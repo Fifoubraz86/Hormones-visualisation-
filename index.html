@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Atlas endocrinien</title>
+<meta name="description" content="Visualisation zoomable et animée des axes endocriniens humains, en commençant par l'axe thyréotrope.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Spectral:ital,wght@0,500;0,600;1,500&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-name">Atlas endocrinien</span>
+      <span class="brand-sub">les hormones en mouvement</span>
+    </div>
+    <nav class="crumbs" id="crumbs" aria-label="Fil d'Ariane"></nav>
+  </header>
+
+  <main class="stage">
+    <svg id="stage" role="img" aria-label="Scène zoomable des axes endocriniens"></svg>
+    <div class="stage-ctrl" role="toolbar" aria-label="Navigation">
+      <button type="button" id="btnUp" title="Remonter d'un niveau (Échap)">↑ Dézoomer</button>
+      <button type="button" id="btnHome" title="Vue d'ensemble">Atlas</button>
+      <span class="ctrl-sep"></span>
+      <button type="button" id="btnOut" class="icon" title="Zoom arrière (−)" aria-label="Zoom arrière">−</button>
+      <button type="button" id="btnIn" class="icon" title="Zoom avant (+)" aria-label="Zoom avant">+</button>
+    </div>
+    <p class="stage-hint">Clic : entrer · molette ou pincement : zoomer · glisser : se déplacer · ← → : parcours</p>
+  </main>
+
+  <aside class="panel" id="panel">
+    <section class="card scene-card" aria-live="polite">
+      <p class="eyebrow" id="sceneLevel">Niveau 1</p>
+      <h1 id="sceneTitle">Atlas des axes endocriniens</h1>
+      <p class="lead" id="sceneLead"></p>
+      <ul class="points" id="scenePoints"></ul>
+      <div class="explore" id="sceneExplore"></div>
+      <div class="tour">
+        <button type="button" id="prevBtn">← Précédent</button>
+        <span id="tourPos">1 / 7</span>
+        <button type="button" id="nextBtn">Suivant →</button>
+      </div>
+    </section>
+
+    <section class="card lab" id="labCard">
+      <div class="card-head">
+        <h2>Bilan thyroïdien simulé</h2>
+        <span class="pill" id="labStatus" data-tone="good">Euthyroïdie</span>
+      </div>
+      <div class="lab-rows" id="labRows"></div>
+      <p class="interp" id="labInterp"></p>
+    </section>
+
+    <section class="card" id="scenarioCard">
+      <div class="card-head">
+        <h2>Scénario clinique</h2>
+        <button type="button" class="link" id="btnReset">Réinitialiser</button>
+      </div>
+      <div class="scenarios" id="scenarios" role="radiogroup" aria-label="Scénario clinique"></div>
+      <details class="params">
+        <summary>Paramètres physiologiques</summary>
+        <div id="sliders"></div>
+      </details>
+      <div class="anim">
+        <button type="button" id="btnPlay" class="play">Pause</button>
+        <div class="speeds" role="group" aria-label="Vitesse">
+          <button type="button" data-speed="0.5" aria-pressed="false">0,5×</button>
+          <button type="button" data-speed="1" aria-pressed="true">1×</button>
+          <button type="button" data-speed="2" aria-pressed="false">2×</button>
+          <button type="button" data-speed="4" aria-pressed="false">4×</button>
+        </div>
+      </div>
+    </section>
+
+    <p class="disclaimer">Modèle pédagogique simplifié : les valeurs sont illustratives et le temps est accéléré (quelques secondes pour plusieurs semaines). Ne remplace pas un avis médical.</p>
+  </aside>
+</div>
+
+<script src="js/engine.js"></script>
+<script src="js/model.js"></script>
+<script src="js/molecules.js"></script>
+<script src="js/scenes/atlas.js"></script>
+<script src="js/scenes/thyroid-axis.js"></script>
+<script src="js/scenes/hypothalamus.js"></script>
+<script src="js/scenes/pituitary.js"></script>
+<script src="js/scenes/follicle.js"></script>
+<script src="js/scenes/transport.js"></script>
+<script src="js/scenes/target-cell.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

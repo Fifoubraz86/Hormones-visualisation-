@@ -1,0 +1,412 @@
+/* Layout : scène plein écran à gauche, panneau de lecture à droite (empilés sur téléphone).
+   Palette sombre par défaut, inspirée de la microscopie à fluorescence : chaque hormone a sa couleur. */
+:root {
+  color-scheme: dark;
+  --bg: #0a1322;
+  --bg-2: #0d182b;
+  --panel: #0f1b2f;
+  --panel-2: #15243c;
+  --line: #243653;
+  --line-2: #36507a;
+  --fg: #e6edf7;
+  --muted: #95a6c0;
+  --faint: #60728f;
+  --accent: #6fd6c8;
+  --accent-ink: #062521;
+
+  --scene-1: #0f1d33;
+  --scene-2: #13243e;
+  --body: #142c4a;
+  --body-line: #2f5d88;
+  --organ: #1a3352;
+  --organ-line: #4a74a3;
+  --cell: #132840;
+  --cell-line: #5c86b6;
+  --nucleus: #1e2c56;
+  --nucleus-line: #7d8fd8;
+  --colloid: #3e321c;
+  --colloid-line: #9c7a3a;
+  --vessel: #3a1823;
+  --vessel-line: #8c3346;
+  --plasma: #24121c;
+  --csf: #12324a;
+
+  --trh: #b892ff;
+  --tsh: #5eaeff;
+  --t4: #ffb84d;
+  --t3: #ff7262;
+  --rt3: #9aa6b8;
+  --iod: #d4e45a;
+  --trab: #ff6ac1;
+  --tg: #e3c39a;
+  --mrna: #6fe3a5;
+  --tbg: #4fc3c9;
+  --ttr: #7fb0ff;
+  --alb: #c9b6e8;
+  --rbc: #c2414f;
+
+  --good: #5bd49a;
+  --warn: #ffc061;
+  --bad: #ff7262;
+  --inhib: #ff7262;
+  --stim: #5bd49a;
+
+  --font-display: "Spectral", "Iowan Old Style", Georgia, serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --bg: #eef3f8; --bg-2: #e5ecf4; --panel: #fbfcfe; --panel-2: #eef3f9; --line: #cfd9e7; --line-2: #a9bbd2;
+    --fg: #13213a; --muted: #50607a; --faint: #8090aa; --accent: #0f7d72; --accent-ink: #ffffff;
+    --scene-1: #f7f9fc; --scene-2: #eef3f9; --body: #dce8f4; --body-line: #8fb0cf; --organ: #e1ebf6; --organ-line: #6f93bd;
+    --cell: #edf3fa; --cell-line: #7c9cc4; --nucleus: #dfe4f7; --nucleus-line: #6a7cc4; --colloid: #f7e6c3; --colloid-line: #c49a4a;
+    --vessel: #f7dade; --vessel-line: #d0707f; --plasma: #fbecee; --csf: #d9ebf6;
+    --trh: #7a4fe0; --tsh: #1f6fd1; --t4: #c27600; --t3: #d3392b; --rt3: #66717f; --iod: #7a9400; --trab: #c21f80;
+    --tg: #a8753f; --mrna: #13925a; --tbg: #138c92; --ttr: #3b6fd0; --alb: #8b6bbf; --rbc: #c23a48;
+    --good: #138a55; --warn: #b07000; --bad: #cc3628; --inhib: #cc3628; --stim: #138a55;
+  }
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #eef3f8; --bg-2: #e5ecf4; --panel: #fbfcfe; --panel-2: #eef3f9; --line: #cfd9e7; --line-2: #a9bbd2;
+  --fg: #13213a; --muted: #50607a; --faint: #8090aa; --accent: #0f7d72; --accent-ink: #ffffff;
+  --scene-1: #f7f9fc; --scene-2: #eef3f9; --body: #dce8f4; --body-line: #8fb0cf; --organ: #e1ebf6; --organ-line: #6f93bd;
+  --cell: #edf3fa; --cell-line: #7c9cc4; --nucleus: #dfe4f7; --nucleus-line: #6a7cc4; --colloid: #f7e6c3; --colloid-line: #c49a4a;
+  --vessel: #f7dade; --vessel-line: #d0707f; --plasma: #fbecee; --csf: #d9ebf6;
+  --trh: #7a4fe0; --tsh: #1f6fd1; --t4: #c27600; --t3: #d3392b; --rt3: #66717f; --iod: #7a9400; --trab: #c21f80;
+  --tg: #a8753f; --mrna: #13925a; --tbg: #138c92; --ttr: #3b6fd0; --alb: #8b6bbf; --rbc: #c23a48;
+  --good: #138a55; --warn: #b07000; --bad: #cc3628; --inhib: #cc3628; --stim: #138a55;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 15px/1.5 var(--font-body);
+  overflow: hidden;
+}
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.app {
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas: "top panel" "stage panel";
+}
+
+/* ---------- Barre du haut ---------- */
+.topbar {
+  grid-area: top;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  padding-block: 12px 10px;
+  padding-left: max(18px, env(safe-area-inset-left, 0px));
+  padding-right: 18px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-2);
+}
+.brand { display: flex; align-items: baseline; gap: 10px; }
+.brand-name { font: 600 21px/1.1 var(--font-display); letter-spacing: 0.01em; }
+.brand-sub { font: italic 500 15px var(--font-display); color: var(--muted); }
+.crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 4px; min-width: 0; }
+.crumbs button {
+  border: 0; background: none; padding: 2px 6px; border-radius: 6px; cursor: pointer;
+  color: var(--muted); font-size: 13px;
+}
+.crumbs button:hover { color: var(--fg); background: var(--panel-2); }
+.crumbs button[aria-current="page"] { color: var(--fg); font-weight: 600; }
+.crumbs .sep { color: var(--faint); font-size: 13px; }
+
+/* ---------- Scène ---------- */
+.stage { grid-area: stage; position: relative; min-height: 0; overflow: hidden; background: var(--bg); }
+#stage { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+#stage.dragging { cursor: grabbing; }
+.stage-ctrl {
+  position: absolute;
+  left: max(14px, env(safe-area-inset-left, 0px));
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px; border-radius: 12px;
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(6px);
+}
+.stage-ctrl button {
+  border: 1px solid var(--line); background: var(--panel-2); border-radius: 8px;
+  padding: 6px 11px; cursor: pointer; font-size: 13px; font-weight: 500;
+}
+.stage-ctrl button.icon { width: 34px; padding: 6px 0; font-size: 17px; line-height: 1; }
+.stage-ctrl button:hover:not(:disabled) { border-color: var(--accent); }
+.stage-ctrl button:disabled { opacity: 0.45; cursor: default; }
+.ctrl-sep { width: 1px; height: 22px; background: var(--line); margin-inline: 2px; }
+.stage-hint {
+  position: absolute; right: 14px; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); margin: 0;
+  font-size: 12px; color: var(--faint); pointer-events: none; text-align: right; max-width: 50%;
+}
+
+/* ---------- Panneau ---------- */
+.panel {
+  grid-area: panel;
+  overflow-y: auto;
+  border-left: 1px solid var(--line);
+  background: var(--panel);
+  padding-block: 16px 24px;
+  padding-left: 16px;
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 14px;
+}
+.card { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.card + .card { border-top: 1px solid var(--line); padding-top: 14px; }
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.eyebrow { margin: 0; font: 500 11.5px var(--font-data); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font: 600 25px/1.15 var(--font-display); text-wrap: balance; }
+h2 { margin: 0; font: 600 13px var(--font-body); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.lead { margin: 0; color: var(--fg); }
+.points { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; color: var(--muted); font-size: 14px; }
+.points li::marker { color: var(--accent); }
+.explore-h { margin: 4px 0 6px; font-size: 12px; color: var(--faint); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  border: 1px solid var(--line-2); background: var(--panel-2); border-radius: 999px;
+  padding: 4px 11px; font-size: 13px; cursor: pointer;
+}
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.chip.muted { color: var(--muted); border-style: dashed; }
+.tour { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px; }
+.tour button {
+  border: 1px solid var(--line-2); background: none; border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 13px;
+}
+.tour button:not(:disabled):hover { border-color: var(--accent); }
+.tour button:disabled { opacity: 0.4; cursor: default; }
+#nextBtn:not(:disabled) { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+#tourPos { font: 12px var(--font-data); color: var(--faint); }
+
+/* Bilan */
+.pill {
+  font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; white-space: nowrap;
+  border: 1px solid currentColor;
+}
+.pill[data-tone="good"] { color: var(--good); }
+.pill[data-tone="warn"] { color: var(--warn); }
+.pill[data-tone="bad"] { color: var(--bad); }
+.lab-rows { display: flex; flex-direction: column; gap: 6px; }
+.lab-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) 92px 110px; align-items: center; gap: 10px;
+  padding: 6px 8px; border-radius: 8px; background: var(--panel-2);
+}
+.lab-name { font-weight: 600; font-size: 14px; display: flex; flex-direction: column; line-height: 1.2; }
+.lab-name span { font: 11px var(--font-data); color: var(--faint); font-weight: 400; margin-top: 2px; }
+.lab-val { font: 500 17px var(--font-data); font-variant-numeric: tabular-nums; text-align: right; }
+.lab-val i { font-style: normal; display: inline-block; width: 1em; text-align: center; margin-left: 2px; }
+.lab-row[data-state="hi"] .lab-val, .lab-row[data-state="lo"] .lab-val { color: var(--bad); }
+.spark { width: 110px; height: 34px; display: block; }
+.spark-band { fill: var(--good); opacity: 0.14; }
+.spark-line { fill: none; stroke: var(--fg); stroke-width: 1.4; vector-effect: non-scaling-stroke; opacity: 0.85; }
+.spark-dot { fill: var(--accent); }
+.lab-row[data-state="hi"] .spark-dot, .lab-row[data-state="lo"] .spark-dot { fill: var(--bad); }
+.interp { margin: 0; font-size: 13.5px; color: var(--muted); }
+
+/* Scénarios */
+.scenarios { display: flex; flex-direction: column; gap: 4px; }
+.scenario {
+  display: grid; grid-template-columns: 18px minmax(0, 1fr); column-gap: 8px; cursor: pointer;
+  padding: 7px 8px; border-radius: 8px; border: 1px solid transparent;
+}
+.scenario:hover { background: var(--panel-2); }
+.scenario:has(input:checked) { border-color: var(--accent); background: var(--panel-2); }
+.scenario input { grid-row: span 2; margin: 3px 0 0; accent-color: var(--accent); }
+.sc-name { font-weight: 600; font-size: 14px; }
+.sc-note { font-size: 12.5px; color: var(--muted); display: none; }
+.scenario:has(input:checked) .sc-note { display: block; }
+.params summary { cursor: pointer; font-size: 13.5px; color: var(--muted); padding: 4px 0; }
+.params summary:hover { color: var(--fg); }
+.slider { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; }
+.slider label { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; }
+.slider output { font: 12px var(--font-data); color: var(--accent); white-space: nowrap; }
+.slider input { width: 100%; accent-color: var(--accent); }
+.anim { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+.play {
+  border: 1px solid var(--accent); background: none; color: var(--accent); border-radius: 8px;
+  padding: 6px 14px; cursor: pointer; font-weight: 600; font-size: 13px; min-width: 84px;
+}
+.speeds { display: flex; border: 1px solid var(--line-2); border-radius: 8px; overflow: hidden; }
+.speeds button { border: 0; background: none; padding: 6px 10px; cursor: pointer; font: 12px var(--font-data); }
+.speeds button + button { border-left: 1px solid var(--line-2); }
+.speeds button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.link { border: 0; background: none; color: var(--accent); cursor: pointer; font-size: 13px; padding: 0; }
+.link:hover { text-decoration: underline; }
+.disclaimer { margin: 0; font-size: 12px; color: var(--faint); }
+
+@media (max-width: 860px) {
+  .app {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 58fr) minmax(0, 42fr);
+    grid-template-areas: "top" "stage" "panel";
+  }
+  .topbar { padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-left: max(16px, env(safe-area-inset-left, 0px)); }
+  .brand-sub { display: none; }
+  .panel { border-left: 0; border-top: 1px solid var(--line); padding-left: max(16px, env(safe-area-inset-left, 0px)); }
+  .stage-hint { display: none; }
+  h1 { font-size: 21px; }
+}
+
+/* ================= SVG ================= */
+.world-bg { fill: var(--bg); }
+.frame { fill: var(--scene-1); stroke: var(--line-2); stroke-width: 3; }
+.depth-2 .frame { fill: var(--scene-2); }
+.scene.can-zoom { cursor: zoom-in; }
+.scene.can-zoom:hover > .content > .frame { stroke: var(--accent); stroke-width: 8; }
+.zoomable { cursor: zoom-in; }
+.zoomable:hover { filter: brightness(1.25); }
+
+.s-title { font: 600 54px var(--font-display); fill: var(--fg); }
+.s-sub { font: italic 500 25px var(--font-display); fill: var(--muted); }
+.atlas-title { font: 600 34px var(--font-display); fill: var(--fg); }
+.atlas-sub { font: italic 500 18px var(--font-display); fill: var(--muted); }
+.atlas-foot { font: 13px var(--font-body); fill: var(--faint); }
+.lbl { font: 600 24px var(--font-body); fill: var(--fg); }
+.lbl-h { font: 600 26px var(--font-display); fill: var(--fg); }
+.lbl-s { font: 500 19px var(--font-body); fill: var(--muted); }
+.lbl-s.strong, .note.strong { fill: var(--fg); font-weight: 600; }
+.note { font: 17px var(--font-body); fill: var(--muted); }
+.loupe-cap { font: 500 20px var(--font-body); fill: var(--accent); cursor: zoom-in; }
+.fb-lbl { font: italic 500 20px var(--font-display); fill: var(--inhib); }
+.connector { fill: none; stroke: var(--line-2); stroke-width: 2; stroke-dasharray: 2 6; stroke-linecap: round; }
+
+.track { fill: none; stroke: var(--line-2); stroke-width: 2; stroke-dasharray: 3 9; stroke-linecap: round; opacity: 0.8; }
+.track.fb { stroke: var(--inhib); opacity: 0.45; }
+.track.faint { opacity: 0.4; }
+.track.chain-arrow { stroke-dasharray: none; stroke-width: 4; opacity: 0.5; }
+.track-none { fill: none; stroke: none; }
+.vessel-wall { fill: none; stroke: var(--vessel-line); stroke-linecap: round; opacity: 0.85; }
+.vessel-lumen { fill: none; stroke: var(--vessel); stroke-linecap: round; }
+
+.sign-halo { opacity: 0.2; }
+.sign.inhib .sign-halo, .sign.inhib .sign-core { fill: var(--inhib); }
+.sign.stim .sign-halo, .sign.stim .sign-core { fill: var(--stim); }
+.sign-glyph { stroke: var(--bg); stroke-width: 3.5; stroke-linecap: round; fill: none; }
+.step circle { fill: var(--accent); }
+.step-n { font: 600 18px var(--font-data); fill: var(--accent-ink); }
+
+/* Atlas */
+.body-shape { fill: var(--body); stroke: var(--body-line); stroke-width: 2.5; }
+.body-brain { fill: var(--organ); stroke: var(--organ-line); stroke-width: 1.5; opacity: 0.7; }
+.leader { fill: none; stroke: var(--c); stroke-width: 1.5; stroke-dasharray: 3 6; opacity: 0.45; }
+.leader.active { stroke-width: 2.5; stroke-dasharray: none; opacity: 0.8; }
+.gland-halo { fill: var(--c); opacity: 0.18; }
+.gland-dot { fill: var(--c); }
+.gland-lbl { font: 500 13px var(--font-body); fill: var(--muted); }
+.legend-box { fill: var(--scene-1); stroke: var(--line); stroke-width: 1.5; }
+.legend-h { font: 600 12px var(--font-body); fill: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+.legend-t { font: 13px var(--font-body); fill: var(--fg); }
+.soon-bg { fill: none; stroke: var(--c); stroke-width: 2.5; }
+.soon-t { font: 600 21px var(--font-body); fill: var(--c); }
+.chain-rect { fill: var(--scene-2); stroke: var(--c); stroke-width: 3; }
+.chain-name { font: 600 40px var(--font-display); fill: var(--fg); }
+.chain-name.small { font-size: 27px; }
+.chain-where { font: 22px var(--font-body); fill: var(--muted); }
+
+/* Anatomie */
+.brain { fill: var(--organ); stroke: var(--organ-line); stroke-width: 2.5; opacity: 0.75; }
+.gyri { fill: none; stroke: var(--organ-line); stroke-width: 2; opacity: 0.5; }
+.organ { fill: var(--organ); stroke: var(--organ-line); stroke-width: 2.5; }
+.organ.hl { fill: color-mix(in srgb, var(--c) 28%, var(--organ)); stroke: var(--c); stroke-width: 3; }
+.organ.post { opacity: 0.6; }
+.stalk { fill: var(--organ); stroke: var(--organ-line); stroke-width: 2; }
+.trachea { fill: var(--bg-2); stroke: var(--line-2); stroke-width: 2; }
+.trachea-ring { stroke: var(--line-2); stroke-width: 3; }
+.thyroid { fill: color-mix(in srgb, var(--t4) 30%, var(--organ)); stroke: var(--t4); stroke-width: 3; }
+.nodule { fill: var(--t3); opacity: 0; transition: opacity 0.6s; }
+.food { fill: color-mix(in srgb, var(--iod) 22%, var(--scene-1)); stroke: var(--iod); stroke-width: 2.5; }
+.food-t { font: 600 20px var(--font-body); fill: var(--iod); }
+.lympho { fill: color-mix(in srgb, var(--trab) 22%, var(--scene-1)); stroke: var(--trab); stroke-width: 2.5; }
+.lympho-n { fill: var(--trab); opacity: 0.6; }
+.lt4-pill { fill: var(--t4); }
+.pill-line { stroke: var(--bg); stroke-width: 2; }
+.input { transition: opacity 0.5s; }
+.periph-halo { fill: var(--t3); opacity: 0.1; }
+.org-shape { fill: var(--organ); stroke: var(--organ-line); stroke-width: 2.5; }
+.org-shape.heart { fill: color-mix(in srgb, var(--rbc) 40%, var(--organ)); stroke: var(--rbc); }
+.org-line { fill: none; stroke: var(--organ-line); stroke-width: 2; }
+.heat { fill: none; stroke: var(--t3); stroke-width: 3; stroke-linecap: round; }
+
+/* Cellules */
+.cell { fill: var(--cell); stroke: var(--cell-line); stroke-width: 3; }
+.cell.ghost { opacity: 0.45; }
+.nucleus { fill: var(--nucleus); stroke: var(--nucleus-line); stroke-width: 2.5; }
+.dna { fill: none; stroke: var(--nucleus-line); stroke-width: 3; }
+.golgi, .er { fill: none; stroke: var(--cell-line); stroke-width: 4; stroke-linecap: round; opacity: 0.8; }
+.axon { fill: none; stroke: var(--cell-line); stroke-width: 22; stroke-linecap: round; opacity: 0.75; }
+.tanycyte { fill: none; stroke: color-mix(in srgb, var(--accent) 35%, var(--cell)); stroke-width: 34; stroke-linecap: round; opacity: 0.7; }
+.csf { fill: var(--csf); stroke: var(--line-2); stroke-width: 2; }
+.enzyme { fill: color-mix(in srgb, var(--accent) 22%, var(--cell)); stroke: var(--accent); stroke-width: 2.5; }
+.enzyme.alt { fill: color-mix(in srgb, var(--rt3) 25%, var(--cell)); stroke: var(--rt3); }
+.enzyme-t { font: 600 20px var(--font-data); fill: var(--fg); }
+.enzyme-t.small { font-size: 12px; }
+.enzyme-box { fill: var(--accent); }
+.enzyme-box.alt { fill: var(--tsh); }
+.receptor { stroke: var(--tsh); stroke-width: 5; stroke-linecap: round; }
+.transporter { fill: var(--accent); stroke: var(--bg); stroke-width: 2; }
+.transporter.alt { fill: var(--rt3); }
+.cascade { fill: none; stroke: var(--accent); stroke-linecap: round; opacity: 0.8; }
+.arrowhead { fill: var(--line-2); }
+.arrowhead.accent { fill: var(--accent); }
+.arrowhead.inhib { fill: var(--inhib); }
+.granule { fill: color-mix(in srgb, var(--tsh) 35%, var(--cell)); stroke: var(--tsh); stroke-width: 2; }
+.colloid { fill: var(--colloid); stroke: var(--colloid-line); stroke-width: 2.5; }
+.microvilli { fill: none; stroke: var(--cell-line); stroke-width: 2.5; }
+.camp { fill: var(--accent); opacity: 0.3; }
+.vesicle { fill: var(--colloid); stroke: var(--colloid-line); stroke-width: 2.5; }
+.lyso { fill: color-mix(in srgb, var(--trab) 18%, var(--cell)); stroke: var(--trab); stroke-width: 2.5; }
+.mini-cells { fill: var(--cell); stroke: var(--cell-line); stroke-width: 2; }
+.mini-sep { stroke: var(--cell-line); stroke-width: 1.5; }
+.mini-hl { fill: var(--accent); opacity: 0.55; }
+.side-box { fill: var(--scene-1); stroke: var(--line-2); stroke-width: 2; }
+.mod-stim { font: 700 24px var(--font-data); fill: var(--stim); }
+.mod-inhib { font: 700 24px var(--font-data); fill: var(--inhib); }
+.plasma { fill: var(--plasma); }
+.endo { stroke: var(--vessel-line); stroke-width: 6; }
+.bar-tbg { fill: var(--tbg); }
+.bar-ttr { fill: var(--ttr); }
+.bar-alb { fill: var(--alb); }
+.tre { fill: var(--accent); opacity: 0.8; }
+.tr { fill: color-mix(in srgb, var(--t3) 35%, var(--nucleus)); stroke: var(--t3); stroke-width: 2.5; }
+.rxr { fill: color-mix(in srgb, var(--tsh) 30%, var(--nucleus)); stroke: var(--tsh); stroke-width: 2.5; }
+.coact { fill: var(--good); }
+.corep { fill: var(--rt3); }
+.ribo { fill: color-mix(in srgb, var(--mrna) 30%, var(--cell)); stroke: var(--mrna); stroke-width: 2; }
+
+/* Molécules */
+.m-trh { fill: var(--trh); }
+.m-bond { fill: none; stroke: var(--trh); stroke-width: 1.6; }
+.m-tsh-a { fill: var(--tsh); opacity: 0.75; }
+.m-tsh-b { fill: var(--tsh); }
+.m-glycan { fill: var(--fg); opacity: 0.7; }
+.m-t4 { fill: var(--t4); }
+.m-t3 { fill: var(--t3); }
+.m-rt3 { fill: var(--rt3); }
+.m-iod { fill: var(--iod); }
+.m-minus { stroke: var(--bg); stroke-width: 1.4; }
+.m-trab { fill: none; stroke: var(--trab); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.m-tg { fill: var(--tg); }
+.m-tyr { fill: var(--bg); opacity: 0.5; }
+.m-mrna { fill: none; stroke: var(--mrna); stroke-width: 2.4; stroke-linecap: round; }
+.m-tbg { fill: var(--tbg); opacity: 0.85; }
+.m-ttr { fill: var(--ttr); opacity: 0.85; }
+.m-alb { fill: var(--alb); opacity: 0.85; }
+.m-rbc { fill: var(--rbc); opacity: 0.55; }
+.m-rbc-in { fill: var(--vessel); opacity: 0.6; }
+.m-na { fill: var(--muted); }
+#mol-dot circle { fill: inherit; }
+
+@media (prefers-reduced-motion: reduce) {
+  .nodule, .input { transition: none; }
+}
