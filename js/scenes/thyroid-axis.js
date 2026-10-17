@@ -9,16 +9,16 @@
   HV.scene({
     id: 'thyro',
     parent: 'atlas',
-    x: 70,
-    y: 110,
-    scale: 0.16,
+    x: HV.CARD.x('L'),
+    y: HV.CARD.y(0),
+    scale: HV.CARD.s,
     title: 'Axe thyréotrope',
     level: 'Axe',
     lead: 'La TRH hypothalamique stimule la sécrétion de TSH, qui stimule la thyroïde. La T4 (et un peu de T3) circule, puis la T4 est convertie en T3 active dans les tissus. T4 et T3 freinent en retour l\'hypophyse et l\'hypothalamus.',
     points: [
       'La relation TSH / T4L est log-linéaire : une petite baisse de T4L entraîne une forte hausse de TSH.',
-      'La thyroïde sécrète surtout de la T4 (80 à 90 %). Environ 80 % de la T3 circulante provient de la désiodation périphérique.',
-      'Le rétrocontrôle passe par la conversion locale de T4 en T3 par la désiodase de type 2 (D2).',
+      'La T4, forme de réserve, est exclusivement thyroïdienne. 75 % de la T3, forme active, proviennent de la conversion périphérique de la T4 par les désiodases.',
+      'La TSH est sous double contrôle hypothalamique : stimulant (TRH) et inhibiteur (somatostatine). T4 et T3 exercent un rétrocontrôle négatif, préférentiellement hypophysaire.',
       'Changez de scénario dans le panneau pour voir l\'axe se rééquilibrer en direct.'
     ],
     build(g, a) {

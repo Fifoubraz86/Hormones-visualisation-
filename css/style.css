@@ -52,6 +52,7 @@
   --o-muscle: #a8424a; --o-tendon: #d8d2c4; --o-fat: #e6c35e; --o-lung: #c98d9a; --o-kidney: #9c4a40; --o-adrenal: #e0a93a;
   --o-pancreas: #e0b17e; --o-stomach: #c98a7a; --o-gonad: #c77aa6; --o-sella: #d9cdb3; --o-line: rgba(0, 0, 0, 0.35);
   --atom-o: #ff6b6b; --atom-n: #6aa3ff;
+  --p-orange: #ff9f43; --p-orange2: #ff7f50; --p-gold: #f2c14e; --p-amber: #f0a830; --p-sky: #6cc5ff; --p-blue: #5b8cff; --p-blue2: #4fa3e0; --p-teal: #3fc1b0; --p-green: #5fd38d; --p-lime: #b6e35a; --p-rose: #ff7eb6; --p-magenta: #e86bd8; --p-violet: #a98bff; --p-red: #ff6464; --p-red2: #e0566f; --p-brown: #c9925e; --p-grey: #a5b2c4;
   --good: #5bd49a;
   --warn: #ffc061;
   --bad: #ff7262;
@@ -74,6 +75,7 @@
     --tg: #a8753f; --mrna: #13925a; --tbg: #138c92; --ttr: #3b6fd0; --alb: #8b6bbf; --rbc: #c23a48;
     --good: #138a55; --warn: #b07000; --bad: #cc3628; --inhib: #cc3628; --stim: #138a55;
  --o-thyroid: #c4566b; --o-brain: #e3b6b2; --o-callosum: #f6e8e3; --o-cerebellum: #d49c9a; --o-hypo: #a3c24e; --o-pit-ant: #6a9ee0; --o-pit-post: #aab0c4; --o-cart: #b9c9d8; --o-trachea: #a6b9cc; --o-parathyroid: #e2b85a; --o-heart: #c9414e; --o-aorta: #d65f68; --o-vein: #5f7fc8; --o-liver: #a2483b; --o-gall: #6dab58; --o-bone: #efe6cf; --o-muscle: #c0525a; --o-tendon: #e9e4d8; --o-fat: #f0d070; --o-lung: #e1a9b4; --o-kidney: #b0574c; --o-adrenal: #e9b445; --o-pancreas: #ecc291; --o-stomach: #dca090; --o-gonad: #d58cb5; --o-sella: #c9b994; --o-line: rgba(40, 20, 20, 0.35); --atom-o: #d63b3b; --atom-n: #2f68d0;
+ --p-orange: #d9700f; --p-orange2: #d4562a; --p-gold: #b88a12; --p-amber: #b97400; --p-sky: #1d86c9; --p-blue: #2f5fd6; --p-blue2: #1f74b8; --p-teal: #0e8f80; --p-green: #178a4c; --p-lime: #5f8a00; --p-rose: #d0407e; --p-magenta: #a8329a; --p-violet: #6a48d6; --p-red: #d23a3a; --p-red2: #b52d48; --p-brown: #8c5a2b; --p-grey: #5f6d80;
   }
 }
 :root[data-theme="light"] {
@@ -87,9 +89,11 @@
   --tg: #a8753f; --mrna: #13925a; --tbg: #138c92; --ttr: #3b6fd0; --alb: #8b6bbf; --rbc: #c23a48;
   --good: #138a55; --warn: #b07000; --bad: #cc3628; --inhib: #cc3628; --stim: #138a55;
  --o-thyroid: #c4566b; --o-brain: #e3b6b2; --o-callosum: #f6e8e3; --o-cerebellum: #d49c9a; --o-hypo: #a3c24e; --o-pit-ant: #6a9ee0; --o-pit-post: #aab0c4; --o-cart: #b9c9d8; --o-trachea: #a6b9cc; --o-parathyroid: #e2b85a; --o-heart: #c9414e; --o-aorta: #d65f68; --o-vein: #5f7fc8; --o-liver: #a2483b; --o-gall: #6dab58; --o-bone: #efe6cf; --o-muscle: #c0525a; --o-tendon: #e9e4d8; --o-fat: #f0d070; --o-lung: #e1a9b4; --o-kidney: #b0574c; --o-adrenal: #e9b445; --o-pancreas: #ecc291; --o-stomach: #dca090; --o-gonad: #d58cb5; --o-sella: #c9b994; --o-line: rgba(40, 20, 20, 0.35); --atom-o: #d63b3b; --atom-n: #2f68d0;
+ --p-orange: #d9700f; --p-orange2: #d4562a; --p-gold: #b88a12; --p-amber: #b97400; --p-sky: #1d86c9; --p-blue: #2f5fd6; --p-blue2: #1f74b8; --p-teal: #0e8f80; --p-green: #178a4c; --p-lime: #5f8a00; --p-rose: #d0407e; --p-magenta: #a8329a; --p-violet: #6a48d6; --p-red: #d23a3a; --p-red2: #b52d48; --p-brown: #8c5a2b; --p-grey: #5f6d80;
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { height: 100%; }
 body {
   margin: 0;
@@ -507,7 +511,7 @@ path.m-bond.trh { stroke: var(--trh); opacity: 1; stroke-width: 1.4; }
 /* ---------- Légende ---------- */
 .legend {
   position: absolute; top: 12px; right: max(12px, env(safe-area-inset-right, 0px)); z-index: 4;
-  width: 300px; max-height: calc(100% - 90px); overflow-y: auto;
+  width: 300px; max-height: calc(100% - 110px); overflow-y: auto;
   border-radius: 12px; border: 1px solid var(--line);
   background: color-mix(in srgb, var(--panel) 92%, transparent); backdrop-filter: blur(6px);
 }
@@ -524,3 +528,86 @@ path.m-bond.trh { stroke: var(--trh); opacity: 1; stroke-width: 1.4; }
 }
 /* Les étiquettes laissent passer le survol vers la structure qu'elles désignent. */
 #stage text:not([data-info]):not(.loupe-cap) { pointer-events: none; }
+
+/* ---------- Schémas d'axes ---------- */
+.ax-halo { fill: var(--c); opacity: 0.12; }
+.ax-node:hover .ax-halo { opacity: 0.28; }
+.ax-lbl { font-size: 23px; }
+.sig-box { fill: color-mix(in srgb, var(--c) 16%, var(--scene-1)); stroke: var(--c); stroke-width: 2.5; }
+.sig-val { font: 600 20px var(--font-data); fill: var(--fg); }
+.ax-track { fill: none; stroke: var(--mc); stroke-width: 3; opacity: 0.55; stroke-linecap: round; }
+.ax-track.inhib { stroke: var(--inhib); stroke-dasharray: 10 8; opacity: 0.7; }
+.ax-track.stim { opacity: 0.6; }
+.ax-pill rect { fill: var(--scene-1); stroke: var(--mc); stroke-width: 2; }
+.ax-pill-t { font: 600 17px var(--font-body); fill: var(--fg); }
+.chain-step { fill: color-mix(in srgb, var(--mc) 14%, var(--scene-1)); stroke: var(--mc); stroke-width: 2; }
+.chain-link { stroke: var(--accent); stroke-width: 2.5; fill: none; }
+.chain-enz { font: italic 15px var(--font-body); fill: var(--accent); }
+.clock-face { fill: var(--scene-1); stroke: var(--line-2); stroke-width: 2; }
+.clock-day { fill: var(--warn); opacity: 0.12; }
+.clock-tick { stroke: var(--muted); stroke-width: 2; }
+.clock-hand { stroke: var(--accent); stroke-width: 4; stroke-linecap: round; }
+.clock-t { font: 500 19px var(--font-data); fill: var(--fg); }
+.cycle-foll { fill: var(--p-rose); opacity: 0.35; }
+.cycle-lut { fill: var(--p-violet); opacity: 0.4; }
+.cycle-mens { fill: var(--rbc); opacity: 0.7; }
+.cycle-mark { fill: var(--accent); }
+.lvl-bg { fill: var(--line); }
+.lvl-bar { fill: var(--mc); }
+.source { margin: 0; font-size: 12px; color: var(--faint); font-style: italic; }
+
+/* Molécules des autres axes (couleur portée par --mc) */
+.m-ring.mc { stroke: var(--mc); fill: color-mix(in srgb, var(--mc) 28%, transparent); }
+.m-arom { fill: none; stroke: var(--mc); stroke-width: 1; }
+path.m-bond.mcs { stroke: var(--mc); opacity: 1; stroke-width: 1.3; }
+.m-res { fill: var(--mc); }
+.m-res.b { fill: color-mix(in srgb, var(--mc) 55%, var(--fg)); }
+.m-helix { fill: none; stroke: var(--mc); stroke-width: 3.2; stroke-linecap: round; }
+.m-ss { stroke: #f2d544; stroke-width: 1.4; fill: none; }
+.m-prot { fill: var(--mc); opacity: 0.9; }
+.m-prot.b { fill: color-mix(in srgb, var(--mc) 55%, var(--fg)); }
+.m-loop { fill: none; stroke: var(--mc); stroke-width: 1.4; }
+.m-chain { stroke: var(--mc); stroke-width: 1.4; }
+.m-chain.b { stroke: color-mix(in srgb, var(--mc) 55%, var(--fg)); }
+.m-alpha { fill: color-mix(in srgb, var(--mc) 55%, var(--fg)); opacity: 0.9; }
+.m-beta { fill: none; stroke: var(--mc); stroke-width: 4; stroke-linecap: round; }
+.m-ion { fill: var(--mc); }
+.m-ion-t { font: 700 5px var(--font-body); fill: var(--bg); }
+.m-H { fill: var(--fg); opacity: 0.85; }
+.m-C { fill: var(--muted); }
+.m-lipo { fill: color-mix(in srgb, var(--mc) 35%, transparent); stroke: var(--mc); stroke-width: 1.2; stroke-dasharray: 1.4 1; }
+.m-lipo-core { fill: var(--mc); opacity: 0.8; }
+.m-apo { fill: none; stroke: var(--p-blue); stroke-width: 2; stroke-linecap: round; }
+.m-recep { fill: none; stroke: var(--mc); stroke-width: 2.4; stroke-linecap: round; }
+
+/* Organes supplémentaires */
+.o-ureter { fill: none; stroke: var(--o-kidney); stroke-width: 4; stroke-linecap: round; }
+.o-medulla { fill: none; stroke: #8a3b2a; stroke-width: 4; opacity: 0.6; }
+.o-epid { fill: color-mix(in srgb, var(--o-gonad) 70%, #000); }
+.o-tubule { fill: none; stroke: rgba(255, 255, 255, 0.35); stroke-width: 1.6; }
+.o-ovary { fill: color-mix(in srgb, var(--o-gonad) 70%, #fff); }
+.o-follicle { fill: rgba(255, 255, 255, 0.55); stroke: var(--o-gonad); stroke-width: 1.4; }
+.o-oocyte { fill: var(--p-rose); }
+.o-uterus { fill: var(--o-gonad); }
+.o-endomet { fill: rgba(255, 255, 255, 0.25); stroke: var(--o-line); stroke-width: 1.2; }
+.o-breast { fill: color-mix(in srgb, var(--o-fat) 60%, var(--o-gonad)); }
+.o-lobule-b { fill: rgba(255, 255, 255, 0.35); }
+.o-duct { fill: none; stroke: var(--o-line); stroke-width: 1.4; }
+.o-nipple { fill: color-mix(in srgb, var(--o-gonad) 60%, #000); }
+.o-colon { fill: color-mix(in srgb, var(--o-stomach) 70%, #000); }
+.o-small { fill: var(--o-stomach); }
+.o-parathyroid.big { stroke: #6b4a12; stroke-width: 1.5; }
+.o-islet { fill: color-mix(in srgb, var(--o-pancreas) 50%, #fff); stroke: var(--o-line); stroke-width: 1.5; }
+.o-islet-b { fill: var(--p-blue2); }
+.o-islet-a { fill: var(--p-orange); }
+.o-islet-d { fill: var(--p-grey); }
+.o-lung.solid { opacity: 0.9; }
+.o-bronch { fill: none; stroke: var(--o-cart); stroke-width: 4; stroke-linecap: round; }
+.o-vessel-wall { fill: none; stroke: var(--vessel-line); stroke-width: 26; stroke-linecap: round; }
+.o-vessel-lumen { fill: none; stroke: var(--vessel); stroke-width: 18; stroke-linecap: round; }
+.o-rbc { fill: var(--rbc); opacity: 0.8; }
+.o-neuron { fill: var(--o-hypo); }
+.o-neuron-n { fill: color-mix(in srgb, var(--o-hypo) 50%, #000); }
+.o-axon { fill: none; stroke: var(--o-hypo); stroke-width: 5; stroke-linecap: round; }
+.o-cell { fill: var(--cell); stroke: var(--cell-line); }
+.o-cell-n { fill: var(--nucleus); stroke: var(--nucleus-line); }

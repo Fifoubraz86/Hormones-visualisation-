@@ -152,5 +152,99 @@
     });
   };
 
+
+  /* ---------- Icônes compactes (≈ 100 × 100) pour les schémas d'axes ---------- */
+  O.hypothalamusIcon = function (g) {
+    O.brainLateral(g);
+    el('ellipse', { cx: -2, cy: 14, rx: 9, ry: 5, class: 'org o-hypo' }, g);
+  };
+  O.pituitaryIcon = function (g) {
+    solid(g, 'M -4,-46 C -6,-30 -2,-18 2,-10 L 10,-10 C 8,-20 6,-32 6,-46 Z', 'o-stalk');
+    el('path', { d: 'M -40,-2 C -42,44 40,44 40,-2', class: 'o-sella' }, g);
+    solid(g, 'M -34,2 C -34,-18 -6,-22 8,-14 C 16,-6 14,20 -2,26 C -18,32 -34,22 -34,2 Z', 'o-pit-ant');
+    solid(g, 'M 10,-12 C 22,-22 38,-16 38,0 C 38,16 22,24 12,18 C 16,8 16,-4 10,-12 Z', 'o-pit-post');
+  };
+  O.kidney = function (g) {
+    solid(g, 'M -6,-40 C 18,-46 34,-22 34,0 C 34,26 16,46 -6,40 C -22,36 -14,16 -6,8 C -14,0 -14,-8 -6,-12 C -16,-20 -24,-34 -6,-40 Z', 'o-kidney');
+    line(g, 'M -8,-10 C 4,-14 12,-4 14,0 C 12,6 4,14 -8,10', 'o-detail-strong');
+    line(g, 'M -10,2 C -22,4 -30,10 -34,22', 'o-ureter');
+  };
+  O.adrenalKidney = function (g) {
+    const k = el('g', { transform: 'translate(0 16) scale(0.78)' }, g);
+    O.kidney(k);
+    solid(g, 'M -26,-12 C -24,-30 -6,-46 8,-44 C 20,-42 26,-28 22,-14 C 10,-8 -12,-6 -26,-12 Z', 'o-adrenal');
+    line(g, 'M -16,-14 C -10,-28 2,-36 12,-32 C 16,-26 14,-18 10,-14', 'o-medulla');
+  };
+  O.testis = function (g) {
+    solid(g, 'M -18,-26 C -4,-34 18,-26 22,-4 C 26,18 12,34 -4,34 C -20,34 -30,16 -28,-2 C -27,-14 -24,-22 -18,-26 Z', 'o-gonad');
+    solid(g, 'M 16,-30 C 30,-26 34,-6 30,10 C 28,22 22,30 16,32 C 22,18 24,-8 16,-30 Z', 'o-epid');
+    [[-12, -6], [-2, 8], [-14, 14], [4, -14]].forEach(([x, y]) => line(g, `M ${x - 6},${y} q 3,-5 6,0 q 3,5 6,0`, 'o-tubule'));
+  };
+  O.ovary = function (g) {
+    solid(g, 'M -34,0 C -34,-20 -14,-28 4,-26 C 24,-24 36,-12 36,2 C 36,18 18,28 0,28 C -20,28 -34,16 -34,0 Z', 'o-ovary');
+    [[-16, -6, 6], [4, -10, 4], [16, 8, 9], [-8, 12, 4]].forEach(([x, y, r]) => {
+      el('circle', { cx: x, cy: y, r, class: 'o-follicle' }, g);
+      el('circle', { cx: x + r * 0.3, cy: y - r * 0.2, r: Math.max(1.2, r * 0.3), class: 'o-oocyte' }, g);
+    });
+  };
+  O.uterus = function (g) {
+    solid(g, 'M -22,-26 C -22,-38 22,-38 22,-26 C 22,0 10,22 6,34 L -6,34 C -10,22 -22,0 -22,-26 Z', 'o-uterus');
+    line(g, 'M -14,-24 C -14,-6 -6,10 0,22 C 6,10 14,-6 14,-24 C 6,-20 -6,-20 -14,-24', 'o-endomet');
+    line(g, 'M -22,-28 C -32,-34 -40,-30 -46,-22 M 22,-28 C 32,-34 40,-30 46,-22', 'o-tube');
+    el('ellipse', { cx: -46, cy: -16, rx: 7, ry: 5, class: 'org o-ovary' }, g);
+    el('ellipse', { cx: 46, cy: -16, rx: 7, ry: 5, class: 'org o-ovary' }, g);
+  };
+  O.breast = function (g) {
+    solid(g, 'M -36,-30 C -40,6 -24,34 4,34 C 28,34 40,14 36,-6 C 34,-20 20,-30 4,-34 C -12,-36 -26,-34 -36,-30 Z', 'o-breast');
+    [[-10, -12], [4, -18], [14, -4], [-14, 6], [2, 4]].forEach(([x, y]) => el('circle', { cx: x, cy: y, r: 5, class: 'o-lobule-b' }, g));
+    line(g, 'M -10,-12 C -2,0 8,10 18,18 M 4,-18 C 8,0 14,10 18,18 M 14,-4 L 18,18 M -14,6 C 0,12 10,16 18,18 M 2,4 L 18,18', 'o-duct');
+    el('circle', { cx: 20, cy: 20, r: 4, class: 'org o-nipple' }, g);
+  };
+  O.intestine = function (g) {
+    solid(g, 'M -40,-30 C -40,-40 40,-40 40,-30 L 40,30 C 40,40 -40,40 -40,30 Z', 'o-colon');
+    solid(g, 'M -28,-18 C -10,-30 10,-6 28,-18 C 34,-6 18,4 28,16 C 10,26 -10,4 -28,16 C -34,4 -18,-6 -28,-18 Z', 'o-small');
+    line(g, 'M -20,-12 C -6,-20 8,-2 22,-12 M -22,10 C -6,0 8,18 22,8', 'o-detail');
+  };
+  O.parathyroidBack = function (g) {
+    const r = 'M -6,-2 C -8,-24 -18,-40 -30,-40 C -44,-40 -50,-16 -50,4 C -50,28 -42,42 -28,42 C -16,42 -8,30 -6,20 Z';
+    solid(g, r, 'o-thyroid');
+    solid(g, mirror(r), 'o-thyroid');
+    el('rect', { x: -8, y: 0, width: 16, height: 16, rx: 4, class: 'org o-thyroid' }, g);
+    [[-40, -22], [-38, 28], [40, -22], [38, 28]].forEach(([x, y]) => {
+      el('ellipse', { cx: x, cy: y, rx: 8, ry: 6, class: 'org o-parathyroid big' }, g);
+      el('ellipse', { cx: x, cy: y, rx: 8, ry: 6, fill: 'url(#shine)' }, g);
+    });
+  };
+  O.islet = function (g) {
+    solid(g, 'M -46,8 C -46,-6 -26,-10 -10,-6 C 10,-2 30,-14 44,-8 C 52,-2 42,10 26,12 C 8,14 -14,22 -32,20 C -42,19 -46,14 -46,8 Z', 'o-pancreas');
+    el('circle', { cx: 6, cy: -24, r: 20, class: 'o-islet' }, g);
+    line(g, 'M -2,-6 L -2,-6', 'o-detail');
+    [[0, -30, 'b'], [10, -30, 'b'], [4, -20, 'b'], [14, -20, 'a'], [-4, -20, 'a'], [8, -38, 'a'], [-6, -30, 'b'], [16, -28, 'd']].forEach(([x, y, k]) => el('circle', { cx: x, cy: y, r: 3.6, class: 'o-islet-' + k }, g));
+    line(g, 'M 6,-4 L 2,4', 'o-detail-strong');
+  };
+  O.lungs = function (g) {
+    const lung = 'M -8,-40 C -26,-40 -40,-10 -42,22 C -44,40 -30,46 -14,40 C -4,36 -2,20 -4,0 C -4,-20 0,-40 -8,-40 Z';
+    const a = el('g', { transform: 'translate(-6 0)' }, g);
+    solid(a, lung, 'o-lung solid');
+    const b = el('g', { transform: 'translate(6 0)' }, g);
+    solid(b, mirror(lung), 'o-lung solid');
+    line(g, 'M 0,-46 L 0,-24 M 0,-24 C -4,-18 -8,-14 -12,-10 M 0,-24 C 4,-18 8,-14 12,-10', 'o-bronch');
+  };
+  O.vessel = function (g) {
+    el('path', { d: 'M -46,0 C -20,-10 20,10 46,0', class: 'o-vessel-wall' }, g);
+    el('path', { d: 'M -46,0 C -20,-10 20,10 46,0', class: 'o-vessel-lumen' }, g);
+    [[-24, -2], [4, 1], [28, 2]].forEach(([x, y]) => el('ellipse', { cx: x, cy: y, rx: 7, ry: 5, class: 'o-rbc' }, g));
+  };
+  O.nerve = function (g) {
+    el('circle', { cx: -28, cy: -18, r: 14, class: 'org o-neuron' }, g);
+    el('circle', { cx: -28, cy: -18, r: 5, class: 'o-neuron-n' }, g);
+    line(g, 'M -16,-12 C 4,0 18,8 34,18', 'o-axon');
+    [[34, 18], [28, 26], [40, 10]].forEach(([x, y]) => el('circle', { cx: x, cy: y, r: 4, class: 'org o-neuron' }, g));
+  };
+  O.cellIcon = function (g) {
+    solid(g, 'M -38,0 C -38,-26 -16,-34 4,-32 C 26,-30 40,-14 38,6 C 36,26 16,36 -4,34 C -24,32 -38,20 -38,0 Z', 'o-cell');
+    el('circle', { cx: -2, cy: 0, r: 12, class: 'org o-cell-n' }, g);
+  };
+
   HV.organs = O;
 })();

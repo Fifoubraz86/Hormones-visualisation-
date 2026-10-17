@@ -8,13 +8,13 @@
   const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const svg = $('stage');
-  HV.buildDefs(svg);
+  HV.buildAxisDefs(HV.buildDefs(svg));
   const root = HV.el('g', { class: 'world' }, svg);
   HV.initTips(svg.parentNode);
-  HV.buildLegend(document.getElementById('legendBody'));
+
   HV.mount(root);
   const scenes = HV.sceneList;
-  const TOUR = ['atlas', 'thyro', 'hypo', 'pit', 'foll', 'transp', 'cell'];
+  const TOUR = ['atlas', 'thyro', 'hypo', 'pit', 'foll', 'transp', 'cell', 'cortico', 'somato', 'gonadoF', 'gonadoM', 'lacto', 'adh', 'medullo', 'phospho', 'raa', 'glyc', 'lipid'];
 
   /* ---------- Caméra ---------- */
   const cam = { cx: 800, cy: 500, w: 1700 };
@@ -218,8 +218,8 @@
     (sc.points || []).forEach((p) => ul.appendChild(Object.assign(document.createElement('li'), { textContent: p })));
     const ex = $('sceneExplore');
     ex.textContent = '';
-    const kids = sc.children.filter((k) => !(sc.id === 'atlas' && k.placeholder));
-    if (sc.id === 'atlas') kids.push(...sc.children.filter((k) => k.placeholder));
+    const order = (k) => (TOUR.indexOf(k.id) + 100) % 100;
+    const kids = sc.children.slice().sort((x, y) => order(x) - order(y));
     if (kids.length) {
       ex.appendChild(Object.assign(document.createElement('p'), { className: 'explore-h', textContent: 'Zoomer sur' }));
       const wrap = document.createElement('div');
@@ -239,7 +239,10 @@
     $('prevBtn').disabled = ti === 0;
     $('nextBtn').disabled = ti === TOUR.length - 1;
     $('btnUp').disabled = !sc.parent;
-    const thyroid = !sc.placeholder;
+    const thyroid = chain.some((s) => s.id === 'thyro') || sc.id === 'atlas';
+    $('sceneSource').hidden = !sc.source;
+    $('sceneSource').textContent = sc.source || '';
+    HV.setLegend(document.getElementById('legendBody'), sc);
     $('labCard').hidden = !thyroid;
     $('scenarioCard').hidden = !thyroid;
     try {

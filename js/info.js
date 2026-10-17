@@ -20,22 +20,22 @@
     /* ---- Molécules ---- */
     trh: { t: 'TRH', k: 'Thyréolibérine · tripeptide', d: 'pGlu-His-Pro-NH₂. Sécrétée par les neurones du noyau paraventriculaire dans le système porte, elle stimule la synthèse et la sécrétion de TSH (et de prolactine).', live: () => 'Sécrétion relative : ' + pct(M.s.trh) },
     tsh: { t: 'TSH', k: 'Thyréostimuline · glycoprotéine ≈ 28 kDa', d: 'Sous-unité α commune à LH, FSH et hCG, sous-unité β spécifique. Agit sur le récepteur de la TSH (couplé à Gs) du thyréocyte. Sécrétion pulsatile, pic nocturne.', live: () => labLine('tsh') },
-    t4: { t: 'T4 · thyroxine', k: '3,5,3′,5′-tétraiodothyronine', d: 'Principale hormone sécrétée par la thyroïde (80 à 90 %). Prohormone peu active, convertie en T3 par D1 et D2. Liée à 99,97 % aux protéines. Demi-vie ≈ 7 jours.', live: () => labLine('t4') },
-    t3: { t: 'T3 · triiodothyronine', k: '3,5,3′-triiodothyronine', d: 'Forme active : affinité pour le récepteur nucléaire 10 fois supérieure à celle de la T4. Environ 80 % proviennent de la désiodation périphérique. Demi-vie ≈ 1 jour.', live: () => labLine('t3') },
+    t4: { t: 'T4 · thyroxine', k: '3,5,3′,5′-tétraiodothyronine', d: 'Forme de réserve, majoritaire dans le plasma, produite exclusivement par la thyroïde. Peu active, convertie en T3 par D1 et D2. Liée à 99,97 % aux protéines. Demi-vie ≈ 7 jours.', live: () => labLine('t4') },
+    t3: { t: 'T3 · triiodothyronine', k: '3,5,3′-triiodothyronine', d: 'Forme active : affinité pour le récepteur nucléaire 10 fois supérieure à celle de la T4. 75 % proviennent de la conversion périphérique de la T4 par les désiodases (25 % sont thyroïdiens). Demi-vie ≈ 1 jour.', live: () => labLine('t3') },
     rt3: { t: 'T3 reverse', k: '3,3′,5′-triiodothyronine', d: 'Métabolite inactif produit par la D3 à partir de la T4. Augmente au cours des maladies aiguës sévères et du jeûne.', live: () => labLine('rt3') },
     iod: { t: 'Iodure (I⁻)', k: 'Oligo-élément indispensable', d: 'Capté par le NIS au pôle basal du thyréocyte. Besoins : 150 µg/j chez l\'adulte, 250 µg/j pendant la grossesse et l\'allaitement.', live: () => 'Apport simulé : ' + Math.round(M.p.iodine * 150) + ' µg/j' },
     trab: { t: 'TRAb', k: 'Anticorps anti-récepteur de la TSH (IgG)', d: 'Dans la maladie de Basedow, ils activent le récepteur de la TSH comme le ferait la TSH, sans rétrocontrôle possible. Ils traversent le placenta.', live: () => (M.p.trab > 0.02 ? 'Présents : ' + n(M.p.trab * 4, 1) + ' UI/L' : 'Absents') },
     tg: { t: 'Thyroglobuline', k: 'Glycoprotéine dimérique ≈ 660 kDa', d: 'Synthétisée par le thyréocyte et stockée dans la colloïde. Ses résidus tyrosyl servent de support à l\'iodation. Marqueur de suivi des cancers thyroïdiens différenciés.' },
     tgi: { t: 'Thyroglobuline iodée', k: 'Forme de stockage', d: 'Porte MIT, DIT, T3 et T4 après iodation par la TPO et couplage. Réserve d\'hormones pour plusieurs semaines.' },
     mrna: { t: 'ARN messager', k: 'Transcription induite par la T3', d: 'Transcrits de gènes cibles : Na⁺/K⁺-ATPase, UCP, chaîne lourde α de la myosine, SERCA2, récepteur des LDL…' },
-    tbg: { t: 'TBG', k: 'Thyroxine-binding globulin', d: 'Lie environ 75 % de la T4. Augmentée par les œstrogènes et la grossesse, diminuée par les androgènes, les glucocorticoïdes et le syndrome néphrotique.' },
-    ttr: { t: 'Transthyrétine (TTR)', k: 'Tétramère, ancienne préalbumine', d: 'Lie environ 15 % de la T4 et transporte aussi la protéine de liaison du rétinol. Assure le passage de la T4 dans le liquide cérébrospinal.' },
-    alb: { t: 'Albumine', k: 'Faible affinité, forte capacité', d: 'Lie environ 10 % de la T4. Réservoir rapidement mobilisable.' },
+    tbg: { t: 'TBG', k: 'Thyroxine-binding globulin', d: 'Lie 75 % des hormones thyroïdiennes. Le dosage des fractions libres évite les fluctuations liées à la TBG. Augmentée par les œstrogènes et la grossesse, diminuée par les androgènes, les glucocorticoïdes et le syndrome néphrotique.' },
+    ttr: { t: 'Transthyrétine (TBPA)', k: 'Thyroxin-binding prealbumin · tétramère', d: 'Lie les 25 % restants selon le polycopié et transporte aussi la protéine de liaison du rétinol. Assure le passage de la T4 dans le liquide cérébrospinal.' },
+    alb: { t: 'Albumine', k: 'Faible affinité, forte capacité', d: 'Faible affinité, forte capacité : fraction mineure, non détaillée dans le polycopié.' },
     rbc: { t: 'Hématie', k: 'Globule rouge', d: 'Repère visuel du flux sanguin.' },
     na: { t: 'Sodium (Na⁺)', k: 'Cotransporté par le NIS', d: 'Le NIS fait entrer 2 Na⁺ pour 1 I⁻ grâce au gradient créé par la Na⁺/K⁺-ATPase.' },
 
     /* ---- Signes ---- */
-    'sign-inhib': { t: 'Rétrocontrôle négatif', k: 'Inhibition', d: 'T4 et T3 freinent la synthèse de TRH et de TSH, essentiellement via la T3 produite sur place par la D2 et le récepteur TRβ2.', live: () => 'Intensité : ' + pct(M.s.fb) },
+    'sign-inhib': { t: 'Inhibition', k: 'Rétrocontrôle négatif ou frein', d: 'L\'hormone en amont freine la cible. Dans l\'axe thyréotrope : T4 et T3 freinent TRH et TSH, surtout via la T3 produite sur place par la D2 (TRβ2).' },
     'sign-stim': { t: 'Stimulation', k: 'Effet positif', d: 'L\'hormone en amont stimule la cellule cible.' },
 
     /* ---- Organes ---- */
@@ -49,7 +49,7 @@
     'pit-ant': { t: 'Antéhypophyse', k: 'Adénohypophyse', d: 'Contient les cellules thyréotropes (≈ 5 %), mais aussi corticotropes, somatotropes, lactotropes et gonadotropes.', live: () => labLine('tsh') },
     'pit-post': { t: 'Posthypophyse', k: 'Neurohypophyse', d: 'Libère l\'ADH (vasopressine) et l\'ocytocine produites par l\'hypothalamus. Hypersignal T1 spontané en IRM.' },
     sella: { t: 'Selle turcique', k: 'Os sphénoïde', d: 'Loge osseuse de l\'hypophyse.' },
-    thyroid: { t: 'Thyroïde', k: '15 à 20 g chez l\'adulte', d: 'Deux lobes reliés par un isthme, en avant de la trachée. Unité fonctionnelle : le follicule. Elle grossit sous l\'effet d\'une stimulation prolongée (goitre).', live: () => 'Volume relatif : ' + pct((0.55 + 0.45 * Math.min(1, M.p.thy)) * Math.sqrt(M.s.goitre)) },
+    thyroid: { t: 'Thyroïde', k: '15 à 20 g chez l\'adulte', d: 'Deux lobes reliés par un isthme (parfois la pyramide de Lalouette). Thyréocytes (hormones thyroïdiennes) et cellules C parafolliculaires (calcitonine). Elle grossit sous l\'effet d\'une stimulation prolongée (goitre).', live: () => 'Volume relatif : ' + pct((0.55 + 0.45 * Math.min(1, M.p.thy)) * Math.sqrt(M.s.goitre)) },
     pyramidal: { t: 'Lobe pyramidal', k: 'Inconstant', d: 'Reliquat du canal thyréoglosse, présent chez environ un tiers des sujets.' },
     parathyroid: { t: 'Parathyroïdes', k: '4 glandes à la face postérieure', d: 'Sécrètent la PTH (métabolisme phosphocalcique). Risque de lésion au cours d\'une thyroïdectomie.' },
     larynx: { t: 'Larynx', k: 'Cartilages thyroïde et cricoïde', d: 'Repères de palpation : la thyroïde se trouve sous le cartilage cricoïde et monte à la déglutition.' },
@@ -149,43 +149,59 @@
     if (liveFn && tip && !tip.hidden) tipL.textContent = liveFn();
   };
 
-  /* ---------- Légende ---------- */
-  HV.buildLegend = function (host) {
-    const groups = [
-      ['Hormones', [['trh', 'TRH'], ['tsh', 'TSH'], ['t4', 'T4 (4 iodes)'], ['t3', 'T3 (3 iodes)'], ['rt3', 'T3 reverse']]],
-      ['Synthèse', [['iod', 'Iodure I⁻'], ['tg', 'Thyroglobuline'], ['tgi', 'Tg iodée'], ['na', 'Na⁺'], ['mrna', 'ARNm']]],
-      ['Transport et immunité', [['tbg', 'TBG'], ['ttr', 'Transthyrétine'], ['alb', 'Albumine'], ['trab', 'TRAb (IgG)']]]
-    ];
-    const NS = 'http://www.w3.org/2000/svg';
-    groups.forEach(([title, items]) => {
-      const h = document.createElement('p');
-      h.className = 'legend-g';
-      h.textContent = title;
-      host.appendChild(h);
-      const ul = document.createElement('ul');
-      items.forEach(([k, label]) => {
-        const li = document.createElement('li');
-        li.dataset.info = k;
-        const svg = document.createElementNS(NS, 'svg');
-        svg.setAttribute('viewBox', '-16 -14 32 28');
-        svg.setAttribute('aria-hidden', 'true');
-        const use = document.createElementNS(NS, 'use');
-        use.setAttribute('href', '#mol-' + k);
-        const big = { tbg: 0.75, ttr: 0.8, alb: 0.75 }[k] || 1.15;
-        use.setAttribute('transform', `scale(${big})`);
-        svg.appendChild(use);
-        li.appendChild(svg);
-        li.appendChild(document.createTextNode(label));
-        ul.appendChild(li);
-      });
-      host.appendChild(ul);
-    });
+  /* ---------- Légende contextuelle ---------- */
+  const THYRO_LEGEND = [
+    ['Hormones', ['trh', 'tsh', 't4', 't3', 'rt3']],
+    ['Synthèse', ['iod', 'tg', 'tgi', 'na', 'mrna']],
+    ['Transport et immunité', ['tbg', 'ttr', 'alb', 'trab']]
+  ];
+  const LABELS = { t4: 'T4 (4 iodes)', t3: 'T3 (3 iodes)', iod: 'Iodure I⁻', tgi: 'Tg iodée', na: 'Na⁺', trab: 'TRAb (IgG)' };
+  const BIG = { tbg: 0.75, ttr: 0.8, alb: 0.75, chylo: 0.85, vldl: 1 };
+  const NS = 'http://www.w3.org/2000/svg';
+  function item(k) {
+    const li = document.createElement('li');
+    li.dataset.info = k;
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '-16 -14 32 28');
+    svg.setAttribute('aria-hidden', 'true');
+    const use = document.createElementNS(NS, 'use');
+    use.setAttribute('href', '#mol-' + k);
+    use.setAttribute('transform', `scale(${BIG[k] || 1.15})`);
+    svg.appendChild(use);
+    li.appendChild(svg);
+    li.appendChild(document.createTextNode(LABELS[k] || (I[k] ? I[k].t.split(' · ')[0] : k)));
+    return li;
+  }
+  function group(host, title, keys) {
+    const h = document.createElement('p');
+    h.className = 'legend-g';
+    h.textContent = title;
+    host.appendChild(h);
+    const ul = document.createElement('ul');
+    keys.forEach((k) => ul.appendChild(item(k)));
+    host.appendChild(ul);
+  }
+  let legendFor = null;
+  HV.setLegend = function (host, sc) {
+    const inThyro = HV.ancestors(sc).some((s) => s.id === 'thyro');
+    const key = inThyro ? 'thyro' : sc.id;
+    if (legendFor === key) return;
+    legendFor = key;
+    host.textContent = '';
+    if (inThyro) THYRO_LEGEND.forEach(([t, ks]) => group(host, t, ks));
+    else if (sc.legend && sc.legend.size) group(host, 'Molécules de l\'axe', [...sc.legend].filter((k) => k !== 'dot'));
+    else {
+      const p = document.createElement('p');
+      p.className = 'legend-g';
+      p.textContent = 'Zoomez sur un axe pour afficher ses molécules.';
+      host.appendChild(p);
+    }
     const h = document.createElement('p');
     h.className = 'legend-g';
     h.textContent = 'Régulation';
     host.appendChild(h);
     const ul = document.createElement('ul');
-    [['sign-stim', 'stim', 'Stimulation'], ['sign-inhib', 'inhib', 'Rétrocontrôle négatif']].forEach(([k, cls, label]) => {
+    [['sign-stim', 'stim', 'Stimulation'], ['sign-inhib', 'inhib', 'Inhibition, rétrocontrôle']].forEach(([k, cls, label]) => {
       const li = document.createElement('li');
       li.dataset.info = k;
       li.innerHTML = `<svg viewBox="-16 -14 32 28" aria-hidden="true"><g class="sign ${cls}"><circle r="9" class="sign-core"></circle><path class="sign-glyph" d="${cls === 'inhib' ? 'M-5,0 H5' : 'M-5,0 H5 M0,-5 V5'}"></path></g></svg>${label}`;

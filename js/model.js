@@ -33,8 +33,8 @@
     const t4prod = (capT * stim + p.auto) * i4;
     const t3prod = (capT * stim + 1.6 * p.auto) * i3;
     const t4 = (t4prod + p.levo) / (0.85 + 0.15 * p.d3);
-    // 80 % de la T3 circulante vient de la désiodation périphérique de la T4.
-    const t3 = (0.2 * t3prod + 0.8 * p.d12 * s.t4) / (0.7 + 0.3 * p.d3);
+    // 75 % de la T3 circulante vient de la désiodation périphérique de la T4 (polycopié CEEDMM).
+    const t3 = (0.25 * t3prod + 0.75 * p.d12 * s.t4) / (0.7 + 0.3 * p.d3);
     const rt3 = (s.t4 * p.d3) / (0.6 + 0.4 * p.d12);
     const goitre = clamp(1 + 0.25 * Math.max(0, stim - 1) + 0.5 * Math.max(0, 1 - iF) * Math.min(1, p.thy), 1, 2.2);
     return { fb, trh, tsh, t4, t3, rt3, goitre, stim, t4prod, t3prod, iF };

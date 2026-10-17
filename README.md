@@ -2,7 +2,9 @@
 
 Visualisation zoomable et animée des axes endocriniens humains, dans l'esprit d'une présentation Prezi : on dézoome pour voir l'ensemble des axes, on rezoome jusqu'à la cellule pour voir les hormones circuler.
 
-Le premier module complet est l'**axe thyréotrope** (hypothalamus → hypophyse → thyroïde → périphérie). Les autres axes (corticotrope, somatotrope, lactotrope, gonadotrope, hydrique, pancréas endocrine, phosphocalcique, rénine-angiotensine-aldostérone) ont déjà leur carte dans l'atlas et sont en préparation.
+L'**axe thyréotrope** est détaillé jusqu'à la cellule (hypothalamus, hypophyse, follicule, transport plasmatique, cellule cible). Les autres axes et boucles de régulation sont tirés du *Polycopié de sémiologie endocrinienne* du CEEDMM (2023) et représentés en schémas animés : corticotrope, somatotrope, lactotrope, gonadotrope féminin (cycle de 28 jours, rétrocontrôle de l'estradiol qui devient positif en milieu de cycle) et masculin, posthypophyse (ADH), médullosurrénale, métabolisme phosphocalcique, système rénine-angiotensine-aldostérone, régulation de la glycémie et métabolisme des lipoprotéines. Le détail des boucles extraites est dans [`docs/axes-polycopie.md`](docs/axes-polycopie.md).
+
+Les organes sont dessinés de façon anatomique, les molécules d'après leur structure (iodothyronines, stéroïdes à quatre cycles, peptides, glycoprotéines, catécholamines, lipoprotéines…). Une légende contextuelle et des fiches au survol (ou au toucher) donnent les informations de chaque élément.
 
 ## Lancer
 
@@ -50,11 +52,16 @@ index.html
 css/style.css
 js/engine.js        moteur de scènes imbriquées, particules, interpolation de zoom
 js/model.js         modèle de l'axe thyréotrope et scénarios
-js/molecules.js     glyphes des molécules (TRH, TSH, T4, T3, iodure, TRAb…)
-js/scenes/*.js      une scène par fichier
+js/molecules.js     glyphes des molécules de l'axe thyréotrope
+js/molecules-axes.js glyphes des autres hormones (stéroïdes, peptides, catécholamines…)
+js/organs.js        dessins anatomiques
+js/info.js          fiches au survol et légende
+js/axis-builder.js  construction d'une scène d'axe à partir de sa description
+js/axes-data.js     axes et boucles tirés du polycopié
+js/scenes/*.js      atlas et scènes détaillées de l'axe thyréotrope
 js/app.js           caméra, navigation, panneau, boucle d'animation
 ```
 
-## Ajouter un axe
+## Ajouter ou détailler un axe
 
-Créer `js/scenes/<axe>.js` avec `HV.scene({ id, parent, x, y, scale, title, lead, points, build(g, a) {…} })`. Chaque scène est dessinée dans un repère 1600 × 1000 ; `a.flow(chemin, { mol, rate })` anime des molécules le long d'un chemin SVG. Remplacer ensuite la carte « En préparation » correspondante dans `js/scenes/atlas.js`.
+Un axe se décrit dans `js/axes-data.js` : nœuds (organes ou signaux), liens (`stim`, `inhib` ou flux simple, avec la molécule transportée), horloge éventuelle (`day` ou `cycle`) et niveaux affichés. Pour un niveau de détail cellulaire comme l'axe thyréotrope, on ajoute des scènes enfants avec `HV.scene({ id, parent, x, y, scale, build(g, a) {…} })` ; `a.flow(chemin, { mol, rate })` anime des molécules le long d'un chemin SVG.
