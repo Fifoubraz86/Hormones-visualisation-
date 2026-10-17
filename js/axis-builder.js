@@ -182,7 +182,7 @@
           a.text(210, 40, 'J14 ovulation', 'note', { anchor: 'middle' }, cg);
           a.text(420, 40, 'J28', 'note', { anchor: 'end' }, cg);
           cycleMark = a.el('path', { d: 'M 0,-4 L -8,-16 L 8,-16 Z', class: 'cycle-mark' }, cg);
-          cycleTxt = a.text(0, 66, '', 'clock-t', null, cg);
+          cycleTxt = a.text(440, 15, '', 'clock-t', null, cg);
         }
         const bars = [];
         if (ax.levels) {
