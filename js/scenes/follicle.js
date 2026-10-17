@@ -32,7 +32,7 @@
       a.text(1400, 92, 'zoom →', 'note', { anchor: 'end' });
 
       // Colloïde, cellule, capillaire
-      a.el('rect', { x: 230, y: 150, width: 1330, height: 190, rx: 20, class: 'colloid' });
+      a.el('rect', { x: 230, y: 150, width: 1330, height: 190, rx: 20, class: 'colloid', 'data-info': 'colloid' });
       a.text(1540, 186, 'Colloïde (lumière du follicule)', 'lbl-s', { anchor: 'end' });
       a.el('rect', { x: 230, y: 332, width: 1330, height: 466, rx: 26, class: 'cell' });
       a.el('rect', { x: 60, y: 332, width: 150, height: 466, rx: 26, class: 'cell ghost' });
@@ -41,42 +41,42 @@
       a.path(mv, 'microvilli');
       a.text(1546, 370, 'pôle apical', 'note', { anchor: 'end' });
       a.text(1546, 780, 'pôle basal', 'note', { anchor: 'end' });
-      a.vessel('M 40,885 L 1580,885', 72);
+      a.info(a.vessel('M 40,885 L 1580,885', 72), 'vessel');
       a.text(60, 955, 'Capillaire', 'lbl-s');
 
-      a.el('ellipse', { cx: 1450, cy: 500, rx: 86, ry: 64, class: 'nucleus' });
+      a.el('ellipse', { cx: 1450, cy: 500, rx: 86, ry: 64, class: 'nucleus', 'data-info': 'nucleus' });
       a.text(1450, 506, 'Noyau', 'note', { anchor: 'middle' });
 
       // 1. Récepteur de la TSH
-      a.path('M 302,760 v 46 M 312,760 v 46 M 322,760 v 46 M 332,760 v 46 M 342,760 v 46', 'receptor');
+      a.path('M 302,760 v 46 M 312,760 v 46 M 322,760 v 46 M 332,760 v 46 M 342,760 v 46', 'receptor', null, { 'data-info': 'tshr' });
       a.step(322, 726, 1);
       a.text(360, 700, ['TSH-R → Gs', '→ AMPc'], 'note', { lh: 1.25 });
-      const camp = a.el('circle', { cx: 340, cy: 620, r: 34, class: 'camp' });
+      const camp = a.el('circle', { cx: 340, cy: 620, r: 34, class: 'camp', 'data-info': 'camp' });
       a.text(340, 627, 'AMPc', 'note strong', { anchor: 'middle' });
 
       // 2. NIS + Na/K-ATPase
-      a.el('rect', { x: 476, y: 770, width: 30, height: 48, rx: 10, class: 'transporter' });
+      a.el('rect', { x: 476, y: 770, width: 30, height: 48, rx: 10, class: 'transporter', 'data-info': 'nis' });
       a.step(491, 736, 2);
       a.text(526, 742, ['NIS', '2 Na⁺ / 1 I⁻'], 'note', { lh: 1.25 });
-      a.el('rect', { x: 1086, y: 772, width: 26, height: 44, rx: 8, class: 'transporter alt' });
+      a.el('rect', { x: 1086, y: 772, width: 26, height: 44, rx: 8, class: 'transporter alt', 'data-info': 'nak' });
       a.text(1099, 756, 'Na⁺/K⁺-ATPase', 'note', { anchor: 'middle' });
 
       // 3. Pendrine
-      a.el('rect', { x: 528, y: 314, width: 28, height: 40, rx: 9, class: 'transporter' });
+      a.el('rect', { x: 528, y: 314, width: 28, height: 40, rx: 9, class: 'transporter', 'data-info': 'pendrin' });
       a.step(490, 380, 3);
       a.text(470, 420, 'Pendrine · ANO1', 'note', { anchor: 'middle' });
 
       // 4. Thyroglobuline : RE → Golgi → exocytose
-      for (let i = 0; i < 4; i++) a.path(`M 670,${640 + i * 18} C 700,${628 + i * 18} 750,${652 + i * 18} 780,${640 + i * 18}`, 'er');
-      const gg = a.el('g', { transform: 'translate(750 500)' });
+      for (let i = 0; i < 4; i++) a.path(`M 670,${640 + i * 18} C 700,${628 + i * 18} 750,${652 + i * 18} 780,${640 + i * 18}`, 'er', null, { 'data-info': 'er' });
+      const gg = a.el('g', { transform: 'translate(750 500)', 'data-info': 'golgi' });
       for (let i = 0; i < 3; i++) a.path(`M -44,${i * 14} C -20,${i * 14 - 10} 20,${i * 14 - 10} 44,${i * 14}`, 'golgi', gg);
       a.text(740, 730, 'RE : thyroglobuline', 'note', { anchor: 'middle' });
       a.text(820, 500, 'Golgi', 'note');
       a.step(700, 380, 4);
 
       // 5. TPO + DUOX2
-      a.el('rect', { x: 860, y: 316, width: 30, height: 34, rx: 8, class: 'enzyme-box' });
-      a.el('rect', { x: 900, y: 316, width: 30, height: 34, rx: 8, class: 'enzyme-box alt' });
+      a.el('rect', { x: 860, y: 316, width: 30, height: 34, rx: 8, class: 'enzyme-box', 'data-info': 'tpo' });
+      a.el('rect', { x: 900, y: 316, width: 30, height: 34, rx: 8, class: 'enzyme-box alt', 'data-info': 'tpo' });
       a.step(895, 386, 5);
       a.text(895, 430, ['TPO + H₂O₂ (DUOX2)', 'iodation : MIT, DIT'], 'note', { anchor: 'middle', lh: 1.25 });
 
@@ -85,18 +85,18 @@
       a.text(330, 220, 'Couplage : DIT + DIT → T4 · MIT + DIT → T3', 'note');
 
       // 7. Endocytose, 8. lysosome
-      a.el('circle', { cx: 1100, cy: 380, r: 22, class: 'vesicle' });
+      a.el('circle', { cx: 1100, cy: 380, r: 22, class: 'vesicle', 'data-info': 'endo' });
       a.step(1150, 388, 7);
       a.text(1180, 394, 'Endocytose', 'note');
-      a.el('circle', { cx: 1120, cy: 560, r: 44, class: 'lyso' });
+      a.el('circle', { cx: 1120, cy: 560, r: 44, class: 'lyso', 'data-info': 'lyso' });
       a.step(1060, 610, 8);
       a.text(1180, 556, ['Lysosome :', 'protéolyse de la Tg'], 'note', { lh: 1.25 });
 
       // 9. Sécrétion MCT8 ; 10. DEHAL1
-      a.el('rect', { x: 1216, y: 770, width: 28, height: 48, rx: 9, class: 'transporter' });
+      a.el('rect', { x: 1216, y: 770, width: 28, height: 48, rx: 9, class: 'transporter', 'data-info': 'mct8' });
       a.step(1270, 736, 9);
       a.text(1290, 742, ['MCT8 : sécrétion', 'de T4 et T3'], 'note', { lh: 1.25 });
-      const deh = a.el('g', { transform: 'translate(930 600)' });
+      const deh = a.el('g', { transform: 'translate(930 600)', 'data-info': 'dehal' });
       a.el('circle', { r: 28, class: 'enzyme' }, deh);
       a.text(0, 6, 'DEHAL1', 'enzyme-t small', { anchor: 'middle' }, deh);
       a.step(930, 548, 10);

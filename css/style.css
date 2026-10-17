@@ -31,12 +31,12 @@
   --plasma: #24121c;
   --csf: #12324a;
 
-  --trh: #b892ff;
+  --trh: #b6e35a;
   --tsh: #5eaeff;
   --t4: #ffb84d;
   --t3: #ff7262;
   --rt3: #9aa6b8;
-  --iod: #d4e45a;
+  --iod: #b48cff;
   --trab: #ff6ac1;
   --tg: #e3c39a;
   --mrna: #6fe3a5;
@@ -45,6 +45,13 @@
   --alb: #c9b6e8;
   --rbc: #c2414f;
 
+
+  --o-thyroid: #b4475c; --o-brain: #c99a98; --o-callosum: #e9d3cc; --o-cerebellum: #b98585; --o-hypo: #8fae3c;
+  --o-pit-ant: #4f86c9; --o-pit-post: #8a8fa6; --o-cart: #8fa7bd; --o-trachea: #6f8aa3; --o-parathyroid: #d6a64a;
+  --o-heart: #b23a46; --o-aorta: #c9505a; --o-vein: #4d6bb3; --o-liver: #8f3b30; --o-gall: #5e9a4a; --o-bone: #e3d7bb;
+  --o-muscle: #a8424a; --o-tendon: #d8d2c4; --o-fat: #e6c35e; --o-lung: #c98d9a; --o-kidney: #9c4a40; --o-adrenal: #e0a93a;
+  --o-pancreas: #e0b17e; --o-stomach: #c98a7a; --o-gonad: #c77aa6; --o-sella: #d9cdb3; --o-line: rgba(0, 0, 0, 0.35);
+  --atom-o: #ff6b6b; --atom-n: #6aa3ff;
   --good: #5bd49a;
   --warn: #ffc061;
   --bad: #ff7262;
@@ -63,9 +70,10 @@
     --scene-1: #f7f9fc; --scene-2: #eef3f9; --body: #dce8f4; --body-line: #8fb0cf; --organ: #e1ebf6; --organ-line: #6f93bd;
     --cell: #edf3fa; --cell-line: #7c9cc4; --nucleus: #dfe4f7; --nucleus-line: #6a7cc4; --colloid: #f7e6c3; --colloid-line: #c49a4a;
     --vessel: #f7dade; --vessel-line: #d0707f; --plasma: #fbecee; --csf: #d9ebf6;
-    --trh: #7a4fe0; --tsh: #1f6fd1; --t4: #c27600; --t3: #d3392b; --rt3: #66717f; --iod: #7a9400; --trab: #c21f80;
+    --trh: #5f8a00; --tsh: #1f6fd1; --t4: #c27600; --t3: #d3392b; --rt3: #66717f; --iod: #7340d8; --trab: #c21f80;
     --tg: #a8753f; --mrna: #13925a; --tbg: #138c92; --ttr: #3b6fd0; --alb: #8b6bbf; --rbc: #c23a48;
     --good: #138a55; --warn: #b07000; --bad: #cc3628; --inhib: #cc3628; --stim: #138a55;
+ --o-thyroid: #c4566b; --o-brain: #e3b6b2; --o-callosum: #f6e8e3; --o-cerebellum: #d49c9a; --o-hypo: #a3c24e; --o-pit-ant: #6a9ee0; --o-pit-post: #aab0c4; --o-cart: #b9c9d8; --o-trachea: #a6b9cc; --o-parathyroid: #e2b85a; --o-heart: #c9414e; --o-aorta: #d65f68; --o-vein: #5f7fc8; --o-liver: #a2483b; --o-gall: #6dab58; --o-bone: #efe6cf; --o-muscle: #c0525a; --o-tendon: #e9e4d8; --o-fat: #f0d070; --o-lung: #e1a9b4; --o-kidney: #b0574c; --o-adrenal: #e9b445; --o-pancreas: #ecc291; --o-stomach: #dca090; --o-gonad: #d58cb5; --o-sella: #c9b994; --o-line: rgba(40, 20, 20, 0.35); --atom-o: #d63b3b; --atom-n: #2f68d0;
   }
 }
 :root[data-theme="light"] {
@@ -75,9 +83,10 @@
   --scene-1: #f7f9fc; --scene-2: #eef3f9; --body: #dce8f4; --body-line: #8fb0cf; --organ: #e1ebf6; --organ-line: #6f93bd;
   --cell: #edf3fa; --cell-line: #7c9cc4; --nucleus: #dfe4f7; --nucleus-line: #6a7cc4; --colloid: #f7e6c3; --colloid-line: #c49a4a;
   --vessel: #f7dade; --vessel-line: #d0707f; --plasma: #fbecee; --csf: #d9ebf6;
-  --trh: #7a4fe0; --tsh: #1f6fd1; --t4: #c27600; --t3: #d3392b; --rt3: #66717f; --iod: #7a9400; --trab: #c21f80;
+  --trh: #5f8a00; --tsh: #1f6fd1; --t4: #c27600; --t3: #d3392b; --rt3: #66717f; --iod: #7340d8; --trab: #c21f80;
   --tg: #a8753f; --mrna: #13925a; --tbg: #138c92; --ttr: #3b6fd0; --alb: #8b6bbf; --rbc: #c23a48;
   --good: #138a55; --warn: #b07000; --bad: #cc3628; --inhib: #cc3628; --stim: #138a55;
+ --o-thyroid: #c4566b; --o-brain: #e3b6b2; --o-callosum: #f6e8e3; --o-cerebellum: #d49c9a; --o-hypo: #a3c24e; --o-pit-ant: #6a9ee0; --o-pit-post: #aab0c4; --o-cart: #b9c9d8; --o-trachea: #a6b9cc; --o-parathyroid: #e2b85a; --o-heart: #c9414e; --o-aorta: #d65f68; --o-vein: #5f7fc8; --o-liver: #a2483b; --o-gall: #6dab58; --o-bone: #efe6cf; --o-muscle: #c0525a; --o-tendon: #e9e4d8; --o-fat: #f0d070; --o-lung: #e1a9b4; --o-kidney: #b0574c; --o-adrenal: #e9b445; --o-pancreas: #ecc291; --o-stomach: #dca090; --o-gonad: #d58cb5; --o-sella: #c9b994; --o-line: rgba(40, 20, 20, 0.35); --atom-o: #d63b3b; --atom-n: #2f68d0;
 }
 
 * { box-sizing: border-box; }
@@ -410,3 +419,108 @@ h2 { margin: 0; font: 600 13px var(--font-body); letter-spacing: 0.06em; text-tr
 @media (prefers-reduced-motion: reduce) {
   .nodule, .input { transition: none; }
 }
+
+/* ---------- Anatomie réaliste ---------- */
+.org { stroke: var(--o-line); stroke-width: 1.5; }
+.org-shine { pointer-events: none; }
+.org-detail { fill: none; stroke: var(--o-line); stroke-width: 1.5; }
+.org-detail-strong { fill: none; stroke: var(--o-line); stroke-width: 2.5; }
+.o-thyroid { fill: var(--o-thyroid); }
+.o-lobule { fill: none; stroke: rgba(255, 255, 255, 0.28); stroke-width: 2; }
+.o-parathyroid { fill: var(--o-parathyroid); }
+.o-cart { fill: var(--o-cart); }
+.o-trachea { fill: var(--o-trachea); }
+.o-ring { fill: none; stroke: var(--o-cart); stroke-width: 6; stroke-linecap: round; }
+.o-brain { fill: var(--o-brain); }
+.o-gyrus { fill: none; stroke: var(--o-line); stroke-width: 2; stroke-linecap: round; }
+.o-callosum { fill: var(--o-callosum); }
+.o-cerebellum { fill: var(--o-cerebellum); }
+.o-brainstem { fill: var(--o-cerebellum); }
+.o-hypo { fill: var(--o-hypo); stroke: var(--trh); stroke-width: 3; }
+.o-chiasm { fill: var(--o-callosum); }
+.o-stalk { fill: var(--o-pit-post); }
+.o-sella { fill: none; stroke: var(--o-sella); stroke-width: 10; stroke-linecap: round; }
+.o-sella.thin { stroke-width: 6; }
+.o-pit-ant { fill: var(--o-pit-ant); stroke: var(--tsh); stroke-width: 3; }
+.o-pit-post { fill: var(--o-pit-post); }
+.o-heart { fill: var(--o-heart); }
+.o-aorta { fill: var(--o-aorta); }
+.o-vessel-l { fill: none; stroke: var(--o-aorta); stroke-width: 4; stroke-linecap: round; }
+.o-vein, .o-pulm { fill: var(--o-vein); }
+.o-coronary { fill: none; stroke: rgba(255, 220, 200, 0.55); stroke-width: 2; }
+.o-liver { fill: var(--o-liver); }
+.o-gall { fill: var(--o-gall); }
+.o-bone { fill: var(--o-bone); }
+.o-muscle { fill: var(--o-muscle); }
+.o-tendon { fill: none; stroke: var(--o-tendon); stroke-width: 6; stroke-linecap: round; }
+.o-fiber { fill: none; stroke: rgba(255, 255, 255, 0.3); stroke-width: 1.5; }
+.o-fat { fill: var(--o-fat); }
+.o-fat-n { fill: #6b4f2a; opacity: 0.7; }
+.o-lung { fill: var(--o-lung); opacity: 0.55; }
+.o-kidney { fill: var(--o-kidney); }
+.o-adrenal { fill: var(--o-adrenal); }
+.o-pancreas { fill: var(--o-pancreas); }
+.o-stomach { fill: var(--o-stomach); opacity: 0.7; }
+.o-gonad { fill: var(--o-gonad); }
+.o-tube { fill: none; stroke: var(--o-gonad); stroke-width: 2.5; }
+.body-organs { opacity: 0.92; }
+.periph-ic .org { stroke-width: 1.2; }
+[data-info] { cursor: help; }
+.zoomable, .zoomable [data-info], .scene.can-zoom [data-info] { cursor: zoom-in; }
+
+/* Molécules : atomes et cycles */
+.m-ring { fill: none; stroke-width: 1.6; stroke-linejoin: round; }
+.m-ring.m-t4 { stroke: var(--t4); fill: color-mix(in srgb, var(--t4) 30%, transparent); }
+.m-ring.m-t3 { stroke: var(--t3); fill: color-mix(in srgb, var(--t3) 30%, transparent); }
+.m-ring.m-rt3 { stroke: var(--rt3); fill: color-mix(in srgb, var(--rt3) 30%, transparent); }
+.m-ring.m-trh { stroke: var(--trh); fill: color-mix(in srgb, var(--trh) 35%, transparent); }
+line.m-bond, path.m-bond { stroke: var(--fg); stroke-width: 1.1; fill: none; opacity: 0.75; }
+path.m-bond.trh { stroke: var(--trh); opacity: 1; stroke-width: 1.4; }
+.m-I { fill: var(--iod); }
+.m-O { fill: var(--atom-o); }
+.m-N { fill: var(--atom-n); }
+.m-tsh-a { fill: color-mix(in srgb, var(--tsh) 55%, var(--fg)); opacity: 0.9; }
+.m-tsh-b { fill: none; stroke: var(--tsh); stroke-width: 4; stroke-linecap: round; }
+.m-glycan { fill: var(--fg); opacity: 0.8; }
+.m-glycan-l { fill: none; stroke: var(--fg); stroke-width: 0.9; opacity: 0.7; }
+.m-trab.light { fill: color-mix(in srgb, var(--trab) 45%, var(--fg)); }
+.m-tg.b { fill: color-mix(in srgb, var(--tg) 75%, var(--bg)); }
+.m-sheet { fill: none; stroke: rgba(255, 255, 255, 0.45); stroke-width: 1.4; }
+.m-channel { fill: var(--bg); opacity: 0.7; }
+.m-base { stroke-width: 1.6; }
+.m-base.b0 { stroke: var(--t3); } .m-base.b1 { stroke: var(--tsh); } .m-base.b2 { stroke: var(--t4); } .m-base.b3 { stroke: var(--trh); }
+
+/* ---------- Infobulle ---------- */
+.tip {
+  position: absolute; z-index: 5; max-width: 300px; pointer-events: none;
+  padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line-2);
+  background: color-mix(in srgb, var(--panel) 96%, transparent); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  display: flex; flex-direction: column; gap: 3px;
+}
+.tip p { margin: 0; }
+.tip-t { font: 600 16px/1.2 var(--font-display); }
+.tip-k { font: 11.5px var(--font-data); color: var(--accent); }
+.tip-d { font-size: 13px; color: var(--muted); line-height: 1.45; }
+.tip-l { font: 500 12.5px var(--font-data); color: var(--fg); border-top: 1px solid var(--line); padding-top: 5px; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.tip-k:empty { display: none; }
+
+/* ---------- Légende ---------- */
+.legend {
+  position: absolute; top: 12px; right: max(12px, env(safe-area-inset-right, 0px)); z-index: 4;
+  width: 300px; max-height: calc(100% - 90px); overflow-y: auto;
+  border-radius: 12px; border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel) 92%, transparent); backdrop-filter: blur(6px);
+}
+.legend summary { cursor: pointer; padding: 8px 12px; font: 600 12px var(--font-body); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.legend-body { padding: 0 10px 10px; }
+.legend-g { margin: 6px 0 2px; font: 11px var(--font-data); color: var(--faint); }
+.legend ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; column-gap: 4px; }
+.legend li { display: flex; align-items: center; gap: 6px; font-size: 12.5px; line-height: 1.2; padding: 1px 4px; border-radius: 6px; cursor: help; }
+.legend li:hover { background: var(--panel-2); }
+.legend li svg { width: 30px; height: 24px; flex: none; overflow: visible; }
+@media (max-width: 860px) {
+  .legend { width: 250px; top: 8px; right: 8px; }
+  .legend:not([open]) { width: auto; }
+}
+/* Les étiquettes laissent passer le survol vers la structure qu'elles désignent. */
+#stage text:not([data-info]):not(.loupe-cap) { pointer-events: none; }

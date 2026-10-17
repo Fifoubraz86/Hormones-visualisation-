@@ -1,0 +1,156 @@
+/*
+ * Dessins anatomiques réutilisables. Chaque fonction dessine l'organe centré sur (0, 0)
+ * dans le groupe fourni ; l'appelant place et met à l'échelle le groupe.
+ */
+(function () {
+  'use strict';
+  const HV = (window.HV = window.HV || {});
+  const el = (...a) => HV.el(...a);
+
+  // Forme pleine + reflet pour donner du volume.
+  function solid(g, d, cls, extra) {
+    const p = el('path', Object.assign({ d, class: 'org ' + cls }, extra || {}), g);
+    el('path', { d, class: 'org-shine', fill: 'url(#shine)' }, g);
+    return p;
+  }
+  const line = (g, d, cls) => el('path', { d, class: cls || 'org-detail' }, g);
+  const mirror = (d) => d.replace(/(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/g, (m, x, y) => -parseFloat(x) + ',' + y);
+
+  const O = {};
+
+  /* Thyroïde vue de face, avec larynx, trachée, isthme, lobe pyramidal et parathyroïdes.
+     Repère : centre de l'isthme en (0, 0), lobes ≈ 200 de large. */
+  O.thyroidNeck = function (g, info) {
+    const cart = el('g', { 'data-info': 'larynx' }, g);
+    solid(cart, 'M -36,-130 L 36,-130 L 31,-104 C 22,-84 9,-74 0,-72 C -9,-74 -22,-84 -31,-104 Z', 'o-cart');
+    line(cart, 'M -10,-130 L 0,-118 L 10,-130', 'org-detail');
+    solid(cart, 'M -26,-66 C -12,-60 12,-60 26,-66 L 26,-54 C 12,-48 -12,-48 -26,-54 Z', 'o-cart');
+    const tr = el('g', { 'data-info': 'trachea' }, g);
+    el('rect', { x: -24, y: -50, width: 48, height: 210, rx: 14, class: 'org o-trachea' }, tr);
+    for (let y = -42; y < 156; y += 17) line(tr, `M -22,${y} C -8,${y + 6} 8,${y + 6} 22,${y}`, 'o-ring');
+    const lobes = el('g', { class: 'thy-lobes' }, g);
+    const right = 'M -22,-12 C -26,-42 -40,-72 -60,-78 C -82,-82 -98,-48 -100,-8 C -104,42 -88,84 -60,90 C -36,94 -20,70 -16,50 Z';
+    solid(lobes, right, 'o-thyroid', { 'data-info': 'thyroid' });
+    solid(lobes, mirror(right), 'o-thyroid', { 'data-info': 'thyroid' });
+    solid(lobes, 'M -22,14 C -10,22 10,22 22,14 L 22,50 C 10,58 -10,58 -22,50 Z', 'o-thyroid', { 'data-info': 'thyroid' });
+    solid(lobes, 'M 6,16 C 6,-6 10,-28 14,-50 C 19,-46 18,-8 14,18 Z', 'o-thyroid', { 'data-info': 'pyramidal' });
+    [[-70, -40], [-82, 0], [-74, 44], [-56, 70], [-56, -10]].forEach(([x, y]) => {
+      line(lobes, `M ${x - 8},${y} q 8,-8 16,0`, 'o-lobule');
+      line(lobes, `M ${-x - 8},${y} q 8,-8 16,0`, 'o-lobule');
+    });
+    const para = el('g', { 'data-info': 'parathyroid' }, g);
+    [[-92, -46], [-90, 64], [92, -46], [90, 64]].forEach(([x, y]) => el('ellipse', { cx: x, cy: y, rx: 8, ry: 6, class: 'org o-parathyroid' }, para));
+    return lobes;
+  };
+
+  /* Thyroïde seule, en papillon (vignettes) */
+  O.thyroidSmall = function (g) {
+    const r = 'M -4,-1 C -5,-6 -8,-11 -11,-12 C -15,-12 -17,-6 -17,0 C -17,8 -14,13 -10,13 C -6,13 -4,9 -3,6 Z';
+    solid(g, r, 'o-thyroid');
+    solid(g, mirror(r), 'o-thyroid');
+    el('rect', { x: -4, y: 1, width: 8, height: 6, rx: 2, class: 'org o-thyroid' }, g);
+  };
+
+  /* Encéphale en coupe sagittale (face à gauche), avec hypothalamus, chiasma, tige et hypophyse dans la selle turcique.
+     Repère : hypothalamus en (0, 0). Retourne { hypo, ant, post }. */
+  O.brainSagittal = function (g) {
+    solid(g, 'M -140,6 C -160,-30 -152,-86 -110,-114 C -70,-142 0,-152 60,-140 C 120,-128 168,-92 178,-42 C 184,-16 172,2 152,6 C 120,10 90,6 70,8 C 40,12 0,14 -32,12 C -80,12 -124,20 -140,6 Z', 'o-brain', { 'data-info': 'brain' });
+    line(g, 'M -120,-40 C -100,-70 -80,-60 -70,-90 M -60,-110 C -40,-90 -20,-120 0,-100 C 20,-80 40,-120 60,-104 M 80,-110 C 90,-80 120,-100 130,-70 M 140,-50 C 120,-40 150,-20 130,-10 M -110,-10 C -90,-30 -70,-14 -60,-34', 'o-gyrus');
+    solid(g, 'M -60,-42 C -40,-70 60,-76 90,-50 C 96,-42 88,-34 80,-38 C 50,-58 -30,-54 -48,-34 C -54,-30 -64,-34 -60,-42 Z', 'o-callosum', { 'data-info': 'callosum' });
+    const cb = el('g', { 'data-info': 'cerebellum' }, g);
+    solid(cb, 'M 118,6 C 120,-16 150,-24 172,-12 C 188,0 184,30 162,38 C 140,44 120,32 118,6 Z', 'o-cerebellum');
+    line(cb, 'M 128,0 C 140,-10 160,-10 174,-2 M 126,12 C 140,4 162,4 180,12 M 130,24 C 144,18 162,20 174,28', 'o-gyrus');
+    solid(g, 'M 76,6 C 82,34 86,64 90,94 L 112,94 C 108,62 106,34 106,6 Z', 'o-brainstem', { 'data-info': 'brainstem' });
+    const hypo = solid(g, 'M -40,0 C -40,-14 -16,-22 6,-20 C 30,-18 44,-8 42,4 C 40,16 14,20 -6,18 C -26,16 -40,12 -40,0 Z', 'o-hypo');
+    el('ellipse', { cx: -54, cy: 16, rx: 16, ry: 7, class: 'org o-chiasm', 'data-info': 'chiasm' }, g);
+    solid(g, 'M -6,16 C -10,50 4,80 8,118 L 22,118 C 18,80 14,48 12,16 Z', 'o-stalk', { 'data-info': 'stalk' });
+    el('path', { d: 'M -64,146 C -66,214 80,214 80,146', class: 'o-sella' }, g);
+    el('path', { d: 'M -70,146 C -74,138 -60,132 -56,140 M 74,140 C 78,130 92,136 86,146', class: 'o-sella thin' }, g);
+    const ant = solid(g, 'M -54,152 C -54,124 -14,118 8,130 C 20,140 18,178 -4,188 C -28,196 -54,180 -54,152 Z', 'o-pit-ant');
+    const post = solid(g, 'M 10,134 C 26,120 58,126 60,150 C 62,174 36,186 20,176 C 26,162 24,146 10,134 Z', 'o-pit-post', { 'data-info': 'pit-post' });
+    return { hypo, ant, post };
+  };
+
+  /* Cerveau, vue latérale */
+  O.brainLateral = function (g) {
+    solid(g, 'M -44,6 C -48,-18 -30,-38 -4,-40 C 22,-42 44,-28 46,-6 C 48,6 42,14 32,14 C 28,22 18,24 10,20 C 0,26 -16,26 -22,18 C -34,20 -44,16 -44,6 Z', 'o-brain');
+    solid(g, 'M 18,16 C 24,10 40,12 42,22 C 42,32 26,36 18,30 C 14,26 14,20 18,16 Z', 'o-cerebellum');
+    solid(g, 'M 8,20 L 12,44 L 20,44 L 18,22 Z', 'o-brainstem');
+    line(g, 'M -30,8 C -14,0 4,2 18,-6 M 4,-38 C -2,-24 8,-14 2,-2 M -30,-24 C -20,-18 -24,-8 -14,-6 M 20,-30 C 28,-22 22,-12 32,-8 M -36,-6 C -28,-10 -26,-2 -20,-4', 'o-gyrus');
+  };
+
+  /* Cœur anatomique (vue antérieure) */
+  O.heart = function (g) {
+    solid(g, 'M -2,-22 C -4,-36 4,-46 16,-46 C 30,-46 34,-36 32,-28 L 25,-28 C 25,-35 20,-39 15,-39 C 9,-39 7,-32 7,-22 Z', 'o-aorta');
+    line(g, 'M 10,-44 L 8,-54 M 16,-46 L 16,-56 M 22,-45 L 25,-55', 'o-vessel-l');
+    el('rect', { x: -22, y: -44, width: 10, height: 26, rx: 4, class: 'org o-vein' }, g);
+    solid(g, 'M -30,-10 C -34,10 -18,32 6,42 C 14,46 22,40 28,30 C 38,14 40,-4 32,-16 C 24,-26 6,-26 -4,-20 C -14,-24 -26,-20 -30,-10 Z', 'o-heart');
+    solid(g, 'M 6,-20 C 8,-32 18,-34 24,-26 L 18,-14 C 14,-18 10,-18 6,-20 Z', 'o-pulm');
+    line(g, 'M -6,-14 C 0,2 6,20 4,38 M 6,-16 C 18,-6 26,8 26,26', 'o-coronary');
+  };
+
+  /* Foie (vue antérieure) avec vésicule biliaire */
+  O.liver = function (g) {
+    solid(g, 'M -50,-6 C -48,-26 -18,-34 10,-30 C 30,-28 48,-22 52,-14 C 54,-8 42,-4 28,2 C 12,10 -6,22 -22,26 C -38,30 -50,18 -50,-6 Z', 'o-liver');
+    line(g, 'M 2,-30 C 0,-18 -2,-6 -6,8', 'o-detail-strong');
+    solid(g, 'M -16,16 C -14,30 -2,32 0,24 C 0,18 -8,13 -16,16 Z', 'o-gall');
+  };
+
+  /* Fémur */
+  O.bone = function (g) {
+    solid(g, 'M -14,-38 C -22,-46 -12,-58 -2,-52 C 4,-48 4,-40 0,-36 L 8,-30 C 12,-36 20,-36 20,-28 C 20,-20 14,-18 10,-16 L 6,30 C 14,32 18,40 12,46 C 8,50 2,46 0,42 C -4,48 -12,48 -14,42 C -18,34 -12,30 -6,30 L -2,-18 C -8,-22 -12,-30 -14,-38 Z', 'o-bone');
+    line(g, 'M 2,-12 L -1,26', 'o-detail');
+  };
+
+  /* Muscle squelettique fusiforme avec tendons */
+  O.muscle = function (g) {
+    line(g, 'M -52,0 L -34,0 M 34,0 L 52,0', 'o-tendon');
+    solid(g, 'M -36,0 C -26,-20 26,-20 36,0 C 26,20 -26,20 -36,0 Z', 'o-muscle');
+    line(g, 'M -28,-6 C -10,-12 10,-12 28,-6 M -30,0 L 30,0 M -28,6 C -10,12 10,12 28,6', 'o-fiber');
+  };
+
+  /* Tissu adipeux : adipocytes uniloculaires, noyau refoulé en périphérie */
+  O.fat = function (g) {
+    [[-20, -12, 15], [8, -18, 14], [26, 4, 14], [-2, 10, 15], [-26, 14, 12]].forEach(([x, y, r]) => {
+      el('circle', { cx: x, cy: y, r, class: 'org o-fat' }, g);
+      el('circle', { cx: x, cy: y, r, fill: 'url(#shine)', class: 'org-shine' }, g);
+      el('ellipse', { cx: x + r * 0.7, cy: y + r * 0.45, rx: 3, ry: 1.6, transform: `rotate(-30 ${x + r * 0.7} ${y + r * 0.45})`, class: 'o-fat-n' }, g);
+    });
+  };
+
+  /* Silhouette interne pour l'atlas (repère du corps, cou en y ≈ -285) */
+  O.bodyOrgans = function (g) {
+    const L = (name, x, y, s, draw, info) => {
+      const gg = el('g', { transform: `translate(${x} ${y}) scale(${s})`, class: 'body-organ', 'data-info': info || name }, g);
+      draw(gg);
+      return gg;
+    };
+    L('brain', 0, -384, 0.95, O.brainLateral);
+    const lung = 'M -8,-40 C -26,-40 -40,-10 -42,22 C -44,40 -30,46 -14,40 C -4,36 -2,20 -4,0 C -4,-20 0,-40 -8,-40 Z';
+    L('lungs', -40, -180, 1, (gg) => solid(gg, lung, 'o-lung'));
+    L('lungs', 40, -180, 1, (gg) => solid(gg, mirror(lung), 'o-lung'));
+    L('heart', 10, -170, 0.75, O.heart);
+    L('thyroid', 0, -284, 0.85, O.thyroidSmall);
+    L('liver', -26, -112, 0.95, O.liver);
+    L('stomach', 34, -112, 1, (gg) => solid(gg, 'M -10,-14 C 0,-20 14,-14 14,-2 C 14,12 2,18 -10,16 C -4,8 -4,0 -10,-14 Z', 'o-stomach'));
+    const kidney = 'M -6,-14 C 4,-16 10,-6 10,2 C 10,12 4,18 -4,16 C -10,14 -6,6 -2,2 C -6,-2 -12,-10 -6,-14 Z';
+    const adr = 'M -8,4 C -8,-4 -2,-10 4,-8 C 8,-6 8,2 6,4 Z';
+    [-1, 1].forEach((k) => {
+      L('kidney', k * 40, -74, 1, (gg) => solid(gg, k < 0 ? mirror(kidney) : kidney, 'o-kidney'));
+      L('adrenal', k * 39, -96, 1, (gg) => solid(gg, k < 0 ? mirror(adr) : adr, 'o-adrenal'));
+    });
+    L('pancreas', 10, -64, 1, (gg) => solid(gg, 'M -22,2 C -22,-6 -10,-6 0,-4 C 12,-2 22,-6 26,-2 C 28,2 20,6 8,6 C -4,6 -14,10 -22,2 Z', 'o-pancreas'));
+    L('uterus', 0, 50, 1, (gg) => {
+      solid(gg, 'M -9,-12 C -9,-18 9,-18 9,-12 C 9,0 4,10 0,14 C -4,10 -9,0 -9,-12 Z', 'o-gonad');
+      line(gg, 'M -9,-12 C -18,-16 -26,-12 -30,-8 M 9,-12 C 18,-16 26,-12 30,-8', 'o-tube');
+      el('ellipse', { cx: -32, cy: -6, rx: 6, ry: 4, class: 'org o-gonad', 'data-info': 'ovary' }, gg);
+      el('ellipse', { cx: 32, cy: -6, rx: 6, ry: 4, class: 'org o-gonad', 'data-info': 'ovary' }, gg);
+    }, 'ovary');
+    L('testis', 0, 126, 1, (gg) => {
+      el('ellipse', { cx: -7, cy: 0, rx: 6, ry: 8, class: 'org o-gonad' }, gg);
+      el('ellipse', { cx: 7, cy: 0, rx: 6, ry: 8, class: 'org o-gonad' }, gg);
+    });
+  };
+
+  HV.organs = O;
+})();

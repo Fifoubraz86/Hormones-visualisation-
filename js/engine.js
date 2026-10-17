@@ -72,7 +72,7 @@
   Flow.prototype.spawn = function (t) {
     let e = this.pool.pop();
     if (!e) {
-      e = el('use', { href: '#mol-' + this.mol, class: this.o.cls || null, style: this.o.style || null }, this.layer);
+      e = el('use', { href: '#mol-' + this.mol, class: this.o.cls || null, style: this.o.style || null, 'data-info': this.o.info || this.mol }, this.layer);
     }
     e.style.display = '';
     this.ps.push({
@@ -150,7 +150,7 @@
         s.dyn.push(fn);
       },
       sign(x, y, kind, parent) {
-        const g = el('g', { class: 'sign ' + kind, transform: `translate(${x} ${y})` }, parent || c());
+        const g = el('g', { class: 'sign ' + kind, transform: `translate(${x} ${y})`, 'data-info': 'sign-' + kind }, parent || c());
         const halo = el('circle', { r: 22, class: 'sign-halo' }, g);
         el('circle', { r: 14, class: 'sign-core' }, g);
         el('path', { d: kind === 'inhib' ? 'M-7,0 H7' : 'M-7,0 H7 M0,-7 V7', class: 'sign-glyph' }, g);
@@ -172,6 +172,15 @@
       childCaption(id, str) {
         const ch = HV.scenes[id];
         text(c(), ch.x + (HV.W * ch.scale) / 2, ch.y + HV.H * ch.scale + 30, str, 'loupe-cap', { anchor: 'middle', attrs: { 'data-zoom': id } });
+      },
+      info(elm, key) {
+        elm.setAttribute('data-info', key);
+        return elm;
+      },
+      organ(name, x, y, s, attrs) {
+        const g = el('g', Object.assign({ transform: `translate(${x} ${y}) scale(${s || 1})`, 'data-info': name }, attrs || {}), c());
+        HV.organs[name](g);
+        return g;
       },
       zoomable(elm, id) {
         elm.setAttribute('data-zoom', id);

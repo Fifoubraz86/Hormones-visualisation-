@@ -23,34 +23,34 @@
     build(g, a) {
       a.frame('Antéhypophyse · cellule thyréotrope', 'TRH → récepteur → synthèse et sécrétion de TSH');
 
-      a.vessel('M 160,160 L 160,960', 64);
+      a.info(a.vessel('M 160,160 L 160,960', 64), 'portal');
       a.text(214, 190, 'Sang porte (TRH)', 'lbl-s');
-      a.vessel('M 1420,160 L 1420,960', 64);
+      a.info(a.vessel('M 1420,160 L 1420,960', 64), 'vessel');
       a.text(1366, 190, 'Circulation générale', 'lbl-s', { anchor: 'end' });
 
-      a.el('ellipse', { cx: 780, cy: 560, rx: 390, ry: 300, class: 'cell' });
-      a.el('ellipse', { cx: 690, cy: 590, rx: 130, ry: 105, class: 'nucleus' });
+      a.el('ellipse', { cx: 780, cy: 560, rx: 390, ry: 300, class: 'cell', 'data-info': 'thyrotroph' });
+      a.el('ellipse', { cx: 690, cy: 590, rx: 130, ry: 105, class: 'nucleus', 'data-info': 'nucleus' });
       a.path('M 620,600 q 8.75,-14 17.5,0 t 17.5,0 t 17.5,0 t 17.5,0 t 17.5,0 t 17.5,0 t 17.5,0 t 17.5,0', 'dna');
       a.text(690, 640, 'TSHβ · αGSU', 'note', { anchor: 'middle' });
 
       // Récepteur TRH (7 domaines transmembranaires)
-      a.path('M 386,500 v 80 M 396,500 v 80 M 406,500 v 80 M 416,500 v 80 M 426,500 v 80', 'receptor');
+      a.path('M 386,500 v 80 M 396,500 v 80 M 406,500 v 80 M 416,500 v 80 M 426,500 v 80', 'receptor', null, { 'data-info': 'trhr' });
       a.text(406, 482, 'TRH-R', 'lbl-s strong', { anchor: 'middle' });
       a.text(406, 610, 'Gq', 'note', { anchor: 'middle' });
       const casc = a.path('M 440,560 C 500,560 540,590 560,600', 'cascade', null, { 'marker-end': 'url(#arr-accent)' });
       a.text(496, 680, ['PLC → IP₃ / Ca²⁺', 'PKC'], 'note', { anchor: 'middle', lh: 1.3 });
 
       // RE / Golgi
-      const gg = a.el('g', { transform: 'translate(880 400)' });
+      const gg = a.el('g', { transform: 'translate(880 400)', 'data-info': 'golgi' });
       for (let i = 0; i < 4; i++) a.path(`M -60,${i * 16} C -30,${i * 16 - 12} 30,${i * 16 - 12} 60,${i * 16}`, 'golgi', gg);
       a.text(880, 360, 'RE · Golgi : glycosylation', 'note', { anchor: 'middle' });
       [[1050, 440], [1080, 520], [1040, 600], [1100, 470]].forEach(([x, y]) => a.el('circle', { cx: x, cy: y, r: 13, class: 'granule' }));
 
       // D2 et MCT8
-      const d2 = a.el('g', { transform: 'translate(950 700)' });
+      const d2 = a.el('g', { transform: 'translate(950 700)', 'data-info': 'd2' });
       a.el('circle', { r: 30, class: 'enzyme' }, d2);
       a.text(0, 8, 'D2', 'enzyme-t', { anchor: 'middle' }, d2);
-      a.el('rect', { x: 1130, y: 700, width: 26, height: 44, rx: 8, class: 'transporter' });
+      a.el('rect', { x: 1130, y: 700, width: 26, height: 44, rx: 8, class: 'transporter', 'data-info': 'mct8' });
       a.text(1143, 786, 'MCT8', 'note', { anchor: 'middle' });
 
       // Flux

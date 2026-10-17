@@ -67,41 +67,32 @@
       const body = a.el('g', { class: 'body', transform: 'translate(800 548)' });
       a.path('M -26,-302 C -28,-285 -40,-272 -70,-266 C -110,-258 -135,-245 -142,-210 L -168,-40 C -174,0 -176,40 -172,70 C -170,90 -150,92 -146,72 L -128,-40 L -118,-150 C -112,-110 -100,-60 -96,-30 C -100,10 -112,40 -112,70 C -112,140 -96,250 -84,400 C -82,420 -40,422 -40,405 L -14,120 C -8,100 8,100 14,120 L 40,405 C 40,422 82,420 84,400 C 96,250 112,140 112,70 C 112,40 100,10 96,-30 C 100,-60 112,-110 118,-150 L 128,-40 L 146,72 C 150,92 170,90 172,70 C 176,40 174,0 168,-40 L 142,-210 C 135,-245 110,-258 70,-266 C 40,-272 28,-285 26,-302 Z', 'body-shape', body);
       a.el('ellipse', { cx: 0, cy: -372, rx: 56, ry: 70, class: 'body-shape' }, body);
-      a.path('M -40,-390 C -38,-428 38,-428 40,-390 C 42,-370 20,-358 0,-360 C -20,-358 -42,-370 -40,-390 Z', 'body-brain', body);
+      HV.organs.bodyOrgans(a.el('g', { class: 'body-organs' }, body));
 
-      const gland = (x, y, r, color, id, label, anchor) => {
-        const gg = a.el('g', { class: 'gland', style: `--c: var(--${color})` });
+      const gland = (x, y, r, color, id, label, anchor, info) => {
+        const gg = a.el('g', { class: 'gland', style: `--c: var(--${color})`, 'data-info': info || null });
         a.el('circle', { cx: x, cy: y, r: r * 2.4, class: 'gland-halo' }, gg);
         a.el('circle', { cx: x, cy: y, r, class: 'gland-dot' }, gg);
         if (label) a.text(x + (anchor === 'end' ? -r - 10 : r + 10), y + 6, label, 'gland-lbl', { anchor: anchor || 'start' }, gg);
         if (id) a.zoomable(gg, id);
         return gg;
       };
-      gland(800, 192, 9, 'trh', 'thyro', 'Hypothalamus · hypophyse', 'start');
-      gland(800, 268, 11, 't4', 'foll', 'Thyroïde', 'start');
-      gland(788, 260, 3.5, 'tg', null);
-      gland(812, 260, 3.5, 'tg', null);
-      gland(764, 352, 5, 'trab', null);
-      gland(836, 352, 5, 'trab', null);
-      gland(762, 440, 6, 't3', null);
-      gland(838, 440, 6, 't3', null, 'Surrénales', 'start');
-      gland(760, 472, 6, 'tbg', null);
-      gland(842, 472, 6, 'rbc', null, 'Reins', 'start');
-      gland(812, 486, 6, 'iod', null);
-      gland(768, 590, 6, 'trh', null);
-      gland(832, 590, 6, 'trh', null, 'Ovaires', 'start');
-      gland(800, 672, 6, 'trh', null, 'Testicules', 'start');
+      gland(800, 196, 8, 'trh', 'thyro', 'Hypothalamus · hypophyse', 'start', 'hypothalamus');
+      gland(800, 264, 9, 't4', 'foll', 'Thyroïde', 'start', 'thyroid');
+      gland(786, 258, 3, 'tg', null, null, null, 'parathyroid');
+      gland(814, 258, 3, 'tg', null, null, null, 'parathyroid');
+      gland(764, 352, 4, 'trab', null);
+      gland(836, 352, 4, 'trab', null);
+      gland(761, 452, 5, 't3', null, null, null, 'adrenal');
+      gland(839, 452, 5, 't3', null, 'Surrénales', 'start', 'adrenal');
+      gland(760, 474, 5, 'tbg', null, null, null, 'kidney');
+      gland(840, 474, 5, 'rbc', null, 'Reins', 'start', 'kidney');
+      gland(812, 484, 5, 'iod', null, null, null, 'pancreas');
+      gland(768, 592, 5, 'trh', null, null, null, 'ovary');
+      gland(832, 592, 5, 'trh', null, 'Ovaires', 'start', 'ovary');
+      gland(800, 674, 5, 'trh', null, 'Testicules', 'start', 'testis');
       a.text(800, 1000 - 14, 'Silhouette schématique · positions approximatives', 'atlas-foot', { anchor: 'middle' });
 
-      // Légende des molécules (case en bas à droite)
-      const lg = a.el('g', { class: 'legend', transform: 'translate(1274 810)' });
-      a.el('rect', { width: 256, height: 160, rx: 10, class: 'legend-box' }, lg);
-      a.text(14, 24, 'Légende', 'legend-h', null, lg);
-      [['trh', 'TRH'], ['tsh', 'TSH'], ['t4', 'T4'], ['t3', 'T3'], ['iod', 'Iodure I⁻'], ['trab', 'TRAb']].forEach(([m, l], i) => {
-        const x = 22 + (i % 2) * 124, y = 52 + Math.floor(i / 2) * 36;
-        a.el('use', { href: '#mol-' + m, transform: `translate(${x} ${y}) scale(1.2)` }, lg);
-        a.text(x + 20, y + 5, l, 'legend-t', null, lg);
-      });
     },
     update(dt, t) {}
   });

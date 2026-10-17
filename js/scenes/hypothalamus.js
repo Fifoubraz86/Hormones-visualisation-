@@ -23,26 +23,27 @@
       a.frame('Hypothalamus · neurone à TRH', 'Noyau paraventriculaire → éminence médiane → système porte');
 
       // 3e ventricule
-      a.el('rect', { x: 60, y: 170, width: 70, height: 760, rx: 35, class: 'csf' });
+      a.el('rect', { x: 60, y: 170, width: 70, height: 760, rx: 35, class: 'csf', 'data-info': 'ventricle' });
       a.text(95, 560, '3ᵉ ventricule', 'note', { anchor: 'middle', attrs: { transform: 'rotate(-90 95 560)' } });
 
       // Capillaire porte
-      a.vessel('M 1180,180 L 1180,960', 64);
+      a.info(a.vessel('M 1180,180 L 1180,960', 64), 'portal');
       a.text(1232, 214, ['Plexus porte primaire', 'vers l\'antéhypophyse ↓'], 'lbl-s', { lh: 1.3 });
 
       // Tanycyte
-      a.path('M 132,770 C 400,740 800,820 1140,852', 'tanycyte');
+      a.path('M 132,770 C 400,740 800,820 1140,852', 'tanycyte', null, { 'data-info': 'tanycyte' });
       a.text(330, 722, 'Tanycyte', 'lbl-s strong');
-      const d2 = a.el('g', { transform: 'translate(720 806)' });
+      const d2 = a.el('g', { transform: 'translate(720 806)', 'data-info': 'd2' });
       a.el('circle', { r: 30, class: 'enzyme' }, d2);
       a.text(0, 8, 'D2', 'enzyme-t', { anchor: 'middle' }, d2);
       a.text(720, 878, 'T4 → T3', 'note', { anchor: 'middle' });
 
       // Neurone
-      a.path('M 520,420 C 700,480 850,560 1000,640', 'axon');
-      a.el('circle', { cx: 430, cy: 380, r: 112, class: 'cell' });
-      a.el('circle', { cx: 1030, cy: 656, r: 30, class: 'cell' });
-      a.el('circle', { cx: 410, cy: 392, r: 50, class: 'nucleus' });
+      const nrn = a.el('g', { 'data-info': 'neuron' });
+      a.path('M 520,420 C 700,480 850,560 1000,640', 'axon', nrn);
+      a.el('circle', { cx: 430, cy: 380, r: 112, class: 'cell' }, nrn);
+      a.el('circle', { cx: 1030, cy: 656, r: 30, class: 'cell', 'data-info': 'me' });
+      a.el('circle', { cx: 410, cy: 392, r: 50, class: 'nucleus', 'data-info': 'nucleus' });
       a.path('M 380,392 q 7.5,-12 15,0 t 15,0 t 15,0 t 15,0', 'dna');
       a.text(410, 420, 'gène TRH', 'note', { anchor: 'middle' });
       a.path('M 470,320 q 18,-6 30,4 M 466,334 q 22,-6 36,6 M 468,348 q 18,-4 30,6', 'golgi');

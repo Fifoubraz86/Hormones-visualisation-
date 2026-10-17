@@ -1,0 +1,196 @@
+/*
+ * Fiches d'information affichées au survol (ou au toucher) et légende des molécules.
+ * Clé = valeur de l'attribut data-info d'un élément SVG ou HTML.
+ * `live` renvoie une ligne calculée à partir du modèle (taux actuel, activité…).
+ */
+(function () {
+  'use strict';
+  const HV = (window.HV = window.HV || {});
+  const M = HV.model;
+  const n = (v, d) => v.toFixed(d).replace('.', ',');
+  const labLine = (k) => {
+    const L = M.LABS.find((x) => x.key === k);
+    const v = M.lab(k);
+    const st = v > L.hi ? ' ↑' : v < L.lo ? ' ↓' : '';
+    return `Valeur simulée : ${k === 'tsh' && v < 0.01 ? '< 0,01' : n(v, k === 'tsh' || k === 'rt3' ? 2 : 1)} ${L.unit}${st}`;
+  };
+  const pct = (v) => Math.round(v * 100) + ' %';
+
+  const I = {
+    /* ---- Molécules ---- */
+    trh: { t: 'TRH', k: 'Thyréolibérine · tripeptide', d: 'pGlu-His-Pro-NH₂. Sécrétée par les neurones du noyau paraventriculaire dans le système porte, elle stimule la synthèse et la sécrétion de TSH (et de prolactine).', live: () => 'Sécrétion relative : ' + pct(M.s.trh) },
+    tsh: { t: 'TSH', k: 'Thyréostimuline · glycoprotéine ≈ 28 kDa', d: 'Sous-unité α commune à LH, FSH et hCG, sous-unité β spécifique. Agit sur le récepteur de la TSH (couplé à Gs) du thyréocyte. Sécrétion pulsatile, pic nocturne.', live: () => labLine('tsh') },
+    t4: { t: 'T4 · thyroxine', k: '3,5,3′,5′-tétraiodothyronine', d: 'Principale hormone sécrétée par la thyroïde (80 à 90 %). Prohormone peu active, convertie en T3 par D1 et D2. Liée à 99,97 % aux protéines. Demi-vie ≈ 7 jours.', live: () => labLine('t4') },
+    t3: { t: 'T3 · triiodothyronine', k: '3,5,3′-triiodothyronine', d: 'Forme active : affinité pour le récepteur nucléaire 10 fois supérieure à celle de la T4. Environ 80 % proviennent de la désiodation périphérique. Demi-vie ≈ 1 jour.', live: () => labLine('t3') },
+    rt3: { t: 'T3 reverse', k: '3,3′,5′-triiodothyronine', d: 'Métabolite inactif produit par la D3 à partir de la T4. Augmente au cours des maladies aiguës sévères et du jeûne.', live: () => labLine('rt3') },
+    iod: { t: 'Iodure (I⁻)', k: 'Oligo-élément indispensable', d: 'Capté par le NIS au pôle basal du thyréocyte. Besoins : 150 µg/j chez l\'adulte, 250 µg/j pendant la grossesse et l\'allaitement.', live: () => 'Apport simulé : ' + Math.round(M.p.iodine * 150) + ' µg/j' },
+    trab: { t: 'TRAb', k: 'Anticorps anti-récepteur de la TSH (IgG)', d: 'Dans la maladie de Basedow, ils activent le récepteur de la TSH comme le ferait la TSH, sans rétrocontrôle possible. Ils traversent le placenta.', live: () => (M.p.trab > 0.02 ? 'Présents : ' + n(M.p.trab * 4, 1) + ' UI/L' : 'Absents') },
+    tg: { t: 'Thyroglobuline', k: 'Glycoprotéine dimérique ≈ 660 kDa', d: 'Synthétisée par le thyréocyte et stockée dans la colloïde. Ses résidus tyrosyl servent de support à l\'iodation. Marqueur de suivi des cancers thyroïdiens différenciés.' },
+    tgi: { t: 'Thyroglobuline iodée', k: 'Forme de stockage', d: 'Porte MIT, DIT, T3 et T4 après iodation par la TPO et couplage. Réserve d\'hormones pour plusieurs semaines.' },
+    mrna: { t: 'ARN messager', k: 'Transcription induite par la T3', d: 'Transcrits de gènes cibles : Na⁺/K⁺-ATPase, UCP, chaîne lourde α de la myosine, SERCA2, récepteur des LDL…' },
+    tbg: { t: 'TBG', k: 'Thyroxine-binding globulin', d: 'Lie environ 75 % de la T4. Augmentée par les œstrogènes et la grossesse, diminuée par les androgènes, les glucocorticoïdes et le syndrome néphrotique.' },
+    ttr: { t: 'Transthyrétine (TTR)', k: 'Tétramère, ancienne préalbumine', d: 'Lie environ 15 % de la T4 et transporte aussi la protéine de liaison du rétinol. Assure le passage de la T4 dans le liquide cérébrospinal.' },
+    alb: { t: 'Albumine', k: 'Faible affinité, forte capacité', d: 'Lie environ 10 % de la T4. Réservoir rapidement mobilisable.' },
+    rbc: { t: 'Hématie', k: 'Globule rouge', d: 'Repère visuel du flux sanguin.' },
+    na: { t: 'Sodium (Na⁺)', k: 'Cotransporté par le NIS', d: 'Le NIS fait entrer 2 Na⁺ pour 1 I⁻ grâce au gradient créé par la Na⁺/K⁺-ATPase.' },
+
+    /* ---- Signes ---- */
+    'sign-inhib': { t: 'Rétrocontrôle négatif', k: 'Inhibition', d: 'T4 et T3 freinent la synthèse de TRH et de TSH, essentiellement via la T3 produite sur place par la D2 et le récepteur TRβ2.', live: () => 'Intensité : ' + pct(M.s.fb) },
+    'sign-stim': { t: 'Stimulation', k: 'Effet positif', d: 'L\'hormone en amont stimule la cellule cible.' },
+
+    /* ---- Organes ---- */
+    brain: { t: 'Encéphale', k: 'Cible majeure de la T3', d: 'La T3 est indispensable à la myélinisation et à la migration neuronale. Une hypothyroïdie congénitale non traitée entraîne un retard mental : d\'où le dépistage néonatal systématique.' },
+    callosum: { t: 'Corps calleux', k: 'Repère anatomique', d: 'Commissure inter-hémisphérique. Sert de repère pour situer l\'hypothalamus, en dessous et en avant.' },
+    cerebellum: { t: 'Cervelet', k: 'Repère anatomique', d: 'Coordination motrice. Repère en coupe sagittale.' },
+    brainstem: { t: 'Tronc cérébral', k: 'Repère anatomique', d: 'Relie l\'encéphale à la moelle épinière.' },
+    chiasm: { t: 'Chiasma optique', k: 'Juste au-dessus de l\'hypophyse', d: 'Un macroadénome hypophysaire à extension suprasellaire le comprime : hémianopsie bitemporale.' },
+    hypothalamus: { t: 'Hypothalamus', k: 'Centre intégrateur neuro-endocrine', d: 'Le noyau paraventriculaire produit la TRH (et la CRH). Il intègre la température, l\'état nutritionnel et le stress.', live: () => 'TRH relative : ' + pct(M.s.trh) },
+    stalk: { t: 'Tige pituitaire', k: 'Infundibulum', d: 'Contient le système porte hypothalamo-hypophysaire et les axones vers la posthypophyse. Sa section lève l\'inhibition dopaminergique (hyperprolactinémie).' },
+    'pit-ant': { t: 'Antéhypophyse', k: 'Adénohypophyse', d: 'Contient les cellules thyréotropes (≈ 5 %), mais aussi corticotropes, somatotropes, lactotropes et gonadotropes.', live: () => labLine('tsh') },
+    'pit-post': { t: 'Posthypophyse', k: 'Neurohypophyse', d: 'Libère l\'ADH (vasopressine) et l\'ocytocine produites par l\'hypothalamus. Hypersignal T1 spontané en IRM.' },
+    sella: { t: 'Selle turcique', k: 'Os sphénoïde', d: 'Loge osseuse de l\'hypophyse.' },
+    thyroid: { t: 'Thyroïde', k: '15 à 20 g chez l\'adulte', d: 'Deux lobes reliés par un isthme, en avant de la trachée. Unité fonctionnelle : le follicule. Elle grossit sous l\'effet d\'une stimulation prolongée (goitre).', live: () => 'Volume relatif : ' + pct((0.55 + 0.45 * Math.min(1, M.p.thy)) * Math.sqrt(M.s.goitre)) },
+    pyramidal: { t: 'Lobe pyramidal', k: 'Inconstant', d: 'Reliquat du canal thyréoglosse, présent chez environ un tiers des sujets.' },
+    parathyroid: { t: 'Parathyroïdes', k: '4 glandes à la face postérieure', d: 'Sécrètent la PTH (métabolisme phosphocalcique). Risque de lésion au cours d\'une thyroïdectomie.' },
+    larynx: { t: 'Larynx', k: 'Cartilages thyroïde et cricoïde', d: 'Repères de palpation : la thyroïde se trouve sous le cartilage cricoïde et monte à la déglutition.' },
+    trachea: { t: 'Trachée', k: 'Anneaux cartilagineux', d: 'Un goitre volumineux peut la dévier ou la comprimer.' },
+    nodule: { t: 'Nodule autonome', k: 'Adénome toxique', d: 'Sécrète indépendamment de la TSH (souvent par mutation activatrice du récepteur de la TSH). Apparaît « chaud » en scintigraphie, le reste de la glande est éteint.' },
+    heart: { t: 'Cœur', k: 'Effets chronotrope et inotrope', d: 'La T3 augmente la fréquence cardiaque et la contractilité (α-MHC, SERCA2, récepteurs β). Hyperthyroïdie : tachycardie, fibrillation atriale.', live: () => 'Fréquence cardiaque simulée : ' + Math.round(HV.clamp(72 * Math.pow(M.s.t3, 0.35), 45, 150)) + ' /min' },
+    liver: { t: 'Foie', k: 'Désiodase D1, métabolisme lipidique', d: 'Contribue à la production de T3 circulante et à la clairance de la T3 reverse. La T3 augmente les récepteurs des LDL : l\'hypothyroïdie élève le LDL-cholestérol.' },
+    bone: { t: 'Os', k: 'Remodelage', d: 'La T3 accélère le remodelage osseux. Une hyperthyroïdie prolongée favorise l\'ostéoporose ; chez l\'enfant, l\'hypothyroïdie retarde la croissance et la maturation osseuse.' },
+    muscle: { t: 'Muscle squelettique', k: 'Thermogenèse', d: 'La T3 augmente la consommation d\'oxygène et la production de chaleur. Hypothyroïdie : crampes, myalgies, CPK élevées ; hyperthyroïdie : amyotrophie.', live: () => 'Thermogenèse relative : ' + pct(Math.pow(M.s.t3, 0.4)) },
+    fat: { t: 'Tissu adipeux', k: 'Lipolyse, métabolisme basal', d: 'La T3 stimule la lipolyse et la thermogenèse (UCP1 dans le tissu adipeux brun).', live: () => 'Métabolisme basal : ' + pct(Math.pow(M.s.t3, 0.4)) },
+    lungs: { t: 'Poumons', k: 'Repère', d: 'Repère anatomique.' },
+    stomach: { t: 'Estomac', k: 'Repère', d: 'Sécrète la ghréline (orexigène) et la gastrine.' },
+    kidney: { t: 'Reins', k: 'Rénine, EPO, calcitriol', d: 'Organe endocrine : rénine (système rénine-angiotensine-aldostérone), érythropoïétine, 1α-hydroxylation de la vitamine D. Cible de l\'ADH et de l\'aldostérone.' },
+    adrenal: { t: 'Surrénales', k: 'Cortex et médullaire', d: 'Cortex : aldostérone, cortisol, androgènes. Médullaire : adrénaline et noradrénaline.' },
+    pancreas: { t: 'Pancréas endocrine', k: 'Îlots de Langerhans', d: 'Cellules β (insuline), α (glucagon), δ (somatostatine).' },
+    ovary: { t: 'Ovaires', k: 'Axe gonadotrope féminin', d: 'Œstradiol, progestérone, inhibine, AMH. Fonctionnement cyclique sous LH et FSH.' },
+    testis: { t: 'Testicules', k: 'Axe gonadotrope masculin', d: 'Cellules de Leydig (testostérone, sous LH) et de Sertoli (spermatogenèse, inhibine B, sous FSH).' },
+
+    /* ---- Structures cellulaires et vaisseaux ---- */
+    vessel: { t: 'Circulation sanguine', k: 'Transport hormonal', d: 'Les hormones thyroïdiennes y circulent liées aux protéines (TBG, TTR, albumine). Seule la fraction libre est active.' },
+    portal: { t: 'Système porte hypothalamo-hypophysaire', k: 'Deux réseaux capillaires en série', d: 'Conduit la TRH de l\'éminence médiane à l\'antéhypophyse à forte concentration, sans dilution dans la circulation générale.' },
+    neuron: { t: 'Neurone à TRH', k: 'Noyau paraventriculaire', d: 'Synthétise le pro-TRH, clivé par les convertases PC1/3 et PC2. Reçoit les signaux du froid, de la leptine et des glucocorticoïdes.' },
+    tanycyte: { t: 'Tanycyte', k: 'Cellule gliale bordant le 3ᵉ ventricule', d: 'Capte la T4 et la convertit en T3 (D2), relais du rétrocontrôle. Dégrade aussi la TRH (pyroglutamyl-peptidase II).' },
+    me: { t: 'Éminence médiane', k: 'Hors barrière hématoencéphalique', d: 'Les terminaisons des neurones hypophysiotropes y libèrent leurs hormones dans le plexus porte primaire.' },
+    ventricle: { t: '3ᵉ ventricule', k: 'Liquide cérébrospinal', d: 'Bordé par les tanycytes.' },
+    thyrotroph: { t: 'Cellule thyréotrope', k: '≈ 5 % des cellules antéhypophysaires', d: 'Synthétise la TSH sous l\'effet de la TRH ; freinée par la T3 (TRβ2), la somatostatine, la dopamine et les glucocorticoïdes.' },
+    trhr: { t: 'Récepteur de la TRH', k: 'RCPG couplé à Gq', d: 'Active la phospholipase C : IP₃, libération de Ca²⁺, protéine kinase C.' },
+    d1: { t: 'Désiodase de type 1', k: 'Foie, rein, thyroïde', d: 'Convertit T4 en T3 et dégrade la T3 reverse. Inhibée par le PTU.' },
+    d2: { t: 'Désiodase de type 2', k: 'Hypophyse, tanycytes, muscle, tissu adipeux brun', d: 'Convertit la T4 en T3 à l\'intérieur de la cellule. Sert de capteur au rétrocontrôle central.', live: () => 'Activité D1/D2 : ' + pct(M.p.d12) },
+    d3: { t: 'Désiodase de type 3', k: 'Placenta, cerveau, peau', d: 'Inactive les hormones : T4 → T3 reverse, T3 → T2. Protège le fœtus d\'un excès d\'hormones maternelles.', live: () => 'Activité D3 : ' + pct(M.p.d3) },
+    mct8: { t: 'MCT8 (SLC16A2)', k: 'Transporteur des hormones thyroïdiennes', d: 'Fait entrer T4 et T3 dans les cellules et sortir les hormones du thyréocyte. Sa mutation (lié à l\'X) cause le syndrome d\'Allan-Herndon-Dudley.' },
+    oatp: { t: 'MCT10 · OATP1C1', k: 'Autres transporteurs', d: 'OATP1C1 transporte préférentiellement la T4 à travers la barrière hématoencéphalique.' },
+    tshr: { t: 'Récepteur de la TSH', k: 'RCPG couplé à Gs', d: 'Active l\'adénylate cyclase (AMPc) et stimule toutes les étapes de l\'hormonosynthèse ainsi que la croissance. Cible des TRAb.', live: () => 'Stimulation : ' + pct(M.s.stim) },
+    camp: { t: 'AMPc', k: 'Second messager', d: 'Relaie l\'effet de la TSH dans le thyréocyte.', live: () => 'Stimulation : ' + pct(M.s.stim) },
+    nis: { t: 'NIS (SLC5A5)', k: 'Symporteur sodium-iodure', d: 'Concentre l\'iodure 20 à 40 fois dans le thyréocyte. Inhibé par le perchlorate ; utilisé pour la scintigraphie et le traitement par iode 131.' },
+    nak: { t: 'Na⁺/K⁺-ATPase', k: 'Pompe', d: 'Crée le gradient de sodium qui alimente le NIS.' },
+    pendrin: { t: 'Pendrine (SLC26A4) · ANO1', k: 'Pôle apical', d: 'Font sortir l\'iodure vers la colloïde. Mutation de la pendrine : syndrome de Pendred (surdité et goitre).' },
+    tpo: { t: 'TPO et DUOX2', k: 'Thyroperoxydase, oxydase double', d: 'DUOX2 produit l\'H₂O₂ ; la TPO oxyde l\'iodure, iode les tyrosines (MIT, DIT) et réalise le couplage. Cible des anti-TPO et des antithyroïdiens de synthèse.' },
+    colloid: { t: 'Colloïde', k: 'Lumière du follicule', d: 'Stock de thyroglobuline iodée.' },
+    er: { t: 'Réticulum endoplasmique', k: 'Synthèse protéique', d: 'Synthèse de la thyroglobuline puis glycosylation dans le Golgi.' },
+    golgi: { t: 'Appareil de Golgi', k: 'Glycosylation', d: 'Maturation des glycoprotéines (thyroglobuline, TSH) avant sécrétion.' },
+    endo: { t: 'Endocytose', k: 'Micropinocytose', d: 'Le thyréocyte réabsorbe la thyroglobuline iodée stockée dans la colloïde.' },
+    lyso: { t: 'Lysosome', k: 'Protéolyse', d: 'Les cathepsines libèrent T4, T3, MIT et DIT de la thyroglobuline.' },
+    dehal: { t: 'DEHAL1 (IYD)', k: 'Iodotyrosine déshalogénase', d: 'Récupère l\'iode de MIT et DIT pour le réutiliser. Son déficit entraîne une hypothyroïdie avec goitre.' },
+    nucleus: { t: 'Noyau', k: 'ADN', d: 'Lieu de la transcription des gènes cibles.' },
+    tr: { t: 'Récepteur nucléaire TR', k: 'TRα1 (cœur, os) · TRβ1 (foie) · TRβ2 (hypophyse, hypothalamus)', d: 'Facteur de transcription activé par la T3. Mutations de TRβ : résistance aux hormones thyroïdiennes.', live: () => 'Occupation simulée : ' + Math.round((100 * M.s.t3) / (M.s.t3 + 1)) + ' %' },
+    rxr: { t: 'RXR', k: 'Récepteur des rétinoïdes X', d: 'Partenaire d\'hétérodimérisation du TR sur l\'ADN.' },
+    tre: { t: 'TRE', k: 'Élément de réponse aux hormones thyroïdiennes', d: 'Séquence d\'ADN reconnue par le dimère TR/RXR dans la région promotrice des gènes cibles.' },
+    coa: { t: 'Coactivateurs', k: 'Ex. : SRC-1', d: 'Recrutés quand la T3 occupe le récepteur : acétylation des histones et activation de la transcription.' },
+    cor: { t: 'Corépresseurs', k: 'NCoR, SMRT', d: 'Liés au récepteur sans T3 : répression de la transcription.' },
+    ribo: { t: 'Ribosomes', k: 'Traduction', d: 'Synthèse des protéines codées par les ARNm induits.' },
+    lympho: { t: 'Lymphocytes B', k: 'Auto-immunité', d: 'Produisent les TRAb dans la maladie de Basedow ; les anti-TPO marquent la thyroïdite de Hashimoto.' },
+    food: { t: 'Apport iodé', k: 'Sel iodé, produits de la mer, laitages', d: 'La carence iodée reste la première cause de goitre dans le monde.', live: () => 'Apport simulé : ' + Math.round(M.p.iodine * 150) + ' µg/j' },
+    levo: { t: 'Lévothyroxine (LT4)', k: 'Traitement substitutif', d: 'T4 de synthèse, à jeun, environ 1,6 µg/kg/j en substitution complète. Adaptation sur la TSH 6 à 8 semaines après chaque changement de dose.', live: () => (M.p.levo > 0.02 ? 'Dose simulée : ' + Math.round((M.p.levo * 112) / 12.5) * 12.5 + ' µg/j' : 'Non prise') },
+    plasma: { t: 'Plasma', k: 'Compartiment de transport', d: 'Plus de 99 % des hormones thyroïdiennes y sont liées aux protéines.' },
+    tissue: { t: 'Cellules des tissus', k: 'Entrée par transporteurs', d: 'Les hormones libres entrent via MCT8, MCT10 et OATP1C1.' }
+  };
+
+  HV.INFO = I;
+
+  /* ---------- Infobulle ---------- */
+  let tip, tipT, tipK, tipD, tipL, liveFn = null, hideTimer = 0;
+  HV.initTips = function (container) {
+    tip = document.createElement('div');
+    tip.className = 'tip';
+    tip.hidden = true;
+    tip.setAttribute('role', 'tooltip');
+    tip.innerHTML = '<p class="tip-t"></p><p class="tip-k"></p><p class="tip-d"></p><p class="tip-l"></p>';
+    container.appendChild(tip);
+    [tipT, tipK, tipD, tipL] = tip.querySelectorAll('p');
+  };
+  HV.showTip = function (key, x, y, sticky) {
+    const f = I[key];
+    if (!f || !tip) return HV.hideTip();
+    tipT.textContent = f.t;
+    tipK.textContent = f.k || '';
+    tipD.textContent = f.d || '';
+    liveFn = f.live || null;
+    tipL.hidden = !liveFn;
+    if (liveFn) tipL.textContent = liveFn();
+    tip.hidden = false;
+    const r = tip.parentNode.getBoundingClientRect();
+    const w = tip.offsetWidth, h = tip.offsetHeight;
+    let left = x - r.left + 16, top = y - r.top + 16;
+    if (left + w > r.width - 8) left = x - r.left - w - 16;
+    if (top + h > r.height - 8) top = y - r.top - h - 16;
+    tip.style.left = Math.max(8, left) + 'px';
+    tip.style.top = Math.max(8, top) + 'px';
+    clearTimeout(hideTimer);
+    if (sticky) hideTimer = setTimeout(HV.hideTip, 4500);
+  };
+  HV.hideTip = function () {
+    if (tip) tip.hidden = true;
+    liveFn = null;
+  };
+  HV.refreshTip = function () {
+    if (liveFn && tip && !tip.hidden) tipL.textContent = liveFn();
+  };
+
+  /* ---------- Légende ---------- */
+  HV.buildLegend = function (host) {
+    const groups = [
+      ['Hormones', [['trh', 'TRH'], ['tsh', 'TSH'], ['t4', 'T4 (4 iodes)'], ['t3', 'T3 (3 iodes)'], ['rt3', 'T3 reverse']]],
+      ['Synthèse', [['iod', 'Iodure I⁻'], ['tg', 'Thyroglobuline'], ['tgi', 'Tg iodée'], ['na', 'Na⁺'], ['mrna', 'ARNm']]],
+      ['Transport et immunité', [['tbg', 'TBG'], ['ttr', 'Transthyrétine'], ['alb', 'Albumine'], ['trab', 'TRAb (IgG)']]]
+    ];
+    const NS = 'http://www.w3.org/2000/svg';
+    groups.forEach(([title, items]) => {
+      const h = document.createElement('p');
+      h.className = 'legend-g';
+      h.textContent = title;
+      host.appendChild(h);
+      const ul = document.createElement('ul');
+      items.forEach(([k, label]) => {
+        const li = document.createElement('li');
+        li.dataset.info = k;
+        const svg = document.createElementNS(NS, 'svg');
+        svg.setAttribute('viewBox', '-16 -14 32 28');
+        svg.setAttribute('aria-hidden', 'true');
+        const use = document.createElementNS(NS, 'use');
+        use.setAttribute('href', '#mol-' + k);
+        const big = { tbg: 0.75, ttr: 0.8, alb: 0.75 }[k] || 1.15;
+        use.setAttribute('transform', `scale(${big})`);
+        svg.appendChild(use);
+        li.appendChild(svg);
+        li.appendChild(document.createTextNode(label));
+        ul.appendChild(li);
+      });
+      host.appendChild(ul);
+    });
+    const h = document.createElement('p');
+    h.className = 'legend-g';
+    h.textContent = 'Régulation';
+    host.appendChild(h);
+    const ul = document.createElement('ul');
+    [['sign-stim', 'stim', 'Stimulation'], ['sign-inhib', 'inhib', 'Rétrocontrôle négatif']].forEach(([k, cls, label]) => {
+      const li = document.createElement('li');
+      li.dataset.info = k;
+      li.innerHTML = `<svg viewBox="-16 -14 32 28" aria-hidden="true"><g class="sign ${cls}"><circle r="9" class="sign-core"></circle><path class="sign-glyph" d="${cls === 'inhib' ? 'M-5,0 H5' : 'M-5,0 H5 M0,-5 V5'}"></path></g></svg>${label}`;
+      ul.appendChild(li);
+    });
+    host.appendChild(ul);
+  };
+})();

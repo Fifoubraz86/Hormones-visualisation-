@@ -34,17 +34,17 @@
       a.text(0, 112, 'Fraction libre : T4 ≈ 0,03 % · T3 ≈ 0,3 %', 'note', null, bar);
 
       // Lumière vasculaire et endothélium
-      a.el('rect', { x: 60, y: 200, width: 1480, height: 500, rx: 40, class: 'plasma' });
+      a.el('rect', { x: 60, y: 200, width: 1480, height: 500, rx: 40, class: 'plasma', 'data-info': 'plasma' });
       a.path('M 60,200 H 1540 M 60,700 H 1540', 'endo');
       a.text(80, 236, 'Plasma →', 'lbl-s');
 
       // Tissu et transporteurs
-      a.el('rect', { x: 60, y: 800, width: 1480, height: 170, rx: 26, class: 'cell' });
+      a.el('rect', { x: 60, y: 800, width: 1480, height: 170, rx: 26, class: 'cell', 'data-info': 'tissue' });
       a.text(80, 940, 'Cellules des tissus', 'lbl-s');
       const tx = [420, 820, 1220];
       const names = ['MCT8', 'MCT10', 'OATP1C1'];
       tx.forEach((x, i) => {
-        a.el('rect', { x: x - 15, y: 780, width: 30, height: 46, rx: 9, class: 'transporter' });
+        a.el('rect', { x: x - 15, y: 780, width: 30, height: 46, rx: 9, class: 'transporter', 'data-info': i === 0 ? 'mct8' : 'oatp' });
         a.text(x + 26, 858, names[i], 'note');
       });
       tx.forEach((x, i) => {
@@ -56,7 +56,7 @@
       const layer = a.el('g', { class: 'drift' });
       const items = [];
       const add = (mol, size, speed, yMin, yMax, cargo) => {
-        const gg = a.el('g', null, layer);
+        const gg = a.el('g', { 'data-info': mol }, layer);
         a.el('use', { href: '#mol-' + mol, transform: `scale(${size})` }, gg);
         let load = null;
         if (cargo) load = a.el('use', { href: '#mol-' + cargo, transform: `translate(${size * 4} ${-size * 4}) scale(1.4)` }, gg);

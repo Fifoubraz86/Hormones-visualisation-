@@ -29,7 +29,11 @@
       <button type="button" id="btnOut" class="icon" title="Zoom arrière (−)" aria-label="Zoom arrière">−</button>
       <button type="button" id="btnIn" class="icon" title="Zoom avant (+)" aria-label="Zoom avant">+</button>
     </div>
-    <p class="stage-hint">Clic : entrer · molette ou pincement : zoomer · glisser : se déplacer · ← → : parcours</p>
+    <details class="legend" id="legend" open>
+      <summary>Légende</summary>
+      <div class="legend-body" id="legendBody"></div>
+    </details>
+    <p class="stage-hint">Survol : fiche · clic : entrer · molette ou pincement : zoomer · glisser : se déplacer · ← → : parcours</p>
   </main>
 
   <aside class="panel" id="panel">
@@ -83,6 +87,8 @@
 <script src="js/engine.js"></script>
 <script src="js/model.js"></script>
 <script src="js/molecules.js"></script>
+<script src="js/organs.js"></script>
+<script src="js/info.js"></script>
 <script src="js/scenes/atlas.js"></script>
 <script src="js/scenes/thyroid-axis.js"></script>
 <script src="js/scenes/hypothalamus.js"></script>

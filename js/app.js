@@ -10,6 +10,8 @@
   const svg = $('stage');
   HV.buildDefs(svg);
   const root = HV.el('g', { class: 'world' }, svg);
+  HV.initTips(svg.parentNode);
+  HV.buildLegend(document.getElementById('legendBody'));
   HV.mount(root);
   const scenes = HV.sceneList;
   const TOUR = ['atlas', 'thyro', 'hypo', 'pit', 'foll', 'transp', 'cell'];
@@ -103,6 +105,7 @@
     else drag && (drag.moved = true);
   });
   svg.addEventListener('pointermove', (e) => {
+    if (e.pointerType === 'mouse' && pointers.size === 0) hover(e);
     if (!pointers.has(e.pointerId)) return;
     const prev = pointers.get(e.pointerId);
     if (pointers.size === 2) {
@@ -132,14 +135,26 @@
     if (drag && pointers.size === 0) {
       if (!drag.moved) {
         const z = drag.target && drag.target.closest && drag.target.closest('[data-zoom]');
-        if (z) {
-          const sc = HV.scenes[z.getAttribute('data-zoom')];
-          if (sc && (sc !== current || !tween)) flyTo(sc);
-        }
+        const sc = z && HV.scenes[z.getAttribute('data-zoom')];
+        const inf = drag.target && drag.target.closest && drag.target.closest('[data-info]');
+        // Un élément de la scène courante affiche sa fiche ; ailleurs, le clic fait entrer dans la scène.
+        if (inf && sc && HV.ancestors(current).includes(sc) && sc === current) HV.showTip(inf.getAttribute('data-info'), e.clientX, e.clientY, e.pointerType !== 'mouse');
+        else if (sc && (sc !== current || !tween)) flyTo(sc);
       } else scheduleDetect();
       drag = null;
     }
   };
+  function hover(e) {
+    const inf = e.target.closest && e.target.closest('[data-info]');
+    if (inf) HV.showTip(inf.getAttribute('data-info'), e.clientX, e.clientY);
+    else HV.hideTip();
+  }
+  svg.addEventListener('pointerleave', () => HV.hideTip());
+  document.getElementById('legendBody').addEventListener('pointermove', (e) => {
+    const li = e.target.closest('[data-info]');
+    if (li) HV.showTip(li.dataset.info, e.clientX, e.clientY);
+  });
+  document.getElementById('legendBody').addEventListener('pointerleave', () => HV.hideTip());
   svg.addEventListener('pointerup', end);
   svg.addEventListener('pointercancel', end);
   svg.addEventListener('wheel', (e) => {
@@ -379,6 +394,7 @@
     if (labTimer <= 0) {
       labTimer = 0.1;
       updateLabs(playing ? 0.1 * speed : 0);
+      HV.refreshTip();
     }
     requestAnimationFrame(frame);
   }
