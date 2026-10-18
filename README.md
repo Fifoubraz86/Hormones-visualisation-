@@ -42,6 +42,17 @@ Les axes hypophysaires partagent une coupe sagittale cerveau – hypothalamus �
 
 La densité et la vitesse des particules suivent le taux sécrété : une hormone en excès défile vite et serrée, une hormone effondrée se raréfie et ralentit. Le panneau propose un curseur « Vitesse des hormones » (0,25× à 3×), une case « Accentuer » qui renforce le lien entre vitesse et taux, et une vitesse du temps simulé à partir de 0,25×.
 
+## Exporter une vidéo
+
+Le bouton « Exporter en vidéo » du panneau ouvre l'éditeur vidéo : module (la scène courante par défaut), scénario clinique de l'axe, durée (5 à 60 s), cadrage 16:9 en 1920 × 1080 ou 1280 × 720, 25 ou 30 images par seconde, pas à pas (aucun, ou toutes les étapes avec N secondes par étape et le titre de l'étape incrusté), vitesse des hormones et accentuation, thème clair ou sombre, titre incrusté facultatif. Le fichier MP4 (H.264) s'insère tel quel dans PowerPoint.
+
+Tout se passe dans le navigateur, sans serveur ni capture d'écran. La boucle temps réel est suspendue ; chaque image avance la simulation d'un pas fixe (`HV.app.pause()`, `HV.app.advance(dt)`, `HV.app.resume()`), puis la scène est sérialisée en SVG autonome (CSS de la page, glyphes moléculaires utilisés, figures du polycopié et polices Google incorporées en data URI) et dessinée dans un canvas. L'encodage passe par WebCodecs (H.264) et la bibliothèque [mp4-muxer](https://github.com/Vanilagy/mp4-muxer) 5.1.3, chargée depuis jsDelivr à l'ouverture de l'éditeur. L'atlas retrouve ensuite son état : scène, cadrage, scénario, paramètres, vitesse et pas à pas. Le code est dans `js/video-export.js` et `css/video-export.css`.
+
+- **Navigateurs** : Chrome, Edge et Safari récents produisent un MP4. Sans encodeur H.264 (Chromium libre, certains Firefox), l'éditeur produit un WebM par MediaRecorder, en temps réel, à convertir avant PowerPoint.
+- **Vitesse** : le rendu est plus lent que le temps réel, de l'ordre de 4 à 6 s de calcul par seconde de vidéo en 1920 × 1080, moins en 1280 × 720.
+- **Page publiée** : le téléchargement passe par la capacité `downloads` de la page (qui demande confirmation) ; ouverte en local, par un lien de téléchargement classique.
+- **Fichier local** : ouvert en `file://`, Chrome interdit de lire les feuilles de style et les figures ; servez le dossier (`python3 -m http.server`) ou utilisez la page assemblée par `tools/bundle.py`. Sans accès à Google Fonts, le texte utilise les polices de repli du système.
+
 ## Iconographie du polycopié
 
 Les 71 figures du polycopié du CEEDMM (2e édition 2023, parties 1 et 2) sont dans `assets/poly/`, extraites des PDF et réduites à 1 100 px. Elles sont reproduites avec l'accord du Collège et décrites dans `js/poly-figs.js` (légende, partie, page, scènes, crédit). On les retrouve à trois endroits : en vignettes dans le panneau de chaque scène, dans les fiches organes, et en pastilles posées sur les organes des schémas. Un clic ouvre la figure en grand avec sa source.
@@ -99,6 +110,7 @@ js/protein-traces.js tracés protéiques extraits de la PDB (généré)
 js/protein-glyphs.js glyphes protéiques à partir des tracés
 js/scenes/*.js      atlas et scènes détaillées de l'axe thyréotrope
 js/app.js           caméra, navigation, panneau, boucle d'animation
+js/video-export.js  éditeur vidéo : rendu image par image, encodage MP4
 ```
 
 Documentation : [`docs/axes-polycopie.md`](docs/axes-polycopie.md) (boucles extraites du polycopié), [`docs/tests-dynamiques.md`](docs/tests-dynamiques.md) (tests dynamiques), [`docs/audit.md`](docs/audit.md) (audit médical).

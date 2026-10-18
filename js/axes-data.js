@@ -247,12 +247,12 @@
     lead: 'La GnRH pulsatile commande la LH et la FSH. La LH stimule la thèque interne (androgènes), la FSH la granulosa, qui les aromatise en estradiol. Le rétrocontrôle de l\'estradiol est négatif, sauf en milieu de cycle où il devient positif et déclenche le pic de LH et l\'ovulation.',
     points: ['J1–J14 : phase folliculaire, sélection d\'un follicule sous FSH.', 'J14 : pic de LH, rupture du follicule, expulsion de l\'ovocyte II.', 'J14–J28 : phase lutéale, le corps jaune sécrète progestérone et estradiol.', 'L\'inhibine B freine la FSH (action hypophysaire). La leptine a un effet permissif sur la GnRH.', 'Observez le signe du rétrocontrôle de l\'estradiol passer de − à + autour de J12–J14.'],
     nodes: [
-      { id: 'hypo', at: 'hypo', leader: true, lx: 290, ly: -14, label: 'Neurones à GnRH', sub: 'sécrétion pulsatile', color: 'p-violet' },
+      { id: 'hypo', at: 'hypo', leader: true, lx: -190, ly: -150, label: 'Neurones à GnRH', sub: 'sécrétion pulsatile', color: 'p-violet' },
       { id: 'pit', at: 'ant', leader: true, lx: 250, ly: 14, label: 'Antéhypophyse', sub: 'cellules gonadotropes', color: 'p-violet' },
       { id: 'ovary', zoom: 'folliculo', x: 920, y: 380, organ: 'ovary', s: 1.25, label: 'Ovaire', sub: ['thèque : androgènes (LH)', 'granulosa : E2 (FSH)', 'corps jaune : progestérone'], color: 'p-rose' },
       { id: 'uterus', zoom: 'endometre', x: 1330, y: 300, organ: 'uterus', label: 'Utérus', sub: 'endomètre, glaire', color: 'p-rose' },
       { id: 'breast', x: 1330, y: 600, organ: 'breast', s: 0.85, label: 'Seins, os, peau', sub: 'effets trophiques, HDL ↑', color: 'p-rose' },
-      { id: 'kiss', at: 'arc', dot: 9, hit: 16, leader: true, lx: 262, ly: 92, label: 'Neurones à kisspeptine', sub: 'noyau arqué', color: 'p-magenta', info: 'Les neurones à kisspeptine de l\'hypothalamus (noyau arqué, complément) stimulent les neurones à GnRH (polycopié, partie 2, p. 3).' },
+      { id: 'kiss', at: 'arc', dot: 9, hit: 16, leader: true, lx: 270, ly: -150, anchor: 'end', label: 'Neurones à kisspeptine', sub: 'noyau arqué', color: 'p-magenta', info: 'Les neurones à kisspeptine de l\'hypothalamus (noyau arqué, complément) stimulent les neurones à GnRH (polycopié, partie 2, p. 3).' },
       { id: 'aff', x: 620, y: 718, label: 'Neurones à GABA, à glutamate', w: 300, sub: 'autres afférences', color: 'p-violet', info: 'Influences distinctes des kisspeptines sur les neurones à GnRH (polycopié, partie 2, p. 3) : le glutamate stimule, le GABA module (complément).' },
       { id: 'lep', x: 600, y: 872, organ: 'fat', s: 0.7, label: 'Tissu adipeux blanc', sub: 'leptine (permissif)', color: 'p-amber', info: 'Effet permissif indirect de la leptine, sécrétée par le tissu adipeux blanc, sur les neurones à GnRH (polycopié).' }
     ],
@@ -282,13 +282,13 @@
     lead: 'La GnRH pulsatile entraîne une libération pulsatile de LH et de FSH. La LH stimule les cellules de Leydig (testostérone), la FSH les cellules de Sertoli (spermatogenèse, inhibine B). La testostérone freine l\'axe ; l\'inhibine B freine la FSH.',
     points: ['Testicule : 15 à 20 mL ; tubes séminifères (cellules germinales et de Sertoli) et tissu interstitiel (cellules de Leydig).', 'Testostérone et cellules de Sertoli sont indispensables à la spermatogenèse.', 'La fonction endocrine décline lentement avec l\'âge, la production de gamètes persiste.', 'Une hyperprolactinémie peut freiner l\'axe.'],
     nodes: [
-      { id: 'hypo', at: 'hypo', leader: true, lx: 290, ly: -14, label: 'Neurones à GnRH', sub: 'pulses ≈ 90 min (complément)', color: 'p-violet' },
+      { id: 'hypo', at: 'hypo', leader: true, lx: -190, ly: -150, label: 'Neurones à GnRH', sub: ['pulses ≈ 90 min', '(complément)'], color: 'p-violet' },
       { id: 'pit', at: 'ant', leader: true, lx: 250, ly: 14, label: 'Antéhypophyse', sub: 'cellules gonadotropes', color: 'p-violet' },
       { id: 'testis', zoom: 'testis-sec', x: 920, y: 380, organ: 'testis', s: 1.25, label: 'Testicule', sub: ['Leydig : testostérone (LH)', 'Sertoli : spermatogenèse (FSH)'], color: 'p-blue' },
       { id: 'muscle', x: 1330, y: 220, organ: 'muscle', s: 0.85, label: 'Muscle', sub: 'effet anabolisant', color: 'p-blue' },
       { id: 'bone', x: 1330, y: 420, organ: 'bone', s: 0.8, label: 'Os, moelle', sub: 'masse osseuse, érythropoïèse', color: 'p-blue' },
       { id: 'brain', x: 1330, y: 620, organ: 'brainLateral', s: 0.85, label: 'Cerveau, peau', sub: 'libido · pilosité, sébum', color: 'p-blue' },
-      { id: 'kiss', at: 'arc', dot: 9, hit: 16, leader: true, lx: 262, ly: 92, label: 'Neurones à kisspeptine', sub: 'noyau arqué', color: 'p-magenta', info: 'Les neurones à kisspeptine de l\'hypothalamus (noyau arqué, complément) stimulent les neurones à GnRH (polycopié, partie 2, p. 3).' },
+      { id: 'kiss', at: 'arc', dot: 9, hit: 16, leader: true, lx: 270, ly: -150, anchor: 'end', label: 'Neurones à kisspeptine', sub: 'noyau arqué', color: 'p-magenta', info: 'Les neurones à kisspeptine de l\'hypothalamus (noyau arqué, complément) stimulent les neurones à GnRH (polycopié, partie 2, p. 3).' },
       { id: 'aff', x: 620, y: 718, label: 'Neurones à GABA, à glutamate', w: 300, sub: 'autres afférences', color: 'p-violet', info: 'Influences distinctes des kisspeptines sur les neurones à GnRH (polycopié, partie 2, p. 3) : le glutamate stimule, le GABA module (complément).' },
       { id: 'lep', x: 600, y: 872, organ: 'fat', s: 0.7, label: 'Tissu adipeux blanc', sub: 'leptine (permissif)', color: 'p-amber', info: 'Effet permissif indirect de la leptine, sécrétée par le tissu adipeux blanc, sur les neurones à GnRH (polycopié).' }
     ],
