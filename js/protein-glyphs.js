@@ -21,7 +21,7 @@
       const old = defs.querySelector('#mol-' + id);
       if (old) old.remove();
       const g = el('g', { id: 'mol-' + id, style: `--mc: var(--${COLOR[key]})`, class: 'm-trace-g' }, defs);
-      const big = t.chains.reduce((a, c) => a + c.length / 2, 0) > 400;
+      const big = Object.values(t.n).reduce((a, v) => a + v, 0) > 1500;
       t.chains.forEach((c, i) => {
         let d = '';
         for (let j = 0; j < c.length; j += 2) d += (j ? ' L' : 'M') + c[j] + ',' + c[j + 1];

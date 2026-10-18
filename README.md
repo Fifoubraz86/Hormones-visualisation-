@@ -4,6 +4,8 @@ Visualisation zoomable et animée des axes endocriniens humains, dans l'esprit d
 
 L'**axe thyréotrope** est détaillé jusqu'à la cellule (hypothalamus, hypophyse, follicule, transport plasmatique, cellule cible). Les autres axes et boucles de régulation sont tirés du *Polycopié de sémiologie endocrinienne* du CEEDMM (2023) et représentés en schémas animés : corticotrope, somatotrope, lactotrope, gonadotrope féminin (cycle de 28 jours, rétrocontrôle de l'estradiol qui devient positif en milieu de cycle) et masculin, posthypophyse (ADH), médullosurrénale, métabolisme phosphocalcique, système rénine-angiotensine-aldostérone, régulation de la glycémie et métabolisme des lipoprotéines. Le détail des boucles extraites est dans [`docs/axes-polycopie.md`](docs/axes-polycopie.md).
 
+Chaque axe dispose d'un modèle physiologique simplifié, d'un bilan biologique simulé et de scénarios cliniques tirés de la sémiologie du polycopié : Cushing (hypophysaire, surrénalien, ectopique), insuffisances surrénale et corticotrope, corticothérapie, acromégalie, déficit somatotrope, prolactinomes et déconnexion, diabète insipide, SIADH, phéochromocytome, ménopause, hypogonadismes, hyperparathyroïdie primaire et secondaire, hypoparathyroïdie, hyperaldostéronismes primaire et secondaire, DT1, DT2, insulinome, hypercholestérolémie familiale et ses traitements…
+
 Les organes sont dessinés de façon anatomique, les molécules d'après leur structure (iodothyronines, stéroïdes à quatre cycles, peptides, glycoprotéines, catécholamines, lipoprotéines…). Une légende contextuelle et des fiches au survol (ou au toucher) donnent les informations de chaque élément.
 
 ## Lancer
@@ -39,6 +41,10 @@ Chaque scène a une ancre (`#thyro`, `#foll`, `#cell`…) pour y accéder direct
 5. **Transport plasmatique** : TBG, transthyrétine, albumine, fraction libre et entrée cellulaire.
 6. **Cellule cible** : MCT8/MCT10/OATP1C1, désiodases D2 et D3, récepteur nucléaire TR/RXR sur TRE, transcription.
 
+## Vérification des molécules
+
+Les petites molécules ont été contrôlées dans PubChem (formule, nom IUPAC, position des substituants) ; les protéines sont dessinées à partir de leurs coordonnées dans la PDB (carbones α projetés, ponts disulfure, glycanes, T4 liée), grâce au script [`docs/tools/traces.py`](docs/tools/traces.py). La source de chaque structure (CID PubChem ou identifiant PDB) s'affiche dans sa fiche au survol.
+
 ## Le modèle
 
 `js/model.js` contient un modèle physiologique simplifié (grandeurs normalisées, relaxation du premier ordre) qui pilote la densité des particules et le bilan biologique simulé (TSH, T4L, T3L, T3 reverse). Neuf scénarios sont fournis : euthyroïdie, Hashimoto, Hashimoto traité, surdosage en LT4, Basedow, adénome toxique, hypothyroïdie centrale, carence iodée et syndrome de basse T3. Les paramètres sont aussi réglables à la main.
@@ -58,6 +64,9 @@ js/organs.js        dessins anatomiques
 js/info.js          fiches au survol et légende
 js/axis-builder.js  construction d'une scène d'axe à partir de sa description
 js/axes-data.js     axes et boucles tirés du polycopié
+js/axes-sim.js      modèles, bilans et scénarios cliniques des axes
+js/protein-traces.js tracés protéiques extraits de la PDB (généré)
+js/protein-glyphs.js glyphes protéiques à partir des tracés
 js/scenes/*.js      atlas et scènes détaillées de l'axe thyréotrope
 js/app.js           caméra, navigation, panneau, boucle d'animation
 ```

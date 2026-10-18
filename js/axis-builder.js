@@ -58,9 +58,17 @@
         a.frame(ax.name, ax.sub);
         const T = { h: ax.startHour != null ? ax.startHour : 8, d: 1 };
         const nodes = {};
+        // Modèle physiologique (axes-sim.js) : scénarios, variables qui pilotent flux, organes et niveaux.
+        const sim = ax.sim || null;
+        const hk = ax.hooks || {};
+        const val = (v) => (hk.rates && hk.rates[v] ? hk.rates[v](sim.s, sim.p) : sim.s[v]);
+        const allNodes = ax.nodes.concat(hk.extraNodes || []);
+        const allLinks = ax.links.concat(hk.extraLinks || []);
+        const shown = [];
+        if (hk.liveNode) allNodes.forEach((n) => { if (hk.liveNode[n.id]) n.live = () => hk.liveNode[n.id](sim.s); });
 
         /* ---- Nœuds ---- */
-        ax.nodes.forEach((n) => {
+        allNodes.forEach((n) => {
           const key = ax.id + '.' + n.id;
           HV.INFO[key] = { t: n.label.replace(/\n/g, ' '), k: Array.isArray(n.sub) ? n.sub.join(' ') : n.sub || '', d: n.info || '', live: n.live ? () => n.live(T) : null };
           const s = n.s || 1.15;
@@ -82,6 +90,14 @@
             n.rx = w / 2; n.ry = h / 2;
           }
           if (n.zoom) a.zoomable(grp, n.zoom);
+          if (sim && hk.cap && hk.cap[n.id] && n.organ) shown.push(() => grp.firstChild.setAttribute('opacity', (0.3 + 0.7 * Math.min(1, sim.p[hk.cap[n.id]])).toFixed(2)));
+          if (sim && hk.tumor && hk.tumor[n.id]) {
+            const s2 = n.s || 1.15;
+            const tu = a.el('circle', { cx: n.x + 34 * s2, cy: n.y - 26 * s2, r: 15, class: 'tumor', 'data-info': 'tumor' });
+            shown.push(() => tu.setAttribute('opacity', sim.p[hk.tumor[n.id]] > 0.02 ? 1 : 0));
+          }
+          if (n.show) shown.push(() => grp.setAttribute('visibility', n.show(sim.p) ? 'visible' : 'hidden'));
+          n.vis = () => !n.show || n.show(sim.p);
           nodes[n.id] = n;
         });
 
@@ -94,8 +110,11 @@
 
         /* ---- Liens ---- */
         const dynLinks = [];
-        ax.links.forEach((l) => {
+        allLinks.forEach((l) => {
           const A = nodes[l.from], B = nodes[l.to];
+          const v = l.v || (hk.links && hk.links[`${l.from}>${l.to}>${l.mol}`]) || null;
+          const keepMod = !(hk.dropMod && v);
+          const vis = () => A.vis() && B.vis();
           // Les extrémités partent vers les points de contrôle : les arcs d'une même paire de nœuds se séparent.
           const cdx = B.x - A.x, cdy = B.y - A.y, cL = Math.hypot(cdx, cdy) || 1;
           const nx = -cdy / cL, ny = cdx / cL, b = l.bend || 0;
@@ -112,7 +131,7 @@
           if (l.mol) {
             legendMols.add(l.mol);
             const base = l.rate || 1.6;
-            a.flow(d, { mol: l.mol, rate: () => base * (l.mod ? l.mod(T) : 1), size: l.size || 1.6, speed: l.speed || 120, track: false, max: 26 });
+            a.flow(d, { mol: l.mol, rate: () => (vis() ? base * (l.mod && keepMod ? l.mod(T) : 1) * (sim && v ? Math.min(6, val(v)) : 1) : 0), size: l.size || 1.6, speed: l.speed || 120, track: false, max: 30 });
           }
           let sign = null;
           if (kind !== 'flow') {
@@ -120,6 +139,7 @@
             sign = a.sign(back[0], back[1], kind === 'inhib' ? 'inhib' : 'stim');
             sign.set(1);
           }
+          let pillEl = null;
           const lab = l.label !== undefined ? l.label : l.mol && HV.INFO[l.mol] ? HV.INFO[l.mol].t.split(' · ')[0] : null;
           if (lab) {
             const m = bezPoint(p0, p1, p2, p3, l.labelAt || 0.5);
@@ -128,8 +148,13 @@
             const lg = a.el('g', { class: 'ax-pill', style: `--mc: var(--${color})`, transform: `translate(${(m[0] + nx * off).toFixed(1)} ${(m[1] + ny * off).toFixed(1)})`, 'data-info': l.mol || l.info || null });
             a.el('rect', { x: -w / 2, y: -15, width: w, height: 30, rx: 15 }, lg);
             a.text(0, 6, lab, 'ax-pill-t', { anchor: 'middle' }, lg);
+            pillEl = lg;
           }
           if (typeof l.kind === 'function') dynLinks.push({ l, track, sign });
+          if (A.show || B.show) {
+            const els = [track, sign && sign.g, pillEl];
+            shown.push(() => els.forEach((e) => e && e.setAttribute('visibility', vis() ? 'visible' : 'hidden')));
+          }
         });
 
         /* ---- Chaîne de biosynthèse ---- */
@@ -185,8 +210,14 @@
           cycleTxt = a.text(440, 15, '', 'clock-t', null, cg);
         }
         const bars = [];
-        if (ax.levels) {
-          const L = ax.levels;
+        let LV = ax.levels;
+        if (sim && hk.levels) {
+          LV = Object.assign({ x: 1180, y: 830, w: 340 }, ax.levels || {}, { title: 'Niveaux simulés' });
+          LV.items = hk.levels.map((it) => Object.assign({}, it, { fn: it.fn ? () => it.fn(sim.s) : () => sim.s[it.v] }));
+          LV.y = Math.min(LV.y, 960 - 30 - LV.items.length * 34);
+        }
+        if (LV) {
+          const L = LV;
           const lg = a.el('g', { class: 'levels', transform: `translate(${L.x} ${L.y})` });
           a.el('rect', { x: -16, y: -36, width: L.w + 32, height: 30 + L.items.length * 34, rx: 14, class: 'side-box' }, lg);
           a.text(0, -10, L.title || 'Niveaux simulés', 'lbl-s strong', null, lg);
@@ -201,6 +232,8 @@
 
         let txtT = 0;
         const tick = (dt) => {
+          if (sim) sim.step(dt, T);
+          shown.forEach((f) => f());
           T.h = (T.h + dt * 0.5) % 24;
           T.d = ((T.d - 1 + dt / 1.6) % 28) + 1;
           if (clockHand) clockHand.setAttribute('transform', `rotate(${(T.h / 24) * 360})`);
@@ -218,9 +251,9 @@
           txtT -= dt;
           if (txtT <= 0) {
             txtT = 0.25;
-            if (clockTxt) clockTxt.textContent = String(Math.floor(T.h)).padStart(2, '0') + ' h' + (ax.clockLabel ? ' · ' + ax.clockLabel(T) : '');
+            if (clockTxt) clockTxt.textContent = String(Math.floor(T.h)).padStart(2, '0') + ' h' + (hk.clockLabel && sim ? ' · ' + hk.clockLabel(sim.s) : ax.clockLabel ? ' · ' + ax.clockLabel(T) : '');
             if (cycleTxt) cycleTxt.textContent = 'Jour ' + Math.floor(T.d) + ' · ' + (T.d < 6 ? 'règles' : T.d < 13 ? 'phase folliculaire' : T.d < 15 ? 'ovulation' : 'phase lutéale');
-            ax.nodes.forEach((n) => { if (n.liveEl) n.liveEl.textContent = n.live(T); });
+            allNodes.forEach((n) => { if (n.liveEl) n.liveEl.textContent = n.live(T); });
           }
         };
         tick(0);

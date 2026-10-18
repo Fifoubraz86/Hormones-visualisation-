@@ -243,117 +243,135 @@
     $('nextBtn').disabled = ti === TOUR.length - 1;
     $('btnUp').disabled = !sc.parent;
     const thyroid = chain.some((s) => s.id === 'thyro') || sc.id === 'atlas';
+    bindProvider(thyroid ? M : sc.sim || null);
     $('sceneSource').hidden = !sc.source;
     $('sceneSource').textContent = sc.source || '';
     HV.setLegend(document.getElementById('legendBody'), sc);
-    $('labCard').hidden = !thyroid;
-    $('scenarioCard').hidden = !thyroid;
     try {
       history.replaceState(null, '', sc.id === 'atlas' ? location.pathname + location.search : '#' + sc.id);
     } catch (err) { /* contexte sans historique */ }
   }
 
-  /* ---------- Panneau : bilan biologique ---------- */
-  const hist = {};
-  const labEls = {};
-  const rows = $('labRows');
-  M.LABS.forEach((L) => {
-    hist[L.key] = [];
-    const row = document.createElement('div');
-    row.className = 'lab-row';
-    row.innerHTML = `<div class="lab-name">${L.name}<span>${L.lo.toString().replace('.', ',')}–${L.hi.toString().replace('.', ',')} ${L.unit}</span></div>
-      <div class="lab-val"><b>–</b><i></i></div>
-      <svg class="spark" viewBox="0 0 120 34" preserveAspectRatio="none" aria-hidden="true"><rect class="spark-band" x="0" width="120"></rect><polyline class="spark-line" points=""></polyline><circle class="spark-dot" r="2.6"></circle></svg>`;
-    rows.appendChild(row);
-    const sy = (v) => {
-      let f;
-      if (L.log) f = (Math.log10(Math.max(v, L.min)) - Math.log10(L.min)) / (Math.log10(L.max) - Math.log10(L.min));
-      else f = (v - L.min) / (L.max - L.min);
-      return 32 - clamp(f, 0, 1) * 30;
-    };
-    const band = row.querySelector('.spark-band');
-    band.setAttribute('y', sy(L.hi));
-    band.setAttribute('height', Math.max(1, sy(L.lo) - sy(L.hi)));
-    labEls[L.key] = { row, b: row.querySelector('b'), i: row.querySelector('i'), line: row.querySelector('.spark-line'), dot: row.querySelector('.spark-dot'), sy, L };
-  });
-  const fmt = (v, key) => {
-    if (key === 'tsh') return v < 0.01 ? '< 0,01' : v < 10 ? v.toFixed(2).replace('.', ',') : v.toFixed(1).replace('.', ',');
-    if (key === 'rt3') return v.toFixed(2).replace('.', ',');
-    return v.toFixed(1).replace('.', ',');
+  /* ---------- Panneau : bilan biologique, scénarios, paramètres ----------
+     Un « fournisseur » décrit le modèle de la scène courante : HV.model pour l'axe thyréotrope,
+     un modèle d'axe (HV.makeSim) pour les autres. */
+  let prov = null;
+  let hist = {};
+  let labEls = {};
+  let sliders = {};
+  const fmtNum = (v, L) => {
+    if (L.fmt) return L.fmt(v);
+    const d = L.dec != null ? L.dec : v < 10 ? 2 : 1;
+    return v.toFixed(d).replace('.', ',');
   };
+  const rng = (L) => (L.range || `${String(L.lo).replace('.', ',')}–${String(L.hi).replace('.', ',')} ${L.unit}`);
+  function bindProvider(P) {
+    if (prov === P) return;
+    prov = P;
+    $('labCard').hidden = !P;
+    $('scenarioCard').hidden = !P;
+    if (!P) return;
+    $('labTitle').textContent = P.title || 'Bilan simulé';
+    hist = {};
+    labEls = {};
+    const rows = $('labRows');
+    rows.textContent = '';
+    P.LABS.forEach((L) => {
+      hist[L.key] = [];
+      const row = document.createElement('div');
+      row.className = 'lab-row';
+      row.innerHTML = `<div class="lab-name">${L.name}<span>${rng(L)}</span></div>
+        <div class="lab-val"><b>–</b><i></i></div>
+        <svg class="spark" viewBox="0 0 120 34" preserveAspectRatio="none" aria-hidden="true"><rect class="spark-band" x="0" width="120"></rect><polyline class="spark-line" points=""></polyline><circle class="spark-dot" r="2.6"></circle></svg>`;
+      rows.appendChild(row);
+      const sy = (v) => {
+        let f;
+        if (L.log) f = (Math.log10(Math.max(v, L.min)) - Math.log10(L.min)) / (Math.log10(L.max) - Math.log10(L.min));
+        else f = (v - L.min) / (L.max - L.min);
+        return 32 - clamp(f, 0, 1) * 30;
+      };
+      const band = row.querySelector('.spark-band');
+      band.setAttribute('y', sy(L.hi));
+      band.setAttribute('height', Math.max(1, sy(L.lo) - sy(L.hi)));
+      labEls[L.key] = { row, b: row.querySelector('b'), i: row.querySelector('i'), line: row.querySelector('.spark-line'), dot: row.querySelector('.spark-dot'), sy, L };
+    });
+    const scWrap = $('scenarios');
+    scWrap.textContent = '';
+    P.SCENARIOS.forEach((sc, i) => {
+      const lab = document.createElement('label');
+      lab.className = 'scenario';
+      lab.innerHTML = `<input type="radio" name="scenario" id="sc-${P.id}-${sc.id}" value="${sc.id}"${(P.active || P.SCENARIOS[0].id) === sc.id ? ' checked' : ''}><span class="sc-name">${sc.name}</span><span class="sc-note">${sc.note}</span>`;
+      lab.querySelector('input').addEventListener('change', () => {
+        P.active = sc.id;
+        P.setScenario(sc.id);
+        syncSliders();
+      });
+      scWrap.appendChild(lab);
+    });
+    sliders = {};
+    const slWrap = $('sliders');
+    slWrap.textContent = '';
+    P.PARAMS.forEach((Q) => {
+      const row = document.createElement('div');
+      row.className = 'slider';
+      row.innerHTML = `<label for="p-${P.id}-${Q.key}">${Q.label}<output></output></label><input type="range" id="p-${P.id}-${Q.key}" min="${Q.min}" max="${Q.max}" step="${Q.step}">`;
+      const input = row.querySelector('input');
+      input.addEventListener('input', () => {
+        P.p[Q.key] = parseFloat(input.value);
+        row.querySelector('output').textContent = Q.fmt(P.p[Q.key]);
+        const radio = document.querySelector('input[name="scenario"]:checked');
+        if (radio) radio.checked = false;
+        P.active = null;
+      });
+      slWrap.appendChild(row);
+      sliders[Q.key] = { input, out: row.querySelector('output'), Q };
+    });
+    syncSliders();
+    updateLabs(0.25);
+  }
+  function syncSliders() {
+    for (const k in sliders) {
+      sliders[k].input.value = prov.p[k];
+      sliders[k].out.textContent = sliders[k].Q.fmt(prov.p[k]);
+    }
+  }
   let sampleAcc = 0;
   function updateLabs(sdt) {
+    if (!prov) return;
     sampleAcc += sdt;
     const sample = sampleAcc >= 0.25;
     if (sample) sampleAcc = 0;
-    M.LABS.forEach((L) => {
-      const v = M.lab(L.key);
+    prov.LABS.forEach((L) => {
+      const v = prov.lab(L.key);
       const E = labEls[L.key];
+      if (!E) return;
       if (sample) {
         hist[L.key].push(v);
         if (hist[L.key].length > 120) hist[L.key].shift();
       }
       const h = hist[L.key];
-      const pts = h.map((x, i) => ((i / 119) * 120).toFixed(1) + ',' + E.sy(x).toFixed(1)).join(' ');
-      E.line.setAttribute('points', pts);
+      E.line.setAttribute('points', h.map((x, i) => ((i / 119) * 120).toFixed(1) + ',' + E.sy(x).toFixed(1)).join(' '));
       if (h.length) {
         E.dot.setAttribute('cx', (((h.length - 1) / 119) * 120).toFixed(1));
         E.dot.setAttribute('cy', E.sy(h[h.length - 1]).toFixed(1));
       }
-      E.b.textContent = fmt(v, L.key);
+      E.b.textContent = fmtNum(v, L);
       const st = v > L.hi ? 'hi' : v < L.lo ? 'lo' : 'ok';
       E.i.textContent = st === 'hi' ? '↑' : st === 'lo' ? '↓' : '';
       E.row.dataset.state = st;
     });
-    const it = M.interpret();
+    const it = prov.interpret();
     const pill = $('labStatus');
     pill.textContent = it.label;
     pill.dataset.tone = it.tone;
     $('labInterp').textContent = it.text;
   }
-
-  /* ---------- Scénarios et paramètres ---------- */
-  const scWrap = $('scenarios');
-  let activeScenario = 'eu';
-  M.SCENARIOS.forEach((sc) => {
-    const lab = document.createElement('label');
-    lab.className = 'scenario';
-    lab.innerHTML = `<input type="radio" name="scenario" id="sc-${sc.id}" value="${sc.id}"${sc.id === 'eu' ? ' checked' : ''}><span class="sc-name">${sc.name}</span><span class="sc-note">${sc.note}</span>`;
-    lab.querySelector('input').addEventListener('change', () => {
-      activeScenario = sc.id;
-      M.setScenario(sc.id);
-      syncSliders();
-    });
-    scWrap.appendChild(lab);
-  });
-  const sliders = {};
-  const slWrap = $('sliders');
-  M.PARAMS.forEach((P) => {
-    const row = document.createElement('div');
-    row.className = 'slider';
-    row.innerHTML = `<label for="p-${P.key}">${P.label}<output id="o-${P.key}"></output></label><input type="range" id="p-${P.key}" min="${P.min}" max="${P.max}" step="${P.step}">`;
-    const input = row.querySelector('input');
-    input.addEventListener('input', () => {
-      M.p[P.key] = parseFloat(input.value);
-      row.querySelector('output').textContent = P.fmt(M.p[P.key]);
-      const radio = document.querySelector('input[name="scenario"]:checked');
-      if (radio) radio.checked = false;
-      activeScenario = null;
-    });
-    slWrap.appendChild(row);
-    sliders[P.key] = { input, out: row.querySelector('output'), P };
-  });
-  function syncSliders() {
-    for (const k in sliders) {
-      sliders[k].input.value = M.p[k];
-      sliders[k].out.textContent = sliders[k].P.fmt(M.p[k]);
-    }
-  }
-  syncSliders();
   $('btnReset').addEventListener('click', () => {
-    M.setScenario('eu');
-    for (const k in M.s) M.s[k] = 1;
-    document.getElementById('sc-eu').checked = true;
+    if (!prov) return;
+    prov.reset();
+    prov.active = prov.SCENARIOS[0].id;
+    const r = document.getElementById(`sc-${prov.id}-${prov.active}`);
+    if (r) r.checked = true;
     syncSliders();
   });
 

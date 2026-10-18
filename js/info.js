@@ -105,6 +105,7 @@
     food: { t: 'Apport iodé', k: 'Sel iodé, produits de la mer, laitages', d: 'La carence iodée reste la première cause de goitre dans le monde.', live: () => 'Apport simulé : ' + Math.round(M.p.iodine * 150) + ' µg/j' },
     levo: { t: 'Lévothyroxine (LT4)', k: 'Traitement substitutif', d: 'T4 de synthèse, à jeun, environ 1,6 µg/kg/j en substitution complète. Adaptation sur la TSH 6 à 8 semaines après chaque changement de dose.', live: () => (M.p.levo > 0.02 ? 'Dose simulée : ' + Math.round((M.p.levo * 112) / 12.5) * 12.5 + ' µg/j' : 'Non prise') },
     plasma: { t: 'Plasma', k: 'Compartiment de transport', d: 'Plus de 99 % des hormones thyroïdiennes y sont liées aux protéines.' },
+    tumor: { t: 'Tumeur sécrétante', k: 'Sécrétion autonome', d: 'Lésion qui sécrète indépendamment de la boucle de régulation : le rétrocontrôle ne peut plus la freiner (ou seulement en partie).' },
     tissue: { t: 'Cellules des tissus', k: 'Entrée par transporteurs', d: 'Les hormones libres entrent via MCT8, MCT10 et OATP1C1.' }
   };
 

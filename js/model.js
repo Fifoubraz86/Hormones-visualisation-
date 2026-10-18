@@ -53,9 +53,9 @@
 
   // Conversion en unités de laboratoire (valeurs de référence adultes usuelles).
   const LABS = [
-    { key: 'tsh', name: 'TSH', unit: 'mUI/L', k: 1.5, lo: 0.4, hi: 4.0, log: true, min: 0.005, max: 100 },
-    { key: 't4', name: 'T4 libre', unit: 'pmol/L', k: 15, lo: 12, hi: 22, min: 0, max: 50 },
-    { key: 't3', name: 'T3 libre', unit: 'pmol/L', k: 4.6, lo: 3.1, hi: 6.8, min: 0, max: 16 },
+    { key: 'tsh', name: 'TSH', unit: 'mUI/L', k: 1.5, lo: 0.4, hi: 4.0, log: true, min: 0.005, max: 100, fmt: (v) => (v < 0.01 ? '< 0,01' : v.toFixed(v < 10 ? 2 : 1).replace('.', ',')) },
+    { key: 't4', name: 'T4 libre', unit: 'pmol/L', k: 15, lo: 12, hi: 22, min: 0, max: 50, dec: 1 },
+    { key: 't3', name: 'T3 libre', unit: 'pmol/L', k: 4.6, lo: 3.1, hi: 6.8, min: 0, max: 16, dec: 1 },
     { key: 'rt3', name: 'T3 reverse', unit: 'nmol/L', k: 0.3, lo: 0.14, hi: 0.54, min: 0, max: 1.6 }
   ];
 
@@ -111,5 +111,10 @@
     return { tone: 'good', label: 'Euthyroïdie', text: 'TSH, T4L et T3L dans les valeurs de référence.' };
   }
 
-  HV.model = { p, s, DEFAULTS, LABS, PARAMS, SCENARIOS, step, setScenario, lab, interpret, targets };
+  function reset() {
+    setScenario('eu');
+    for (const k in s) s[k] = 1;
+  }
+
+  HV.model = { id: 'thyro', title: 'Bilan thyroïdien simulé', active: 'eu', p, s, DEFAULTS, LABS, PARAMS, SCENARIOS, step, setScenario, lab, interpret, targets, reset };
 })();

@@ -621,3 +621,5 @@ path.m-bond.mcs { stroke: var(--mc); opacity: 1; stroke-width: 1.3; }
 line.m-db { stroke: var(--mc); stroke-width: 0.9; }
 .tip-s { font: 11px var(--font-data); color: var(--faint); }
 .m-trace-g .m-ss { stroke-width: 0.7; }
+.tumor { fill: var(--bad); stroke: var(--bg); stroke-width: 3; transition: opacity 0.5s; }
+.lab .card-head { flex-wrap: wrap; }
