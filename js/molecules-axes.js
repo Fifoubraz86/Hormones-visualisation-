@@ -133,7 +133,9 @@
     peptide('gnrh', 'p-violet', 10);
     peptide('kiss', 'p-magenta', 10);
     peptide('angio', 'p-red', 8);
-    peptide('sst', 'p-grey', 14, { ring: 12, ss: [2, 9] });
+    peptide('angio1', 'p-red', 10); // angiotensine I (décapeptide)
+    peptide('calcitonin', 'tg', 32, { helix: true });
+    peptide('sst', 'p-grey', 14, { ring: 12, ss: [0, 11] }); // pont Cys3–Cys14 fermant le cycle
     peptide('adh', 'p-sky', 9, { ring: 6, ss: [0, 5] });
     peptide('oxy', 'p-rose', 9, { ring: 6, ss: [0, 5] });
     peptide('glucagon', 'p-orange', 29, { helix: true });

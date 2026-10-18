@@ -16,7 +16,7 @@
     level: 'Axe',
     lead: 'La TRH hypothalamique stimule la sécrétion de TSH, qui stimule la thyroïde. La T4 (et un peu de T3) circule, puis la T4 est convertie en T3 active dans les tissus. T4 et T3 freinent en retour l\'hypophyse et l\'hypothalamus.',
     points: [
-      'La relation TSH / T4L est log-linéaire : une petite baisse de T4L entraîne une forte hausse de TSH.',
+      'La relation TSH / T4L est log-linéaire (complément) : une petite baisse de T4L entraîne une forte hausse de TSH.',
       'La T4, forme de réserve, est exclusivement thyroïdienne. 75 % de la T3, forme active, proviennent de la conversion périphérique de la T4 par les désiodases.',
       'La TSH est sous double contrôle hypothalamique : stimulant (TRH) et inhibiteur (somatostatine). T4 et T3 exercent un rétrocontrôle négatif, préférentiellement hypophysaire.',
       'Changez de scénario dans le panneau pour voir l\'axe se rééquilibrer en direct.'
@@ -104,10 +104,13 @@
       const scTxt = a.text(115, 168, '', 'scinti-c', { anchor: 'middle' }, sc);
       a.dyn(() => {
         const u = HV.clamp(Math.pow(Math.max(S.stim, 0), 0.8) * Math.min(1, P.thy * 1.4) * 0.55, 0, 1);
+        // Indiquée seulement devant une TSH basse : inutile devant une hypothyroïdie ou un goitre à TSH non basse.
+        const ind = HV.model.lab('tsh') < 0.4;
+        sc.setAttribute('opacity', ind ? 1 : 0.4);
         [up1, up2, up3].forEach((e) => e.setAttribute('fill-opacity', (0.06 + 0.94 * u).toFixed(2)));
-        holes.setAttribute('opacity', P.thy < 0.6 ? 0.9 : 0);
+        holes.setAttribute('opacity', P.thy < 0.6 || P.iodine < 0.5 ? 0.9 : 0);
         hot.setAttribute('opacity', P.auto > 0.02 ? 1 : 0);
-        scTxt.textContent = P.auto > 0.02 ? 'nodule chaud, extinction du reste' : P.trab > 0.05 ? 'fixation diffuse et intense' : u < 0.2 ? 'fixation faible' : P.thy < 0.6 ? 'fixation hétérogène' : 'fixation homogène';
+        scTxt.textContent = !ind ? 'non indiquée : TSH non basse' : P.auto > 0.02 ? 'nodule chaud, extinction du reste' : P.trab > 0.05 ? 'fixation diffuse et intense' : u < 0.2 ? 'hypofixation globale' : P.iodine < 0.5 ? 'fixation hétérogène, nodulaire' : P.thy < 0.6 ? 'fixation hétérogène' : 'fixation homogène';
       });
 
       /* --- Circulation --- */

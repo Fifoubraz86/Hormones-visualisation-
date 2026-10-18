@@ -17,17 +17,17 @@ Chaque test se lance depuis la carte « Tests dynamiques » du panneau, sur le s
 | Somatotrope | HGPO avec GH (P) | sain, acromégalie |
 | Somatotrope | Hypoglycémie insulinique (P) | sain (pic ≥ 6 ng/mL), déficit partiel (3–6), complet (< 3) |
 | Rénine-aldostérone | Charge sodée (P) | sain, hyperaldostéronisme primaire |
-| Glycémie | HGPO à 75 g (P) | sain, DT2, DT1 |
-| Glycémie | Épreuve de jeûne de 72 h | sain, insulinome |
-| Posthypophyse | Restriction hydrique + desmopressine (P) | sain, diabète insipide central, néphrogénique |
+| Glycémie | HGPO à 75 g (P) | sain, intolérance (curseurs) ; non indiquée quand la glycémie à jeun est déjà ≥ 1,26 g/L (DT2, DT1) |
+| Glycémie | Épreuve de jeûne de 72 h | sain, insulinome (non indiquée chez le diabétique traité) |
+| Posthypophyse | Restriction hydrique + desmopressine (P ; desmopressine en complément) | sain, diabète insipide central, néphrogénique ; SIADH : restriction partielle, sans desmopressine, correction lente |
 
 ## Axe corticotrope et corticosurrénale
 
 | Test | Principe | Ce que l'on cherche | Réponse normale / pathologique |
 | --- | --- | --- | --- |
-| **Test au Synacthène immédiat** (P) | 250 µg de tétracosactide (ACTH 1-24) IV ou IM ; cortisol à T0, 30 et 60 min | Insuffisance surrénale périphérique, ou corticotrope ancienne (cortex atrophique) | Normal : cortisol ≥ 500 nmol/L (18 µg/dL). Pas de réponse : insuffisance surrénale |
-| **Hypoglycémie insulinique** (P) | Insuline IV jusqu'à une glycémie < 0,40 g/L ; cortisol, ACTH (et GH) | Insuffisance corticotrope (et somatotrope) : test de référence | Normal : élévation du cortisol (et de la GH). Contre-indiqué en cas de cardiopathie ou d'épilepsie |
-| **Freinage minute à la dexaméthasone** (P) | 1 mg de dexaméthasone à 23 h, cortisol à 8 h | Dépistage de l'hypercortisolisme | Normal : cortisol freiné (< 50 nmol/L). Cushing : absence de freinage |
+| **Test au Synacthène immédiat** (P) | 250 µg de tétracosactide (ACTH 1-24) IV ou IM ; cortisol à T0, 30 et 60 min | Insuffisance surrénale périphérique, ou corticotrope ancienne (cortex atrophique) | Normal : cortisol maximal ≥ 500 nmol/L (18 µg/dL) sur les prélèvements. Pas de réponse : insuffisance surrénale (faux négatif possible dans une insuffisance corticotrope récente) |
+| **Hypoglycémie insulinique** (P) | Insuline IV jusqu'à une glycémie < 0,40 g/L ; cortisol, ACTH (et GH) avant puis après l'injection | Insuffisance corticotrope ; test de référence de l'insuffisance somatotrope | Normal : élévation du cortisol (> 500 nmol/L) et de la GH. Contre-indications (cardiopathie ischémique, épilepsie) : complément |
+| **Freinage minute à la dexaméthasone** (P) | 1 mg de dexaméthasone à 23 h, cortisol à 8 h | Dépistage de l'hypercortisolisme | Normal : cortisol freiné (< 50 nmol/L, 1,8 µg/dL ; seuil en complément, Endocrine Society 2008). Cushing : absence de freinage |
 | **Cortisol libre urinaire des 24 h** (P) | Recueil des urines de 24 h | Hypercortisolisme | Élevé dans le syndrome de Cushing |
 | **Cortisol salivaire à minuit** (P) | Prélèvement salivaire à minuit | Perte du nadir nocturne | Élevé dans le syndrome de Cushing |
 | Freinage faible (2 mg/j pendant 48 h) | Dexaméthasone 0,5 mg × 4 /j | Confirmation de l'hypercortisolisme | Absence de freinage : Cushing |
@@ -59,8 +59,8 @@ Chaque test se lance depuis la carte « Tests dynamiques » du panneau, sur le s
 
 | Test | Principe | Ce que l'on cherche | Réponse normale / pathologique |
 | --- | --- | --- | --- |
-| **HGPO avec dosage de la GH** (P) | 75 g de glucose, GH répétée sur 2 h | Acromégalie | Normal : GH freinée < 0,4 ng/mL (1 mUI/L). Acromégalie : non freinée |
-| **IGF-1** (P) | Dosage, normes selon l'âge et le sexe | Acromégalie, déficit | Élevée dans l'acromégalie |
+| **HGPO avec dosage de la GH** (P) | 75 g de glucose, GH répétée sur 2 h | Acromégalie | Normal : GH freinée < 0,4 ng/mL (≈ 1 mUI/L). Acromégalie : non freinée |
+| **IGF-1** (P) | Dosage, normes selon l'âge et le sexe | Acromégalie, déficit | Élevée dans l'acromégalie. Normale dans plus de la moitié des déficits somatotropes : ne suffit pas au diagnostic |
 | **Hypoglycémie insulinique** (P) | Voir l'axe corticotrope | Déficit somatotrope : test de référence | Pic de GH insuffisant : déficit |
 | Tests à l'arginine, au glucagon, GHRH + arginine, macimoréline | Stimulation pharmacologique | Déficit somatotrope si l'hypoglycémie insulinique est contre-indiquée | Pic de GH sous le seuil : déficit |
 | Tests à la clonidine, à l'ornithine (enfant) | Stimulation | Retard de croissance par déficit en GH | Deux tests déficitaires sont requis chez l'enfant |
@@ -80,14 +80,16 @@ Chaque test se lance depuis la carte « Tests dynamiques » du panneau, sur le s
 | Test à la GnRH (LH-RH) | GnRH IV, LH et FSH sur 1 à 2 h | Puberté précoce centrale ; déficit gonadotrope | Pic de LH prédominant : puberté centrale activée. Réponse plate : déficit |
 | Test à l'hCG | hCG IM, testostérone à J3 ou J5 | Fonction leydigienne (enfant, cryptorchidie, ambiguïté sexuelle) | Hausse de la testostérone : cellules de Leydig fonctionnelles |
 | Test aux progestatifs | Progestatif 10 jours | Aménorrhée : imprégnation œstrogénique | Saignement : œstrogènes présents. Pas de saignement : carence |
-| Test au Synacthène avec 17-OHP | Voir l'axe corticotrope | Bloc en 21-hydroxylase non classique (hyperandrogénie) | Réponse explosive de la 17-OHP |
-| AMH, inhibine B | Dosages | Réserve ovarienne ; spermatogenèse | Basses en cas d'insuffisance ovarienne ou d'atteinte sertolienne |
+| **Testostérone totale + LH et FSH** (P) | Prélèvement matinal, à jeun, à contrôler (complément), après avoir écarté une hyperprolactinémie | Hypogonadisme masculin | Testostérone basse : LH et FSH élevées (primaire) ou basses / inadaptées (gonadotrope) |
+| **Estradiol + LH et FSH** (P) | Après avoir écarté une grossesse (β-hCG, complément) et une hyperprolactinémie | Aménorrhée, hypogonadisme féminin | Estradiol bas : FSH élevée (insuffisance ovarienne ; après la ménopause, l'absence d'élévation de la FSH signe le déficit gonadotrope) ou basse / inadaptée (gonadotrope) |
+| **17-OHP de base ou après Synacthène** (P) | Voir l'axe corticotrope | Bloc en 21-hydroxylase non classique (hyperandrogénie) | Réponse explosive de la 17-OHP |
+| AMH, **inhibine B** (P pour l'inhibine B) | Dosages | Réserve ovarienne ; spermatogenèse | Basses en cas d'insuffisance ovarienne ou d'atteinte sertolienne (inhibine B basse dans l'hypogonadisme primaire masculin, P) ; AMH élevée dans le SOPK (complément) |
 
 ## Posthypophyse et équilibre hydrique
 
 | Test | Principe | Ce que l'on cherche | Réponse normale / pathologique |
 | --- | --- | --- | --- |
-| **Épreuve de restriction hydrique** (P) | Arrêt des boissons en milieu hospitalier ; poids, diurèse, osmolalités, natrémie (après imagerie) | Diabète insipide | Normal : urines concentrées. Diabète insipide : diurèse qui baisse insuffisamment, urines non concentrées. Dans le SIADH (P), la restriction est aussi le traitement |
+| **Épreuve de restriction hydrique** (P) | Arrêt des boissons en milieu hospitalier ; poids, diurèse, osmolalités, natrémie (après imagerie) | Diabète insipide | Normal : urines concentrées (> 600 mosmol/kg, complément). Diabète insipide : diurèse qui baisse insuffisamment, urines non concentrées. Dans le SIADH (P), la restriction (partielle, 500 à 800 mL/j, complément) est aussi le traitement, sans desmopressine, avec une correction ≤ 8 à 10 mmol/L par 24 h (complément) |
 | Test à la desmopressine | En fin de restriction | Distinguer DI central et néphrogénique | Concentration des urines : central. Pas de réponse : néphrogénique |
 | Copeptine stimulée (sérum salé hypertonique ou arginine) | Copeptine, marqueur stable de l'ADH | Diabète insipide et polydipsie primaire | Copeptine basse : DI central |
 
@@ -103,8 +105,8 @@ Chaque test se lance depuis la carte « Tests dynamiques » du panneau, sur le s
 
 | Test | Principe | Ce que l'on cherche | Réponse normale / pathologique |
 | --- | --- | --- | --- |
-| **HGPO à 75 g** (P) | Glycémie à jeun, 1 h et 2 h | Diabète, prédiabète, diabète gestationnel | Diabète : ≥ 2,00 g/L à 2 h ; intolérance : 1,40–1,99 g/L |
-| **Triade de Whipple** (P) avec insuline et **peptide C** (P) au moment de l'hypoglycémie | Symptômes, glycémie basse, correction au resucrage | Hypoglycémie organique | Insuline et peptide C non freinés : hyperinsulinisme endogène (insulinome) ; peptide C bas : insuline exogène |
+| **HGPO à 75 g** (P) | Glycémie à jeun, 1 h et 2 h | Diabète, prédiabète (le diabète gestationnel a ses propres seuils : complément) | On classe d'abord sur la glycémie à jeun (≥ 1,26 g/L : diabète ; 1,10–1,25 : hyperglycémie modérée à jeun), puis à 2 h (≥ 2,00 : diabète ; 1,40–1,99 : intolérance). Non indiquée si la glycémie à jeun est déjà ≥ 1,26 g/L |
+| **Triade de Whipple** (P) avec insuline et peptide C (complément) au moment de l'hypoglycémie | Symptômes, glycémie < 0,50 g/L, correction au resucrage | Hypoglycémie organique | Insuline et peptide C non freinés : hyperinsulinisme endogène (insulinome, ou prise de sulfamides, à rechercher dans le plasma) ; peptide C bas : insuline exogène |
 | Épreuve de jeûne de 72 h | Jeûne surveillé jusqu'à l'hypoglycémie | Insulinome | Hypoglycémie avec insuline et peptide C inappropriés |
 | Test au glucagon (peptide C) | Glucagon IV | Réserve insulinique (classification du diabète) | Peptide C non stimulé : carence insulinique |
 
@@ -112,7 +114,7 @@ Chaque test se lance depuis la carte « Tests dynamiques » du panneau, sur le s
 
 | Test | Principe | Ce que l'on cherche | Réponse normale / pathologique |
 | --- | --- | --- | --- |
-| **Scintigraphie à l'iode 123 ou au technétium** (P) | Imagerie fonctionnelle | Cause d'une hyperthyroïdie, nodule(s) avec TSH basse | Nodule chaud et extinction : adénome toxique ; fixation diffuse : Basedow ; fixation nulle : thyroïdite, surcharge iodée, LT4. Inutile devant une hypothyroïdie (P) |
+| **Scintigraphie à l'iode 123** (P ; technétium en complément) | Imagerie fonctionnelle, en seconde intention | Hyperthyroïdie avec goitre nodulaire ou TRAb négatifs | Nodule chaud et extinction : adénome toxique ; fixation diffuse : Basedow ; hypofixation globale : thyroïdite (P ; surcharge iodée, LT4 : complément). Inutile devant une hypothyroïdie ou un goitre à TSH non basse (P) |
 | Test au TRH | Historique | Hypothyroïdie centrale, résistance aux hormones thyroïdiennes | Quasi abandonné |
 
 ## Proposition d'intégration dans l'atlas

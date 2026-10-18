@@ -85,7 +85,7 @@
       ['Demi-vie', '≈ 3 semaines (IgG)'],
       ['Particularité', 'Traversent le placenta : risque de dysthyroïdie fœtale et néonatale'],
       ['Dosage', 'TRAb : diagnostic de la maladie de Basedow']
-    ], links: [pdb('1IGT')] },
+    ], links: [{ label: 'RCSB PDB 1IGT (IgG2a murine entière, modèle d\'architecture)', url: 'https://www.rcsb.org/structure/1IGT' }] },
     tbg: { cls: 'Glycoprotéine de transport (serpine)', rows: [
       ['Structure', 'Serpine non inhibitrice, une poche de liaison pour T4 ou T3 (PDB 2CEO)'],
       ['Masse', '≈ 54 kDa glycosylée (chaîne ≈ 42,5 kDa)'],
@@ -103,7 +103,7 @@
       ['Structure', '585 acides aminés, ≈ 66,5 kDa, trois domaines (PDB 1AO6)'],
       ['Synthèse', 'Foie'],
       ['Rôle', 'Liaison de faible affinité et de forte capacité (hormones, calcium, acides gras, médicaments)'],
-      ['Intérêt', 'Fixe 50 % du calcium : calcémie corrigée = Ca + 0,025 × (40 − albumine)']
+      ['Intérêt', 'Fixe environ la moitié du calcium plasmatique (50 % selon le polycopié) : calcémie corrigée = Ca + 0,025 × (40 − albumine)']
     ], links: [pdb('1AO6')] },
 
     /* ---------------- Stéroïdes ---------------- */
@@ -115,7 +115,7 @@
       ['Demi-vie', '≈ 60 à 90 min'],
       ['Récepteur', 'Récepteur nucléaire des glucocorticoïdes (GR) ; aussi le récepteur minéralocorticoïde, protégé dans le rein par la 11β-HSD2'],
       ['Rythme', 'Pic en début de matinée, nadir le soir'],
-      ['Dosage', 'Cortisol à 8 h ; cortisol libre urinaire ; cortisol salivaire à minuit'],
+      ['Dosage', 'Cortisol à 8 h (habituellement 10–20 µg/dL, 275–550 nmol/L ; < 5 µg/dL, ≈ 138 nmol/L : évocateur d\'insuffisance surrénale ; > 18 µg/dL, ≈ 500 nmol/L : l\'exclut) ; cortisol libre urinaire ; cortisol salivaire à minuit'],
       ['Pharmacologie', 'Hydrocortisone ; corticoïdes de synthèse (prednisone, dexaméthasone)']
     ], links: [pc(5754)] },
     aldo: { cls: 'Minéralocorticoïde (stéroïde en C21)', rows: [
@@ -178,7 +178,7 @@
       ['Demi-vie', '≈ 10 min'],
       ['Récepteur', 'MC2R (+ MRAP), Gs → AMPc'],
       ['Effets', 'StAR, enzymes P450, trophicité surrénalienne ; mélanodermie quand elle est très élevée'],
-      ['Dosage', 'ACTH à 8 h, sur tube réfrigéré']
+      ['Dosage', 'ACTH à 8 h, sur tube réfrigéré : 20–52 pg/mL (4,5–12 pmol/L)']
     ], links: [] },
     ghrh: { cls: 'Neuropeptide', rows: [['Structure', '44 acides aminés'], ['Synthèse', 'Noyau arqué'], ['Récepteur', 'GHRH-R, Gs'], ['Effets', 'Sécrétion de GH']], links: [] },
     sst: { cls: 'Peptide cyclique', rows: [['Formule, masse', 'C₇₆H₁₀₄N₁₈O₁₉S₂ · 1 637,9 g/mol (somatostatine-14)'], ['Structure', '14 acides aminés, pont disulfure Cys3–Cys14'], ['Synthèse', 'Hypothalamus (noyau périventriculaire), cellules δ des îlots, tube digestif'], ['Demi-vie', '1 à 3 min'], ['Récepteurs', 'SST1 à SST5, Gi'], ['Effets', 'Freine GH, TSH, insuline, glucagon'], ['Pharmacologie', 'Octréotide, lanréotide, pasiréotide']], links: [pc(16129706)] },
@@ -266,12 +266,13 @@
     ], links: [pdb('1ET1')] },
     ca: { cls: 'Cation divalent', rows: [
       ['Formule, masse', 'Ca²⁺ · 40,08 g/mol'],
-      ['Répartition', '99 % dans l\'os ; plasma : 50 % ionisé, 50 % lié (albumine) et une petite part complexée'],
+      ['Répartition', '99 % dans l\'os ; plasma : 50 % ionisé, 50 % lié à l\'albumine (polycopié) ; en réalité ≈ 50 % ionisé, ≈ 40 % lié aux protéines, ≈ 10 % complexé (complément)'],
       ['Valeurs', 'Calcémie totale 2,20–2,60 mmol/L ; ionisée 1,15–1,30 mmol/L'],
       ['Capteur', 'CaSR (parathyroïde, anse de Henlé)'],
       ['Conversion', '1 mmol/L = 40 mg/L']
     ], links: [pc(271)] },
-    calcitonin: { cls: 'Peptide', rows: [['Structure', '32 acides aminés, pont disulfure'], ['Synthèse', 'Cellules C (parafolliculaires) de la thyroïde'], ['Effets', 'Favorise la fixation du calcium sur l\'os'], ['Dosage', 'Marqueur du cancer médullaire de la thyroïde']], links: [] },
+    calcitonin: { cls: 'Peptide', rows: [['Structure', '32 acides aminés, pont disulfure Cys1–Cys7 (complément)'], ['Synthèse', 'Cellules C (parafolliculaires) de la thyroïde'], ['Effets', 'Freine la résorption osseuse par les ostéoclastes : effet hypocalcémiant, mineur chez l\'homme (complément)'], ['Dosage', 'Marqueur du cancer médullaire de la thyroïde']], links: [] },
+    angio1: { cls: 'Décapeptide (complément)', rows: [['Structure', 'Asp-Arg-Val-Tyr-Ile-His-Pro-Phe-His-Leu'], ['Formation', 'Clivage de l\'angiotensinogène (foie) par la rénine, dans le plasma'], ['Devenir', 'Converti en angiotensine II par l\'enzyme de conversion, surtout pulmonaire'], ['Activité', 'Peu active par elle-même']], links: [] },
 
     /* ---------------- SRAA ---------------- */
     renin: { cls: 'Enzyme (aspartyl-protéase)', rows: [['Structure', '≈ 340 acides aminés, deux lobes, site actif à deux aspartates (PDB 2REN)'], ['Synthèse', 'Cellules juxtaglomérulaires'], ['Substrat', 'Angiotensinogène → angiotensine I'], ['Stimuli', 'Baisse de la perfusion rénale, de la charge sodée à la macula densa, stimulation β1'], ['Dosage', 'Rénine active (concentration) ou activité rénine plasmatique'], ['Pharmacologie', 'Aliskiren (inhibiteur direct)']], links: [pdb('2REN')] },
@@ -282,7 +283,7 @@
     water: { cls: 'Solvant', rows: [['Formule, masse', 'H₂O · 18,0 g/mol'], ['Lien endocrine', 'Réabsorption de l\'eau libre par l\'aquaporine 2 sous ADH']], links: [pc(962)] },
 
     /* ---------------- Médullosurrénale ---------------- */
-    adre: { cls: 'Catécholamine', rows: [['Formule, masse', 'C₉H₁₃NO₃ · 183,2 g/mol'], ['Synthèse', 'Noradrénaline → adrénaline par la PNMT (induite par le cortisol)'], ['Origine', 'Médullosurrénale (80 à 95 % de sa sécrétion)'], ['Demi-vie', '2 à 3 min'], ['Récepteurs', 'α et β adrénergiques'], ['Métabolites', 'Métanéphrine (COMT), acide vanylmandélique'], ['Dosage', 'Métanéphrines plasmatiques ou urinaires']], links: [pc(5816)] },
+    adre: { cls: 'Catécholamine', rows: [['Formule, masse', 'C₉H₁₃NO₃ · 183,2 g/mol'], ['Synthèse', 'Noradrénaline → adrénaline par la PNMT (induite par le cortisol)'], ['Origine', 'Essentiellement médullosurrénalienne (80 à 95 % de la sécrétion médullaire)'], ['Demi-vie', '2 à 3 min'], ['Récepteurs', 'α et β adrénergiques'], ['Métabolites', 'Métanéphrine (COMT), acide vanylmandélique'], ['Dosage', 'Métanéphrines plasmatiques ou urinaires']], links: [pc(5816)] },
     nora: { cls: 'Catécholamine', rows: [['Formule, masse', 'C₈H₁₁NO₃ · 169,2 g/mol'], ['Synthèse', 'Dopamine → noradrénaline (dopamine β-hydroxylase, dans les granules)'], ['Origine', 'Terminaisons sympathiques surtout ; 10 à 20 % de la sécrétion médullosurrénalienne'], ['Récepteurs', 'α surtout, β1'], ['Métabolite', 'Normétanéphrine']], links: [pc(439260)] },
 
     /* ---------------- Métabolisme glucidique ---------------- */

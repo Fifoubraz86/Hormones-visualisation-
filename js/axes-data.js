@@ -1,6 +1,6 @@
 /*
  * Axes et boucles de régulation tirés du Polycopié de sémiologie endocrinienne du CEEDMM
- * (1re édition, 2023, parties 1 et 2). Les rares compléments de physiologie classique absents
+ * (2e édition, 2023, parties 1 et 2). Les rares compléments de physiologie classique absents
  * du polycopié sont signalés « (complément) » dans les fiches.
  */
 (function () {
@@ -16,22 +16,23 @@
     lh: 'p-violet', fsh: 'p-rose', testo: 'p-blue', e2: 'p-rose', prog: 'p-violet', inhib: 'p-brown', pth: 'p-green', calcitriol: 'p-amber',
     ca: 'p-green', renin: 'p-red', angio: 'p-red', aldo: 'p-teal', k: 'p-violet', nai: 'p-amber', adre: 'p-red', nora: 'p-red2',
     insulin: 'p-blue2', glucagon: 'p-orange', glucose: 'p-lime', ffa: 'p-amber', ketone: 'p-red2', chylo: 'p-amber', vldl: 'p-gold',
-    ldl: 'p-orange', hdl: 'p-teal', chol: 'p-gold', pcsk9: 'p-magenta', ldlr: 'p-teal', t4: 't4', t3: 't3', dot: 'accent'
+    ldl: 'p-orange', hdl: 'p-teal', chol: 'p-gold', pcsk9: 'p-magenta', ldlr: 'p-teal', t4: 't4', t3: 't3', dot: 'accent',
+    angio1: 'p-red', calcitonin: 'tg'
   };
 
   /* Fiches des hormones (d'après le polycopié) */
   Object.assign(HV.INFO, {
-    crh: { t: 'CRH', k: 'Corticolibérine · peptide de 41 acides aminés', d: 'Sécrétée par l\'hypothalamus, elle stimule les cellules corticotropes à sécréter l\'ACTH. Freinée par le cortisol.' },
-    acth: { t: 'ACTH', k: 'Corticotrophine · 39 acides aminés, issue de la POMC', d: 'Stimule la sécrétion de cortisol et d\'androgènes surrénaliens : augmente StAR, puis les enzymes P450 ; en excès chronique, hyperplasie surrénalienne. Rythme circadien, pic le matin. Sa sécrétion augmente avec certaines molécules de l\'inflammation. L\'α-MSH, issue du même précurseur, explique la mélanodermie de l\'insuffisance surrénale périphérique.' },
+    crh: { t: 'CRH', k: 'Corticolibérine · peptide de 41 acides aminés (complément)', d: 'Sécrétée par l\'hypothalamus, elle stimule les cellules corticotropes à sécréter l\'ACTH. Freinée par le cortisol.' },
+    acth: { t: 'ACTH', k: 'Corticotrophine · 39 acides aminés (complément), issue de la POMC', d: 'Stimule la sécrétion de cortisol et d\'androgènes surrénaliens : augmente StAR, puis les enzymes P450 ; en excès chronique, hyperplasie surrénalienne. Rythme circadien, pic le matin. Sa sécrétion augmente avec certaines molécules de l\'inflammation. L\'α-MSH, issue du même précurseur, explique la mélanodermie de l\'insuffisance surrénale périphérique.' },
     cortisol: { t: 'Cortisol', k: 'Principal glucocorticoïde · zone fasciculée', d: 'Néoglucogenèse (hyperglycémiant), catabolisme protidique, lipogenèse viscérale et facio-tronculaire, inhibition de l\'ADH, effet anti-inflammatoire, tonus vasculaire, effet minéralocorticoïde à forte dose. Rétrocontrôle négatif sur la CRH et l\'ACTH. Pic en début de matinée, nadir le soir.' },
-    dhea: { t: 'DHEA, DHEA-S', k: 'Androgènes surrénaliens · zone réticulée', d: 'Avec l\'androstènedione. Production dépendante de l\'ACTH, mais sans rétrocontrôle sur l\'axe (contrairement au cortisol).' },
+    dhea: { t: 'DHEA, DHEA-S', k: 'Androgènes surrénaliens · zone réticulée', d: 'Avec l\'androstènedione. Production dépendante de l\'ACTH ; pas de rétrocontrôle sur l\'axe, contrairement au cortisol (complément).' },
     ghrh: { t: 'GHRH', k: 'Somatolibérine', d: 'Stimule les cellules somatotropes à sécréter la GH.' },
     sst: { t: 'Somatostatine', k: 'Peptide cyclique inhibiteur', d: 'Freine la sécrétion de GH, et aussi celle de TSH. Les analogues de la somatostatine traitent l\'acromégalie.' },
     gh: { t: 'GH', k: 'Hormone de croissance · faisceau de 4 hélices', d: 'Sécrétion pulsatile, surtout la nuit. Stimule la production hépatique d\'IGF-1. Hyperglycémiante : sécrétée lors de l\'hypoglycémie. Normalement freinée par l\'HGPO (seuil d\'absence de freination : GH ≥ 0,4 ng/mL).' },
     igf1: { t: 'IGF-1', k: 'Insulin-like growth factor 1', d: 'Produite par le foie sous l\'effet de la GH. En excès, rétrocontrôle négatif sur la GH et la GHRH. Une IGF-1 élevée confirme l\'acromégalie.' },
     dopa: { t: 'Dopamine', k: 'Catécholamine hypothalamique', d: 'Tonus inhibiteur permanent sur la prolactine. Sa levée (compression ou section de la tige) donne une hyperprolactinémie de déconnexion. Précurseur de la noradrénaline dans la médullosurrénale.' },
-    prl: { t: 'Prolactine', k: 'Seule hormone antéhypophysaire sous contrôle inhibiteur', d: 'Stimulée par la TRH et les œstrogènes (grossesse). En excès, elle inhibe la pulsatilité de la GnRH : insuffisance gonadotrope fonctionnelle. > 200 ng/mL : évoque un macroadénome à prolactine.' },
-    adh: { t: 'ADH · vasopressine', k: 'Nonapeptide, noyaux supraoptiques et paraventriculaires', d: 'Transportée le long des axones de la tige et stockée dans la posthypophyse. Se lie au récepteur V2 du tubule rénal : réabsorption d\'eau par les aquaporines. Puissant vasopresseur en cas de chute brutale de la pression artérielle. Freinée par le cortisol.' },
+    prl: { t: 'Prolactine', k: 'Sous tonus inhibiteur dopaminergique permanent', d: 'Stimulée par la TRH et les œstrogènes (grossesse). En excès, elle inhibe la pulsatilité de la GnRH : insuffisance gonadotrope fonctionnelle. > 200 ng/mL : évoque un macroadénome à prolactine.' },
+    adh: { t: 'ADH · vasopressine', k: 'Nonapeptide (complément), noyaux supraoptiques et paraventriculaires', d: 'Transportée le long des axones de la tige et stockée dans la posthypophyse. Se lie au récepteur V2 du tubule rénal : réabsorption d\'eau par les aquaporines. Puissant vasopresseur en cas de chute brutale de la pression artérielle. Freinée par le cortisol.' },
     oxy: { t: 'Ocytocine', k: 'Nonapeptide posthypophysaire', d: 'Synthétisée dans les mêmes noyaux hypothalamiques que l\'ADH et libérée par la posthypophyse. Contraction utérine et éjection du lait (complément).' },
     water: { t: 'Eau libre', k: 'Réabsorbée sous ADH', d: 'Diabète insipide : polyurie > 3 L/24 h, urines diluées (osmolalité < 200 mosmol/kg). SIADH : rétention d\'eau et hyponatrémie, souvent < 120 mmol/L.' },
     gnrh: { t: 'GnRH', k: 'Gonadolibérine · décapeptide pulsatile', d: 'La pulsatilité est indispensable à la sécrétion de LH et de FSH. Réactivation progressive à la puberté (fréquence et amplitude des pics de LH). Modulée par la kisspeptine, le GABA, le glutamate ; effet permissif de la leptine.' },
@@ -44,14 +45,16 @@
     inhib: { t: 'Inhibine B', k: 'Sertoli (homme) · cellules folliculaires (femme)', d: 'Rétrocontrôle négatif sur la FSH, essentiellement au niveau hypophysaire.' },
     pth: { t: 'PTH', k: 'Parathormone · 84 acides aminés', d: 'Rein : réabsorption du calcium (anse de Henlé, tube contourné distal) et 1α-hydroxylation de la 25-OH-vitamine D en calcitriol. Os : active les ostéocytes, libération rapide de calcium, stimule la résorption. Sa sécrétion est freinée par le calcium via le CaSR.' },
     calcitriol: { t: '1,25-(OH)₂-vitamine D', k: 'Calcitriol · sécostéroïde actif', d: 'Stimule l\'absorption digestive active du calcium (voie transcellulaire) et la réabsorption rénale au tube contourné distal.' },
-    ca: { t: 'Calcium ionisé', k: 'Ca²⁺ · 1,15–1,30 mmol/L', d: 'Calcémie totale 2,20–2,60 mmol/L, dont 50 % liés à l\'albumine. Calcémie corrigée = Ca mesurée + 0,025 × (40 − albumine en g/L). 99 % du calcium est osseux. Active le CaSR de la parathyroïde et de l\'anse de Henlé.' },
+    ca: { t: 'Calcium ionisé', k: 'Ca²⁺ · 1,15–1,30 mmol/L', d: 'Calcémie totale 2,20–2,60 mmol/L : 50 % ionisés, 50 % liés à l\'albumine selon le polycopié (en réalité ≈ 40 % liés aux protéines et ≈ 10 % complexés, complément). Calcémie corrigée = Ca mesurée + 0,025 × (40 − albumine en g/L). 99 % du calcium est osseux. Active le CaSR de la parathyroïde et de l\'anse de Henlé.' },
     renin: { t: 'Rénine', k: 'Enzyme de l\'appareil juxtaglomérulaire', d: 'Déclenche la cascade aboutissant à l\'angiotensine II.' },
+    angio1: { t: 'Angiotensine I', k: 'Décapeptide (complément)', d: 'Formée dans le plasma par la rénine, qui clive l\'angiotensinogène d\'origine hépatique ; convertie en angiotensine II par l\'enzyme de conversion, surtout pulmonaire (complément).' },
+    calcitonin: { t: 'Calcitonine', k: 'Peptide de 32 acides aminés · cellules C', d: 'Sécrétée par les cellules C parafolliculaires de la thyroïde (polycopié). Complément : freine la résorption osseuse par les ostéoclastes (effet hypocalcémiant, mineur chez l\'homme). Marqueur du cancer médullaire de la thyroïde.' },
     angio: { t: 'Angiotensine II', k: 'Octapeptide', d: 'Se lie à ses récepteurs dans la zone glomérulée et stimule la libération d\'aldostérone. Vasoconstricteur (complément).' },
     aldo: { t: 'Aldostérone', k: 'Minéralocorticoïde · zone glomérulée (aldostérone synthase)', d: 'Au tube contourné distal et au canal collecteur : réabsorption du sodium, excrétion du potassium et des ions H⁺. Régulée par le SRAA et la kaliémie.' },
     k: { t: 'Potassium', k: 'K⁺', d: 'Une kaliémie élevée stimule la sécrétion d\'aldostérone ; l\'aldostérone augmente l\'excrétion urinaire de K⁺.' },
     nai: { t: 'Sodium', k: 'Na⁺', d: 'Réabsorbé sous l\'effet de l\'aldostérone : rétention hydrosodée et régulation de la pression artérielle.' },
-    adre: { t: 'Adrénaline', k: '80 à 95 % sécrétés par la médullosurrénale', d: 'Formée à partir de la noradrénaline par la PNMT. Réaction de combat ou de fuite : fréquence cardiaque et pression artérielle ↑, vasoconstriction. Hyperglycémiante (contre-régulation de l\'hypoglycémie).' },
-    nora: { t: 'Noradrénaline', k: '10 à 20 % d\'origine médullosurrénalienne', d: 'Dérivée de la dopamine. Agit sur les récepteurs adrénergiques.' },
+    adre: { t: 'Adrénaline', k: 'Essentiellement d\'origine médullosurrénalienne', d: 'Formée à partir de la noradrénaline par la PNMT. Réaction de combat ou de fuite : fréquence cardiaque et pression artérielle ↑, vasoconstriction. Hyperglycémiante (contre-régulation de l\'hypoglycémie).' },
+    nora: { t: 'Noradrénaline', k: 'Surtout issue des terminaisons sympathiques', d: 'Dérivée de la dopamine. Agit sur les récepteurs adrénergiques. 10 à 20 % de la sécrétion médullosurrénalienne (l\'adrénaline en fait 80 à 95 %).' },
     insulin: { t: 'Insuline', k: 'Cellules β · chaînes A et B reliées par des ponts disulfure', d: 'Hypoglycémiante : captation du glucose par le muscle et le tissu adipeux (GLUT4), freine la production hépatique de glucose. Hormone de stockage : freine la lipolyse et la protéolyse. Prédomine en journée et après les repas.' },
     glucagon: { t: 'Glucagon', k: 'Cellules α', d: 'Hyperglycémiant : mobilise les réserves (glycogénolyse, néoglucogenèse hépatiques). Prédomine la nuit et au jeûne. Sécrété lors d\'une hypoglycémie (réponse perdue dans le diabète de type 1).' },
     glucose: { t: 'Glucose', k: 'Principal substrat énergétique', d: 'Glycémie à jeun normale 0,80–1,10 g/L ; diabète ≥ 1,26 g/L à deux reprises. Réabsorbé en totalité par SGLT2 au tube proximal ; glycosurie au-delà de 1,80 g/L. Hypoglycémie : < 0,50 g/L hors diabète, < 0,70 g/L chez le diabétique.' },
@@ -61,7 +64,7 @@
     vldl: { t: 'VLDL', k: 'Riches en triglycérides', d: 'Sécrétées par l\'hépatocyte, transformées en IDL par la lipoprotéine lipase, puis en LDL (lipase hépatique).' },
     ldl: { t: 'LDL', k: 'Transporteur majoritaire du cholestérol · apoB100', d: 'Captées via le récepteur des LDL (70 % hépatique). Le cholestérol internalisé freine l\'HMG-CoA réductase et l\'expression du récepteur.' },
     hdl: { t: 'HDL', k: 'Retour du cholestérol vers le foie', d: 'Synthétisées par le foie, elles captent le cholestérol des tissus. Anti-athérogènes : anti-inflammatoires, antioxydantes, vasodilatatrices.' },
-    chol: { t: 'Cholestérol', k: 'Précurseur des stéroïdes', d: 'Apporté par les LDL ou synthétisé dans le réticulum. Transféré dans la mitochondrie par StAR (étape limitante de la stéroïdogenèse).' },
+    chol: { t: 'Cholestérol', k: 'Précurseur des stéroïdes', d: 'Apporté par les LDL ou synthétisé dans le réticulum. Son transport mitochondrial par StAR est l\'étape limitante de la stéroïdogenèse.' },
     pcsk9: { t: 'PCSK9', k: 'Proprotéine convertase', d: 'Favorise la dégradation lysosomale du récepteur des LDL plutôt que son recyclage : moins de récepteurs, LDL plasmatique ↑.' },
     ldlr: { t: 'Récepteur des LDL', k: 'Recyclé ou dégradé', d: 'Reconnaît l\'apoB100. Après internalisation, il est recyclé vers la membrane ou dégradé dans les lysosomes.' }
   });
@@ -83,7 +86,7 @@
       { id: 'muscle', x: 1330, y: 440, organ: 'muscle', s: 0.9, label: 'Muscle', sub: 'catabolisme protidique', color: 'p-gold' },
       { id: 'fat', x: 1330, y: 640, organ: 'fat', s: 0.9, label: 'Tissu adipeux', sub: 'lipogenèse viscérale', color: 'p-gold' },
       { id: 'inflam', x: 230, y: 760, label: 'Inflammation', sub: 'cytokines', color: 'bad', info: 'Certaines molécules de la réponse inflammatoire augmentent la sécrétion d\'ACTH : l\'axe interagit avec le système immunitaire.' },
-      { id: 'andro', x: 930, y: 760, label: 'Androgènes', sub: 'pas de rétrocontrôle', color: 'p-sky', info: 'Les androgènes surrénaliens dépendent de l\'ACTH mais ne freinent pas l\'axe.' }
+      { id: 'andro', x: 930, y: 760, label: 'Androgènes', sub: 'pas de rétrocontrôle', color: 'p-sky', info: 'Les androgènes surrénaliens dépendent de l\'ACTH mais ne freinent pas l\'axe (complément).' }
     ],
     links: [
       { from: 'hypo', to: 'pit', kind: 'stim', mol: 'crh', mod: R.circadian },
@@ -93,7 +96,7 @@
       { from: 'adr', to: 'fat', mol: 'cortisol', mod: R.circadian, rate: 1, label: '' },
       { from: 'adr', to: 'pit', kind: 'inhib', mol: 'cortisol', bend: -110, mod: R.circadian, rate: 0.9, label: 'cortisol −' },
       { from: 'adr', to: 'hypo', kind: 'inhib', mol: 'cortisol', bend: -230, mod: R.circadian, rate: 0.9, label: '' },
-      { from: 'inflam', to: 'pit', kind: 'stim', color: 'bad', info: 'axe-inflam', label: 'cytokines' },
+      { from: 'inflam', to: 'pit', kind: 'stim', color: 'bad', info: 'cortico.inflam', label: 'cytokines' },
       { from: 'adr', to: 'andro', mol: 'dhea', rate: 1 }
     ],
     levels: { x: 1180, y: 830, w: 340, items: [{ label: 'ACTH', mol: 'acth', fn: R.circadian, max: 1.1 }, { label: 'Cortisol', mol: 'cortisol', fn: (T) => R.circadian({ h: T.h - 1 }), max: 1.1 }] }
@@ -221,7 +224,7 @@
       { id: 'uterus', x: 1330, y: 300, organ: 'uterus', label: 'Utérus', sub: 'endomètre, glaire', color: 'p-rose' },
       { id: 'breast', x: 1330, y: 600, organ: 'breast', s: 0.85, label: 'Seins, os, peau', sub: 'effets trophiques, HDL ↑', color: 'p-rose' },
       { id: 'kiss', x: 220, y: 770, label: 'Kisspeptines', sub: 'glutamate (+) · GABA', color: 'p-magenta' },
-      { id: 'lep', x: 560, y: 790, organ: 'fat', s: 0.8, label: 'Tissu adipeux blanc', sub: 'leptine (permissif)', color: 'p-amber' }
+      { id: 'lep', x: 560, y: 790, organ: 'fat', s: 0.8, label: 'Tissu adipeux blanc', sub: 'leptine (permissif)', color: 'p-amber', info: 'Effet permissif indirect de la leptine, sécrétée par le tissu adipeux blanc, sur les neurones à GnRH (polycopié).' }
     ],
     links: [
       { from: 'hypo', to: 'pit', kind: 'stim', mol: 'gnrh', mod: R.gnrhPulse, rate: 2 },
@@ -234,7 +237,7 @@
       { from: 'ovary', to: 'hypo', kind: e2Kind, mol: 'e2', bend: -230, mod: R.e2, rate: 0.9, label: '' },
       { from: 'ovary', to: 'pit', kind: 'inhib', mol: 'inhib', bend: 120, rate: 0.6, label: 'inhibine B → FSH' },
       { from: 'kiss', to: 'hypo', kind: 'stim', mol: 'kiss', rate: 0.8, label: '' },
-      { from: 'lep', to: 'hypo', kind: 'stim', color: 'p-amber', label: 'leptine', info: 'gonadoF.lep' }
+      { from: 'lep', to: 'hypo', kind: 'stim', color: 'p-amber', label: 'leptine (permissif)', info: 'gonadoF.lep', effect: 'permissif (indirect)' }
     ],
     levels: { x: 1180, y: 790, w: 340, items: [{ label: 'LH', mol: 'lh', fn: R.lh, max: 2.8 }, { label: 'FSH', mol: 'fsh', fn: R.fsh, max: 2.8 }, { label: 'Estradiol', mol: 'e2', fn: R.e2, max: 1.6 }, { label: 'Progestérone', mol: 'prog', fn: R.prog, max: 1.6 }] }
   });
@@ -243,18 +246,18 @@
   AX.push({
     id: 'gonadoM', card: { side: 'R', row: 1 }, color: 'p-blue', target: [806, 674],
     name: 'Axe gonadotrope masculin', sub: 'GnRH pulsatile · LH, FSH · testicule', clock: 'day',
-    clockInfo: 'Pulses de GnRH environ toutes les 90 minutes, suivis de pulses de LH.',
+    clockInfo: 'Pulses de GnRH environ toutes les 90 minutes (complément), suivis de pulses de LH.',
     lead: 'La GnRH pulsatile entraîne une libération pulsatile de LH et de FSH. La LH stimule les cellules de Leydig (testostérone), la FSH les cellules de Sertoli (spermatogenèse, inhibine B). La testostérone freine l\'axe ; l\'inhibine B freine la FSH.',
     points: ['Testicule : 15 à 20 mL ; tubes séminifères (cellules germinales et de Sertoli) et tissu interstitiel (cellules de Leydig).', 'Testostérone et cellules de Sertoli sont indispensables à la spermatogenèse.', 'La fonction endocrine décline lentement avec l\'âge, la production de gamètes persiste.', 'Une hyperprolactinémie peut freiner l\'axe.'],
     nodes: [
-      { id: 'hypo', x: 220, y: 380, organ: 'hypothalamusIcon', label: 'Neurones à GnRH', sub: 'pulses ≈ 90 min', color: 'p-violet' },
+      { id: 'hypo', x: 220, y: 380, organ: 'hypothalamusIcon', label: 'Neurones à GnRH', sub: 'pulses ≈ 90 min (complément)', color: 'p-violet' },
       { id: 'pit', x: 560, y: 380, organ: 'pituitaryIcon', label: 'Antéhypophyse', sub: 'cellules gonadotropes', color: 'p-violet' },
       { id: 'testis', x: 920, y: 380, organ: 'testis', s: 1.25, label: 'Testicule', sub: ['Leydig : testostérone (LH)', 'Sertoli : spermatogenèse (FSH)'], color: 'p-blue' },
       { id: 'muscle', x: 1330, y: 220, organ: 'muscle', s: 0.85, label: 'Muscle', sub: 'effet anabolisant', color: 'p-blue' },
       { id: 'bone', x: 1330, y: 420, organ: 'bone', s: 0.8, label: 'Os, moelle', sub: 'masse osseuse, érythropoïèse', color: 'p-blue' },
       { id: 'brain', x: 1330, y: 620, organ: 'brainLateral', s: 0.85, label: 'Cerveau, peau', sub: 'libido · pilosité, sébum', color: 'p-blue' },
       { id: 'kiss', x: 220, y: 770, label: 'Kisspeptines', sub: 'glutamate (+) · GABA', color: 'p-magenta' },
-      { id: 'lep', x: 560, y: 790, organ: 'fat', s: 0.8, label: 'Tissu adipeux blanc', sub: 'leptine (permissif)', color: 'p-amber' }
+      { id: 'lep', x: 560, y: 790, organ: 'fat', s: 0.8, label: 'Tissu adipeux blanc', sub: 'leptine (permissif)', color: 'p-amber', info: 'Effet permissif indirect de la leptine, sécrétée par le tissu adipeux blanc, sur les neurones à GnRH (polycopié).' }
     ],
     links: [
       { from: 'hypo', to: 'pit', kind: 'stim', mol: 'gnrh', mod: R.gnrhPulse, rate: 2 },
@@ -267,7 +270,7 @@
       { from: 'testis', to: 'hypo', kind: 'inhib', mol: 'testo', bend: -230, rate: 0.9, label: '' },
       { from: 'testis', to: 'pit', kind: 'inhib', mol: 'inhib', bend: 120, rate: 0.6, label: 'inhibine B → FSH' },
       { from: 'kiss', to: 'hypo', kind: 'stim', mol: 'kiss', rate: 0.8, label: '' },
-      { from: 'lep', to: 'hypo', kind: 'stim', color: 'p-amber', label: 'leptine', info: 'gonadoM.lep' }
+      { from: 'lep', to: 'hypo', kind: 'stim', color: 'p-amber', label: 'leptine (permissif)', info: 'gonadoM.lep', effect: 'permissif (indirect)' }
     ],
     levels: { x: 1180, y: 830, w: 340, items: [{ label: 'GnRH / LH', mol: 'lh', fn: R.gnrhPulse, max: 1.8 }, { label: 'Testostérone', mol: 'testo', fn: () => 1, max: 1.6 }] }
   });
@@ -287,7 +290,7 @@
       { id: 'kidney', x: 980, y: 250, organ: 'kidney', label: 'Rein', sub: ['réabsorption du Ca', '1α-hydroxylation'], color: 'p-green' },
       { id: 'bone', x: 980, y: 620, organ: 'bone', label: 'Os', sub: 'ostéocytes : libération rapide', color: 'p-green', info: '99 % du calcium de l\'organisme. Le remodelage équilibre résorption et minéralisation.' },
       { id: 'gut', x: 1360, y: 400, organ: 'intestine', label: 'Intestin grêle', sub: 'absorption active du Ca', color: 'p-amber' },
-      { id: 'ccell', x: 300, y: 830, label: 'Cellules C (thyroïde)', w: 260, color: 'tg', zoom: 'foll', info: 'Les cellules parafolliculaires sécrètent la calcitonine, qui favorise la fixation du calcium sur l\'os.' }
+      { id: 'ccell', x: 300, y: 830, label: 'Cellules C (thyroïde)', w: 260, color: 'tg', zoom: 'foll', info: 'Les cellules parafolliculaires sécrètent la calcitonine (polycopié), qui freine la résorption osseuse par les ostéoclastes (effet hypocalcémiant, mineur chez l\'homme ; complément).' }
     ],
     links: [
       { from: 'ca', to: 'para', kind: 'inhib', mol: 'ca', rate: 1.2, label: 'Ca²⁺ → CaSR' },
@@ -297,7 +300,7 @@
       { from: 'kidney', to: 'ca', mol: 'ca', bend: -150, label: 'réabsorption', rate: 1 },
       { from: 'bone', to: 'ca', mol: 'ca', bend: 150, label: 'libération', labelAt: 0.6, mod: pthLvl, rate: 1 },
       { from: 'gut', to: 'ca', mol: 'ca', bend: -480, label: 'absorption', rate: 0.9 },
-      { from: 'ccell', to: 'bone', kind: 'stim', color: 'tg', label: 'calcitonine', info: 'phospho.ccell' }
+      { from: 'ccell', to: 'bone', kind: 'inhib', mol: 'calcitonin', rate: 0.6, label: 'calcitonine (− résorption)' }
     ],
     levels: { x: 1180, y: 830, w: 340, items: [{ label: 'Calcémie', mol: 'ca', fn: (T) => (calc(T) - 2.2) * 5, max: 2 }, { label: 'PTH', mol: 'pth', fn: pthLvl, max: 2 }] }
   });
@@ -307,7 +310,7 @@
     id: 'raa', card: { side: 'R', row: 3 }, color: 'p-teal', target: [840, 474],
     name: 'Rénine-angiotensine-aldostérone', sub: 'Appareil juxtaglomérulaire · angiotensine II · zone glomérulée',
     lead: 'L\'appareil juxtaglomérulaire libère la rénine, qui déclenche une cascade aboutissant à l\'angiotensine II. Celle-ci stimule l\'aldostérone de la zone glomérulée. L\'aldostérone fait réabsorber le sodium et excréter le potassium et les ions H⁺ au tube distal et au canal collecteur. La kaliémie stimule aussi l\'aldostérone.',
-    points: ['Aldostérone : rôle important dans la régulation de la pression artérielle par la rétention sodée.', 'Toutes les hormones corticostéroïdes dérivent du cholestérol ; StAR est l\'étape limitante.', 'Le retour de la volémie et de la pression artérielle freine la rénine (complément).'],
+    points: ['Aldostérone : rôle important dans la régulation de la pression artérielle par la rétention sodée.', 'Toutes les hormones corticostéroïdes dérivent du cholestérol ; son transport mitochondrial par StAR est l\'étape limitante.', 'L\'hypovolémie, la baisse de la pression artérielle ou de la perfusion rénale stimulent la rénine ; l\'expansion volémique la met au repos.'],
     nodes: [
       { id: 'jga', x: 230, y: 350, organ: 'kidney', label: 'Appareil juxtaglomérulaire', sub: 'rénine', color: 'p-red' },
       { id: 'liver', x: 230, y: 740, organ: 'liver', s: 0.85, label: 'Foie', sub: 'angiotensinogène (complément)', color: 'p-red' },
@@ -315,11 +318,11 @@
       { id: 'adr', x: 960, y: 350, organ: 'adrenalKidney', label: 'Zone glomérulée', sub: 'aldostérone synthase', color: 'p-teal' },
       { id: 'tub', x: 1340, y: 350, organ: 'kidney', label: 'Tube distal, canal collecteur', sub: ['Na⁺ réabsorbé', 'K⁺ et H⁺ excrétés'], color: 'p-teal' },
       { id: 'k', x: 960, y: 760, label: 'Kaliémie ↑', color: 'p-violet', info: 'La concentration de potassium régule directement la sécrétion d\'aldostérone.' },
-      { id: 'vol', x: 1340, y: 760, label: 'Volémie, PA ↑', w: 220, sub: 'rétention sodée', color: 'p-teal', info: 'La rétention de sodium restaure la volémie et la pression artérielle, ce qui freine la rénine (complément).' }
+      { id: 'vol', x: 1340, y: 760, label: 'Volémie, PA ↑', w: 220, sub: 'rétention sodée', color: 'p-teal', info: 'La rétention de sodium restaure la volémie et la pression artérielle, ce qui met au repos la production de rénine.' }
     ],
     links: [
       { from: 'jga', to: 'liver', mol: 'renin', label: 'rénine', rate: 1.2 },
-      { from: 'liver', to: 'lung', mol: 'angio', label: 'angiotensine I', rate: 1.2 },
+      { from: 'liver', to: 'lung', mol: 'angio1', label: 'angiotensinogène → angiotensine I', rate: 1.2 },
       { from: 'lung', to: 'adr', kind: 'stim', mol: 'angio', rate: 1.4 },
       { from: 'adr', to: 'tub', kind: 'stim', mol: 'aldo', rate: 1.4 },
       { from: 'k', to: 'adr', kind: 'stim', mol: 'k', rate: 1 },
@@ -371,8 +374,8 @@
   AX.push({
     id: 'lipid', card: { side: 'R', row: 5 }, color: 'p-orange', target: [774, 436],
     name: 'Métabolisme des lipoprotéines', sub: 'Chylomicrons · VLDL · IDL · LDL · HDL · récepteur des LDL',
-    lead: 'Le foie est au centre du métabolisme des LDL : l\'hépatocyte sécrète les VLDL, porte 70 % des récepteurs des LDL et sécrète la PCSK9, qui agit surtout sur ses propres récepteurs. Dans le plasma, la lipoprotéine lipase transforme les VLDL en IDL puis en LDL. Le cholestérol internalisé freine l\'HMG-CoA réductase. Les HDL ramènent au foie le cholestérol des tissus.',
-    points: ['70 % des récepteurs des LDL sont hépatiques, 30 % sur les autres cellules.', 'PCSK9, sécrétée par l\'hépatocyte, se fixe au récepteur des LDL et l\'oriente vers le lysosome au lieu du recyclage : moins de récepteurs, LDL plasmatique ↑.', 'Les statines freinent l\'HMG-CoA réductase : la cellule exprime plus de récepteurs (SREBP-2) et capte plus de LDL. Les anti-PCSK9 empêchent la dégradation des récepteurs.', 'Un LDL-c élevé se dépose dans la paroi artérielle (athérome) ; les HDL sont anti-athérogènes.'],
+    lead: 'Le foie est au centre du métabolisme des LDL : l\'hépatocyte sécrète les VLDL, porte 70 % des récepteurs des LDL et sécrète la PCSK9, qui agit surtout sur ses propres récepteurs (complément). Dans le plasma, la lipoprotéine lipase transforme les VLDL en IDL puis en LDL. Le cholestérol internalisé freine l\'HMG-CoA réductase. Les HDL ramènent au foie le cholestérol des tissus.',
+    points: ['70 % des récepteurs des LDL sont hépatiques, 30 % sur les autres cellules.', 'PCSK9, sécrétée par l\'hépatocyte, se fixe au récepteur des LDL et l\'oriente vers le lysosome au lieu du recyclage : moins de récepteurs, LDL plasmatique ↑.', 'Les statines freinent l\'HMG-CoA réductase : la cellule exprime plus de récepteurs (SREBP-2) et capte plus de LDL. Les anti-PCSK9 empêchent la dégradation des récepteurs (complément).', 'Objectif de LDL-c selon le risque cardiovasculaire : < 0,55, < 0,70, < 1,00 ou < 1,90 g/L ; l\'hypercholestérolémie familiale est d\'emblée à risque élevé.', 'Un LDL-c élevé se dépose dans la paroi artérielle (athérome) ; les HDL sont anti-athérogènes.'],
     nodes: [
       { id: 'gut', x: 200, y: 280, organ: 'intestine', label: 'Intestin', sub: 'chylomicrons (apoB48)', color: 'p-amber' },
       { id: 'plasma', x: 620, y: 280, organ: 'vessel', s: 1.3, label: 'Plasma', sub: ['lipoprotéine lipase', 'VLDL → IDL → LDL'], color: 'p-amber', info: 'La lipoprotéine lipase hydrolyse les triglycérides des chylomicrons et des VLDL ; les VLDL deviennent IDL puis LDL (lipase hépatique).' },
@@ -381,7 +384,7 @@
       { id: 'liver', x: 620, y: 700, organ: 'liver', s: 1.45, label: 'Foie : hépatocyte', sub: ['70 % des récepteurs des LDL', 'sécrète VLDL, HDL et PCSK9'], color: 'p-gold' },
       { id: 'periph', x: 200, y: 700, organ: 'cellIcon', label: 'Cellules périphériques', sub: '30 % des récepteurs des LDL', color: 'p-teal' },
       { id: 'hmg', x: 1060, y: 570, label: 'HMG-CoA réductase', w: 250, sub: 'synthèse du cholestérol', color: 'p-gold', info: 'Enzyme limitante de la synthèse du cholestérol, freinée par le cholestérol issu des LDL internalisées ; cible des statines.' },
-      { id: 'pcsk9', x: 1060, y: 870, label: 'PCSK9', w: 200, sub: 'agit surtout sur l\'hépatocyte', color: 'p-magenta', info: 'Sécrétée par l\'hépatocyte, elle se lie au récepteur des LDL de la surface et entraîne sa dégradation lysosomale.' }
+      { id: 'pcsk9', x: 1060, y: 870, label: 'PCSK9', w: 200, sub: 'agit surtout sur l\'hépatocyte (complément)', color: 'p-magenta', info: 'Sécrétée par l\'hépatocyte, elle se lie au récepteur des LDL de la surface et entraîne sa dégradation lysosomale.' }
     ],
     links: [
       { from: 'gut', to: 'plasma', mol: 'chylo', rate: 1.2 },
@@ -398,6 +401,8 @@
     levels: { x: 60, y: 880, w: 300, items: [] }
   });
 
+  // Mention de la source affichée sous chaque axe (le polycopié de 2023 en est la 2e édition).
+  AX.forEach((ax) => { if (!ax.source) ax.source = 'Source : Polycopié de sémiologie endocrinienne, CEEDMM, 2e édition (2023).'; });
   HV.AXES = AX;
   AX.forEach(HV.axisScene);
 })();

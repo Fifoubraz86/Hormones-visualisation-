@@ -14,10 +14,10 @@
     level: 'Organe',
     lead: 'Les neurones du noyau paraventriculaire (NPV) synthétisent la TRH. Elle est libérée au niveau de l\'éminence médiane dans le système porte, qui la conduit à l\'antéhypophyse.',
     points: [
-      'TRH : tripeptide pGlu-His-Pro-NH₂ issu du clivage du pro-TRH par les convertases PC1/3 et PC2.',
-      'Les tanycytes captent la T4 et la convertissent en T3 (D2). La T3 réprime le gène de la TRH via TRβ2.',
-      'Le froid stimule la TRH. Le jeûne (baisse de la leptine), les glucocorticoïdes et l\'inflammation la freinent.',
-      'Les tanycytes dégradent aussi la TRH grâce à la pyroglutamyl-peptidase II.'
+      'TRH : tripeptide pGlu-His-Pro-NH₂ issu du clivage du pro-TRH par les convertases PC1/3 et PC2 (complément).',
+      'Les tanycytes captent la T4 et la convertissent en T3 (D2). La T3 réprime le gène de la TRH via TRβ2 (complément).',
+      'Le froid stimule la TRH. Le jeûne (baisse de la leptine), les glucocorticoïdes et l\'inflammation la freinent (complément).',
+      'Les tanycytes dégradent aussi la TRH grâce à la pyroglutamyl-peptidase II (complément).'
     ],
     build(g, a) {
       a.frame('Hypothalamus · neurone à TRH', 'Noyau paraventriculaire → éminence médiane → système porte');

@@ -51,12 +51,13 @@
     }
   }
 
-  // Conversion en unités de laboratoire (valeurs de référence adultes usuelles).
+  // Conversion en unités de laboratoire. Seule la norme de la TSH (0,4–4 mU/L) vient du polycopié ;
+  // les autres sont des normes usuelles, dépendantes de la trousse (complément).
   const LABS = [
-    { key: 'tsh', name: 'TSH', unit: 'mUI/L', k: 1.5, lo: 0.4, hi: 4.0, log: true, min: 0.005, max: 100, fmt: (v) => (v < 0.01 ? '< 0,01' : v.toFixed(v < 10 ? 2 : 1).replace('.', ',')) },
-    { key: 't4', name: 'T4 libre', unit: 'pmol/L', k: 15, lo: 12, hi: 22, min: 0, max: 50, dec: 1 },
-    { key: 't3', name: 'T3 libre', unit: 'pmol/L', k: 4.6, lo: 3.1, hi: 6.8, min: 0, max: 16, dec: 1 },
-    { key: 'rt3', name: 'T3 reverse', unit: 'nmol/L', k: 0.3, lo: 0.14, hi: 0.54, min: 0, max: 1.6 }
+    { key: 'tsh', name: 'TSH', unit: 'mUI/L', range: '0,4–4 mUI/L', k: 1.5, lo: 0.4, hi: 4.0, log: true, min: 0.005, max: 100, fmt: (v) => (v < 0.01 ? '< 0,01' : v.toFixed(v < 10 ? 2 : 1).replace('.', ',')) },
+    { key: 't4', name: 'T4 libre', unit: 'pmol/L', range: '12–22 pmol/L (selon la trousse ; complément)', k: 15, lo: 12, hi: 22, min: 0, max: 50, dec: 1 },
+    { key: 't3', name: 'T3 libre', unit: 'pmol/L', range: '3,1–6,8 pmol/L (selon la trousse ; complément)', k: 4.6, lo: 3.1, hi: 6.8, min: 0, max: 16, dec: 1 },
+    { key: 'rt3', name: 'T3 reverse', unit: 'nmol/L', range: '0,15–0,38 nmol/L (complément, non dosée en pratique)', k: 0.3, lo: 0.15, hi: 0.38, min: 0, max: 1.6 }
   ];
 
   const PARAMS = [
@@ -75,12 +76,12 @@
     { id: 'eu', name: 'Euthyroïdie', note: 'Sujet sain : l\'axe est à l\'équilibre.', p: {} },
     { id: 'hashi', name: 'Hypothyroïdie primaire (Hashimoto)', note: 'La glande détruite produit moins de T4 : la TSH monte fortement.', p: { thy: 0.12 } },
     { id: 'lt4', name: 'Hashimoto traité par lévothyroxine', note: 'La T4 orale remplace la production : TSH et T4L se normalisent.', p: { thy: 0.12, levo: 0.9 } },
-    { id: 'lt4x', name: 'Surdosage en lévothyroxine', note: 'Excès de T4 exogène : TSH effondrée, hyperthyroïdie iatrogène.', p: { thy: 0.12, levo: 2 } },
+    { id: 'lt4x', name: 'Surdosage en lévothyroxine', note: 'Excès de T4 exogène : TSH effondrée, thyrotoxicose iatrogène (sans hyperthyroïdie).', p: { thy: 0.12, levo: 2 } },
     { id: 'graves', name: 'Maladie de Basedow', note: 'Les TRAb stimulent le récepteur de la TSH sans rétrocontrôle possible.', p: { trab: 1.5 } },
     { id: 'nodule', name: 'Adénome toxique', note: 'Un nodule autonome sécrète indépendamment de la TSH, qui s\'effondre.', p: { auto: 1.6 } },
     { id: 'central', name: 'Hypothyroïdie centrale', note: 'Insuffisance hypophysaire : T4L basse avec une TSH normale ou basse, inadaptée.', p: { pit: 0.08 } },
-    { id: 'iodine', name: 'Carence iodée', note: 'La TSH stimule la glande qui grossit (goitre) et privilégie la T3.', p: { iodine: 0.12 } },
-    { id: 'nti', name: 'Syndrome de basse T3', note: 'Maladie aiguë sévère : moins de conversion T4 → T3, plus de T3 reverse.', p: { d12: 0.45, d3: 2.2, hypo: 0.75 } }
+    { id: 'iodine', name: 'Carence iodée', note: 'La TSH stimule la glande qui grossit (goitre) et privilégie la T3 (complément).', p: { iodine: 0.12 } },
+    { id: 'nti', name: 'Syndrome de basse T3', note: 'Maladie aiguë sévère : moins de conversion T4 → T3, plus de T3 reverse (complément).', p: { d12: 0.45, d3: 2.2, hypo: 0.75 } }
   ];
 
   function setScenario(id) {
@@ -98,16 +99,20 @@
     const tsh = lab('tsh'), t4 = lab('t4'), t3 = lab('t3'), rt3 = lab('rt3');
     if (tsh > 4) {
       if (t4 < 12) return { tone: 'bad', label: 'Hypothyroïdie primaire', text: 'TSH élevée et T4L basse : la thyroïde ne suit plus, l\'hypophyse compense.' };
-      return { tone: 'warn', label: 'Hypothyroïdie infraclinique', text: 'TSH élevée, T4L encore normale : la compensation hypophysaire maintient la T4L.' };
+      if (tsh > 10) return { tone: 'warn', label: 'TSH > 10 mUI/L, T4L normale', text: 'Au-delà du seuil de l\'hypothyroïdie infraclinique (TSH 4–10 mUI/L) : hypothyroïdie à confirmer sur un 2ᵉ dosage, le plus souvent traitée (complément).' };
+      return { tone: 'warn', label: 'Hypothyroïdie infraclinique', text: 'TSH modérément élevée (4–10 mUI/L), T4L encore normale : à confirmer sur un 2ᵉ dosage à 6–8 semaines.' };
     }
     if (tsh < 0.4) {
-      if (t4 > 22 || t3 > 6.8) return { tone: 'bad', label: 'Hyperthyroïdie', text: 'TSH effondrée et hormones libres élevées : production non freinée par le rétrocontrôle.' };
+      if (t4 > 22 || t3 > 6.8) {
+        const cause = p.trab > 0.05 ? ' TRAb positifs : hyperthyroïdie (maladie de Basedow).' : p.auto > 0.02 ? ' Nodule autonome : hyperthyroïdie (adénome toxique).' : p.levo > 0.02 ? ' Prise excessive de lévothyroxine : thyrotoxicose iatrogène, sans hyperthyroïdie.' : '';
+        return { tone: 'bad', label: 'Thyrotoxicose', text: 'TSH effondrée et hormones libres élevées : excès d\'hormones thyroïdiennes non freiné par le rétrocontrôle.' + cause };
+      }
       if (t4 < 12) return { tone: 'bad', label: 'Origine centrale', text: 'TSH basse et T4L basse : évoquer une atteinte hypothalamo-hypophysaire.' };
       return { tone: 'warn', label: 'Hyperthyroïdie infraclinique', text: 'TSH basse, hormones libres encore dans les normes.' };
     }
     if (t4 < 12) return { tone: 'bad', label: 'Hypothyroïdie centrale', text: 'T4L basse avec une TSH « normale » : la TSH est inadaptée au niveau de T4L.' };
-    if (t3 < 3.1) return { tone: 'warn', label: 'Syndrome de basse T3', text: 'T3L basse, TSH normale' + (rt3 > 0.54 ? ', T3 reverse élevée' : '') + ' : conversion périphérique diminuée.' };
-    if (t4 > 22) return { tone: 'warn', label: 'T4L élevée, TSH normale', text: 'Discordance à explorer (prise de LT4 récente, interférence, résistance).' };
+    if (t3 < 3.1) return { tone: 'warn', label: 'Syndrome de basse T3', text: 'T3L basse, TSH normale' + (rt3 > 0.38 ? ', T3 reverse élevée' : '') + ' : conversion périphérique diminuée.' };
+    if (t4 > 22) return { tone: 'warn', label: 'T4L élevée, TSH normale', text: 'Discordance à explorer : adénome thyréotrope (hyperthyroïdie centrale) ; complément : prise récente de LT4, interférence de dosage, résistance aux hormones thyroïdiennes.' };
     return { tone: 'good', label: 'Euthyroïdie', text: 'TSH, T4L et T3L dans les valeurs de référence.' };
   }
 
