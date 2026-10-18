@@ -72,12 +72,13 @@
   AX.push({
     id: 'cortico', card: { side: 'L', row: 1 }, color: 'p-gold', target: [761, 452],
     name: 'Axe corticotrope', sub: 'Hypothalamus · antéhypophyse · corticosurrénale', clock: 'day',
+    hh: { x: 270, y: 340, s: 1.05, flip: true },
     clockInfo: 'Le cortisol est le plus élevé en début de matinée et le plus bas le soir, du fait du rythme circadien de l\'ACTH.',
     lead: 'La CRH hypothalamique stimule la sécrétion d\'ACTH, qui stimule la production de cortisol (et d\'androgènes) par la corticosurrénale. Le cortisol, et non les androgènes, freine en retour la CRH et l\'ACTH.',
     points: ['Rythme circadien : pic de cortisol le matin, nadir le soir (horloge à côté du titre).', 'L\'inflammation augmente la sécrétion d\'ACTH.', 'Exploration : cortisol à 8 h, test au Synacthène, freinage minute à la dexaméthasone, cortisol libre urinaire ou salivaire à minuit.', 'L\'excès chronique d\'ACTH entraîne une hyperplasie surrénalienne.'],
     nodes: [
-      { id: 'hypo', x: 230, y: 380, organ: 'hypothalamusIcon', label: 'Hypothalamus', sub: 'CRH', color: 'p-orange', info: 'Les neurones hypothalamiques libèrent la CRH dans le système porte.' },
-      { id: 'pit', x: 570, y: 380, organ: 'pituitaryIcon', label: 'Antéhypophyse', sub: 'cellules corticotropes', color: 'p-orange2', info: 'Les cellules corticotropes sécrètent l\'ACTH (et l\'α-MSH, issue de la POMC).' },
+      { id: 'hypo', at: 'hypo', lx: 96, ly: 50, label: 'Hypothalamus', sub: 'noyau paraventriculaire : CRH', color: 'p-orange', info: 'Les neurones hypothalamiques libèrent la CRH dans le système porte.' },
+      { id: 'pit', at: 'ant', lx: 40, ly: 96, label: 'Antéhypophyse', sub: 'cellules corticotropes', color: 'p-orange2', info: 'Les cellules corticotropes sécrètent l\'ACTH (et l\'α-MSH, issue de la POMC).' },
       { id: 'adr', x: 930, y: 380, organ: 'adrenalKidney', label: 'Corticosurrénale', sub: ['zone fasciculée : cortisol', 'zone réticulée : androgènes'], color: 'p-gold', info: 'Zone fasciculée : 75 à 80 % du volume du cortex, cortisol. Zone réticulée : DHEA, DHEA-S, androstènedione.' },
       { id: 'liver', x: 1330, y: 240, organ: 'liver', s: 0.9, label: 'Foie', sub: 'néoglucogenèse', color: 'p-gold' },
       { id: 'muscle', x: 1330, y: 440, organ: 'muscle', s: 0.9, label: 'Muscle', sub: 'catabolisme protidique', color: 'p-gold' },
@@ -86,7 +87,7 @@
       { id: 'andro', x: 930, y: 760, label: 'Androgènes', sub: 'pas de rétrocontrôle', color: 'p-sky', info: 'Les androgènes surrénaliens dépendent de l\'ACTH mais ne freinent pas l\'axe.' }
     ],
     links: [
-      { from: 'hypo', to: 'pit', kind: 'stim', mol: 'crh', mod: R.circadian },
+      { from: 'hypo', to: 'pit', kind: 'stim', mol: 'crh', mod: R.circadian, labelOff: 64 },
       { from: 'pit', to: 'adr', kind: 'stim', mol: 'acth', mod: R.circadian },
       { from: 'adr', to: 'liver', mol: 'cortisol', mod: R.circadian, rate: 1 },
       { from: 'adr', to: 'muscle', mol: 'cortisol', mod: R.circadian, rate: 1, label: '' },
@@ -103,12 +104,13 @@
   AX.push({
     id: 'somato', card: { side: 'L', row: 2 }, color: 'p-sky', target: [790, 198],
     name: 'Axe somatotrope', sub: 'Hypothalamus · antéhypophyse · foie', clock: 'day', startHour: 20,
+    hh: { x: 270, y: 340, s: 1.05, flip: true },
     clockInfo: 'La GH est sécrétée de façon pulsatile, particulièrement la nuit.',
     lead: 'La GHRH stimule et la somatostatine freine la sécrétion de GH. La GH, pulsatile et surtout nocturne, stimule la production hépatique d\'IGF-1, qui freine en retour la GH et la GHRH.',
     points: ['Les analogues de la somatostatine traitent l\'acromégalie.', 'Diagnostic de l\'acromégalie : IGF-1 élevée et absence de freination de la GH sous HGPO (GH ≥ 0,4 ng/mL).', 'La GH est l\'une des hormones de contre-régulation de l\'hypoglycémie.', 'Avant la soudure des cartilages, l\'excès de GH donne un gigantisme.'],
     nodes: [
-      { id: 'hypo', x: 230, y: 380, organ: 'hypothalamusIcon', label: 'Hypothalamus', sub: 'GHRH · somatostatine', color: 'p-sky' },
-      { id: 'pit', x: 600, y: 380, organ: 'pituitaryIcon', label: 'Antéhypophyse', sub: 'cellules somatotropes', color: 'p-sky' },
+      { id: 'hypo', at: 'hypo', lx: 96, ly: 50, label: 'Hypothalamus', sub: 'GHRH (+) · somatostatine (−)', color: 'p-sky' },
+      { id: 'pit', at: 'ant', lx: 40, ly: 96, label: 'Antéhypophyse', sub: 'cellules somatotropes', color: 'p-sky' },
       { id: 'liver', x: 980, y: 380, organ: 'liver', label: 'Foie', sub: 'IGF-1', color: 'p-blue' },
       { id: 'bone', x: 1360, y: 260, organ: 'bone', s: 0.9, label: 'Cartilages de croissance', sub: 'croissance staturale', color: 'p-blue' },
       { id: 'muscle', x: 1360, y: 500, organ: 'muscle', s: 0.9, label: 'Muscles, viscères', sub: 'croissance tissulaire', color: 'p-blue' },
@@ -116,8 +118,8 @@
       { id: 'hgpo', x: 600, y: 770, label: 'Hyperglycémie (HGPO)', w: 270, color: 'p-lime', info: 'La charge en glucose freine normalement la GH : test dynamique de freination de l\'acromégalie.' }
     ],
     links: [
-      { from: 'hypo', to: 'pit', kind: 'stim', mol: 'ghrh', bend: -40, mod: R.ghNight },
-      { from: 'hypo', to: 'pit', kind: 'inhib', mol: 'sst', bend: 50, rate: 0.8 },
+      { from: 'hypo', to: 'pit', kind: 'stim', mol: 'ghrh', bend: -40, mod: R.ghNight, labelOff: 40 },
+      { from: 'hypo', to: 'pit', kind: 'inhib', mol: 'sst', bend: 50, rate: 0.8, labelOff: 70 },
       { from: 'pit', to: 'liver', kind: 'stim', mol: 'gh', mod: R.ghNight, rate: 2.2 },
       { from: 'liver', to: 'bone', mol: 'igf1' },
       { from: 'liver', to: 'muscle', mol: 'igf1', label: '' },
@@ -133,51 +135,65 @@
   AX.push({
     id: 'lacto', card: { side: 'L', row: 3 }, color: 'p-magenta', target: [764, 352],
     name: 'Axe lactotrope', sub: 'Hypothalamus · antéhypophyse · glande mammaire',
+    hh: { x: 270, y: 340, s: 1.05, flip: true },
     lead: 'La prolactine est la seule hormone antéhypophysaire freinée en permanence : la dopamine hypothalamique exerce un tonus inhibiteur. TRH et œstrogènes la stimulent. Il n\'y a pas de boucle de rétrocontrôle hormonal comme dans les quatre autres axes.',
     points: ['Une section ou une compression de la tige lève le frein dopaminergique : hyperprolactinémie de déconnexion (prolactine en général < 200 ng/mL).', 'Prolactine > 200 ng/mL : évoque un macroadénome à prolactine.', 'L\'hyperprolactinémie inhibe la pulsatilité de la GnRH : aménorrhée, insuffisance gonadotrope fonctionnelle.', 'Écarter les causes connues (médicaments, grossesse, macroprolactinémie).'],
     nodes: [
-      { id: 'hypo', x: 230, y: 380, organ: 'hypothalamusIcon', label: 'Hypothalamus', sub: 'dopamine · TRH', color: 'p-grey' },
-      { id: 'pit', x: 620, y: 380, organ: 'pituitaryIcon', label: 'Antéhypophyse', sub: 'cellules lactotropes', color: 'p-magenta' },
+      { id: 'hypo', at: 'hypo', lx: 96, ly: 50, label: 'Hypothalamus', sub: 'dopamine (−) · TRH (+)', color: 'p-grey', info: 'Les neurones dopaminergiques tubéro-infundibulaires (noyau arqué) libèrent la dopamine dans le système porte de la tige (complément).' },
+      { id: 'pit', at: 'ant', lx: 40, ly: 96, label: 'Antéhypophyse', sub: 'cellules lactotropes', color: 'p-magenta' },
       { id: 'breast', x: 1020, y: 380, organ: 'breast', label: 'Glande mammaire', sub: 'lactation', color: 'p-magenta' },
-      { id: 'e2', x: 620, y: 770, label: 'Œstrogènes', sub: 'grossesse', color: 'p-rose' },
-      { id: 'gnrh', x: 1020, y: 770, label: 'Neurones à GnRH', w: 250, sub: 'pulsatilité freinée', color: 'p-violet', zoom: 'gonadoF', info: 'L\'excès de prolactine inhibe la pulsatilité de la GnRH hypothalamique.' },
-      { id: 'stalk', x: 230, y: 770, label: 'Tige pituitaire', color: 'p-grey', info: 'Véhicule la dopamine. Sa compression ou sa section donne une hyperprolactinémie de déconnexion, avec déficit des autres axes.' }
+      { id: 'e2', x: 620, y: 800, label: 'Œstrogènes', sub: 'grossesse', color: 'p-rose' },
+      { id: 'gnrh', x: 1020, y: 770, label: 'Neurones à GnRH', w: 250, sub: 'pulsatilité freinée', color: 'p-violet', zoom: 'gonadoF', info: 'L\'excès de prolactine inhibe la pulsatilité de la GnRH hypothalamique.' }
     ],
     links: [
-      { from: 'hypo', to: 'pit', kind: 'inhib', mol: 'dopa', bend: -50, rate: 2.2, label: 'dopamine (tonus −)' },
-      { from: 'hypo', to: 'pit', kind: 'stim', mol: 'trh', bend: 60, rate: 0.8 },
+      { from: 'hypo', to: 'pit', kind: 'inhib', mol: 'dopa', bend: -50, rate: 2.2, label: 'dopamine (tonus −)', labelOff: 120 },
+      { from: 'hypo', to: 'pit', kind: 'stim', mol: 'trh', bend: 60, rate: 0.8, labelOff: 60 },
       { from: 'e2', to: 'pit', kind: 'stim', mol: 'e2', rate: 0.8 },
       { from: 'pit', to: 'breast', kind: 'stim', mol: 'prl', rate: 1.4 },
-      { from: 'pit', to: 'gnrh', kind: 'inhib', mol: 'prl', rate: 0.6, label: '' },
-      { from: 'stalk', to: 'hypo', color: 'p-grey', label: '' }
+      { from: 'pit', to: 'gnrh', kind: 'inhib', mol: 'prl', rate: 0.6, label: '' }
     ]
   });
 
-  /* ===================== Posthypophyse ===================== */
+  /* ===================== Posthypophyse : ADH et ocytocine ===================== */
   AX.push({
     id: 'adh', card: { side: 'L', row: 4 }, color: 'p-sky', target: [760, 474],
-    name: 'Posthypophyse · ADH', sub: 'Noyaux supraoptiques et paraventriculaires · posthypophyse · rein',
-    lead: 'L\'ADH est synthétisée par les noyaux supraoptiques et paraventriculaires, transportée le long des axones de la tige et stockée dans la posthypophyse. Sur le rein (récepteur V2), elle fait réabsorber l\'eau par les aquaporines.',
-    points: ['Diabète insipide : polyurie > 3 L/24 h, polydipsie, nycturie, urines diluées (densité < 1005, osmolalité < 200 mosmol/kg).', 'SIADH : rétention d\'eau sans œdème, hyponatrémie souvent < 120 mmol/L, osmolalité plasmatique basse.', 'Un adénome hypophysaire ne donne jamais de diabète insipide (sauf apoplexie ou chirurgie).', 'Le cortisol inhibe la sécrétion d\'ADH.'],
+    name: 'Posthypophyse · ADH et ocytocine', sub: 'Hypothalamus · posthypophyse · rein · utérus, sein',
+    hh: { x: 250, y: 330, s: 1.0, portal: false },
+    levels: { x: 1350, y: 740, w: 190 },
+    panels: [{ id: 'oxyPanel', x: 440, y: 655, w: 870, h: 315, color: 'p-rose', title: 'Ocytocine', sub: 'mêmes noyaux, même voie axonale, autres cibles et autres stimulus' }],
+    lead: 'Deux nonapeptides sont fabriqués par les neurones des noyaux supraoptiques et paraventriculaires, transportés le long de leurs axones dans la tige et stockés dans la posthypophyse. L\'ADH règle l\'eau : un « osmostat » hypothalamique compare l\'osmolalité plasmatique à sa consigne ; l\'ADH fait réabsorber l\'eau libre par le canal collecteur (récepteur V2, aquaporines 2), ce qui dilue le plasma et ramène l\'osmolalité à la consigne. L\'ocytocine, elle, agit sur l\'utérus et le sein.',
+    points: ['Osmolalité plasmatique ≈ 2 × natrémie + 10 ≈ 285–295 mosmol/kg ; seuil de l\'ADH vers 280–285, de la soif vers 290–295 (complément).', 'Une hypovolémie importante (> 10 %) stimule aussi l\'ADH, qui devient vasoconstrictrice (récepteur V1a).', 'Diabète insipide : polyurie > 3 L/24 h, polydipsie, nycturie, urines diluées (osmolalité < 200 mosmol/kg).', 'SIADH : rétention d\'eau sans œdème, hyponatrémie souvent < 120 mmol/L, osmolalité plasmatique basse.', 'Le cortisol inhibe la sécrétion d\'ADH.', 'Ocytocine : réflexe de succion (éjection du lait), distension du col au travail (rétrocontrôle positif, complément).'],
     nodes: [
-      { id: 'hypo', x: 230, y: 380, organ: 'hypothalamusIcon', label: 'Hypothalamus', sub: 'noyaux SO et PV', color: 'p-sky' },
-      { id: 'post', x: 580, y: 380, organ: 'pituitaryIcon', label: 'Posthypophyse', sub: 'stockage, libération', color: 'p-sky' },
-      { id: 'kidney', x: 960, y: 300, organ: 'kidney', label: 'Rein', sub: 'tube collecteur · V2', color: 'p-sky' },
-      { id: 'vessel', x: 960, y: 620, organ: 'vessel', label: 'Vaisseaux', sub: 'vasopresseur si chute de PA', color: 'p-red' },
-      { id: 'uterus', x: 1350, y: 300, organ: 'uterus', s: 0.9, label: 'Utérus', sub: 'contraction (complément)', color: 'p-rose' },
-      { id: 'breast', x: 1350, y: 590, organ: 'breast', s: 0.85, label: 'Sein', sub: 'éjection du lait (complément)', color: 'p-rose' },
-      { id: 'osm', x: 230, y: 760, label: 'Osmolalité ↑', sub: '(complément)', color: 'p-sky', info: 'Les osmorécepteurs hypothalamiques stimulent l\'ADH quand l\'osmolalité plasmatique s\'élève (complément de physiologie, non détaillé dans le polycopié).' },
-      { id: 'cort', x: 580, y: 760, label: 'Cortisol', color: 'p-gold', zoom: 'cortico', info: 'Le cortisol inhibe la sécrétion d\'hormone antidiurétique : l\'insuffisance corticotrope peut s\'accompagner d\'une hyponatrémie.' }
+      { id: 'hypo', at: 'hypo', lx: -180, ly: 122, label: 'Noyaux SO et PV', sub: ['osmorécepteurs', 'ADH · ocytocine'], color: 'p-sky', info: 'Les neurones magnocellulaires des noyaux supraoptiques (SO) et paraventriculaires (PV) synthétisent l\'ADH et l\'ocytocine. Des osmorécepteurs voisins (organes circumventriculaires) détectent l\'osmolalité plasmatique (complément).' },
+      { id: 'post', at: 'post', lx: 60, ly: 10, label: 'Posthypophyse', sub: 'stockage, libération', color: 'p-sky', info: 'Terminaisons axonales : l\'ADH et l\'ocytocine y sont stockées puis libérées dans le sang.' },
+      { id: 'osm', x: 730, y: 250, w: 380, h: 150, label: 'Osmolalité plasmatique', color: 'p-sky', gauge: { min: 265, max: 315, lo: 280, hi: 295, set: 287, ticks: [270, 280, 290, 300, 310], val: (s) => 2 * s.na + 10 }, info: 'Le « thermostat » de l\'eau : l\'hypothalamus compare l\'osmolalité plasmatique (≈ 2 × Na + 10) à sa consigne. Au-dessus : ADH et soif ; au-dessous : ADH effondrée, urines diluées.' },
+      { id: 'thirst', x: 700, y: 450, label: 'Soif', w: 200, sub: 'apport d\'eau', color: 'p-sky', info: 'La soif apparaît pour une osmolalité un peu plus haute que le seuil de l\'ADH (complément). Elle protège de l\'hypernatrémie tant que le patient peut boire.' },
+      { id: 'kidney', x: 1090, y: 320, organ: 'nephron', s: 1.4, label: 'Rein : canal collecteur', sub: ['récepteur V2 → aquaporines 2', 'réabsorption d\'eau libre'], color: 'p-sky', info: 'L\'ADH se fixe au récepteur V2 des cellules du canal collecteur : les aquaporines 2 s\'insèrent dans la membrane apicale et l\'eau libre est réabsorbée.' },
+      { id: 'urine', x: 1420, y: 300, label: 'Urines', w: 270, color: 'p-gold', info: 'Volume et concentration des urines : leur osmolalité reflète l\'action de l\'ADH sur le rein.' },
+      { id: 'vessel', x: 1420, y: 510, organ: 'vessel', s: 0.7, label: 'Artérioles', sub: 'V1a : vasoconstriction', color: 'p-red', info: 'Aux fortes concentrations (hypovolémie, hypotension), l\'ADH est vasoconstrictrice par le récepteur V1a.' },
+      { id: 'baro', x: 150, y: 660, label: 'Hypovolémie, PA ↓', w: 250, sub: 'barorécepteurs', color: 'p-red', info: 'Une baisse importante de la volémie ou de la pression artérielle stimule l\'ADH, même si l\'osmolalité est normale (complément).' },
+      { id: 'cort', x: 150, y: 860, label: 'Cortisol', w: 180, color: 'p-gold', zoom: 'cortico', info: 'Le cortisol inhibe la sécrétion d\'hormone antidiurétique : l\'insuffisance corticotrope peut s\'accompagner d\'une hyponatrémie.' },
+      { id: 'suck', x: 600, y: 770, label: 'Succion du mamelon', w: 250, color: 'p-rose', info: 'Le réflexe neuroendocrine de la tétée déclenche la libération d\'ocytocine (complément).' },
+      { id: 'cervix', x: 600, y: 905, label: 'Distension du col', w: 250, sub: '', color: 'p-rose', info: 'Réflexe de Ferguson : la distension du col et du vagin au cours du travail stimule l\'ocytocine, qui renforce les contractions (rétrocontrôle positif, complément).' },
+      { id: 'uterus', x: 900, y: 810, organ: 'uterus', s: 0.8, label: 'Utérus', sub: 'contractions du travail', color: 'p-rose' },
+      { id: 'breast', x: 1170, y: 810, organ: 'breast', s: 0.78, label: 'Glande mammaire', sub: 'éjection du lait', color: 'p-rose' }
     ],
     links: [
-      { from: 'hypo', to: 'post', mol: 'adh', label: 'transport axonal', rate: 1.6 },
-      { from: 'post', to: 'kidney', kind: 'stim', mol: 'adh', rate: 1.6 },
-      { from: 'post', to: 'vessel', kind: 'stim', mol: 'adh', rate: 0.6, label: '' },
-      { from: 'kidney', to: 'vessel', mol: 'water', rate: 2.2, bend: 60, label: 'eau réabsorbée' },
-      { from: 'post', to: 'uterus', kind: 'stim', mol: 'oxy', bend: -60, rate: 0.7 },
-      { from: 'post', to: 'breast', kind: 'stim', mol: 'oxy', bend: 40, rate: 0.6, label: '' },
-      { from: 'osm', to: 'hypo', kind: 'stim', color: 'p-sky', label: '' },
-      { from: 'cort', to: 'hypo', kind: 'inhib', mol: 'cortisol', rate: 0.6, label: '' }
+      { from: 'osm', to: 'hypo', kind: 'stim', color: 'p-sky', bend: 40, label: 'osmorécepteurs', info: 'adh.osm' },
+      { from: 'hypo', to: 'post', mol: 'adh', label: '', rate: 1.6 },
+      { from: 'post', to: 'kidney', kind: 'stim', mol: 'adh', bend: -40, rate: 1.6, label: 'ADH' },
+      { from: 'kidney', to: 'osm', mol: 'water', rate: 2, bend: 60, label: 'eau réabsorbée', labelAt: 0.3 },
+      { from: 'kidney', to: 'urine', mol: 'water', rate: 1, label: '' },
+      { from: 'hypo', to: 'thirst', kind: 'stim', color: 'p-sky', bend: -20, label: '' },
+      { from: 'thirst', to: 'osm', mol: 'water', rate: 1, label: 'eau bue' },
+      { from: 'post', to: 'vessel', kind: 'stim', mol: 'adh', bend: 60, rate: 0.5, label: '' },
+      { from: 'baro', to: 'hypo', kind: 'stim', color: 'p-red', bend: -40, label: '' },
+      { from: 'cort', to: 'hypo', kind: 'inhib', mol: 'cortisol', bend: -80, rate: 0.5, label: '' },
+      { from: 'post', to: 'uterus', kind: 'stim', mol: 'oxy', bend: 30, rate: 0.9, label: 'ocytocine' },
+      { from: 'post', to: 'breast', kind: 'stim', mol: 'oxy', bend: 60, rate: 0.7, label: '' },
+      { from: 'suck', to: 'hypo', kind: 'stim', color: 'p-rose', bend: -60, label: '' },
+      { from: 'cervix', to: 'hypo', kind: 'stim', color: 'p-rose', bend: -110, label: '' },
+      { from: 'uterus', to: 'cervix', kind: 'stim', color: 'p-rose', bend: -30, label: 'rétrocontrôle +' }
     ]
   });
 
@@ -185,22 +201,26 @@
   AX.push({
     id: 'medullo', card: { side: 'L', row: 5 }, color: 'p-red', target: [765, 456],
     name: 'Médullosurrénale', sub: 'Système sympathique · cellules chromaffines · catécholamines',
-    lead: 'Les nerfs splanchniques du système sympathique stimulent les cellules chromaffines, qui libèrent l\'adrénaline (80 à 95 %) et la noradrénaline (10 à 20 %) stockées dans leurs granules. Les glucocorticoïdes du cortex stimulent leur synthèse.',
-    points: ['Réaction de combat ou de fuite : fréquence cardiaque ↑, pression artérielle ↑, vasoconstriction.', 'Les catécholamines participent à la contre-régulation de l\'hypoglycémie ; leurs signes adrénergiques alertent le patient.', 'Les glucocorticoïdes augmentent la tyrosine hydroxylase et la PNMT.'],
+    lead: 'Les nerfs splanchniques du système sympathique stimulent les cellules chromaffines, qui libèrent l\'adrénaline (80 à 95 %) et la noradrénaline (10 à 20 %) stockées dans leurs granules. Les glucocorticoïdes du cortex stimulent leur synthèse. Dans la cellule (et dans la tumeur), la COMT transforme en continu les catécholamines en métanéphrines : c\'est ce que l\'on dose.',
+    points: ['Réaction de combat ou de fuite : fréquence cardiaque ↑, pression artérielle ↑, vasoconstriction.', 'Les catécholamines participent à la contre-régulation de l\'hypoglycémie ; leurs signes adrénergiques alertent le patient.', 'Les glucocorticoïdes augmentent la tyrosine hydroxylase et la PNMT : seule la médullosurrénale, baignée de cortisol, fabrique beaucoup d\'adrénaline.', 'Profil sécrétoire (complément) : adrénergique (métanéphrine ↑, paroxysmes, tachycardie, hyperglycémie), noradrénergique (normétanéphrine ↑, HTA plus permanente ; paragangliomes extra-surrénaliens), dopaminergique (3-méthoxytyramine ↑, souvent peu d\'HTA ; paragangliomes, gène SDHB).'],
     nodes: [
       { id: 'nerve', x: 230, y: 380, organ: 'nerve', label: 'Nerfs splanchniques', sub: 'système sympathique', color: 'p-red' },
       { id: 'med', x: 600, y: 380, organ: 'adrenalKidney', label: 'Médullosurrénale', sub: 'cellules chromaffines', color: 'p-red' },
       { id: 'heart', x: 960, y: 230, organ: 'heart', s: 0.9, label: 'Cœur', sub: 'FC ↑, contractilité ↑', color: 'p-red' },
       { id: 'vessel', x: 960, y: 470, organ: 'vessel', label: 'Vaisseaux', sub: 'vasoconstriction, PA ↑', color: 'p-red' },
       { id: 'liver', x: 960, y: 700, organ: 'liver', s: 0.9, label: 'Foie', sub: 'glycémie ↑', color: 'p-lime' },
-      { id: 'cortex', x: 600, y: 760, label: 'Cortisol (cortex)', w: 240, color: 'p-gold', zoom: 'cortico', info: 'Les glucocorticoïdes produits par le cortex surrénalien stimulent la synthèse des catécholamines.' }
+      { id: 'cortex', x: 600, y: 760, label: 'Cortisol (cortex)', w: 240, color: 'p-gold', zoom: 'cortico', info: 'Les glucocorticoïdes produits par le cortex surrénalien stimulent la synthèse des catécholamines.' },
+      { id: 'assay', x: 230, y: 760, label: 'Métanéphrines', w: 270, sub: ['COMT dans la cellule (et la tumeur)', 'dosage plasmatique ou urinaire'], color: 'p-brown', info: 'Métanéphrine (issue de l\'adrénaline), normétanéphrine (de la noradrénaline), 3-méthoxytyramine (de la dopamine) : produites en continu, même entre les paroxysmes, d\'où leur intérêt diagnostique.' }
     ],
     links: [
       { from: 'nerve', to: 'med', kind: 'stim', color: 'p-red', label: 'influx sympathique', info: 'medullo.nerve' },
       { from: 'med', to: 'heart', kind: 'stim', mol: 'adre', rate: 1.6 },
       { from: 'med', to: 'vessel', kind: 'stim', mol: 'nora', rate: 1 },
       { from: 'med', to: 'liver', kind: 'stim', mol: 'adre', rate: 0.9, label: '' },
-      { from: 'cortex', to: 'med', kind: 'stim', mol: 'cortisol', rate: 0.8, label: '' }
+      { from: 'cortex', to: 'med', kind: 'stim', mol: 'cortisol', rate: 0.8, label: '' },
+      { from: 'med', to: 'assay', mol: 'adre', rate: 0.5, bend: 30, label: '' },
+      { from: 'med', to: 'assay', mol: 'nora', rate: 0.5, label: 'MN · NMN · 3-MT' },
+      { from: 'med', to: 'assay', mol: 'dopa', rate: 0.4, bend: -30, label: '' }
     ],
     chain: { x: 1250, y: 240, dy: 120, w: 300, title: 'Biosynthèse (cellule chromaffine)', steps: [
       { label: 'Tyrosine', enz: 'tyrosine hydroxylase' }, { label: 'L-DOPA', enz: 'décarboxylase' }, { label: 'Dopamine', mol: 'dopa', enz: 'dopamine β-hydroxylase' }, { label: 'Noradrénaline', mol: 'nora', enz: 'PNMT (cytosol)' }, { label: 'Adrénaline', mol: 'adre' }
@@ -212,11 +232,12 @@
   AX.push({
     id: 'gonadoF', card: { side: 'R', row: 0 }, color: 'p-rose', target: [832, 592],
     name: 'Axe gonadotrope féminin', sub: 'GnRH pulsatile · LH, FSH · ovaire · cycle de 28 jours', clock: 'cycle',
+    hh: { x: 270, y: 340, s: 1.05, flip: true },
     lead: 'La GnRH pulsatile commande la LH et la FSH. La LH stimule la thèque interne (androgènes), la FSH la granulosa, qui les aromatise en estradiol. Le rétrocontrôle de l\'estradiol est négatif, sauf en milieu de cycle où il devient positif et déclenche le pic de LH et l\'ovulation.',
     points: ['J1–J14 : phase folliculaire, sélection d\'un follicule sous FSH.', 'J14 : pic de LH, rupture du follicule, expulsion de l\'ovocyte II.', 'J14–J28 : phase lutéale, le corps jaune sécrète progestérone et estradiol.', 'L\'inhibine B freine la FSH (action hypophysaire). La leptine a un effet permissif sur la GnRH.', 'Observez le signe du rétrocontrôle de l\'estradiol passer de − à + autour de J12–J14.'],
     nodes: [
-      { id: 'hypo', x: 220, y: 380, organ: 'hypothalamusIcon', label: 'Neurones à GnRH', sub: 'sécrétion pulsatile', color: 'p-violet' },
-      { id: 'pit', x: 560, y: 380, organ: 'pituitaryIcon', label: 'Antéhypophyse', sub: 'cellules gonadotropes', color: 'p-violet' },
+      { id: 'hypo', at: 'hypo', lx: 96, ly: 50, label: 'Neurones à GnRH', sub: 'sécrétion pulsatile', color: 'p-violet' },
+      { id: 'pit', at: 'ant', lx: 40, ly: 96, label: 'Antéhypophyse', sub: 'cellules gonadotropes', color: 'p-violet' },
       { id: 'ovary', x: 920, y: 380, organ: 'ovary', s: 1.25, label: 'Ovaire', sub: ['thèque : androgènes (LH)', 'granulosa : E2 (FSH)', 'corps jaune : progestérone'], color: 'p-rose' },
       { id: 'uterus', x: 1330, y: 300, organ: 'uterus', label: 'Utérus', sub: 'endomètre, glaire', color: 'p-rose' },
       { id: 'breast', x: 1330, y: 600, organ: 'breast', s: 0.85, label: 'Seins, os, peau', sub: 'effets trophiques, HDL ↑', color: 'p-rose' },
@@ -224,7 +245,7 @@
       { id: 'lep', x: 560, y: 790, organ: 'fat', s: 0.8, label: 'Tissu adipeux blanc', sub: 'leptine (permissif)', color: 'p-amber' }
     ],
     links: [
-      { from: 'hypo', to: 'pit', kind: 'stim', mol: 'gnrh', mod: R.gnrhPulse, rate: 2 },
+      { from: 'hypo', to: 'pit', kind: 'stim', mol: 'gnrh', mod: R.gnrhPulse, rate: 2, labelOff: 64 },
       { from: 'pit', to: 'ovary', kind: 'stim', mol: 'lh', bend: -40, mod: R.lh },
       { from: 'pit', to: 'ovary', kind: 'stim', mol: 'fsh', bend: 40, mod: R.fsh },
       { from: 'ovary', to: 'uterus', mol: 'e2', mod: R.e2, label: 'E2' },
@@ -243,12 +264,13 @@
   AX.push({
     id: 'gonadoM', card: { side: 'R', row: 1 }, color: 'p-blue', target: [806, 674],
     name: 'Axe gonadotrope masculin', sub: 'GnRH pulsatile · LH, FSH · testicule', clock: 'day',
+    hh: { x: 270, y: 340, s: 1.05, flip: true },
     clockInfo: 'Pulses de GnRH environ toutes les 90 minutes, suivis de pulses de LH.',
     lead: 'La GnRH pulsatile entraîne une libération pulsatile de LH et de FSH. La LH stimule les cellules de Leydig (testostérone), la FSH les cellules de Sertoli (spermatogenèse, inhibine B). La testostérone freine l\'axe ; l\'inhibine B freine la FSH.',
     points: ['Testicule : 15 à 20 mL ; tubes séminifères (cellules germinales et de Sertoli) et tissu interstitiel (cellules de Leydig).', 'Testostérone et cellules de Sertoli sont indispensables à la spermatogenèse.', 'La fonction endocrine décline lentement avec l\'âge, la production de gamètes persiste.', 'Une hyperprolactinémie peut freiner l\'axe.'],
     nodes: [
-      { id: 'hypo', x: 220, y: 380, organ: 'hypothalamusIcon', label: 'Neurones à GnRH', sub: 'pulses ≈ 90 min', color: 'p-violet' },
-      { id: 'pit', x: 560, y: 380, organ: 'pituitaryIcon', label: 'Antéhypophyse', sub: 'cellules gonadotropes', color: 'p-violet' },
+      { id: 'hypo', at: 'hypo', lx: 96, ly: 50, label: 'Neurones à GnRH', sub: 'pulses ≈ 90 min', color: 'p-violet' },
+      { id: 'pit', at: 'ant', lx: 40, ly: 96, label: 'Antéhypophyse', sub: 'cellules gonadotropes', color: 'p-violet' },
       { id: 'testis', x: 920, y: 380, organ: 'testis', s: 1.25, label: 'Testicule', sub: ['Leydig : testostérone (LH)', 'Sertoli : spermatogenèse (FSH)'], color: 'p-blue' },
       { id: 'muscle', x: 1330, y: 220, organ: 'muscle', s: 0.85, label: 'Muscle', sub: 'effet anabolisant', color: 'p-blue' },
       { id: 'bone', x: 1330, y: 420, organ: 'bone', s: 0.8, label: 'Os, moelle', sub: 'masse osseuse, érythropoïèse', color: 'p-blue' },
@@ -257,7 +279,7 @@
       { id: 'lep', x: 560, y: 790, organ: 'fat', s: 0.8, label: 'Tissu adipeux blanc', sub: 'leptine (permissif)', color: 'p-amber' }
     ],
     links: [
-      { from: 'hypo', to: 'pit', kind: 'stim', mol: 'gnrh', mod: R.gnrhPulse, rate: 2 },
+      { from: 'hypo', to: 'pit', kind: 'stim', mol: 'gnrh', mod: R.gnrhPulse, rate: 2, labelOff: 64 },
       { from: 'pit', to: 'testis', kind: 'stim', mol: 'lh', bend: -40, mod: R.gnrhPulse },
       { from: 'pit', to: 'testis', kind: 'stim', mol: 'fsh', bend: 40 },
       { from: 'testis', to: 'muscle', mol: 'testo' },

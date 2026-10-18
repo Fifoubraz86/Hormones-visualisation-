@@ -210,6 +210,18 @@
           fat.eff.textContent = 'MB ≈ ' + Math.round(100 * Math.pow(t3, 0.4)) + ' %';
         }
       });
+
+      /* --- Pas à pas --- */
+      HV.spotlight(HV.scenes.thyro, a, [
+        { t: 'L\'hypothalamus sécrète la TRH', d: 'Les neurones du noyau paraventriculaire fabriquent la TRH, un tripeptide, et la libèrent dans les capillaires de l\'éminence médiane. Zoomez sur l\'hypothalamus pour voir le neurone à TRH.', spot: [[700, 252, 92]] },
+        { t: 'Le système porte conduit la TRH à l\'antéhypophyse', d: 'Les veines portes de la tige pituitaire amènent la TRH aux cellules thyréotropes, qui sécrètent la TSH. La somatostatine freine la TSH.', spot: [[690, 352, 112]] },
+        { t: 'La TSH stimule la thyroïde', d: 'La TSH gagne la circulation générale et se fixe sur son récepteur à la surface des thyréocytes : captation de l\'iode, synthèse et sécrétion des hormones, croissance de la glande.', spot: [[742, 520, 86], [700, 650, 122]] },
+        { t: 'La thyroïde fabrique surtout de la T4', d: 'L\'iode alimentaire est capté puis incorporé à la thyroglobuline : la glande sécrète surtout de la T4 (forme de réserve) et un peu de T3. Zoomez sur le follicule pour suivre la synthèse.', spot: [[700, 650, 130], [455, 785, 72]] },
+        { t: 'Le transport dans le sang', d: 'T4 et T3 circulent liées à des protéines (TBG surtout) ; seule la fraction libre, infime, est active et dosée (T4L, T3L).', spot: [[520, 812, 1052, 100]] },
+        { t: 'Dans les tissus, la T4 devient T3', d: 'Les désiodases convertissent la T4 en T3, forme active : 75 % de la T3 vient de cette conversion. La T3 agit sur le cœur, le cerveau, l\'os, le muscle, le métabolisme de base.', spot: [[1030, 400, 540, 350]] },
+        { t: 'Rétrocontrôle négatif', d: 'T4 et T3 freinent la TSH (surtout) et la TRH. La relation est log-linéaire : une petite baisse de T4L fait monter fortement la TSH, d\'où l\'intérêt de la TSH en première intention.', spot: [[760, 240, 240, 610], [700, 252, 60], [790, 428, 46]] },
+        { t: 'Ce qui vient de l\'extérieur', d: 'L\'apport iodé, les anticorps anti-récepteur de la TSH (Basedow) et la lévothyroxine entrent dans la boucle. Essayez les scénarios du panneau pour voir l\'axe se rééquilibrer.', spot: [[465, 540, 72], [455, 785, 72], [600, 948, 80]] }
+      ]);
     }
   });
 })();

@@ -71,6 +71,45 @@
     return { hypo, ant, post };
   };
 
+  /* Coupe sagittale cerveau – hypothalamus – tige – hypophyse, pour les axes hypophysaires.
+     Ajoute au cerveau sagittal les noyaux, les axones vers la posthypophyse et le système porte vers
+     l'antéhypophyse. opts.portal / opts.axons : afficher l'une ou l'autre voie (par défaut les deux).
+     Repères (repère local) : hypothalamus (0, 0), éminence médiane (4, 20), antéhypophyse (-22, 156),
+     posthypophyse (38, 152). */
+  O.HH = { hypo: [0, -2], me: [4, 20], ant: [-22, 156], post: [38, 152] };
+  O.hhSagittal = function (g, opts) {
+    opts = opts || {};
+    const parts = O.brainSagittal(g);
+    const show = (k) => opts[k] !== false;
+    if (show('axons')) {
+      const ax = el('g', { class: 'hh-axons', 'data-info': 'hh-axons' }, g);
+      el('ellipse', { cx: 14, cy: -8, rx: 9, ry: 6, class: 'hh-nuc' }, ax);
+      el('ellipse', { cx: -26, cy: 8, rx: 9, ry: 5, class: 'hh-nuc' }, ax);
+      el('path', { d: 'M 14,-8 C 22,30 20,70 26,110 C 30,130 34,140 38,150', class: 'hh-axon' }, ax);
+      el('path', { d: 'M -26,8 C -4,20 14,50 18,96 C 22,124 30,140 34,150', class: 'hh-axon' }, ax);
+    }
+    if (show('portal')) {
+      const po = el('g', { class: 'hh-portal', 'data-info': 'hh-portal' }, g);
+      el('path', { d: 'M -12,22 C -14,14 -4,12 0,18 C 4,12 14,14 12,22 C 8,28 -8,28 -12,22 Z', class: 'hh-plexus' }, po);
+      el('path', { d: 'M -2,26 C -6,60 -12,100 -20,138', class: 'hh-vein' }, po);
+      el('path', { d: 'M 4,26 C 2,60 -4,100 -12,136', class: 'hh-vein' }, po);
+      el('path', { d: 'M -40,146 C -34,138 -26,150 -18,142 C -10,150 -4,140 2,150 M -42,162 C -34,154 -26,166 -18,158 C -10,166 -4,156 4,166', class: 'hh-plexus2' }, po);
+      el('ellipse', { cx: -54, cy: 16, rx: 16, ry: 7, class: 'org o-chiasm', 'data-info': 'chiasm' }, g);
+    }
+    return parts;
+  };
+
+  /* Néphron simplifié : glomérule, tube proximal, anse de Henlé, tube distal, canal collecteur.
+     Repère : glomérule (-70, -60), canal collecteur vertical en x = 70. */
+  O.nephron = function (g0) {
+    const g = el('g', { transform: 'scale(0.5)' }, g0);
+    el('path', { d: 'M -120,-110 L 120,-110 L 120,120 L -120,120 Z', class: 'neph-cortex' }, g);
+    el('path', { d: 'M -120,10 L 120,10', class: 'neph-limit' }, g);
+    el('circle', { cx: -70, cy: -64, r: 20, class: 'neph-glom' }, g);
+    el('path', { d: 'M -52,-56 C -30,-50 -40,-30 -20,-24 C 0,-18 -20,0 -8,20 L -8,100 C -8,116 14,116 14,100 L 14,20 C 14,-10 30,-20 44,-40 C 54,-56 62,-70 70,-70', class: 'neph-tube' }, g);
+    el('path', { d: 'M 70,-100 L 70,112', class: 'neph-cd', 'data-info': 'cd' }, g);
+  };
+
   /* Cerveau, vue latérale */
   O.brainLateral = function (g) {
     solid(g, 'M -44,6 C -48,-18 -30,-38 -4,-40 C 22,-42 44,-28 46,-6 C 48,6 42,14 32,14 C 28,22 18,24 10,20 C 0,26 -16,26 -22,18 C -34,20 -44,16 -44,6 Z', 'o-brain');

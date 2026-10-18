@@ -31,10 +31,31 @@
         lead(ax.card.side === 'L' ? x + cw : x, y + ch / 2, ax.target[0], ax.target[1], ax.card.side, ax.color, true);
       });
 
-      // Silhouette
+      // Silhouette humaine de face (proportions ≈ 7,5 têtes), bras légèrement écartés.
       const body = a.el('g', { class: 'body', transform: 'translate(800 548)' });
-      a.path('M -26,-302 C -28,-285 -40,-272 -70,-266 C -110,-258 -135,-245 -142,-210 L -168,-40 C -174,0 -176,40 -172,70 C -170,90 -150,92 -146,72 L -128,-40 L -118,-150 C -112,-110 -100,-60 -96,-30 C -100,10 -112,40 -112,70 C -112,140 -96,250 -84,400 C -82,420 -40,422 -40,405 L -14,120 C -8,100 8,100 14,120 L 40,405 C 40,422 82,420 84,400 C 96,250 112,140 112,70 C 112,40 100,10 96,-30 C 100,-60 112,-110 118,-150 L 128,-40 L 146,72 C 150,92 170,90 172,70 C 176,40 174,0 168,-40 L 142,-210 C 135,-245 110,-258 70,-266 C 40,-272 28,-285 26,-302 Z', 'body-shape', body);
-      a.el('ellipse', { cx: 0, cy: -372, rx: 56, ry: 70, class: 'body-shape' }, body);
+      const mirrorX = (d) => d.replace(/(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/g, (m, x, y) => -parseFloat(x) + ',' + y);
+      const half = 'M 0,-328 C 10,-328 17,-323 19,-314 C 21,-302 21,-294 25,-287 C 46,-277 82,-273 104,-263 C 121,-255 128,-239 124,-221 C 119,-205 108,-197 103,-186 C 103,-150 99,-110 89,-71 C 83,-47 83,-25 91,-5 C 103,23 108,51 106,84 C 104,140 96,200 87,250 C 83,276 86,300 84,330 C 82,360 71,384 67,400 C 73,412 82,420 71,426 C 56,431 38,429 30,422 C 28,404 30,388 30,372 C 26,330 22,300 24,262 C 20,210 16,160 10,110 C 6,90 4,78 0,74';
+      const arm = 'M 117,-246 C 145,-246 156,-222 156,-196 C 160,-150 165,-110 168,-74 C 172,-40 179,0 183,40 C 185,58 187,70 189,80 C 199,96 203,118 195,136 C 189,148 175,146 171,132 C 167,118 167,100 169,84 C 163,62 157,40 151,16 C 145,-14 139,-44 137,-74 C 133,-112 125,-150 115,-180 C 111,-200 108,-224 117,-246 Z';
+      const skin = a.el('g', { class: 'body-skin' }, body);
+      [arm, mirrorX(arm)].forEach((d) => a.path(d, 'body-fill body-limb', skin));
+      [-1, 1].forEach((k) => a.el('ellipse', { cx: k * 45, cy: -382, rx: 7, ry: 13, class: 'body-fill' }, skin));
+      a.el('ellipse', { cx: 0, cy: -385, rx: 46, ry: 58, class: 'body-fill' }, skin);
+      [half, mirrorX(half)].forEach((d) => a.path(d + ' Z', 'body-fill', skin));
+      // Modelé : ombre latérale (volume cylindrique du tronc et des membres).
+      const grad = a.el('linearGradient', { id: 'bodyShade', gradientUnits: 'userSpaceOnUse', x1: -130, y1: 0, x2: 130, y2: 0 }, a.el('defs'));
+      [[0, 0.32], [0.22, 0], [0.78, 0], [1, 0.32]].forEach(([o, op]) => a.el('stop', { offset: o, 'stop-color': 'var(--body-line)', 'stop-opacity': op }, grad));
+      [half, mirrorX(half)].forEach((d) => a.path(d + ' Z', 'body-shade', skin));
+      a.el('ellipse', { cx: 0, cy: -385, rx: 46, ry: 58, class: 'body-shade' }, skin);
+      [half, mirrorX(half)].forEach((d) => a.path(d, 'body-outline', skin));
+      // Repères anatomiques discrets : clavicules, pectoraux, ligne blanche, ombilic, crêtes iliaques, rotules, chevilles.
+      const marks = ['M -98,-262 C -66,-270 -28,-262 -7,-255', 'M -86,-198 C -62,-176 -28,-174 -6,-190', 'M 0,-246 L 0,-62', 'M -82,-4 C -62,30 -32,56 -8,68', 'M -60,-130 C -40,-124 -20,-124 -4,-128', 'M -58,-92 C -40,-86 -20,-86 -4,-90', 'M -46,-310 C -30,-300 -16,-298 -8,-300', 'M -124,-226 C -110,-206 -108,-190 -112,-172', 'M -94,64 C -72,124 -54,184 -50,240', 'M -70,300 C -62,330 -60,352 -62,374', 'M -140,-150 C -146,-120 -150,-100 -150,-84'];
+      const lines = a.el('g', { class: 'body-lines' }, body);
+      marks.forEach((d) => { a.path(d, 'body-line', lines); if (d.indexOf('M 0,') !== 0) a.path(mirrorX(d), 'body-line', lines); });
+      a.el('ellipse', { cx: 0, cy: -38, rx: 4, ry: 5, class: 'body-line' }, lines);
+      [-1, 1].forEach((k) => {
+        a.el('ellipse', { cx: k * 55, cy: 262, rx: 13, ry: 16, class: 'body-line' }, lines);
+        a.path(`M ${k * 133},-74 C ${k * 140},-70 ${k * 150},-70 ${k * 158},-76`, 'body-line', lines);
+      });
       HV.organs.bodyOrgans(a.el('g', { class: 'body-organs' }, body));
 
       const gland = (x, y, r, color, id, label, anchor, info) => {

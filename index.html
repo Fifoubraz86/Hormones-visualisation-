@@ -33,6 +33,19 @@
       <summary>Légende</summary>
       <div class="legend-body" id="legendBody"></div>
     </details>
+    <section class="step-box" id="stepBox" hidden aria-live="polite">
+      <div class="step-head">
+        <span class="step-count" id="stepCount">Étape 1 / 6</span>
+        <button type="button" class="step-x" id="stepQuit" aria-label="Quitter le pas à pas">×</button>
+      </div>
+      <h2 id="stepTitle"></h2>
+      <p id="stepText"></p>
+      <div class="step-nav">
+        <button type="button" id="stepPrev">← Étape précédente</button>
+        <div class="step-dots" id="stepDots"></div>
+        <button type="button" id="stepNext" class="primary">Étape suivante →</button>
+      </div>
+    </section>
     <p class="stage-hint">Survol : fiche · clic : entrer · molette ou pincement : zoomer · glisser : se déplacer · ← → : parcours</p>
   </main>
 
@@ -43,6 +56,7 @@
       <p class="lead" id="sceneLead"></p>
       <ul class="points" id="scenePoints"></ul>
       <p class="source" id="sceneSource" hidden></p>
+      <button type="button" class="step-start" id="stepStart" hidden>▶ Comprendre pas à pas</button>
       <div class="explore" id="sceneExplore"></div>
       <div class="explore" id="sceneSheets"></div>
       <div class="tour">
@@ -105,6 +119,7 @@
 <script src="js/axis-builder.js"></script>
 <script src="js/axes-data.js"></script>
 <script src="js/axes-sim.js"></script>
+<script src="js/axes-steps.js"></script>
 <script src="js/tests.js"></script>
 <script src="js/protein-traces.js"></script>
 <script src="js/protein-glyphs.js"></script>

@@ -165,6 +165,37 @@
       }
     }
   ];
+  T.adh_situations = [
+    {
+      id: 'water', name: 'Charge en eau : 1,5 L bu', poly: false,
+      what: 'Situation de la vie courante : que fait l\'osmostat quand on boit beaucoup d\'un coup ?',
+      proto: '1,5 L d\'eau bus en 30 minutes ; diurèse et osmolalité urinaire suivies pendant 4 heures (illustration physiologique, complément).',
+      unit: 'L/24 h', label: 'Débit urinaire', thr: 3, thrDir: 'below', thrLabel: 'débit urinaire habituel < 3 L/24 h',
+      span: 4, xUnit: 'h', duration: 16,
+      samples: [{ x: 0.03, label: '0 h' }, { x: 0.25, label: '1 h' }, { x: 0.5, label: '2 h' }, { x: 0.75, label: '3 h' }, { x: 1, label: '4 h' }],
+      apply(p, x) { p.drink = x > 0.04 && x < 0.16 ? 1.6 : 0; },
+      measure: (sim) => sim.lab('diur'),
+      interpret(v, sim, st) {
+        const peak = Math.max(...v), na = sim.lab('na');
+        return { tone: 'good', text: `L'eau bue abaisse l'osmolalité : l'ADH s'effondre, les urines deviennent abondantes (jusqu'à ${n2(peak)} L/24 h en débit) et diluées, puis tout revient à la normale en quelques heures (natrémie ${n0(na)} mmol/L). C'est le rétrocontrôle négatif de l'osmostat. Si le rein ne pouvait pas éliminer l'eau (SIADH), la même charge ferait chuter la natrémie.` };
+      }
+    },
+    {
+      id: 'desert', name: 'Marche dans le désert (6 h)', poly: false,
+      what: 'Situation de la vie courante : sueur abondante sans pouvoir boire.',
+      proto: 'Six heures de marche au soleil sans eau ; natrémie, osmolalité urinaire et diurèse (illustration physiologique, complément).',
+      unit: 'mosmol/kg', label: 'Osmolalité urinaire', thr: 600, thrDir: 'above', thrLabel: 'urines concentrées > 600 mosmol/kg',
+      span: 6, xUnit: 'h', duration: 16,
+      samples: [{ x: 0.03, label: '0 h' }, { x: 0.33, label: '2 h' }, { x: 0.67, label: '4 h' }, { x: 1, label: '6 h' }],
+      apply(p, x) { if (x > 0.04) p.sweat = Math.min(1, (x - 0.04) * 3); },
+      measure: (sim) => sim.lab('uosm'),
+      interpret(v, sim) {
+        const u = v[v.length - 1], na = sim.lab('na'), d = sim.lab('diur');
+        if (u < 300) return { tone: 'bad', text: `Malgré la déshydratation (natrémie ${n0(na)} mmol/L), les urines restent diluées (${n0(u)} mosmol/kg) : le rein ne peut pas économiser l'eau. Chez un patient atteint de diabète insipide, une telle situation est dangereuse (déshydratation hypernatrémique) s'il ne peut pas boire.` };
+        return { tone: 'warn', text: `La sueur fait monter l'osmolalité (natrémie ${n0(na)} mmol/L) : l'ADH s'élève, les urines deviennent rares (${n2(d)} L/24 h) et très concentrées (${n0(u)} mosmol/kg). Le rein limite les pertes, mais seule la boisson (soif) peut corriger le déficit en eau.` };
+      }
+    }
+  ];
   T.adh = [
     {
       id: 'restriction', name: 'Épreuve de restriction hydrique', poly: true,
@@ -188,7 +219,8 @@
         return { tone: 'bad', text: `Urines non concentrées (${n0(u8)} mosmol/kg) et pas de réponse à la desmopressine (${n0(ud)}) : diabète insipide néphrogénique.` + extra };
       }
     }
-  ];
+  ].concat(T.adh_situations);
+  delete T.adh_situations;
   HV.TESTS = T;
 
   /* ---------------- Moteur ---------------- */

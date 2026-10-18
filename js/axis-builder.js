@@ -39,10 +39,66 @@
     return [u * u * u * p0[0] + 3 * u * u * t * p1[0] + 3 * u * t * t * p2[0] + t * t * t * p3[0], u * u * u * p0[1] + 3 * u * u * t * p1[1] + 3 * u * t * t * p2[1] + t * t * t * p3[1]];
   }
 
+  /* Mode pas à pas : chaque étape allume des nœuds et des liens ; les étapes déjà vues restent
+     visibles (atténuées), les suivantes sont estompées. */
+  function makeSteps(def, reg) {
+    let cur = -1;
+    def.stepTo = function (i) {
+      cur = i;
+      const on = i >= 0;
+      const past = new Set(), now = new Set(on ? def.steps[i].on : []);
+      if (on) for (let k = 0; k < i; k++) def.steps[k].on.forEach((x) => past.add(x));
+      const cls = (e, st) => {
+        if (!e) return;
+        e.classList.remove('st-now', 'st-past', 'st-dim');
+        if (st) e.classList.add(st);
+      };
+      const state = (key) => (!on ? null : now.has(key) ? 'st-now' : past.has(key) ? 'st-past' : 'st-dim');
+      Object.keys(reg.nodes).forEach((id) => cls(reg.nodes[id], state(id)));
+      reg.links.forEach((L) => {
+        const st = !on ? null : now.has(L.key) || now.has(L.key + '>' + L.mol) ? 'st-now' : past.has(L.key) || past.has(L.key + '>' + L.mol) ? 'st-past' : 'st-dim';
+        L.on = !on || st !== 'st-dim';
+        L.els.forEach((e) => cls(e, st));
+      });
+      Object.keys(reg.extras).forEach((k) => cls(reg.extras[k], state(k)));
+      if (def.onStep) def.onStep(i);
+    };
+    def.stepIndex = () => cur;
+  }
+
+  /* Pas à pas pour les scènes dessinées à la main : un voile assombrit la scène sauf des « projecteurs »
+     (cercles [x, y, r] ou rectangles [x, y, w, h]) ; les zones des étapes passées restent à demi éclairées. */
+  HV.spotlight = function (def, a, steps) {
+    def.steps = steps;
+    const id = 'spot-' + def.id;
+    const mask = a.el('mask', { id, maskUnits: 'userSpaceOnUse', x: 0, y: 0, width: HV.W, height: HV.H }, a.el('defs'));
+    a.el('rect', { x: 0, y: 0, width: HV.W, height: HV.H, fill: 'white' }, mask);
+    const holes = a.el('g', null, mask);
+    const veil = a.el('rect', { x: 0, y: 0, width: HV.W, height: HV.H, rx: 30, class: 'spot-veil', mask: `url(#${id})`, visibility: 'hidden' });
+    const ring = a.el('g', { class: 'spot-rings' });
+    let cur = -1;
+    const shape = (sp, fill, parent, cls) => (sp.length === 3
+      ? a.el('circle', { cx: sp[0], cy: sp[1], r: sp[2], fill, class: cls || null }, parent)
+      : a.el('rect', { x: sp[0], y: sp[1], width: sp[2], height: sp[3], rx: 24, fill, class: cls || null }, parent));
+    def.stepTo = function (i) {
+      cur = i;
+      holes.textContent = '';
+      ring.textContent = '';
+      veil.setAttribute('visibility', i < 0 ? 'hidden' : 'visible');
+      if (i < 0) return;
+      def.content.appendChild(veil); // au-dessus des particules
+      def.content.appendChild(ring);
+      for (let k = 0; k < i; k++) steps[k].spot.forEach((sp) => shape(sp, '#7a7a7a', holes));
+      steps[i].spot.forEach((sp) => { shape(sp, 'black', holes); shape(sp, 'none', ring, 'spot-ring'); });
+    };
+    def.stepIndex = () => cur;
+  };
+
   HV.axisScene = function (ax) {
     const pos = ax.card;
     const legendMols = new Set();
-    HV.scene({
+    const reg = { nodes: {}, links: [], extras: {} };
+    const def = HV.scene({
       id: ax.id,
       parent: 'atlas',
       x: HV.CARD.x(pos.side),
@@ -56,6 +112,25 @@
       legend: legendMols,
       build(g, a) {
         a.frame(ax.name, ax.sub);
+        if (ax.steps) {
+          def.steps = ax.steps;
+          makeSteps(def, reg);
+        }
+        /* ---- Coupe cerveau – hypothalamus – hypophyse (axes hypophysaires) ---- */
+        const hh = ax.hh || null;
+        if (hh) {
+          const hg = a.el('g', { class: 'hh', transform: `translate(${hh.x} ${hh.y}) scale(${hh.flip ? -hh.s : hh.s} ${hh.s})` });
+          HV.organs.hhSagittal(hg, hh);
+          reg.extras.hh = hg;
+          const fx = hh.flip ? -1 : 1, HX = (lx) => hh.x + lx * hh.s * fx, HY = (ly) => hh.y + ly * hh.s;
+          const used = new Set(ax.nodes.filter((n) => n.at).map((n) => n.at));
+          // Légendes discrètes, du côté postérieur (libre) de la tige.
+          const back = fx > 0 ? 'start' : 'end';
+          const caps = hh.portal === false ? [[HX(26), HY(96), ['tige pituitaire', '(axones)'], back]] : [];
+          if (!used.has('post')) caps.push([HX(46), HY(214), ['posthypophyse'], 'middle']);
+          if (!used.has('ant')) caps.push([HX(-30), HY(218), ['antéhypophyse'], 'middle']);
+          caps.concat(hh.captions || []).forEach((c) => a.text(c[0], c[1], c[2], 'hh-cap', { anchor: c[3] || 'start', lh: 1.15 }));
+        }
         const T = { h: ax.startHour != null ? ax.startHour : 8, d: 1 };
         const nodes = {};
         // Modèle physiologique (axes-sim.js) : scénarios, variables qui pilotent flux, organes et niveaux.
@@ -67,13 +142,34 @@
         const shown = [];
         if (hk.liveNode) allNodes.forEach((n) => { if (hk.liveNode[n.id]) n.live = () => hk.liveNode[n.id](sim.s); });
 
+        /* ---- Encadrés (sous-systèmes distincts dans une même scène) ---- */
+        (ax.panels || []).forEach((P) => {
+          const pg = a.el('g', { class: 'ax-panel', style: `--c: var(--${P.color || 'accent'})` });
+          a.el('rect', { x: P.x, y: P.y, width: P.w, height: P.h, rx: 22, class: 'ax-panel-r' }, pg);
+          a.text(P.x + 24, P.y + 36, P.title, 'ax-panel-t', null, pg);
+          if (P.sub) a.text(P.x + 24, P.y + 62, P.sub, 'note', null, pg);
+          if (P.id) reg.extras[P.id] = pg;
+        });
+
         /* ---- Nœuds ---- */
         allNodes.forEach((n) => {
           const key = ax.id + '.' + n.id;
           HV.INFO[key] = { t: n.label.replace(/\n/g, ' '), k: Array.isArray(n.sub) ? n.sub.join(' ') : n.sub || '', d: n.info || '', live: n.live ? () => n.live(T) : null };
           const s = n.s || 1.15;
-          const grp = a.el('g', { class: 'ax-node' + (n.organ ? '' : ' signal'), 'data-info': key, 'data-sheet': n.organ ? HV.ORGAN_BY_ICON[n.organ] || null : null });
-          if (n.organ) {
+          const grp = a.el('g', { class: 'ax-node' + (n.organ || n.at ? '' : ' signal'), 'data-info': key, 'data-sheet': n.organ ? HV.ORGAN_BY_ICON[n.organ] || null : n.sheet || null });
+          reg.nodes[n.id] = grp;
+          if (n.at) {
+            // Point d'ancrage sur la coupe cerveau – hypophyse : pas d'icône, juste une zone sensible et l'étiquette.
+            const P = HV.organs.HH[n.at];
+            n.x = hh.x + P[0] * hh.s * (hh.flip ? -1 : 1);
+            n.y = hh.y + P[1] * hh.s;
+            a.el('circle', { cx: n.x, cy: n.y, r: n.hit || 30, class: 'hh-hit', style: `--c: var(--${n.color || 'accent'})` }, grp);
+            n.r = n.rr || 30;
+            const lx = n.x + (n.lx != null ? n.lx : 46), ly = n.y + (n.ly || 0);
+            const anc = n.anchor || 'start';
+            a.text(lx, ly, n.label.split('\n'), 'lbl ax-lbl', { anchor: anc, lh: 1.15 }, grp);
+            if (n.sub) a.text(lx, ly + 24 + (n.label.includes('\n') ? 26 : 0), Array.isArray(n.sub) ? n.sub : [n.sub], 'note', { anchor: anc, lh: 1.25 }, grp);
+          } else if (n.organ) {
             const ic = a.el('g', { transform: `translate(${n.x} ${n.y}) scale(${s})` }, grp);
             a.el('circle', { r: 58, class: 'ax-halo', style: `--c: var(--${n.color || 'accent'})` }, ic);
             HV.organs[n.organ](ic);
@@ -83,8 +179,20 @@
           } else {
             const w = n.w || 230, h = n.h || 76;
             a.el('rect', { x: n.x - w / 2, y: n.y - h / 2, width: w, height: h, rx: h / 2, class: 'sig-box', style: `--c: var(--${n.color || 'accent'})` }, grp);
-            a.text(n.x, n.y + (n.live ? -6 : 7), n.label.split('\n'), 'lbl-s strong', { anchor: 'middle', lh: 1.15 }, grp);
-            if (n.live) n.liveEl = a.text(n.x, n.y + 22, '', 'sig-val', { anchor: 'middle' }, grp);
+            const top = n.gauge ? n.y - h / 2 + 34 : n.y + (n.live ? -6 : 7);
+            a.text(n.x, top, n.label.split('\n'), 'lbl-s strong', { anchor: 'middle', lh: 1.15 }, grp);
+            if (n.live) n.liveEl = a.text(n.x, n.gauge ? top + 30 : n.y + 22, '', 'sig-val', { anchor: 'middle' }, grp);
+            if (n.gauge && sim) {
+              // Jauge « thermostat » : zone normale, consigne et aiguille de la valeur simulée.
+              const G = n.gauge, gx = n.x - w / 2 + 24, gw = w - 48, gy = n.y + h / 2 - 30;
+              const X = (v) => gx + (clamp(v, G.min, G.max) - G.min) / (G.max - G.min) * gw;
+              a.el('rect', { x: gx, y: gy, width: gw, height: 12, rx: 6, class: 'gauge-bg' }, grp);
+              a.el('rect', { x: X(G.lo), y: gy, width: X(G.hi) - X(G.lo), height: 12, class: 'gauge-ok' }, grp);
+              if (G.set != null) a.el('path', { d: `M ${X(G.set)},${gy - 6} L ${X(G.set)},${gy + 18}`, class: 'gauge-set' }, grp);
+              (G.ticks || []).forEach((t) => a.text(X(t), gy + 32, String(t), 'gauge-t', { anchor: 'middle' }, grp));
+              const nd = a.el('path', { d: 'M 0,-10 L 7,-22 L -7,-22 Z', class: 'gauge-needle' }, grp);
+              shown.push(() => nd.setAttribute('transform', `translate(${X(G.val(sim.s, sim.p)).toFixed(1)} ${gy + 4})`));
+            }
             if (n.sub) a.text(n.x, n.y + h / 2 + 24, Array.isArray(n.sub) ? n.sub : [n.sub], 'note', { anchor: 'middle', lh: 1.25 }, grp);
             n.r = Math.max(w, h) / 2 - 8;
             n.rx = w / 2; n.ry = h / 2;
@@ -149,6 +257,8 @@
         /* ---- Liens ---- */
         const dynLinks = [];
         allLinks.forEach((l) => {
+          const LR = { key: l.from + '>' + l.to, from: l.from, to: l.to, mol: l.mol || '', on: true, els: [] };
+          reg.links.push(LR);
           const A = nodes[l.from], B = nodes[l.to];
           const v = l.v || (hk.links && hk.links[`${l.from}>${l.to}>${l.mol}`]) || null;
           const keepMod = !(hk.dropMod && v);
@@ -169,7 +279,7 @@
           if (l.mol) {
             legendMols.add(l.mol);
             const base = l.rate || 1.6;
-            a.flow(d, { mol: l.mol, rate: () => (vis() ? base * (l.mod && keepMod ? l.mod(T) : 1) * (sim && v ? Math.min(6, val(v)) : 1) : 0), size: l.size || 1.6, speed: l.speed || 120, track: false, max: 30 });
+            a.flow(d, { mol: l.mol, rate: () => (vis() && LR.on ? base * (l.mod && keepMod ? l.mod(T) : 1) * (sim && v ? Math.min(6, val(v)) : 1) : 0), size: l.size || 1.6, speed: l.speed || 120, track: false, max: 30 });
           }
           let sign = null;
           if (kind !== 'flow') {
@@ -188,6 +298,7 @@
             a.text(0, 6, lab, 'ax-pill-t', { anchor: 'middle' }, lg);
             pillEl = lg;
           }
+          LR.els.push(track, sign && sign.g, pillEl);
           if (typeof l.kind === 'function') dynLinks.push({ l, track, sign });
           if (A.show || B.show) {
             const els = [track, sign && sign.g, pillEl];
@@ -199,6 +310,7 @@
         if (ax.chain) {
           const c = ax.chain;
           const cg = a.el('g', { class: 'chain' });
+          reg.extras.chain = cg;
           a.text(c.x, c.y - 26, c.title, 'lbl-s strong', null, cg);
           c.steps.forEach((st, i) => {
             const y = c.y + i * c.dy, x = c.x;
@@ -257,6 +369,7 @@
         if (LV) {
           const L = LV;
           const lg = a.el('g', { class: 'levels', transform: `translate(${L.x} ${L.y})` });
+          reg.extras.levels = lg;
           a.el('rect', { x: -16, y: -36, width: L.w + 32, height: 30 + L.items.length * 34, rx: 14, class: 'side-box' }, lg);
           a.text(0, -10, L.title || 'Niveaux simulés', 'lbl-s strong', null, lg);
           L.items.forEach((it, i) => {
@@ -279,9 +392,11 @@
           bars.forEach((b) => b.bar.setAttribute('width', clamp(b.it.fn(T) / (b.it.max || 2), 0.03, 1) * b.w));
           dynLinks.forEach((o) => {
             const k = o.l.kind(T);
-            o.track.setAttribute('class', 'ax-track ' + k);
+            o.track.classList.remove('stim', 'inhib');
+            o.track.classList.add(k);
             if (o.sign) {
-              o.sign.g.setAttribute('class', 'sign ' + k);
+              o.sign.g.classList.remove('stim', 'inhib');
+              o.sign.g.classList.add(k);
               o.sign.g.setAttribute('data-info', 'sign-' + k);
               o.sign.g.querySelector('.sign-glyph').setAttribute('d', k === 'inhib' ? 'M-7,0 H7' : 'M-7,0 H7 M0,-7 V7');
             }

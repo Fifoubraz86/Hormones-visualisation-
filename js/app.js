@@ -184,8 +184,8 @@
     if (e.target.closest && e.target.closest('input, select, textarea')) return;
     if (e.key === 'Escape' && HV.sheetOpen()) { HV.closeSheet(); e.preventDefault(); }
     else if (e.key === 'Escape' || e.key === 'Backspace') { goUp(); e.preventDefault(); }
-    else if (e.key === 'ArrowRight') tourStep(1);
-    else if (e.key === 'ArrowLeft') tourStep(-1);
+    else if (e.key === 'ArrowRight') (stepping() ? stepGo(1) : tourStep(1));
+    else if (e.key === 'ArrowLeft') (stepping() ? stepGo(-1) : tourStep(-1));
     else if (e.key === '+' || e.key === '=') zoomCenter(1 / 1.3);
     else if (e.key === '-') zoomCenter(1.3);
     else if (e.key === ' ' && e.target === document.body) { togglePlay(); e.preventDefault(); }
@@ -212,9 +212,52 @@
   $('nextBtn').addEventListener('click', () => tourStep(1));
 
   /* ---------- Panneau : scène courante ---------- */
+  /* ---------- Mode pas à pas ---------- */
+  let stepSc = null;
+  const stepping = () => !!(stepSc && stepSc.stepIndex() >= 0);
+  function stepShow(sc, i) {
+    const box = $('stepBox');
+    if (stepSc && stepSc !== sc) stepSc.stepTo(-1);
+    stepSc = sc;
+    sc.stepTo(i);
+    box.hidden = i < 0;
+    if (i < 0) return;
+    const S = sc.steps[i];
+    $('stepCount').textContent = `Étape ${i + 1} / ${sc.steps.length}`;
+    $('stepTitle').textContent = S.t;
+    $('stepText').textContent = S.d;
+    $('stepPrev').disabled = i === 0;
+    $('stepNext').textContent = i === sc.steps.length - 1 ? 'Tout afficher' : 'Étape suivante →';
+    const dots = $('stepDots');
+    dots.textContent = '';
+    sc.steps.forEach((st, k) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.title = st.t;
+      b.setAttribute('aria-label', `Étape ${k + 1} : ${st.t}`);
+      if (k === i) b.setAttribute('aria-current', 'step');
+      b.addEventListener('click', () => stepShow(sc, k));
+      dots.appendChild(b);
+    });
+  }
+  function stepGo(d) {
+    if (!stepping()) return;
+    const i = stepSc.stepIndex() + d;
+    if (i >= stepSc.steps.length) return stepShow(stepSc, -1);
+    if (i >= 0) stepShow(stepSc, i);
+  }
+  function stepStop() { if (stepSc) stepShow(stepSc, -1); }
+  $('stepStart').addEventListener('click', () => { if (current.steps) stepShow(current, 0); });
+  $('stepPrev').addEventListener('click', () => stepGo(-1));
+  $('stepNext').addEventListener('click', () => stepGo(1));
+  $('stepQuit').addEventListener('click', stepStop);
+
   let current = HV.scenes.atlas;
   function setCurrent(sc) {
+    if (stepSc && stepSc !== sc) stepStop();
     current = sc;
+    $('stepStart').hidden = !(sc.steps && sc.stepTo);
+    if (sc.steps) $('stepStart').textContent = `▶ Comprendre pas à pas (${sc.steps.length} étapes)`;
     const chain = HV.ancestors(sc);
     scenes.forEach((s) => s.g.classList.toggle('can-zoom', !chain.includes(s)));
     const crumbs = $('crumbs');

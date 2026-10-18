@@ -223,18 +223,50 @@
     atom(g, -4, -3.4, 1.3, 'm-O');
     atom(g, 8.8, 4, 1.3, 'm-O');
 
-    /* ---------- Lipoprotéines : cœur lipidique, coque de phospholipides, apolipoprotéine ---------- */
-    const lipo = (id, color, r, apo) => {
-      const gg = root(id, color);
-      el('circle', { r, class: 'm-lipo' }, gg);
-      el('circle', { r: r * 0.62, class: 'm-lipo-core' }, gg);
-      el('circle', { r, fill: 'url(#shine)' }, gg);
-      if (apo) el('path', { d: `M ${-r * 0.9},${-r * 0.4} C ${-r * 0.3},${-r * 1.2} ${r * 0.6},${-r * 1.1} ${r * 0.95},${-r * 0.2}`, class: 'm-apo' }, gg);
+    /* ---------- Lipoprotéines : taille, cœur et apolipoprotéines propres à chaque classe ----------
+       Coque de phospholipides (perles), cœur de triglycérides (jaune) et/ou d'esters de cholestérol (orange),
+       apolipoprotéines : B48 (chylomicrons), B100 (VLDL, LDL), A-I (HDL), C et E (petits disques). */
+    const shell = (gg, r, n) => {
+      for (let i = 0; i < n; i++) {
+        const t = (i / n) * 2 * Math.PI;
+        el('circle', { cx: (r * Math.cos(t)).toFixed(2), cy: (r * Math.sin(t)).toFixed(2), r: 0.75, class: 'm-pl' }, gg);
+      }
     };
-    lipo('chylo', 'p-amber', 11, true);
-    lipo('vldl', 'p-gold', 8.5, true);
-    lipo('ldl', 'p-orange', 6.5, true);
-    lipo('hdl', 'p-teal', 4.6, true);
+    const drops = (gg, pts, cls) => pts.forEach(([x, y, r]) => el('circle', { cx: x, cy: y, r, class: cls }, gg));
+    const arc = (gg, r, a0, a1, cls) => {
+      const p = (a) => [r * Math.cos((a * Math.PI) / 180), r * Math.sin((a * Math.PI) / 180)];
+      const [x0, y0] = p(a0), [x1, y1] = p(a1);
+      el('path', { d: `M ${x0.toFixed(2)},${y0.toFixed(2)} A ${r},${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1.toFixed(2)},${y1.toFixed(2)}`, class: cls }, gg);
+    };
+    const smallApo = (gg, r, angs, cls) => angs.forEach((a) => el('circle', { cx: (r * Math.cos((a * Math.PI) / 180)).toFixed(2), cy: (r * Math.sin((a * Math.PI) / 180)).toFixed(2), r: 1.3, class: cls }, gg));
+    // Chylomicron : très gros, presque uniquement des triglycérides ; apoB48 courte, apoC et apoE.
+    let gg = root('chylo', 'p-amber');
+    el('circle', { r: 12.5, class: 'm-lp-shell' }, gg);
+    drops(gg, [[-4, -3, 4.2], [4, -4, 3.6], [-3, 5, 3.8], [5, 4, 3.4], [0, 0, 2.4]], 'm-tg');
+    shell(gg, 12.5, 26);
+    arc(gg, 13.2, 200, 245, 'm-apoB');
+    smallApo(gg, 13.2, [300, 340, 30, 80, 130], 'm-apoC');
+    // VLDL : grosse, riche en triglycérides, un peu d'esters de cholestérol ; apoB100, apoC, apoE.
+    gg = root('vldl', 'p-gold');
+    el('circle', { r: 9.5, class: 'm-lp-shell' }, gg);
+    drops(gg, [[-3, -2.5, 3.3], [3, -2.5, 3], [-1.5, 3.5, 3], [3.6, 3, 1.6]], 'm-tg');
+    drops(gg, [[0.5, 0.5, 1.6], [-4.6, 2, 1.2]], 'm-ce');
+    shell(gg, 9.5, 20);
+    arc(gg, 10.2, 150, 290, 'm-apoB');
+    smallApo(gg, 10.2, [330, 20, 75], 'm-apoC');
+    // LDL : petite, cœur dense d'esters de cholestérol, une seule apoB100 qui ceinture la particule.
+    gg = root('ldl', 'p-orange');
+    el('circle', { r: 6.6, class: 'm-lp-shell' }, gg);
+    el('circle', { r: 4.6, class: 'm-ce' }, gg);
+    shell(gg, 6.6, 14);
+    arc(gg, 7.3, -160, 150, 'm-apoB');
+    // HDL : la plus petite, pauvre en lipides, riche en protéines : plusieurs apoA-I en hélices.
+    gg = root('hdl', 'p-teal');
+    el('circle', { r: 4.4, class: 'm-lp-shell' }, gg);
+    el('circle', { r: 2.2, class: 'm-ce' }, gg);
+    arc(gg, 4.9, -80, 40, 'm-apoA');
+    arc(gg, 4.9, 60, 180, 'm-apoA');
+    arc(gg, 4.9, 200, 260, 'm-apoA');
     g = root('chol', 'p-gold', 0.75); // cholestérol libre (noyau stérol)
     const rr = 3.2, ss = rr * R3;
     [[-ss, 1.5 * rr], [0, 1.5 * rr], [ss / 2, 0]].forEach((c) => el('path', { d: polyD(hexV(c[0], c[1], rr)), class: 'm-ring mc' }, g));
