@@ -9,7 +9,7 @@
   const HV = (window.HV = window.HV || {});
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
-  const DEFAULTS = { iodine: 1, thy: 1, pit: 1, hypo: 1, trab: 0, auto: 0, levo: 0, d12: 1, d3: 1 };
+  const DEFAULTS = { iodine: 1, thy: 1, pit: 1, hypo: 1, trab: 0, auto: 0, levo: 0, d12: 1, d3: 1, atro: 0 };
   const p = Object.assign({}, DEFAULTS);
   const s = { trh: 1, tsh: 1, t4: 1, t3: 1, rt3: 1, goitre: 1, fb: 1, stim: 1, t4prod: 1, t3prod: 1, iF: 1 };
   const TAU = { trh: 0.6, tsh: 1.2, t4: 4, t3: 2, rt3: 2.5, goitre: 12 };
@@ -36,7 +36,8 @@
     // 75 % de la T3 circulante vient de la désiodation périphérique de la T4 (polycopié CEEDMM).
     const t3 = (0.25 * t3prod + 0.75 * p.d12 * s.t4) / (0.7 + 0.3 * p.d3);
     const rt3 = (s.t4 * p.d3) / (0.6 + 0.4 * p.d12);
-    const goitre = clamp(1 + 0.25 * Math.max(0, stim - 1) + 0.5 * Math.max(0, 1 - iF) * Math.min(1, p.thy), 1, 2.2);
+    // Forme atrophique de la thyroïdite auto-immune : la glande ne grossit pas malgré la TSH.
+    const goitre = p.atro > 0.5 ? 1 : clamp(1 + 0.25 * Math.max(0, stim - 1) + 0.5 * Math.max(0, 1 - iF) * Math.min(1, p.thy), 1, 2.2);
     return { fb, trh, tsh, t4, t3, rt3, goitre, stim, t4prod, t3prod, iF };
   }
 
@@ -74,7 +75,8 @@
 
   const SCENARIOS = [
     { id: 'eu', name: 'Euthyroïdie', note: 'Sujet sain : l\'axe est à l\'équilibre.', p: {} },
-    { id: 'hashi', name: 'Hypothyroïdie primaire (Hashimoto)', note: 'La glande détruite produit moins de T4 : la TSH monte fortement.', p: { thy: 0.12 } },
+    { id: 'hashi', name: 'Hypothyroïdie primaire (Hashimoto)', note: 'Maladie de Hashimoto : thyroïde augmentée de volume, ferme et hétérogène (polycopié p. 21-22). La glande détruite produit moins de T4 : la TSH monte fortement.', p: { thy: 0.12 } },
+    { id: 'atro', name: 'Thyroïdite chronique auto-immune atrophique', note: 'Autre forme de thyroïdite auto-immune, distincte de la maladie de Hashimoto : thyroïde atrophique (polycopié p. 22). Même biologie : TSH élevée, T4L basse.', p: { thy: 0.12, atro: 1 } },
     { id: 'lt4', name: 'Hashimoto traité par lévothyroxine', note: 'La T4 orale remplace la production : TSH et T4L se normalisent.', p: { thy: 0.12, levo: 0.9 } },
     { id: 'lt4x', name: 'Surdosage en lévothyroxine', note: 'Excès de T4 exogène : TSH effondrée, thyrotoxicose iatrogène (sans hyperthyroïdie).', p: { thy: 0.12, levo: 2 } },
     { id: 'graves', name: 'Maladie de Basedow', note: 'Les TRAb stimulent le récepteur de la TSH sans rétrocontrôle possible.', p: { trab: 1.5 } },
@@ -98,6 +100,8 @@
   function interpret() {
     const tsh = lab('tsh'), t4 = lab('t4'), t3 = lab('t3'), rt3 = lab('rt3');
     if (tsh > 4) {
+      // Garde-fou : une hypophyse lésée peut sécréter une TSH peu active, modérément élevée (complément).
+      if (t4 < 8 && tsh < 10) return { tone: 'warn', label: 'T4L très basse, TSH peu élevée', text: 'Une TSH à peine élevée (< 10 mUI/L) face à une T4L très basse est inadaptée : évoquer aussi une origine centrale, l\'hypophyse lésée sécrétant une TSH moins active (complément). IRM hypophysaire et bilan des autres axes si le contexte s\'y prête.' };
       if (t4 < 12) return { tone: 'bad', label: 'Hypothyroïdie primaire', text: 'TSH élevée et T4L basse : la thyroïde ne suit plus, l\'hypophyse compense.' };
       if (tsh > 10) return { tone: 'warn', label: 'TSH > 10 mUI/L, T4L normale', text: 'Au-delà du seuil de l\'hypothyroïdie infraclinique (TSH 4–10 mUI/L) : hypothyroïdie à confirmer sur un 2ᵉ dosage, le plus souvent traitée (complément).' };
       return { tone: 'warn', label: 'Hypothyroïdie infraclinique', text: 'TSH modérément élevée (4–10 mUI/L), T4L encore normale : à confirmer sur un 2ᵉ dosage à 6–8 semaines.' };
@@ -121,7 +125,7 @@
     const out = [];
     if (p.auto > 0.02) out.push('nodule thyroïdien autonome (adénome toxique), parenchyme éteint');
     if (p.trab > 0.05) out.push('goitre diffus hypervasculaire (maladie de Basedow)');
-    if (p.thy < 0.6) out.push('thyroïdite lymphocytaire (Hashimoto)');
+    if (p.thy < 0.6) out.push(p.atro > 0.5 ? 'thyroïdite chronique auto-immune atrophique' : 'maladie de Hashimoto : thyroïde augmentée de volume, infiltrat lymphocytaire');
     if (p.iodine < 0.5) out.push('goitre multinodulaire');
     if (p.pit < 0.5) out.push('macroadénome hypophysaire non sécrétant');
     return out.join(' · ');

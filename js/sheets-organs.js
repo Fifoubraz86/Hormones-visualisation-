@@ -14,7 +14,7 @@
       ['Situation', 'Base du cou, en avant de la trachée, sous le cartilage cricoïde ; monte à la déglutition'],
       ['Forme', 'Deux lobes latéraux réunis par un isthme, parfois une pyramide de Lalouette (vestige embryonnaire)'],
       ['Poids', '15 à 20 g chez l\'adulte (complément)'],
-      ['Vascularisation', 'Artères thyroïdiennes supérieures (carotide externe) et inférieures (tronc thyréo-cervical) (complément)'],
+      ['Vascularisation', 'Artères thyroïdiennes supérieures (carotide externe) et inférieures (tronc thyro-cervical) (complément)'],
       ['Rapports', 'Parathyroïdes à la face postérieure ; nerfs laryngés récurrents, carotides et jugulaires en dehors (complément)'],
       ['Histologie', 'Follicules (thyréocytes autour de la colloïde) ; cellules C parafolliculaires (calcitonine)'],
       ['Hormones', 'T4 (réserve, exclusivement thyroïdienne), T3 (25 % de la T3 circulante), calcitonine'],

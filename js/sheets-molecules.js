@@ -37,7 +37,7 @@
       ['Formule, masse', 'C₁₅H₁₁I₄NO₄ · 776,9 g/mol (65 % d\'iode en masse)'],
       ['Lipophilie', 'XLogP 2,4 ; entre dans les cellules par des transporteurs (MCT8, MCT10, OATP1C1)'],
       ['Synthèse', 'Exclusivement thyroïdienne, par couplage de deux DIT sur la thyroglobuline'],
-      ['Transport', 'Liée à plus de 99,9 % : TBG (75 %), TBPA (25 %) ; fraction libre ≈ 0,03 %'],
+      ['Transport', 'Liée à plus de 99,9 % : TBG ≈ 70–75 %, TBPA ≈ 10–15 %, albumine ≈ 10–20 % (complément ; le polycopié simplifie en 75 / 25 %) ; fraction libre ≈ 0,03 %'],
       ['Demi-vie', '≈ 7 jours'],
       ['Récepteur', 'Prohormone : faible affinité pour TR, convertie en T3 par D1 et D2'],
       ['Dosage', 'T4 libre 12–22 pmol/L'],
@@ -96,7 +96,7 @@
     ttr: { cls: 'Protéine de transport (homotétramère)', rows: [
       ['Structure', '4 sous-unités de 127 acides aminés (≈ 13,8 kDa chacune), canal central qui accueille la T4 (PDB 2ROX)'],
       ['Synthèse', 'Foie, plexus choroïdes'],
-      ['Rôle', 'Transporte 25 % de la T4 (TBPA, polycopié) et la RBP (rétinol)'],
+      ['Rôle', 'Transporte ≈ 10–15 % de la T4 (25 % selon le polycopié ; complément) et la RBP (rétinol)'],
       ['Pathologie', 'Amylose à transthyrétine (complément)']
     ], links: [pdb('2ROX')] },
     alb: { cls: 'Protéine plasmatique', rows: [
@@ -188,7 +188,7 @@
       ['Sécrétion', 'Pulsatile, surtout pendant le sommeil lent profond'],
       ['Transport', 'GHBP (fragment du récepteur), ≈ 50 %'],
       ['Demi-vie', '≈ 20 min'],
-      ['Récepteur', 'GHR, cytokine de classe I, dimérisé par une molécule de GH → JAK2/STAT5'],
+      ['Récepteur', 'GHR, cytokine de classe I : dimère préformé, activé par la liaison d\'une molécule de GH (sites 1 et 2) qui change sa conformation → JAK2/STAT5 (Brooks, Science 2014)'],
       ['Effets', 'IGF-1 hépatique, croissance, lipolyse ; hyperglycémiante'],
       ['Dosage', 'GH ponctuelle peu informative ; nadir sous HGPO ; tests de stimulation'],
       ['Pharmacologie', 'Somatropine ; pegvisomant (antagoniste du récepteur)']
@@ -276,7 +276,7 @@
 
     /* ---------------- SRAA ---------------- */
     renin: { cls: 'Enzyme (aspartyl-protéase)', rows: [['Structure', '≈ 340 acides aminés, deux lobes, site actif à deux aspartates (PDB 2REN)'], ['Synthèse', 'Cellules juxtaglomérulaires'], ['Substrat', 'Angiotensinogène → angiotensine I'], ['Stimuli', 'Baisse de la perfusion rénale, de la charge sodée à la macula densa, stimulation β1'], ['Dosage', 'Rénine active (concentration) ou activité rénine plasmatique'], ['Pharmacologie', 'Aliskiren (inhibiteur direct)']], links: [pdb('2REN')] },
-    angio: { cls: 'Octapeptide', rows: [['Formule, masse', 'C₅₀H₇₁N₁₃O₁₂ · 1 046,2 g/mol'], ['Structure', 'Asp-Arg-Val-Tyr-Ile-His-Pro-Phe'], ['Formation', 'Angiotensine I (10 acides aminés) → angiotensine II par l\'enzyme de conversion'], ['Demi-vie', '1 à 2 min'], ['Récepteur', 'AT1 (Gq) : vasoconstriction, aldostérone, soif, ADH'], ['Pharmacologie', 'IEC ; ARA2 (sartans)']], links: [pc(172198)] },
+    angio: { cls: 'Octapeptide', rows: [['Formule, masse', 'C₅₀H₇₁N₁₃O₁₂ · 1 046,2 g/mol'], ['Structure', 'Asp-Arg-Val-Tyr-Ile-His-Pro-Phe'], ['Formation', 'Angiotensine I (10 acides aminés) → angiotensine II par l\'enzyme de conversion'], ['Demi-vie', '< 1 min (≈ 15 à 60 s)'], ['Récepteur', 'AT1 (Gq) : vasoconstriction, aldostérone, soif, ADH'], ['Pharmacologie', 'IEC ; ARA2 (sartans)']], links: [pc(172198)] },
     k: { cls: 'Cation', rows: [['Formule, masse', 'K⁺ · 39,1 g/mol'], ['Valeurs', 'Kaliémie 3,5–5,0 mmol/L'], ['Lien endocrine', 'Stimule l\'aldostérone ; l\'aldostérone augmente son excrétion urinaire']], links: [pc(813)] },
     nai: { cls: 'Cation', rows: [['Formule, masse', 'Na⁺ · 23,0 g/mol'], ['Valeurs', 'Natrémie 135–145 mmol/L'], ['Lien endocrine', 'Réabsorbé sous aldostérone (ENaC) ; la natrémie reflète surtout le bilan de l\'eau (ADH)']], links: [pc(923)] },
     na: { cls: 'Cation', rows: [['Formule, masse', 'Na⁺ · 23,0 g/mol'], ['Rôle', 'Cotransporté avec l\'iodure par le NIS (2 Na⁺ / 1 I⁻)']], links: [pc(923)] },

@@ -31,8 +31,8 @@ Chaque test se lance depuis la carte « Tests dynamiques » du panneau, sur le s
 | **Cortisol libre urinaire des 24 h** (P) | Recueil des urines de 24 h | Hypercortisolisme | Élevé dans le syndrome de Cushing |
 | **Cortisol salivaire à minuit** (P) | Prélèvement salivaire à minuit | Perte du nadir nocturne | Élevé dans le syndrome de Cushing |
 | Freinage faible (2 mg/j pendant 48 h) | Dexaméthasone 0,5 mg × 4 /j | Confirmation de l'hypercortisolisme | Absence de freinage : Cushing |
-| Freinage fort (8 mg) | Dexaméthasone à forte dose | Origine hypophysaire ou ectopique | Freinage partiel : maladie de Cushing ; pas de freinage : ectopique ou surrénalien |
-| Test à la CRH ou à la desmopressine | Injection IV, ACTH et cortisol | Cushing ACTH-dépendant : hypophysaire ou ectopique | Réponse : adénome corticotrope ; pas de réponse : sécrétion ectopique |
+| Freinage fort (8 mg) | Dexaméthasone à forte dose | Origine hypophysaire ou ectopique | Freinage partiel : maladie de Cushing ; pas de freinage : ectopique ou surrénalien. Sensibilité et spécificité médiocres : le cathétérisme des sinus pétreux est préféré (complément) |
+| Test à la CRH ou à la desmopressine | Injection IV, ACTH et cortisol | Cushing ACTH-dépendant : hypophysaire ou ectopique | Réponse : plutôt adénome corticotrope ; pas de réponse : plutôt sécrétion ectopique. Certaines tumeurs ectopiques répondent à la desmopressine (complément) : le test oriente sans trancher |
 | Cathétérisme des sinus pétreux inférieurs | ACTH centrale et périphérique, après CRH ou desmopressine | Localiser un adénome corticotrope invisible en IRM | Gradient centre/périphérie : origine hypophysaire |
 | 17-OH-progestérone, de base ou après Synacthène (P pour le dépistage néonatal) | Dosage ; test de Guthrie à la naissance | Bloc en 21-hydroxylase (hyperplasie congénitale des surrénales) | 17-OHP élevée, explosive après Synacthène |
 | Test à la métopirone | Blocage de la 11β-hydroxylase | Réserve corticotrope | Normal : hausse du 11-désoxycortisol et de l'ACTH |
@@ -77,7 +77,7 @@ Chaque test se lance depuis la carte « Tests dynamiques » du panneau, sur le s
 
 | Test | Principe | Ce que l'on cherche | Réponse normale / pathologique |
 | --- | --- | --- | --- |
-| Test à la GnRH (LH-RH) | GnRH IV, LH et FSH sur 1 à 2 h | Puberté précoce centrale ; déficit gonadotrope | Pic de LH prédominant : puberté centrale activée. Réponse plate : déficit |
+| Test à la GnRH (LH-RH) | GnRH IV, LH et FSH sur 1 à 2 h | Puberté précoce centrale ; déficit gonadotrope | Pic de LH prédominant : puberté centrale activée. Réponse plate : déficit, sans en préciser le niveau (après une longue privation en GnRH, l'hypophyse peut répondre peu malgré une hypophyse intacte) ; le test distingue mal le retard pubertaire simple du déficit congénital (complément) |
 | Test à l'hCG | hCG IM, testostérone à J3 ou J5 | Fonction leydigienne (enfant, cryptorchidie, ambiguïté sexuelle) | Hausse de la testostérone : cellules de Leydig fonctionnelles |
 | Test aux progestatifs | Progestatif 10 jours | Aménorrhée : imprégnation œstrogénique | Saignement : œstrogènes présents. Pas de saignement : carence |
 | **Testostérone totale + LH et FSH** (P) | Prélèvement matinal, à jeun, à contrôler (complément), après avoir écarté une hyperprolactinémie | Hypogonadisme masculin | Testostérone basse : LH et FSH élevées (primaire) ou basses / inadaptées (gonadotrope) |
@@ -91,7 +91,7 @@ Chaque test se lance depuis la carte « Tests dynamiques » du panneau, sur le s
 | --- | --- | --- | --- |
 | **Épreuve de restriction hydrique** (P) | Arrêt des boissons en milieu hospitalier ; poids, diurèse, osmolalités, natrémie (après imagerie) | Diabète insipide | Normal : urines concentrées (> 600 mosmol/kg, complément). Diabète insipide : diurèse qui baisse insuffisamment, urines non concentrées. Dans le SIADH (P), la restriction (partielle, 500 à 800 mL/j, complément) est aussi le traitement, sans desmopressine, avec une correction ≤ 8 à 10 mmol/L par 24 h (complément) |
 | Test à la desmopressine | En fin de restriction | Distinguer DI central et néphrogénique | Concentration des urines : central. Pas de réponse : néphrogénique |
-| Copeptine stimulée (sérum salé hypertonique ou arginine) | Copeptine, marqueur stable de l'ADH | Diabète insipide et polydipsie primaire | Copeptine basse : DI central |
+| Copeptine stimulée (sérum salé hypertonique ou arginine) | Copeptine, marqueur stable de l'ADH | Diabète insipide et polydipsie primaire | Copeptine de base > 21,4 pmol/L : DI néphrogénique. Après sérum salé hypertonique (natrémie ≥ 150 mmol/L), copeptine > 4,9 pmol/L : polydipsie primaire, ≤ 4,9 : DI central (Fenske, NEJM 2018). Après arginine, ≤ 3,8 pmol/L : DI central (Winzeler, Lancet 2019). Complément |
 
 ## Métabolisme phosphocalcique
 

@@ -390,6 +390,7 @@ h2 { margin: 0; font: 600 13px var(--font-body); letter-spacing: 0.06em; text-tr
 .bar-tbg { fill: var(--tbg); }
 .bar-ttr { fill: var(--ttr); }
 .bar-alb { fill: var(--alb); }
+.bar-alb { fill: var(--alb); }
 .tre { fill: var(--accent); opacity: 0.8; }
 .tr { fill: color-mix(in srgb, var(--t3) 35%, var(--nucleus)); stroke: var(--t3); stroke-width: 2.5; }
 .rxr { fill: color-mix(in srgb, var(--tsh) 30%, var(--nucleus)); stroke: var(--tsh); stroke-width: 2.5; }
@@ -847,3 +848,5 @@ line.m-db { stroke: var(--mc); stroke-width: 0.9; }
 .sheet-more { margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px; }
 .sheet-more > summary { cursor: pointer; color: var(--muted); font-size: 13px; font-weight: 600; }
 .sheet-more[open] > summary { margin-bottom: 8px; }
+
+.lab-note { margin: 6px 0 0; font-size: 11.5px; color: var(--muted); font-style: italic; }

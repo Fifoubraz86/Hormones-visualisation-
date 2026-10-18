@@ -66,7 +66,7 @@
     {
       id: 'dxm8', name: 'Freinage fort à la dexaméthasone', poly: false,
       what: 'Devant un Cushing ACTH-dépendant : origine hypophysaire (freinage partiel) ou sécrétion ectopique (pas de freinage) ?',
-      proto: 'Dexaméthasone 8 mg (en une prise ou 2 mg toutes les 6 h pendant 48 h) ; cortisol avant et après (complément, non détaillé dans le polycopié).',
+      proto: 'Dexaméthasone 8 mg (en une prise ou 2 mg toutes les 6 h pendant 48 h) ; cortisol avant et après (complément, non détaillé dans le polycopié). Sensibilité et spécificité médiocres : le cathétérisme des sinus pétreux inférieurs est préféré.',
       unit: 'nmol/L', label: 'Cortisol', thrFn: (st) => (st.values.length ? st.values[0] * 0.5 : null), thrDir: 'below', thrLabel: 'baisse de 50 % par rapport au départ',
       span: 48, xUnit: 'h', duration: 15,
       samples: [{ x: 0.04, label: 'J0' }, { x: 0.5, label: 'J1' }, { x: 1, label: 'J2' }],
@@ -77,8 +77,10 @@
         const pc = fall > 0 ? Math.round(fall * 100) + ' %' : 'aucune baisse';
         if (v[0] < 550) return { tone: 'warn', text: `Variation : ${pc}. Le test n'a d'intérêt qu'en cas d'hypercortisolisme ACTH-dépendant confirmé.` };
         if (st.base.autoAdr > 0.02) return { tone: 'warn', text: `Variation : ${pc}. ACTH effondrée : Cushing ACTH-indépendant (surrénalien), le test d'orientation hypophyse/ectopie n'est pas indiqué.` };
-        if (fall >= 0.5) return { tone: 'good', text: `Baisse du cortisol de ${pc} (≥ 50 %) : freinage partiel en faveur d'un adénome corticotrope (maladie de Cushing).` };
-        return { tone: 'bad', text: `Baisse du cortisol : ${pc} (< 50 %), absence de freinage en faveur d'une sécrétion ectopique d'ACTH.` };
+        // Sensibilité et spécificité médiocres : le cathétérisme des sinus pétreux lui est préféré (complément).
+        const lim = ' Test peu sensible et peu spécifique : les recommandations actuelles lui préfèrent le cathétérisme des sinus pétreux inférieurs (complément).';
+        if (fall >= 0.5) return { tone: 'good', text: `Baisse du cortisol de ${pc} (≥ 50 %) : freinage partiel en faveur d'un adénome corticotrope (maladie de Cushing).` + lim };
+        return { tone: 'bad', text: `Baisse du cortisol : ${pc} (< 50 %), absence de freinage en faveur d'une sécrétion ectopique d'ACTH.` + lim };
       }
     }
   );
@@ -87,7 +89,7 @@
       id: 'hgpo-gh', name: 'HGPO avec dosage de la GH', poly: true,
       what: 'Diagnostic de l\'acromégalie : la GH se freine-t-elle sous hyperglycémie ?',
       proto: '75 g de glucose per os ; GH à T0, 30, 60, 90 et 120 min.',
-      unit: 'ng/mL', label: 'GH', thr: 0.4, thrDir: 'below', thrLabel: 'nadir < 0,4 ng/mL (1 mUI/L)',
+      unit: 'ng/mL', label: 'GH', thr: 0.4, thrDir: 'below', thrLabel: 'nadir < 0,4 ng/mL (≈ 1 mUI/L)',
       span: 120, xUnit: 'min', duration: 15,
       samples: [{ x: 0.04, label: 'T0' }, { x: 0.25, label: '30' }, { x: 0.5, label: '60' }, { x: 0.75, label: '90' }, { x: 1, label: '120' }],
       apply(p, x) { if (x > 0.05) p.load = clamp(Math.min((x - 0.05) * 8, 1) * (1 - 0.4 * Math.max(0, x - 0.6) / 0.4), 0, 1); },
@@ -215,7 +217,7 @@
       span: 10, xUnit: 'h', duration: 20,
       samples: [{ x: 0.03, label: '0 h' }, { x: 0.2, label: '2 h' }, { x: 0.4, label: '4 h' }, { x: 0.6, label: '6 h' }, { x: 0.79, label: '8 h' }, { x: 1, label: 'DDAVP' }],
       apply(p, x) {
-        const siadh = p.siadh > 0.02;
+        const siadh = p.siadh > 0.02 || p.drug > 0.02;
         // SIADH : restriction partielle (500 à 800 mL/j) et correction lente ; jamais de desmopressine.
         if (x > 0.05) p.restrict = siadh ? 0.2 : 1;
         if (x > 0.8 && !siadh) p.ddavp = 1;
@@ -230,7 +232,7 @@
         const u8 = v[4], ud = v[5], na = sim.lab('na');
         const loss = (st.acc / 70) * 100;
         const extra = ` Natrémie finale ${n0(na)} mmol/L ; perte de poids ≈ ${loss.toFixed(1).replace('.', ',')} %.` + (loss > 3 || na > 148 ? ' En pratique, l\'épreuve est interrompue avant ce stade (perte de poids > 3 à 5 % ou natrémie qui dépasse la normale ; complément).' : '');
-        if (st.base.siadh > 0.02) {
+        if (st.base.siadh > 0.02 || st.base.drug > 0.02) {
           const na0 = st.na0 != null ? st.na0 : na, d = na - na0;
           return { tone: 'warn', text: `Restriction hydrique partielle (500 à 800 mL/j ; complément) : les urines restent inappropriément concentrées et la natrémie remonte lentement, de ${n0(na0)} à ${n0(na)} mmol/L (+${d.toFixed(1).replace('.', ',')} mmol/L) : argument pour un SIADH (épreuve diagnostique et thérapeutique). Pas de desmopressine dans un SIADH. Mise en garde : corriger de 8 à 10 mmol/L par 24 h au plus (risque de myélinolyse osmotique ; complément).` };
         }

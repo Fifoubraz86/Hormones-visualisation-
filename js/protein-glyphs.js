@@ -49,7 +49,7 @@
 
   /* Sources des petites molécules (vérifiées dans PubChem) */
   HV.SMALL_SRC = {
-    t4: 'PubChem CID 5819 · thyroxine', t3: 'PubChem CID 5920 · liothyronine', rt3: 'PubChem CID 644280 · 3,3′,5′-triiodothyronine',
+    t4: 'PubChem CID 5819 · L-thyroxine', t3: 'PubChem CID 5920 · L-triiodothyronine', rt3: 'PubChem CID 644280 · 3,3′,5′-triiodothyronine',
     trh: 'PubChem CID 638678 · protiréline', cortisol: 'PubChem CID 5754', aldo: 'PubChem CID 5839', testo: 'PubChem CID 6013',
     e2: 'PubChem CID 5757', prog: 'PubChem CID 5994', dhea: 'PubChem CID 5881', calcitriol: 'PubChem CID 5280453',
     adre: 'PubChem CID 5816', nora: 'PubChem CID 439260', dopa: 'PubChem CID 681', glucose: 'PubChem CID 5793'

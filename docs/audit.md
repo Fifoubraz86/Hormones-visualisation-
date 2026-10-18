@@ -291,3 +291,42 @@ Liste dédoublonnée des éléments du polycopié (ou de pratique courante) abse
 | Organes, imagerie, langue | js/sheets-organs.js:46 et js/imaging.js (adénome géant) | Le poly est lui-même incohérent : il écrit « adénome géant > 40 mm » dans le texte et « ≥ 40 mm » dans la légende de la figure 22C (P1 p.66). L'atlas retient « ≥ 40 mm », ce qui est défendable, mais faut-il signaler l'écart ? |
 | Organes, imagerie, langue | js/sheets-organs.js:17 (fiche thyroïde, Vascularisation) | « tronc thyréo-cervical » : la terminologie anatomique française usuelle est « tronc thyro-cervical » (ou « thyrocervical »). Faut-il harmoniser ? |
 
+
+## Décisions sur les points à trancher (quiz du 18 octobre 2026)
+
+Réponses de l'auteur au quiz « Arbitrages de l'atlas endocrinien ». « Oui » : appliqué ; « Non » : atlas inchangé ; « Sans importance » : classé.
+
+| Point | Décision | Ce qui a changé |
+| --- | --- | --- |
+| T1 Carence iodée | Sans importance | — |
+| T2 Hypothyroïdie centrale à TSH un peu élevée | Oui | Garde-fou : T4L < 8 pmol/L avec TSH < 10 mUI/L → « évoquer aussi une origine centrale » (complément) |
+| T3 Hashimoto et thyroïdite atrophique | Oui | Deux formes distinctes (P1 p. 21-22) ; nouveau scénario « Thyroïdite chronique auto-immune atrophique » |
+| T4 Producteurs des TRAb | Oui | Plasmocytes, issus des lymphocytes B |
+| T5 Protéines de transport | Oui | TBG ≈ 70–75 %, TTR ≈ 10–15 %, albumine ≈ 10–20 % (complément), écart avec le polycopié signalé |
+| T6 Volume dans le scénario Hashimoto | Oui | Thyroïde augmentée de volume ; réduite dans la forme atrophique |
+| S1 Freinage fort | Oui | Sensibilité et spécificité médiocres, cathétérisme des sinus pétreux préféré |
+| S2 Test à la desmopressine | Oui | Certaines tumeurs ectopiques répondent : le test oriente sans trancher |
+| S3 Cytokines et CRH | Sans importance | — |
+| S4 Normes hors polycopié | Oui | Rénine, aldostérone, FC et PA marquées complément ; mention générale « valeurs de référence indicatives, variables selon le laboratoire » sous chaque bilan |
+| S5 Valeurs chiffrées SDHEA, 17-OHP | Sans importance | Valeurs relatives conservées |
+| A1 Natrémie du SIADH | Sans importance | — |
+| A2 Tumeur ou médicament | Oui | SIADH paranéoplasique (ADH ectopique) et SIADH médicamenteux (libération hypothalamique, potentialisation rénale ; complément) séparés |
+| A3 Rebond de GH sous HGPO | Sans importance | Une seule valeur < 0,4 ng/mL suffit (note de l'auteur) |
+| A4 Rétrocontrôle court de la prolactine | Sans importance | — |
+| A5 GH dans la dénutrition | Sans importance | — |
+| A6 Conversion du nadir de GH | Oui | « ≈ 1 mUI/L » |
+| A7 Copeptine | Oui | Seuils de Fenske 2018 et Winzeler 2019 (complément) |
+| G1 Critère échographique du SOPK | Oui | Follicules antraux de 2 à 9 mm, écart avec le polycopié signalé |
+| G2 Test à la GnRH | Oui | Texte nuancé |
+| G3 GABA et glutamate | Oui | Nœud distinct « Neurones à GABA, à glutamate » |
+| G4 Jour de l'ovulation | Sans importance | — |
+| G5 Norme de la FSH | Sans importance | — |
+| C1 Seuil de PTH | Oui | Cause non parathyroïdienne seulement si PTH freinée (< 20 pg/mL) |
+| C2 Épreuve de jeûne | Non | Seuil de Whipple du polycopié conservé |
+| C3 Carence profonde en vitamine D | Oui | Hyperparathyroïdie secondaire accentuée (PTH ≈ 110 pg/mL) |
+| M1 Récepteur de la GH | Oui | Dimère préformé activé par la GH |
+| M2 LH illustrée par l'hCG | Oui | Rappel dans le titre de l'info-bulle |
+| M3 Noms des hormones thyroïdiennes | Oui | L-thyroxine, L-triiodothyronine |
+| M4 Demi-vie de l'angiotensine II | Oui | < 1 min |
+| O1 Adénome géant | Sans importance | — |
+| O2 Tronc thyro-cervical | Oui | Terminologie harmonisée |

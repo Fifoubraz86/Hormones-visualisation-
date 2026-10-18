@@ -305,13 +305,13 @@
   const uosmOf = (eff, na) => clamp((50 + 700 * pw(eff, 1.5)) * clamp(1 - 0.05 * Math.max(0, 135 - (na || 140)), 0.4, 1), 40, 1200);
   SIMS.adh = {
     title: 'Bilan hydrique simulé',
-    defaults: { hypo: 1, kidney: 1, siadh: 0, restrict: 0, ddavp: 0, drink: 0, sweat: 0 },
+    defaults: { hypo: 1, kidney: 1, siadh: 0, drug: 0, restrict: 0, ddavp: 0, drink: 0, sweat: 0 },
     init: { na: 140, adh: 1, eff: 1, W: 0 },
     tau: { na: 1.5, W: 1, adh: 0.5, eff: 0.5 },
     targets(p, s) {
-      const adh = p.hypo * clamp(ex((s.na - 140) / (s.na < 140 ? 1.2 : 3)) * (1 + 1.2 * p.sweat), 0, 12) + p.siadh; // osmolalité (effondrée sous la consigne) et volémie
+      const adh = p.hypo * clamp(ex((s.na - 140) / (s.na < 140 ? 1.2 : 3)) * (1 + 1.2 * p.sweat), 0, 12) + p.siadh + 3 * p.drug; // osmolalité (effondrée sous la consigne), volémie ; SIADH paranéoplasique (ADH ectopique) ou médicamenteux (libération hypothalamique stimulée)
       const a2 = adh + 5 * p.ddavp; // desmopressine : agoniste V2
-      const eff = clamp((p.kidney * a2) / (a2 + 0.5) * 1.5, 0, 1.5);
+      const eff = clamp((p.kidney * a2) / (a2 + 0.5) * 1.5 * (1 + 0.15 * p.drug), 0, 1.5); // certains médicaments potentialisent aussi l'effet rénal (complément)
       // Excès d'eau éliminé quand l'ADH s'effondre ; déficit corrigé par la soif si le patient peut boire.
       const canDrink = Math.max(0, 1 - p.restrict - p.sweat);
       const dW = 2.4 * p.drink - 0.45 * p.sweat - (s.W > 0 ? s.W * 0.8 * clamp(1.15 - eff, 0.03, 1.15) : 0) + (s.W < 0 ? -s.W * 0.8 * canDrink : 0);
@@ -329,7 +329,8 @@
     params: [
       { key: 'hypo', label: 'Sécrétion d\'ADH', min: 0.01, max: 1.5, step: 0.01, fmt: pct },
       { key: 'kidney', label: 'Sensibilité rénale (V2)', min: 0.02, max: 1.2, step: 0.01, fmt: pct },
-      { key: 'siadh', label: 'Sécrétion inappropriée d\'ADH', min: 0, max: 6, step: 0.1, fmt: x100 },
+      { key: 'siadh', label: 'ADH ectopique (tumeur)', min: 0, max: 6, step: 0.1, fmt: x100 },
+      { key: 'drug', label: 'Médicament inducteur de SIADH', min: 0, max: 2, step: 0.05, fmt: x100 },
       { key: 'drink', label: 'Boissons en excès', min: 0, max: 1, step: 0.05, fmt: pct },
       { key: 'sweat', label: 'Pertes sudorales sans boire', min: 0, max: 1, step: 0.05, fmt: pct }
     ],
@@ -339,7 +340,8 @@
       { id: 'hyper', name: 'Hyperhydratation : 1,5 L d\'eau bus', note: 'Apport d\'eau abondant : l\'osmolalité baisse, l\'ADH s\'effondre, le rein élimine l\'excès par des urines abondantes et diluées.', p: { drink: 1 } },
       { id: 'dic', name: 'Diabète insipide central', note: 'Défaut d\'ADH : polyurie > 3 L, urines diluées < 200 mosmol/kg, natrémie un peu haute.', p: { hypo: 0.01 } },
       { id: 'din', name: 'Diabète insipide néphrogénique', note: 'Résistance rénale à l\'ADH (complément) : même tableau, ADH élevée.', p: { kidney: 0.05 } },
-      { id: 'siadh', name: 'SIADH', note: 'Rétention d\'eau sans œdème, hyponatrémie souvent < 120 mmol/L, urines inappropriément concentrées.', p: { siadh: 5 } }
+      { id: 'siadh', name: 'SIADH paranéoplasique', note: 'Une tumeur sécrète de l\'ADH de façon autonome (syndrome paranéoplasique) : rétention d\'eau sans œdème, hyponatrémie en règle très basse (< 120 mmol/L), urines inappropriément concentrées.', p: { siadh: 5 } },
+      { id: 'siadhm', name: 'SIADH médicamenteux', note: 'De nombreux médicaments (polycopié p. 64) : ils stimulent surtout la libération hypothalamique d\'ADH ou potentialisent son effet rénal (complément). Même tableau ; l\'éviction du médicament confirme rétrospectivement le diagnostic.', p: { drug: 1.6 } }
     ],
     interpret(s, p, L) {
       const na = L('na'), u = L('uosm'), d = L('diur');
@@ -363,11 +365,12 @@
       extraNodes: [
         { id: 'restr', x: 700, y: 570, label: 'Restriction hydrique', w: 250, color: 'p-sky', show: (p) => p.restrict > 0.02, info: 'Arrêt des boissons en milieu hospitalier : l\'osmolalité monte et l\'ADH doit concentrer les urines.' },
         { id: 'ddavp', x: 1090, y: 560, label: 'Desmopressine', w: 220, color: 'p-sky', show: (p) => p.ddavp > 0.02, info: 'Agoniste V2 : concentre les urines si le rein répond (diabète insipide central), pas dans le diabète insipide néphrogénique.' },
-        { id: 'ectoadh', x: 960, y: 600, label: 'Tumeur ou médicament', w: 270, color: 'bad', show: (p) => p.siadh > 0.02, info: 'SIADH : de nombreux médicaments, ou une tumeur responsable d\'un syndrome paranéoplasique.' },
+        { id: 'ectoadh', x: 960, y: 588, label: 'Tumeur : ADH ectopique', w: 290, color: 'bad', show: (p) => p.siadh > 0.02, info: 'SIADH paranéoplasique : la tumeur sécrète elle-même l\'ADH, sans passer par l\'hypothalamus ni la posthypophyse.' },
+        { id: 'drugadh', x: 960, y: 588, label: 'Médicament', w: 210, color: 'bad', show: (p) => p.drug > 0.02, info: 'De nombreux médicaments peuvent entraîner un SIADH (polycopié p. 64). Mécanismes (complément) : stimulation de la libération hypothalamique d\'ADH, potentialisation de son effet sur le rein.' },
         { id: 'sun', x: 1000, y: 140, label: 'Chaleur, sueur, pas d\'eau', w: 300, color: 'p-amber', show: (p) => p.sweat > 0.02, info: 'Marche prolongée au soleil sans boire : perte d\'eau par la sueur et la respiration, que la soif ne peut compenser.' },
         { id: 'glass', x: 1000, y: 140, label: 'Boissons', w: 170, color: 'p-sky', show: (p) => p.drink > 0.02, info: 'Apport rapide d\'eau libre (par exemple 1,5 L en 30 minutes).' }
       ],
-      extraLinks: [{ from: 'ectoadh', to: 'kidney', kind: 'stim', mol: 'adh', v: 'siadhRate', label: '' }, { from: 'restr', to: 'osm', kind: 'stim', color: 'p-sky', label: '' }, { from: 'ddavp', to: 'kidney', kind: 'stim', mol: 'adh', v: 'ddavpRate', label: '' }, { from: 'sun', to: 'osm', kind: 'stim', color: 'p-amber', label: 'perte d\'eau' }, { from: 'glass', to: 'osm', kind: 'inhib', mol: 'water', v: 'thirstRate', label: '' }],
+      extraLinks: [{ from: 'ectoadh', to: 'kidney', kind: 'stim', mol: 'adh', v: 'siadhRate', label: '' }, { from: 'drugadh', to: 'hypo', kind: 'stim', color: 'bad', label: 'libération ↑' }, { from: 'drugadh', to: 'kidney', kind: 'stim', color: 'bad', label: 'potentialisation' }, { from: 'restr', to: 'osm', kind: 'stim', color: 'p-sky', label: '' }, { from: 'ddavp', to: 'kidney', kind: 'stim', mol: 'adh', v: 'ddavpRate', label: '' }, { from: 'sun', to: 'osm', kind: 'stim', color: 'p-amber', label: 'perte d\'eau' }, { from: 'glass', to: 'osm', kind: 'inhib', mol: 'water', v: 'thirstRate', label: '' }],
       levels: [{ label: 'ADH', mol: 'adh', v: 'adh', max: 6 }, { label: 'Ocytocine', mol: 'oxy', fn: () => 0.6, max: 2 }]
     }
   };
@@ -388,8 +391,8 @@
       { key: 'mn', name: 'Métanéphrine', unit: '× limite sup.', range: '< 1 × LSN', lo: 0, hi: 1, min: 0, max: 15, dec: 1, fn: (s, p) => 0.45 * p.sym + 2.4 * p.pheoA },
       { key: 'nmn', name: 'Normétanéphrine', unit: '× limite sup.', range: '< 1 × LSN', lo: 0, hi: 1, min: 0, max: 15, dec: 1, fn: (s, p) => 0.45 * p.sym + 2.4 * p.pheoN },
       { key: 'mt', name: '3-méthoxytyramine', unit: '× limite sup.', range: '< 1 × LSN', lo: 0, hi: 1, min: 0, max: 15, dec: 1, fn: (s, p) => 0.5 + 2.4 * p.pheoD },
-      { key: 'fc', name: 'Fréquence cardiaque', unit: '/min', range: '60–100 /min', lo: 60, hi: 100, min: 40, max: 180, dec: 0, fn: (s) => clamp(70 + 22 * ln(Math.max(s.A, 0.2)) + 6 * ln(Math.max(s.N, 0.2)), 45, 170) },
-      { key: 'pas', name: 'PA systolique', unit: 'mmHg', range: '100–140 mmHg', lo: 100, hi: 140, min: 80, max: 260, dec: 0, fn: (s) => clamp(120 + 10 * ln(Math.max(s.A, 0.2)) + 22 * ln(Math.max(s.N, 0.2)), 85, 250) },
+      { key: 'fc', name: 'Fréquence cardiaque', unit: '/min', range: '60–100 /min (indicatif, complément)', lo: 60, hi: 100, min: 40, max: 180, dec: 0, fn: (s) => clamp(70 + 22 * ln(Math.max(s.A, 0.2)) + 6 * ln(Math.max(s.N, 0.2)), 45, 170) },
+      { key: 'pas', name: 'PA systolique', unit: 'mmHg', range: '100–140 mmHg (indicatif, complément)', lo: 100, hi: 140, min: 80, max: 260, dec: 0, fn: (s) => clamp(120 + 10 * ln(Math.max(s.A, 0.2)) + 22 * ln(Math.max(s.N, 0.2)), 85, 250) },
       { key: 'gly', name: 'Glycémie', unit: 'g/L', range: '0,70–1,10 g/L', lo: 0.7, hi: 1.1, min: 0.5, max: 3, dec: 2, fn: (s) => clamp(0.92 + 0.22 * ln(Math.max(s.A, 0.2)), 0.6, 2.5) }
     ],
     params: [
@@ -469,7 +472,7 @@
     interpret(s, p, L, T) {
       const f = L('fsh'), e = L('e2'), prl = L('prl');
       // SOPK : 2 critères de Rotterdam sur 3, après exclusion des autres diagnostics (polycopié, partie 2, p. 15).
-      if (p.sopk >= 0.5 && prl <= 25 && p.ovary > 0.3) return { tone: 'bad', label: 'Anovulation avec hyperandrogénie : SOPK ?', text: 'Critères de Rotterdam (2 sur 3) : troubles du cycle (spanioménorrhée, aménorrhée, infertilité) ; hyperandrogénie clinique ou biologique ; ovaires > 10 mL avec plus de 20 follicules par ovaire à l\'échographie. Diagnostic d\'exclusion : éliminer un bloc en 21-hydroxylase non classique (17-OHP), un syndrome de Cushing, une tumeur virilisante, une hyperprolactinémie. Rechercher l\'insulinorésistance (obésité, acanthosis nigricans).' };
+      if (p.sopk >= 0.5 && prl <= 25 && p.ovary > 0.3) return { tone: 'bad', label: 'Anovulation avec hyperandrogénie : SOPK ?', text: 'Critères de Rotterdam (2 sur 3) : troubles du cycle (spanioménorrhée, aménorrhée, infertilité) ; hyperandrogénie clinique ou biologique ; ovaires > 10 mL avec au moins 20 follicules antraux de 2 à 9 mm par ovaire à l\'échographie (« pré-antraux » dans le polycopié ; critères actualisés, complément). Diagnostic d\'exclusion : éliminer un bloc en 21-hydroxylase non classique (17-OHP), un syndrome de Cushing, une tumeur virilisante, une hyperprolactinémie. Rechercher l\'insulinorésistance (obésité, acanthosis nigricans).' };
       // « Ovulatoire » seulement si le cycle simulé comporte un pic de LH et une phase lutéale (progestérone > 5 ng/mL vers J21).
       if (s.cyc > 0.5) {
         if (T && T.d < 6 && f > 12) return { tone: 'warn', label: 'Cycle ovulatoire, FSH élevée', text: 'Pic de LH et phase lutéale conservés, mais FSH élevée en début de phase folliculaire : baisse de la réserve ovarienne (seuil indicatif ; complément).' };
@@ -489,7 +492,7 @@
       lesions: [
         { node: 'ovary', kind: 'label', show: (p) => p.ovary < 0.3, label: 'ovaire sans follicules', ly: -84, title: 'Épuisement folliculaire', text: 'Ménopause ou insuffisance ovarienne précoce (avant 40 ans) : plus de follicules, donc plus d\'estradiol ni d\'inhibine.' },
         { node: 'hypo', kind: 'label', show: (p) => p.hypo < 0.5, label: 'GnRH freinée', ly: -76, title: 'Aménorrhée hypothalamique', text: 'Baisse de la pulsatilité de la GnRH : insuffisance gonadotrope fonctionnelle. Causes (complément) : anorexie mentale, activité physique intense, stress (baisse de la leptine).' },
-        { node: 'ovary', kind: 'label', show: (p) => p.sopk >= 0.5, label: 'ovaires multifolliculaires', ly: -96, title: 'Aspect échographique du SOPK', text: 'Ovaires augmentés de volume (> 10 mL) avec plus de 20 follicules pré-antraux par ovaire (critère de Rotterdam ; polycopié, partie 2, p. 15). La thèque produit les androgènes sous LH.' },
+        { node: 'ovary', kind: 'label', show: (p) => p.sopk >= 0.5, label: 'ovaires multifolliculaires', ly: -96, title: 'Aspect échographique du SOPK', text: 'Ovaires augmentés de volume (> 10 mL) avec au moins 20 follicules par ovaire (critère de Rotterdam). Le polycopié (partie 2, p. 15) écrit « pré-antraux » ; les critères actualisés (Teede 2018, 2023) parlent de follicules antraux de 2 à 9 mm (complément). La thèque produit les androgènes sous LH.' },
         { node: 'pit', kind: 'nodule', tone: 'magenta', dx: 30, dy: -26, show: (p) => p.prl > 0.3, label: 'prolactinome', title: 'Adénome à prolactine', text: 'La prolactine en excès inhibe la pulsatilité de la GnRH.' }
       ],
       extraNodes: [
@@ -571,9 +574,11 @@
     targets(p, s) {
       // CaSR peu sensible (hypercalcémie hypocalciurique familiale) : la consigne de calcémie est déplacée vers le haut.
       const shift = 0.32 * (1 - p.casr);
-      const pth = clamp(p.para * Math.min(4 + 40 * (p.para - 0.05), ex(-12 * (s.ca - 2.4 - shift))), 0, 20) + p.autoPara;
+      // Le calcitriol freine la PTH : en carence en vitamine D, l'hyperparathyroïdie secondaire est franche (complément).
+      const vdDrive = 1 + 2 * Math.max(0, 1 - p.vitD);
+      const pth = clamp(p.para * vdDrive * Math.min(4 + 40 * (p.para - 0.05), ex(-12 * (s.ca - 2.4 - shift))), 0, 20) + p.autoPara;
       const d = clamp(pw(pth, 0.6) * p.vitD, 0, 5);
-      const ca = 2.4 + shift + 0.4 * ln((0.6 * (pth + 1.5 * p.pthrp) + 0.4) * (0.5 + 0.5 * d));
+      const ca = 2.4 + shift + 0.4 * ln((0.6 * (pth + 1.5 * p.pthrp) + 0.4) * (0.3 + 0.7 * d));
       return { pth, d, ca: clamp(ca, 1.5, 3.6) };
     },
     labs: [
@@ -598,14 +603,15 @@
       { id: 'hpt', name: 'Hyperparathyroïdie primaire', note: 'Adénome : hypercalcémie avec PTH élevée ou inadaptée, phosphatémie basse ou normale basse.', p: { autoPara: 2.5 } },
       { id: 'hypo', name: 'Hypoparathyroïdie (post-chirurgicale)', note: 'Hypocalcémie avec PTH basse ou inadaptée, phosphatémie haute.', p: { para: 0.05 } },
       { id: 'vitd', name: 'Carence en vitamine D', note: 'Hyperparathyroïdie secondaire (complément) : calcémie basse ou normale, PTH élevée.', p: { vitD: 0.1 } },
-      { id: 'pthrp', name: 'Hypercalcémie tumorale', note: 'PTHrP (complément) : elle agit comme la PTH sur l\'os et sur le rein (réabsorption du calcium, fuite de phosphate) ; hypercalcémie avec PTH effondrée, phosphatémie basse.', p: { pthrp: 3.5 } },
+      { id: 'pthrp', name: 'Hypercalcémie tumorale', note: 'PTHrP (complément) : elle agit comme la PTH sur l\'os et sur le rein (réabsorption du calcium, fuite de phosphate) ; hypercalcémie avec PTH effondrée, phosphatémie basse.', p: { pthrp: 4 } },
       { id: 'hhf', name: 'Hypercalcémie hypocalciurique familiale', note: 'Complément (absente du polycopié) : CaSR peu sensible (mutation inactivatrice) ; hypercalcémie modérée, PTH normale ou un peu élevée, calciurie basse. Bénigne : à distinguer de l\'hyperparathyroïdie primaire, car elle ne s\'opère pas.', p: { casr: 0.3 } }
     ],
     interpret(s, p, L) {
       const ca = L('ca'), pth = L('pth');
       if (ca > 2.6 && L('cau') < 2.5) return { tone: 'warn', label: 'Hypercalcémie avec calciurie basse', text: 'PTH normale ou peu élevée et calciurie basse : évoquer une hypercalcémie hypocalciurique familiale (complément), bénigne, qui ne s\'opère pas.' };
-      if (ca > 2.6 && pth >= 30) return { tone: 'bad', label: 'Hypercalcémie PTH-dépendante', text: 'PTH élevée ou inadaptée face à l\'hypercalcémie : hyperparathyroïdie primaire. Calciurie élevée : la charge filtrée de calcium dépasse les capacités de réabsorption (polycopié p. 40–41).' };
-      if (ca > 2.6) return { tone: 'bad', label: 'Hypercalcémie non parathyroïdienne', text: 'PTH freinée : rechercher une cause tumorale (PTHrP, métastases osseuses) ou une intoxication en vitamine D (complément).' };
+      // Face à une hypercalcémie, une PTH « normale » (20–65 pg/mL) est déjà inadaptée (polycopié p. 42) ; seule une PTH freinée oriente ailleurs.
+      if (ca > 2.6 && pth >= 20) return { tone: 'bad', label: 'Hypercalcémie PTH-dépendante', text: 'PTH élevée, ou normale donc inadaptée face à l\'hypercalcémie : hyperparathyroïdie primaire. Calciurie élevée : la charge filtrée de calcium dépasse les capacités de réabsorption (polycopié p. 40–41).' };
+      if (ca > 2.6) return { tone: 'bad', label: 'Hypercalcémie non parathyroïdienne', text: 'PTH freinée (< 20 pg/mL, seuil indicatif ; complément) : rechercher une cause tumorale (PTHrP, métastases osseuses) ou une intoxication en vitamine D (complément).' };
       if (ca < 2.2 && pth < 30) return { tone: 'bad', label: 'Hypoparathyroïdie', text: 'Hypocalcémie avec PTH basse ou inadaptée.' };
       if (pth > 65) return { tone: 'warn', label: 'Hyperparathyroïdie secondaire', text: 'PTH élevée qui maintient la calcémie : carence en vitamine D ou insuffisance rénale (complément).' };
       return { tone: 'good', label: 'Équilibre phosphocalcique normal', text: 'Calcémie et PTH dans les normes.' };
@@ -640,11 +646,11 @@
       return { renin, aldo, vol, k };
     },
     labs: [
-      { key: 'renin', name: 'Rénine active', unit: 'mUI/L', range: '5–40 mUI/L', k: 15, lo: 5, hi: 40, min: 0.2, max: 400, log: true, dec: 1 },
-      { key: 'aldo', name: 'Aldostérone', unit: 'pmol/L', range: '100–550 pmol/L', k: 300, lo: 100, hi: 550, min: 10, max: 4000, log: true, dec: 0 },
+      { key: 'renin', name: 'Rénine active', unit: 'mUI/L', range: '5–40 mUI/L (complément ; variable selon le laboratoire et la position)', k: 15, lo: 5, hi: 40, min: 0.2, max: 400, log: true, dec: 1 },
+      { key: 'aldo', name: 'Aldostérone', unit: 'pmol/L', range: '100–550 pmol/L (complément ; variable selon le laboratoire et la position)', k: 300, lo: 100, hi: 550, min: 10, max: 4000, log: true, dec: 0 },
       { key: 'k', name: 'Kaliémie', unit: 'mmol/L', k: 1, lo: 3.5, hi: 5, min: 2, max: 7, dec: 1 },
       { key: 'na', name: 'Natrémie', unit: 'mmol/L', range: '135–145 mmol/L', lo: 135, hi: 145, min: 120, max: 150, dec: 0, fn: (s) => clamp(140 + 3 * ln(Math.max(s.aldo, 0.05)), 122, 148) },
-      { key: 'pas', name: 'PA systolique', unit: 'mmHg', range: '100–140 mmHg', lo: 100, hi: 140, min: 70, max: 220, dec: 0, fn: (s, p) => clamp(120 + 250 * (s.vol - 1) + 18 * p.sten, 75, 210) }
+      { key: 'pas', name: 'PA systolique', unit: 'mmHg', range: '100–140 mmHg (indicatif, complément)', lo: 100, hi: 140, min: 70, max: 220, dec: 0, fn: (s, p) => clamp(120 + 250 * (s.vol - 1) + 18 * p.sten, 75, 210) }
     ],
     params: [
       { key: 'conn', label: 'Sécrétion autonome d\'aldostérone', min: 0, max: 8, step: 0.1, fmt: x100 },

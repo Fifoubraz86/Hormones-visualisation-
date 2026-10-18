@@ -37,8 +37,8 @@
     oxy: { t: 'Ocytocine', k: 'Nonapeptide posthypophysaire', d: 'Synthétisée dans les mêmes noyaux hypothalamiques que l\'ADH et libérée par la posthypophyse. Contraction utérine et éjection du lait (complément).' },
     water: { t: 'Eau libre', k: 'Réabsorbée sous ADH', d: 'Diabète insipide : polyurie > 3 L/24 h, urines diluées (osmolalité < 200 mosmol/kg). SIADH : rétention d\'eau et hyponatrémie, souvent < 120 mmol/L.' },
     gnrh: { t: 'GnRH', k: 'Gonadolibérine · décapeptide pulsatile', d: 'La pulsatilité est indispensable à la sécrétion de LH et de FSH. Réactivation progressive à la puberté (fréquence et amplitude des pics de LH). Modulée par la kisspeptine, le GABA, le glutamate ; effet permissif de la leptine.' },
-    kiss: { t: 'Kisspeptines', k: 'Neurones afférents', d: 'Stimulent les neurones à GnRH, avec le glutamate ; le GABA module aussi leur activité.' },
-    lh: { t: 'LH', k: 'Hormone lutéinisante · glycoprotéine α/β', d: 'Homme : stimule les cellules de Leydig (testostérone). Femme : stimule la synthèse d\'androgènes par la thèque interne ; le pic de LH déclenche l\'ovulation à J14.' },
+    kiss: { t: 'Kisspeptines', k: 'Neurones afférents', d: 'Stimulent les neurones à GnRH. Le GABA et le glutamate sont des influences distinctes, portées par d\'autres neurones (polycopié, partie 2, p. 3).' },
+    lh: { t: 'LH · structure illustrée par l\'hCG (PDB 1HRP)', k: 'Hormone lutéinisante · glycoprotéine α/β · la β tracée est celle de l\'hCG (145 acides aminés, contre 121 pour la LH)', d: 'Homme : stimule les cellules de Leydig (testostérone). Femme : stimule la synthèse d\'androgènes par la thèque interne ; le pic de LH déclenche l\'ovulation à J14.' },
     fsh: { t: 'FSH', k: 'Folliculostimuline · glycoprotéine α/β', d: 'Homme : stimule les cellules de Sertoli et la spermatogenèse. Femme : sélection et croissance folliculaire, aromatisation des androgènes en estradiol par la granulosa.' },
     testo: { t: 'Testostérone', k: 'Stéroïde · cellules de Leydig', d: 'Spermatogenèse, virilisation, libido, effet anabolisant musculaire, préservation de la masse osseuse, répartition androïde des graisses, pilosité et sébum, érythropoïèse. Rétrocontrôle négatif hypothalamo-hypophysaire.' },
     e2: { t: 'Estradiol (E2)', k: 'Stéroïde · granulosa, puis corps jaune', d: 'Endomètre, glaire perméable aux spermatozoïdes, effet trophique sur vagin et seins, HDL ↑, masse osseuse, répartition gynoïde. Effet diphasique sur l\'hypophyse : stimule LH et FSH en milieu de cycle (ovulation), les inhibe le reste du temps.' },
@@ -252,8 +252,9 @@
       { id: 'ovary', zoom: 'folliculo', x: 920, y: 380, organ: 'ovary', s: 1.25, label: 'Ovaire', sub: ['thèque : androgènes (LH)', 'granulosa : E2 (FSH)', 'corps jaune : progestérone'], color: 'p-rose' },
       { id: 'uterus', zoom: 'endometre', x: 1330, y: 300, organ: 'uterus', label: 'Utérus', sub: 'endomètre, glaire', color: 'p-rose' },
       { id: 'breast', x: 1330, y: 600, organ: 'breast', s: 0.85, label: 'Seins, os, peau', sub: 'effets trophiques, HDL ↑', color: 'p-rose' },
-      { id: 'kiss', at: 'arc', dot: 9, hit: 16, leader: true, lx: 262, ly: 92, label: 'Neurones à kisspeptine', sub: 'noyau arqué · glutamate (+), GABA', color: 'p-magenta', info: 'Les neurones à kisspeptine de l\'hypothalamus (noyau arqué, complément) stimulent les neurones à GnRH, avec les neurones à glutamate ; le GABA module leur activité (polycopié, partie 2, p. 3).' },
-      { id: 'lep', x: 560, y: 790, organ: 'fat', s: 0.8, label: 'Tissu adipeux blanc', sub: 'leptine (permissif)', color: 'p-amber', info: 'Effet permissif indirect de la leptine, sécrétée par le tissu adipeux blanc, sur les neurones à GnRH (polycopié).' }
+      { id: 'kiss', at: 'arc', dot: 9, hit: 16, leader: true, lx: 262, ly: 92, label: 'Neurones à kisspeptine', sub: 'noyau arqué', color: 'p-magenta', info: 'Les neurones à kisspeptine de l\'hypothalamus (noyau arqué, complément) stimulent les neurones à GnRH (polycopié, partie 2, p. 3).' },
+      { id: 'aff', x: 620, y: 718, label: 'Neurones à GABA, à glutamate', w: 300, sub: 'autres afférences', color: 'p-violet', info: 'Influences distinctes des kisspeptines sur les neurones à GnRH (polycopié, partie 2, p. 3) : le glutamate stimule, le GABA module (complément).' },
+      { id: 'lep', x: 600, y: 872, organ: 'fat', s: 0.7, label: 'Tissu adipeux blanc', sub: 'leptine (permissif)', color: 'p-amber', info: 'Effet permissif indirect de la leptine, sécrétée par le tissu adipeux blanc, sur les neurones à GnRH (polycopié).' }
     ],
     links: [
       { from: 'hypo', to: 'pit', kind: 'stim', mol: 'gnrh', mod: R.gnrhPulse, rate: 2, labelOff: 150 },
@@ -266,6 +267,7 @@
       { from: 'ovary', to: 'hypo', kind: e2Kind, mol: 'e2', bend: -230, mod: R.e2, rate: 0.9, label: '' },
       { from: 'ovary', to: 'pit', kind: 'inhib', mol: 'inhib', bend: 120, rate: 0.6, label: 'inhibine B → FSH', labelAt: 0.25 },
       { from: 'kiss', to: 'hypo', kind: 'stim', mol: 'kiss', rate: 0.6, label: '', bend: 12 },
+      { from: 'aff', to: 'hypo', kind: 'stim', color: 'p-violet', label: 'GABA, glutamate' },
       { from: 'lep', to: 'hypo', kind: 'stim', color: 'p-amber', label: 'leptine (permissif)', info: 'gonadoF.lep', effect: 'permissif (indirect)' }
     ],
     levels: { x: 60, y: 860, w: 300, items: [{ label: 'LH', mol: 'lh', fn: R.lh, max: 2.8 }, { label: 'FSH', mol: 'fsh', fn: R.fsh, max: 2.8 }, { label: 'Estradiol', mol: 'e2', fn: R.e2, max: 1.6 }, { label: 'Progestérone', mol: 'prog', fn: R.prog, max: 1.6 }] }
@@ -286,8 +288,9 @@
       { id: 'muscle', x: 1330, y: 220, organ: 'muscle', s: 0.85, label: 'Muscle', sub: 'effet anabolisant', color: 'p-blue' },
       { id: 'bone', x: 1330, y: 420, organ: 'bone', s: 0.8, label: 'Os, moelle', sub: 'masse osseuse, érythropoïèse', color: 'p-blue' },
       { id: 'brain', x: 1330, y: 620, organ: 'brainLateral', s: 0.85, label: 'Cerveau, peau', sub: 'libido · pilosité, sébum', color: 'p-blue' },
-      { id: 'kiss', at: 'arc', dot: 9, hit: 16, leader: true, lx: 262, ly: 92, label: 'Neurones à kisspeptine', sub: 'noyau arqué · glutamate (+), GABA', color: 'p-magenta', info: 'Les neurones à kisspeptine de l\'hypothalamus (noyau arqué, complément) stimulent les neurones à GnRH, avec les neurones à glutamate ; le GABA module leur activité (polycopié, partie 2, p. 3).' },
-      { id: 'lep', x: 560, y: 790, organ: 'fat', s: 0.8, label: 'Tissu adipeux blanc', sub: 'leptine (permissif)', color: 'p-amber', info: 'Effet permissif indirect de la leptine, sécrétée par le tissu adipeux blanc, sur les neurones à GnRH (polycopié).' }
+      { id: 'kiss', at: 'arc', dot: 9, hit: 16, leader: true, lx: 262, ly: 92, label: 'Neurones à kisspeptine', sub: 'noyau arqué', color: 'p-magenta', info: 'Les neurones à kisspeptine de l\'hypothalamus (noyau arqué, complément) stimulent les neurones à GnRH (polycopié, partie 2, p. 3).' },
+      { id: 'aff', x: 620, y: 718, label: 'Neurones à GABA, à glutamate', w: 300, sub: 'autres afférences', color: 'p-violet', info: 'Influences distinctes des kisspeptines sur les neurones à GnRH (polycopié, partie 2, p. 3) : le glutamate stimule, le GABA module (complément).' },
+      { id: 'lep', x: 600, y: 872, organ: 'fat', s: 0.7, label: 'Tissu adipeux blanc', sub: 'leptine (permissif)', color: 'p-amber', info: 'Effet permissif indirect de la leptine, sécrétée par le tissu adipeux blanc, sur les neurones à GnRH (polycopié).' }
     ],
     links: [
       { from: 'hypo', to: 'pit', kind: 'stim', mol: 'gnrh', mod: R.gnrhPulse, rate: 2, labelOff: 150 },
@@ -300,6 +303,7 @@
       { from: 'testis', to: 'hypo', kind: 'inhib', mol: 'testo', bend: -230, rate: 0.9, label: '' },
       { from: 'testis', to: 'pit', kind: 'inhib', mol: 'inhib', bend: 120, rate: 0.6, label: 'inhibine B → FSH', labelAt: 0.25 },
       { from: 'kiss', to: 'hypo', kind: 'stim', mol: 'kiss', rate: 0.6, label: '', bend: 12 },
+      { from: 'aff', to: 'hypo', kind: 'stim', color: 'p-violet', label: 'GABA, glutamate' },
       { from: 'lep', to: 'hypo', kind: 'stim', color: 'p-amber', label: 'leptine (permissif)', info: 'gonadoM.lep', effect: 'permissif (indirect)' }
     ],
     levels: { x: 1180, y: 830, w: 340, items: [{ label: 'GnRH / LH', mol: 'lh', fn: R.gnrhPulse, max: 1.8 }, { label: 'Testostérone', mol: 'testo', fn: () => 1, max: 1.6 }] }

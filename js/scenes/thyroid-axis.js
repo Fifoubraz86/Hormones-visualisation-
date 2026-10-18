@@ -75,7 +75,8 @@
       a.el('path', { d: 'M -46,6 C -50,-30 -10,-52 22,-40 C 52,-28 56,10 38,32 C 18,52 -36,46 -46,6 Z', class: 'les-mass' }, pitMass);
       a.el('path', { d: 'M -46,6 C -50,-30 -10,-52 22,-40 C 52,-28 56,10 38,32 C 18,52 -36,46 -46,6 Z', fill: 'url(#shine)' }, pitMass);
       a.dyn(() => {
-        const k = (0.55 + 0.45 * Math.min(1, P.thy)) * Math.sqrt(S.goitre);
+        // Hashimoto : glande augmentée de volume ; forme atrophique : glande réduite (polycopié p. 21-22).
+        const k = P.atro > 0.5 ? 0.62 : Math.sqrt(S.goitre);
         lobes.setAttribute('transform', `scale(${k.toFixed(3)})`);
         const on = (el, c) => el.setAttribute('opacity', c ? 1 : 0);
         on(nodule, P.auto > 0.02);
@@ -85,7 +86,7 @@
         on(pitMass, P.pit < 0.5);
         // Parenchyme « éteint » quand la TSH est effondrée (adénome toxique, surdosage en LT4)
         lobes.classList.toggle('quiet', S.tsh < 0.15 && P.trab < 0.05);
-        lesLbl.textContent = P.auto > 0.02 ? 'nodule autonome, reste du parenchyme éteint' : P.trab > 0.05 ? 'goitre diffus hypervasculaire' : P.thy < 0.6 ? 'infiltrat lymphocytaire' : P.iodine < 0.5 ? 'goitre multinodulaire' : '';
+        lesLbl.textContent = P.auto > 0.02 ? 'nodule autonome, reste du parenchyme éteint' : P.trab > 0.05 ? 'goitre diffus hypervasculaire' : P.thy < 0.6 ? (P.atro > 0.5 ? 'thyroïde atrophique' : 'goitre de Hashimoto, infiltrat lymphocytaire') : P.iodine < 0.5 ? 'goitre multinodulaire' : '';
       });
 
       /* --- Scintigraphie à l'iode 123 (vignette) --- */
@@ -154,7 +155,7 @@
       const immG = a.el('g', { class: 'input immune', 'data-info': 'lympho' });
       a.el('circle', { cx: 470, cy: 520, r: 24, class: 'lympho' }, immG);
       a.el('circle', { cx: 466, cy: 516, r: 15, class: 'lympho-n' }, immG);
-      a.text(470, 566, 'Lymphocytes B · TRAb', 'lbl-s', { anchor: 'middle' }, immG);
+      a.text(470, 566, 'Plasmocytes · TRAb', 'lbl-s', { anchor: 'middle' }, immG);
       a.flow('M 496,530 C 548,540 584,574 612,604', { mol: 'trab', rate: () => 4 * P.trab, size: 1.3, speed: 60 });
 
       const levG = a.el('g', { class: 'input', 'data-info': 'levo' });
