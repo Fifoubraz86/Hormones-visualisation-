@@ -1,1 +1,67 @@
-/* Loupes : gonad */
+/* Loupes : gonad (folliculogenèse, cycle, grossesse, tube séminifère, différenciation sexuelle, puberté) */
+.zgo-axis { fill: none; stroke: var(--line-2); stroke-width: 2; }
+.zgo-grid { fill: none; stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 3 6; }
+.zgo-curve { fill: none; stroke: var(--c); stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; }
+.zgo-curve.thin { stroke-width: 3; }
+.zgo-curve.dash { stroke-dasharray: 10 7; }
+.zgo-area { fill: color-mix(in srgb, var(--c) 20%, transparent); stroke: none; }
+.zgo-band { fill: color-mix(in srgb, var(--c) 11%, transparent); stroke: none; }
+.zgo-band-l { fill: none; stroke: var(--c); stroke-width: 2; stroke-dasharray: 6 6; opacity: 0.8; }
+.zgo-cursor { stroke: var(--fg); stroke-width: 2.5; opacity: 0.75; }
+.zgo-dot { fill: var(--c); stroke: var(--scene-1); stroke-width: 2.5; }
+.zgo-tick { font: 15px var(--font-data); fill: var(--muted); }
+.zgo-ctag { font: 600 17px var(--font-body); fill: var(--c); }
+.zgo-big { font: 600 30px var(--font-display); fill: var(--fg); }
+.zgo-val { font: 600 18px var(--font-data); fill: var(--fg); }
+.zgo-box { fill: color-mix(in srgb, var(--c, var(--line-2)) 9%, var(--scene-1)); stroke: var(--c, var(--line-2)); stroke-width: 2; }
+.zgo-bar { fill: color-mix(in srgb, var(--c) 30%, transparent); stroke: var(--c); stroke-width: 1.5; }
+.zgo-mark { fill: var(--c); }
+.zgo-arrow { fill: none; stroke: var(--line-2); stroke-width: 2.5; }
+.zgo-arrowhead { fill: var(--line-2); }
+.zgo-hl { fill: color-mix(in srgb, var(--accent) 14%, transparent); stroke: var(--accent); stroke-width: 2; }
+.zgo-x { stroke: var(--bad); stroke-width: 4; stroke-linecap: round; }
+
+/* Follicules */
+.zgo-oo { fill: color-mix(in srgb, var(--p-rose) 22%, var(--scene-1)); stroke: var(--p-rose); stroke-width: 2; }
+.zgo-oo-n { fill: color-mix(in srgb, var(--p-violet) 35%, var(--scene-1)); stroke: var(--p-violet); stroke-width: 1.5; }
+.zgo-zp { fill: none; stroke: color-mix(in srgb, var(--p-rose) 55%, var(--line-2)); stroke-width: 3; }
+.zgo-gc { fill: color-mix(in srgb, var(--p-gold) 35%, var(--scene-1)); stroke: var(--p-gold); stroke-width: 1.5; }
+.zgo-gl { fill: color-mix(in srgb, var(--p-gold) 22%, var(--scene-1)); stroke: var(--p-gold); stroke-width: 2; }
+.zgo-th { fill: color-mix(in srgb, var(--p-brown) 18%, var(--scene-1)); stroke: var(--p-brown); stroke-width: 2.5; }
+.zgo-antrum { fill: color-mix(in srgb, var(--p-sky) 22%, var(--scene-1)); stroke: color-mix(in srgb, var(--p-sky) 60%, transparent); stroke-width: 1.5; }
+.zgo-cl { fill: color-mix(in srgb, var(--p-amber) 45%, var(--scene-1)); stroke: var(--p-amber); stroke-width: 2.5; }
+.zgo-cb { fill: color-mix(in srgb, var(--p-grey) 18%, var(--scene-1)); stroke: var(--p-grey); stroke-width: 2.5; }
+.zgo-fib { fill: none; stroke: var(--p-grey); stroke-width: 1.5; opacity: 0.7; }
+.zgo-atr { opacity: 0.35; }
+
+/* Cellules (deux cellules, tube séminifère) */
+.zgo-cell { fill: color-mix(in srgb, var(--c) 12%, var(--scene-1)); stroke: var(--c); stroke-width: 3; }
+.zgo-nuc { fill: color-mix(in srgb, var(--c) 30%, var(--scene-1)); stroke: var(--c); stroke-width: 1.5; }
+.zgo-cap { fill: none; stroke: color-mix(in srgb, var(--p-red) 45%, var(--scene-1)); stroke-width: 26; stroke-linecap: round; }
+.zgo-cap-l { fill: none; stroke: color-mix(in srgb, var(--p-red) 20%, var(--scene-1)); stroke-width: 16; stroke-linecap: round; }
+.zgo-bm { fill: none; stroke: var(--p-grey); stroke-width: 3; stroke-dasharray: 8 6; }
+.zgo-lumen { fill: color-mix(in srgb, var(--p-sky) 10%, var(--scene-1)); stroke: color-mix(in srgb, var(--p-sky) 50%, transparent); stroke-width: 1.5; }
+.zgo-tub { fill: color-mix(in srgb, var(--p-blue) 5%, var(--scene-1)); stroke: var(--p-grey); stroke-width: 5; }
+.zgo-myo { fill: color-mix(in srgb, var(--p-brown) 25%, var(--scene-1)); stroke: var(--p-brown); stroke-width: 1; }
+.zgo-sert { fill: color-mix(in srgb, var(--p-teal) 16%, var(--scene-1)); stroke: var(--p-teal); stroke-width: 2; }
+.zgo-sert-n { fill: color-mix(in srgb, var(--p-teal) 40%, var(--scene-1)); stroke: var(--p-teal); stroke-width: 1.5; }
+.zgo-tj { stroke: var(--p-red2); stroke-width: 6; stroke-linecap: round; }
+.zgo-germ { fill: color-mix(in srgb, var(--c) 28%, var(--scene-1)); stroke: var(--c); stroke-width: 1.8; }
+.zgo-germ-n { fill: var(--c); opacity: 0.55; }
+.zgo-tail { fill: none; stroke: var(--p-blue); stroke-width: 2; }
+.zgo-leyd { fill: color-mix(in srgb, var(--p-amber) 35%, var(--scene-1)); stroke: var(--p-amber); stroke-width: 2; }
+.zgo-lip { fill: color-mix(in srgb, var(--p-gold) 55%, var(--scene-1)); }
+
+/* Endomètre */
+.zgo-endo { fill: color-mix(in srgb, var(--p-rose) 26%, var(--scene-1)); stroke: var(--p-rose); stroke-width: 2; }
+.zgo-endo-b { fill: color-mix(in srgb, var(--p-rose) 45%, var(--scene-1)); stroke: none; }
+.zgo-myom { fill: color-mix(in srgb, var(--p-red2) 30%, var(--scene-1)); stroke: none; }
+.zgo-gland { fill: none; stroke: color-mix(in srgb, var(--p-red2) 75%, var(--fg)); stroke-width: 2; opacity: 0.7; }
+.zgo-blood { fill: var(--p-red); }
+.zgo-mucus { fill: color-mix(in srgb, var(--p-sky) 40%, var(--scene-1)); stroke: var(--p-sky); stroke-width: 1.5; }
+
+/* Tanner */
+.zgo-skin { fill: color-mix(in srgb, var(--p-orange) 16%, var(--scene-1)); stroke: var(--p-orange2); stroke-width: 2.5; }
+.zgo-areola { fill: color-mix(in srgb, var(--p-brown) 45%, var(--scene-1)); stroke: var(--p-brown); stroke-width: 1.5; }
+.zgo-orchi { fill: color-mix(in srgb, var(--p-blue) 22%, var(--scene-1)); stroke: var(--p-blue); stroke-width: 2; }
+.zgo-col-hl { fill: color-mix(in srgb, var(--accent) 10%, transparent); stroke: var(--accent); stroke-width: 2; }
