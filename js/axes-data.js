@@ -415,23 +415,26 @@
       { id: 'gut', x: 200, y: 280, organ: 'intestine', label: 'Intestin', sub: 'chylomicrons (apoB48)', color: 'p-amber' },
       { id: 'plasma', x: 620, y: 280, organ: 'vessel', s: 1.3, label: 'Plasma', sub: ['lipoprotéine lipase', 'VLDL → IDL → LDL'], color: 'p-amber', info: 'La lipoprotéine lipase hydrolyse les triglycérides des chylomicrons et des VLDL ; les VLDL deviennent IDL puis LDL (lipase hépatique).' },
       { id: 'tissue', x: 1060, y: 190, organ: 'muscle', s: 0.85, label: 'Muscle, tissu adipeux', sub: 'acides gras', color: 'p-amber' },
-      { id: 'artery', x: 1060, y: 420, organ: 'vessel', s: 0.9, label: 'Paroi artérielle', sub: 'dépôt de LDL : athérome', color: 'bad', info: 'Les LDL en excès pénètrent dans l\'intima et s\'y oxydent : début de la plaque d\'athérome.' },
-      { id: 'liver', x: 620, y: 700, organ: 'liver', s: 1.45, label: 'Foie : hépatocyte', sub: ['70 % des récepteurs des LDL', 'sécrète VLDL, HDL et PCSK9'], color: 'p-gold' },
-      { id: 'periph', x: 200, y: 700, organ: 'cellIcon', label: 'Cellules périphériques', sub: '30 % des récepteurs des LDL', color: 'p-teal' },
-      { id: 'hmg', x: 1060, y: 570, label: 'HMG-CoA réductase', w: 250, sub: 'synthèse du cholestérol', color: 'p-gold', info: 'Enzyme limitante de la synthèse du cholestérol, freinée par le cholestérol issu des LDL internalisées ; cible des statines.' },
-      { id: 'pcsk9', x: 1060, y: 870, label: 'PCSK9', w: 200, sub: 'agit surtout sur l\'hépatocyte (complément)', color: 'p-magenta', info: 'Sécrétée par l\'hépatocyte, elle se lie au récepteur des LDL de la surface et entraîne sa dégradation lysosomale.' }
+      { id: 'artery', x: 1060, y: 410, organ: 'vessel', s: 0.9, label: 'Paroi artérielle', sub: 'dépôt de LDL : athérome', color: 'bad', info: 'Les LDL en excès pénètrent dans l\'intima et s\'y oxydent : début de la plaque d\'athérome.' },
+      { id: 'liver', x: 640, y: 830, organ: 'liver', s: 1.2, label: 'Foie', sub: 'sécrète VLDL, HDL naissantes', color: 'p-gold' },
+      { id: 'ldlr', x: 860, y: 625, label: 'Récepteur des LDL', w: 250, color: 'p-teal', info: 'Le récepteur reconnaît l\'apoB100 des LDL. Après internalisation, il est recyclé vers la membrane ou dégradé dans le lysosome (polycopié, partie 2, p. 19–20).' },
+      { id: 'hmg', x: 1080, y: 900, label: 'HMG-CoA réductase', w: 250, sub: 'synthèse du cholestérol', color: 'p-gold', info: 'Enzyme limitante de la synthèse du cholestérol dans l\'hépatocyte, freinée par le cholestérol issu des LDL internalisées ; cible des statines.' },
+      { id: 'pcsk9', x: 1130, y: 700, label: 'PCSK9', w: 180, sub: 'fabriquée par l\'hépatocyte', color: 'p-magenta', info: 'Synthétisée et sécrétée par l\'hépatocyte, elle se lie au récepteur des LDL et l\'oriente vers le lysosome plutôt que vers le recyclage (polycopié, partie 2, p. 20).' },
+      { id: 'periph', x: 200, y: 700, organ: 'cellIcon', label: 'Cellules périphériques', sub: '30 % des récepteurs des LDL', color: 'p-teal' }
     ],
+    panels: [{ id: 'hepato', x: 420, y: 570, w: 830, h: 400, color: 'p-gold', title: 'Hépatocyte' }],
     links: [
       { from: 'gut', to: 'plasma', mol: 'chylo', rate: 1.2 },
       { from: 'plasma', to: 'tissue', mol: 'ffa', rate: 1.2, label: 'acides gras' },
-      { from: 'liver', to: 'plasma', mol: 'vldl', bend: -90, rate: 1.2, label: 'VLDL' },
-      { from: 'plasma', to: 'liver', mol: 'ldl', bend: -90, rate: 1.4, label: 'LDL, remnants → récepteurs' },
+      { from: 'liver', to: 'plasma', mol: 'vldl', bend: -60, rate: 1.2, label: 'VLDL' },
+      { from: 'plasma', to: 'ldlr', mol: 'ldl', bend: -40, rate: 1.4, label: 'LDL (apoB100)' },
+      { from: 'ldlr', to: 'liver', mol: 'ldl', rate: 1.2, label: 'internalisées' },
       { from: 'plasma', to: 'artery', mol: 'ldl', rate: 0.5, label: 'LDL en excès' },
       { from: 'plasma', to: 'periph', mol: 'ldl', rate: 0.6, label: '' },
       { from: 'periph', to: 'liver', mol: 'hdl', rate: 1, label: 'HDL : retour du cholestérol' },
       { from: 'liver', to: 'hmg', kind: 'inhib', mol: 'chol', rate: 1, label: 'cholestérol' },
-      { from: 'liver', to: 'pcsk9', mol: 'pcsk9', bend: 70, rate: 0.6, label: 'sécrétion' },
-      { from: 'pcsk9', to: 'liver', kind: 'inhib', mol: 'pcsk9', bend: 70, rate: 0.6, label: 'dégrade le LDL-R' }
+      { from: 'liver', to: 'pcsk9', mol: 'pcsk9', rate: 0.6, label: 'synthèse' },
+      { from: 'pcsk9', to: 'ldlr', kind: 'inhib', mol: 'pcsk9', bend: -30, rate: 0.6, label: 'dégrade le récepteur' }
     ],
     levels: { x: 60, y: 880, w: 300, items: [] }
   });

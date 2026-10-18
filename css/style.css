@@ -841,3 +841,4 @@ line.m-db { stroke: var(--mc); stroke-width: 0.9; }
 .hh-inset-bg { fill: color-mix(in srgb, var(--panel) 70%, transparent); }
 .hh-inset-ring { fill: none; stroke: var(--line-2); stroke-width: 3; }
 .hh-leader { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 4 4; }
+.sheet-missing li { color: var(--muted); font-size: 13px; margin: 3px 0; } .sheet-missing { padding-left: 18px; border-left: 3px dashed var(--line-2); }

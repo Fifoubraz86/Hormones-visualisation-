@@ -883,7 +883,7 @@
       const cell = a.el('rect', { x: 100, y: 296, width: 380, height: 360, rx: 50, class: 'zt-tcell-wall', 'data-info': 'thyrocyte' });
       a.el('ellipse', { cx: 390, cy: 380, rx: 50, ry: 38, class: 'nucleus' });
       a.vessel('M 70,770 L 510,770', 22);
-      a.text(80, 812, 'capillaire', 'note');
+      a.text(500, 812, 'capillaire', 'note', { anchor: 'end' });
       const camp = a.el('circle', { cx: 230, cy: 470, r: 34, class: 'zt-camp', 'data-info': 'zt-camp' });
       a.text(230, 476, 'AMPc', 'note strong', { anchor: 'middle', attrs: { 'data-info': 'zt-camp' } });
       const effT = a.text(290, 560, ['synthèse et sécrétion ↑', 'croissance → goitre diffus'], 'note strong', { anchor: 'middle', lh: 1.2 });
@@ -891,11 +891,11 @@
         const r = a.el('rect', { x: x - 10, y: 636, width: 20, height: 44, rx: 7, class: 'zt-recep', 'data-info': 'zt-tshr' });
         return r;
       });
-      a.text(470, 712, 'récepteur de la TSH', 'note', { anchor: 'end', attrs: { 'data-info': 'zt-tshr' } });
+      a.text(290, 626, 'récepteur de la TSH ↓', 'note', { anchor: 'middle', attrs: { 'data-info': 'zt-tshr' } });
       [170, 290, 410].forEach((x) => a.flow(`M ${x},760 L ${x},${690}`, { mol: 'trab', rate: () => 0.25 + 0.6 * lvl(), size: 1.4, speed: 40, track: false, info: mode === 'stim' ? 'zt-trab-s' : 'zt-trab-b' }));
       a.flow('M 470,690 L 470,760', { mol: 't4', rate: () => (mode === 'stim' ? 0.4 + 0.8 * lvl() : 0.15), size: 1.2, speed: 50, track: false });
       const modeC = choice(a, ai, null, 70, 840, [['stim', 'TRAb stimulants', 170, 'zt-trab-s'], ['block', 'TRAb bloquants', 160, 'zt-trab-b']], mode, (v) => { mode = v; });
-      a.text(70, 910, ['Stimulants : hyperthyroïdie (p. 31).', 'Bloquants : hypothyroïdie (complément).'], 'note', { lh: 1.2 });
+      a.text(70, 904, ['Stimulants : hyperthyroïdie (p. 31).', 'Bloquants : hypothyroïdie (complément).'], 'note', { lh: 1.15 });
       HV.figBadge(a, 500, 200, ['9B']);
       void modeC;
 
@@ -914,53 +914,54 @@
       a.text(1030, 330, 'TPO', 'note strong', { anchor: 'end', attrs: { 'data-info': 'zt-tpoab' } });
       const inf = a.el('g', { 'data-info': 'zt-infil' });
       seed = 5;
-      for (let k = 0; k < 26; k++) a.el('circle', { cx: 600 + rnd() * 400, cy: 500 + rnd() * 150, r: 10 + rnd() * 4, class: 'zt-lympho' }, inf);
+      for (let k = 0; k < 24; k++) a.el('circle', { cx: 600 + rnd() * 400, cy: 568 + rnd() * 90, r: 10 + rnd() * 4, class: 'zt-lympho' }, inf);
       a.text(800, 690, 'infiltrat lymphocytaire', 'note strong', { anchor: 'middle', attrs: { 'data-info': 'zt-infil' } });
       const tc = a.el('g', { 'data-info': 'zt-tcyt' });
       [[700, 476], [920, 476]].forEach(([x, y]) => a.el('circle', { cx: x, cy: y, r: 16, class: 'zt-tcell' }, tc));
-      a.text(920, 520, 'LT cytotoxique', 'note', { anchor: 'middle', attrs: { 'data-info': 'zt-tcyt' } });
+      a.text(944, 492, 'LT cytotoxique', 'note', { attrs: { 'data-info': 'zt-tcyt' } });
       const pl = a.el('g', { 'data-info': 'zt-plasmo' });
-      a.el('ellipse', { cx: 640, cy: 600, rx: 26, ry: 20, class: 'zt-lympho' }, pl);
-      a.el('ellipse', { cx: 960, cy: 600, rx: 26, ry: 20, class: 'zt-lympho' }, pl);
-      a.text(640, 640, 'plasmocyte', 'note', { anchor: 'middle', attrs: { 'data-info': 'zt-plasmo' } });
-      a.flow('M 640,580 C 660,460 640,380 640,322', { mol: 'zt-tpoab', rate: () => 1.2, size: 1.3, speed: 50, track: false });
-      a.flow('M 960,580 C 980,450 1000,330 960,280', { mol: 'zt-tgab', rate: () => 1, size: 1.3, speed: 50, track: false });
+      a.el('ellipse', { cx: 630, cy: 520, rx: 26, ry: 20, class: 'zt-lympho' }, pl);
+      a.el('ellipse', { cx: 990, cy: 530, rx: 26, ry: 20, class: 'zt-lympho' }, pl);
+      a.text(700, 526, 'plasmocyte', 'note', { anchor: 'middle', attrs: { 'data-info': 'zt-plasmo' } });
+      a.flow('M 630,500 C 640,440 640,380 640,322', { mol: 'zt-tpoab', rate: () => 1.2, size: 1.3, speed: 50, track: false });
+      a.flow('M 990,510 C 1000,440 1000,330 960,280', { mol: 'zt-tgab', rate: () => 1, size: 1.3, speed: 50, track: false });
       a.text(1030, 760, ['anti-TPO : marqueur ;', 's\'ils sont élevés, diagnostic', 'retenu, sans nouveau dosage (p. 23)'], 'note', { anchor: 'end', lh: 1.2 });
       a.text(580, 760, ['anti-Tg', '(complément)'], 'note', { lh: 1.2, attrs: { 'data-info': 'zt-tgab' } });
       a.text(580, 870, ['Destruction surtout cellulaire (complément) :', 'hypothyroïdie primaire, TSH ↑ (p. 19).', 'Glande augmentée ou atrophique,', 'ferme et hétérogène (p. 21-22).'], 'note', { lh: 1.2 });
 
       /* ---------- Orbitopathie ---------- */
-      a.text(1080, 186, 'Orbitopathie basedowienne', 'lbl-h');
-      HV.figBadge(a, 1530, 176, ['8']);
-      const orb = a.el('g', { 'data-info': 'zt-orbit' });
-      a.path('M 1110,250 L 1500,410 L 1500,470 L 1110,650 Z', 'zt-orbit', orb);
-      const fat = a.el('g', { 'data-info': 'zt-orbit' });
+      a.text(1080, 186, 'Orbitopathie', 'lbl-h');
+      a.text(1080, 214, 'coupe sagittale', 'note');
+      const OY = 100; // décalage vertical du schéma
+      const orb = a.el('g', { 'data-info': 'zt-orbit', transform: `translate(0 ${OY})` });
+      a.path('M 1110,250 L 1500,400 L 1500,460 L 1110,610 Z', 'zt-orbit', orb);
+      const og = a.el('g', { transform: `translate(0 ${OY})` });
+      const fat = a.el('g', { 'data-info': 'zt-orbit' }, og);
       seed = 9;
-      for (let k = 0; k < 22; k++) a.el('ellipse', { cx: 1240 + rnd() * 220, cy: 340 + rnd() * 220 * (0.4 + 0.6 * rnd()), rx: 16, ry: 12, class: 'zt-fat' }, fat);
-      a.path('M 1230,440 C 1320,436 1420,440 1500,440', 'zt-nerve', null, { 'data-info': 'zt-optic', style: 'stroke: var(--p-gold)' });
-      const musU = a.el('ellipse', { cx: 1350, cy: 380, rx: 110, ry: 18, transform: 'rotate(12 1350 380)', class: 'zt-muscle', 'data-info': 'zt-eom' });
-      const musD = a.el('ellipse', { cx: 1350, cy: 500, rx: 110, ry: 18, transform: 'rotate(-12 1350 500)', class: 'zt-muscle', 'data-info': 'zt-eom' });
-      const globe = a.el('g', { 'data-info': 'zt-orbit' });
-      a.el('circle', { cx: 1180, cy: 440, r: 70, class: 'zt-globe' }, globe);
-      a.el('circle', { cx: 1112, cy: 440, r: 18, class: 'zt-lympho' }, globe);
-      a.text(1420, 330, 'muscles', 'note strong', { anchor: 'middle', attrs: { 'data-info': 'zt-eom' } });
-      a.text(1440, 600, 'graisse', 'note strong', { anchor: 'middle', attrs: { 'data-info': 'zt-orbit' } });
-      a.text(1500, 492, ['nerf', 'optique'], 'note', { anchor: 'end', lh: 1.1, attrs: { 'data-info': 'zt-optic' } });
-      const exT = a.text(1100, 690, '', 'note strong');
+      for (let k = 0; k < 22; k++) a.el('ellipse', { cx: 1240 + rnd() * 220, cy: 330 + rnd() * 200, rx: 16, ry: 12, class: 'zt-fat' }, fat);
+      a.path('M 1230,430 C 1320,426 1420,430 1500,430', 'zt-nerve', og, { 'data-info': 'zt-optic' });
+      const musU = a.el('ellipse', { cx: 1350, cy: 370, rx: 110, ry: 18, transform: 'rotate(12 1350 370)', class: 'zt-muscle', 'data-info': 'zt-eom' }, og);
+      const musD = a.el('ellipse', { cx: 1350, cy: 490, rx: 110, ry: 18, transform: 'rotate(-12 1350 490)', class: 'zt-muscle', 'data-info': 'zt-eom' }, og);
+      const globe = a.el('g', { 'data-info': 'zt-orbit' }, og);
+      a.el('circle', { cx: 1180, cy: 430, r: 70, class: 'zt-globe' }, globe);
+      a.el('circle', { cx: 1112, cy: 430, r: 18, class: 'zt-lympho' }, globe);
+      a.text(1420, 300, 'muscles oculomoteurs', 'note strong', { anchor: 'middle', attrs: { 'data-info': 'zt-eom' } }, og);
+      a.text(1450, 590, 'graisse', 'note strong', { anchor: 'middle', attrs: { 'data-info': 'zt-orbit' } }, og);
+      a.text(1540, 470, ['nerf', 'optique'], 'note', { anchor: 'end', lh: 1.1, attrs: { 'data-info': 'zt-optic' } }, og);
+      const exT = a.text(1080, 760, '', 'note strong');
       // Fibroblaste
       const fb = a.el('g', { 'data-info': 'zt-fibro' });
-      a.el('ellipse', { cx: 1300, cy: 790, rx: 120, ry: 50, class: 'zt-tcell-wall' }, fb);
-      a.el('ellipse', { cx: 1300, cy: 790, rx: 26, ry: 18, class: 'nucleus' }, fb);
-      a.el('rect', { x: 1290, y: 724, width: 20, height: 36, rx: 7, class: 'zt-recep', 'data-info': 'zt-tshr' }, fb);
-      a.text(1300, 868, 'fibroblaste orbitaire + récepteur de la TSH', 'note strong', { anchor: 'middle', attrs: { 'data-info': 'zt-fibro' } });
-      a.flow('M 1300,690 L 1300,724', { mol: 'trab', rate: () => 0.2 + 0.6 * lvl(), size: 1.3, speed: 25, track: false });
-      a.text(1300, 900, ['→ adipocytes, glycosaminoglycanes :', 'volume ↑ (complément)'], 'note', { anchor: 'middle', lh: 1.2 });
-      a.text(1300, 960, 'Tabac : principal facteur de risque (p. 31)', 'note strong', { anchor: 'middle' });
+      a.el('ellipse', { cx: 1170, cy: 860, rx: 80, ry: 38, class: 'zt-tcell-wall' }, fb);
+      a.el('ellipse', { cx: 1170, cy: 864, rx: 22, ry: 15, class: 'nucleus' }, fb);
+      a.el('rect', { x: 1160, y: 806, width: 20, height: 30, rx: 7, class: 'zt-recep', 'data-info': 'zt-tshr' }, fb);
+      a.flow('M 1170,776 L 1170,806', { mol: 'trab', rate: () => 0.2 + 0.6 * lvl(), size: 1.3, speed: 20, track: false });
+      a.text(1266, 820, ['fibroblaste orbitaire (complément)', 'récepteur de la TSH (p. 31)', '→ adipocytes, glycosamino-', 'glycanes : volume ↑ (complément)'], 'note', { lh: 1.2, attrs: { 'data-info': 'zt-fibro' } });
+      a.text(1080, 950, 'Tabac : principal facteur de risque (p. 31)', 'note strong');
+      HV.figBadge(a, 1520, 940, ['8']);
 
       // Démonstration / modèle
-      a.text(70, 990, '', 'note');
-      choice(a, ai, null, 580, 940, [[true, 'Démonstration', 150, 'zt-demo'], [false, 'Modèle (panneau)', 170, 'zt-demo']], demo, (v) => { demo = v; });
-      const lvT = a.text(915, 965, '', 'note');
+      choice(a, ai, null, 70, 946, [[true, 'Démonstration', 150, 'zt-demo'], [false, 'Modèle (panneau)', 170, 'zt-demo']], demo, (v) => { demo = v; });
+      const lvT = a.text(80, 812, '', 'note');
 
       let ph = 0, txt = 0;
       a.dyn((dt) => {
@@ -988,10 +989,10 @@
 
       HV.spotlight(ai, a, [
         { t: 'Basedow : les TRAb stimulent', d: 'Les TRAb se fixent sur le récepteur de la TSH et le stimulent sans rétrocontrôle : synthèse et sécrétion d\'hormones ↑, goitre diffus vasculaire (p. 26, 31). Fixation diffuse à la scintigraphie (figure 9B).', spot: [[60, 160, 480, 680]] },
-        { t: 'TRAb bloquants', d: 'Cliquez « TRAb bloquants » : l\'anticorps occupe le récepteur sans l\'activer, la TSH ne peut plus agir : hypothyroïdie (complément).', spot: [[60, 820, 360, 70], [290, 660, 160]] },
+        { t: 'TRAb bloquants', d: 'Cliquez « TRAb bloquants » : l\'anticorps occupe le récepteur sans l\'activer, la TSH ne peut plus agir : hypothyroïdie (complément).', spot: [[60, 830, 360, 60], [290, 660, 160]] },
         { t: 'Hashimoto : l\'infiltrat détruit', d: 'Les lymphocytes infiltrent la glande et détruisent les thyréocytes (complément) : hypothyroïdie primaire (p. 19). Les anti-TPO, dirigés contre l\'enzyme de la face apicale, sont le marqueur (p. 23).', spot: [[560, 160, 480, 640]] },
-        { t: 'Orbitopathie', d: 'Les fibroblastes orbitaires portent le récepteur de la TSH : muscles oculomoteurs et graisse augmentent de volume, l\'œil est poussé en avant (p. 31). Formes sévères : compression du nerf optique (p. 32).', spot: [[1070, 160, 480, 520]] },
-        { t: 'Auto-immunité, pas hyperthyroïdie', d: 'L\'orbitopathie résulte de l\'auto-immunité thyroïdienne et non de l\'hyperthyroïdie ; le tabac en est le principal facteur de risque (p. 31). Passez en « Modèle » et choisissez « Maladie de Basedow » dans le panneau.', spot: [[1150, 700, 300, 280], [570, 920, 520, 70]] }
+        { t: 'Orbitopathie', d: 'Liée aux récepteurs de la TSH orbitaires : muscles oculomoteurs et graisse augmentent de volume, l\'œil est poussé en avant (p. 31). Formes sévères : compression du nerf optique (p. 32). Rôle des fibroblastes : complément.', spot: [[1070, 330, 480, 450]] },
+        { t: 'Auto-immunité, pas hyperthyroïdie', d: 'L\'orbitopathie résulte de l\'auto-immunité thyroïdienne et non de l\'hyperthyroïdie ; le tabac en est le principal facteur de risque (p. 31). Passez en « Modèle » et choisissez « Maladie de Basedow » dans le panneau.', spot: [[1070, 790, 480, 190], [60, 930, 360, 60]] }
       ]);
     }
   }, HV.LOUPE.L(5)));

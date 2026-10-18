@@ -104,8 +104,8 @@
     { t: 'Les lipides alimentaires', d: 'L\'entérocyte assemble les chylomicrons (apoB48, très riches en triglycérides), qui gagnent la lymphe puis le sang.', on: ['gut', 'gut>plasma', 'plasma'] },
     { t: 'La lipoprotéine lipase', d: 'Dans les capillaires, elle libère les acides gras des triglycérides pour le muscle et le tissu adipeux.', on: ['plasma>tissue', 'tissue'] },
     { t: 'Le foie sécrète les VLDL', d: 'L\'hépatocyte exporte ses triglycérides dans les VLDL (apoB100) ; en perdant leurs triglycérides, elles deviennent IDL puis LDL, riches en esters de cholestérol.', on: ['liver', 'liver>plasma'] },
-    { t: 'Le récepteur des LDL', d: '70 % des récepteurs des LDL sont hépatiques. Le cholestérol internalisé freine l\'HMG-CoA réductase.', on: ['plasma>liver', 'liver>hmg', 'hmg'] },
-    { t: 'PCSK9 dégrade le récepteur', d: 'Sécrétée par l\'hépatocyte, PCSK9 se fixe au récepteur et l\'envoie au lysosome : moins de récepteurs, LDL plasmatique ↑.', on: ['liver>pcsk9', 'pcsk9', 'pcsk9>liver'] },
+    { t: 'Le récepteur des LDL', d: '70 % des récepteurs des LDL sont hépatiques : ils captent les LDL par leur apoB100. Le cholestérol internalisé freine l\'HMG-CoA réductase.', on: ['ldlr', 'plasma>ldlr', 'ldlr>liver', 'liver>hmg', 'hmg'] },
+    { t: 'PCSK9 dégrade le récepteur', d: 'Sécrétée par l\'hépatocyte, PCSK9 se fixe au récepteur et l\'envoie au lysosome : moins de récepteurs, LDL plasmatique ↑.', on: ['liver>pcsk9', 'pcsk9', 'pcsk9>ldlr', 'ldlr'] },
     { t: 'Athérome et retour par les HDL', d: 'Les LDL en excès se déposent dans l\'intima ; les HDL ramènent le cholestérol des tissus vers le foie.', on: ['plasma>artery', 'artery', 'plasma>periph', 'periph', 'periph>liver'] }
   ];
 

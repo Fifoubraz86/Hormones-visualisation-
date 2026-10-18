@@ -93,9 +93,9 @@
       a.text(0, 92, 'insulinome', 'les-lbl', { anchor: 'middle' }, tumor);
 
       // Sécrétions dans les capillaires (insuline, glucagon) et paracrinie.
-      a.flow(caps[0], { mol: 'insulin', rate: () => 1.6 * S().ins, pace: () => HV.paceOf(S().ins), size: 1.4, speed: 110, track: false, max: 30 });
+      a.flow(caps[0], { mol: 'insulin', rate: () => 1.6 * S().insE, pace: () => HV.paceOf(S().insE), size: 1.4, speed: 110, track: false, max: 30 });
       a.flow(caps[1], { mol: 'glucagon', rate: () => 1.4 * S().glu, pace: () => HV.paceOf(S().glu), size: 1.4, speed: 110, track: false, max: 24 });
-      a.flow(caps[1], { mol: 'insulin', rate: () => 1 * S().ins, pace: () => HV.paceOf(S().ins), size: 1.4, speed: 110, track: false, max: 20 });
+      a.flow(caps[1], { mol: 'insulin', rate: () => 1 * S().insE, pace: () => HV.paceOf(S().insE), size: 1.4, speed: 110, track: false, max: 20 });
       a.flow('M 60,560 C 110,560 130,540 160,520', { mol: 'glucose', rate: () => 2 * S().g, size: 1.3, speed: 60, track: false });
       a.text(70, 620, 'sang artériel', 'note');
       a.text(790, 400, 'veine porte', 'note', { anchor: 'middle' });
@@ -173,7 +173,7 @@
       a.text(X0 + 260, Y0 + 446, 'granules d\'insuline', 'note strong', { anchor: 'middle', attrs: { 'data-info': 'granules' } });
       a.text(X0 + 260, Y0 + H + 40, '1re phase : granules amarrés · 2e phase : réserves mobilisées', 'note', { anchor: 'middle' });
       a.path(`M ${X0 + 60},${Y0 + H + 70} L ${X0 + W - 60},${Y0 + H + 70}`, 'islet-cap', null, { 'data-info': 'islet-cap' });
-      [0, 1, 2, 3].forEach((k) => a.flow(`M ${X0 + 160 + k * 70},${Y0 + H - 30} L ${X0 + 180 + k * 70},${Y0 + H + 66}`, { mol: 'insulin', rate: () => 0.9 * S().ins, pace: () => HV.paceOf(S().ins), size: 1.3, speed: 45, track: false, max: 8 }));
+      [0, 1, 2, 3].forEach((k) => a.flow(`M ${X0 + 160 + k * 70},${Y0 + H - 30} L ${X0 + 180 + k * 70},${Y0 + H + 66}`, { mol: 'insulin', rate: () => 0.9 * S().insE, pace: () => HV.paceOf(S().insE), size: 1.3, speed: 45, track: false, max: 8 }));
       // 7. Incrétines
       const glp = a.el('g', { 'data-info': 'glp1r', transform: `translate(${X0} ${Y0 + 560})` });
       a.el('path', { d: 'M -8,-30 L -8,30 M 8,-30 L 8,30', class: 'm-recep' }, glp);
@@ -187,6 +187,8 @@
 
       let kOpen = 1, caOpen = 0, txt = 0;
       a.dyn((dt) => {
+        // La scène de l'axe est masquée quand on est dans l'îlot : on fait avancer le modèle ici.
+        if (dt > 0 && !(HV.scenes.glyc._op > 0)) { const M = sim(); M.T.h = (M.T.h + dt * 0.5) % 24; M.step(dt, M.T); }
         const s = S(), p = P();
         const atp = clamp((s.g - 0.5) / 1.1, 0, 1);
         kOpen = clamp(1 - Math.pow(atp, 1.3) * 1.25, 0, 1);

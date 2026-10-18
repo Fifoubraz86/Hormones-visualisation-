@@ -527,13 +527,15 @@
   /* ===================== Phosphocalcique ===================== */
   SIMS.phospho = {
     title: 'Bilan phosphocalcique simulé',
-    defaults: { para: 1, autoPara: 0, vitD: 1, pthrp: 0 },
+    defaults: { para: 1, autoPara: 0, vitD: 1, pthrp: 0, casr: 1 },
     init: { ca: 2.4, pth: 1, d: 1 },
     tau: { ca: 2 },
     targets(p, s) {
-      const pth = clamp(p.para * Math.min(4 + 40 * (p.para - 0.05), ex(-12 * (s.ca - 2.4))), 0, 20) + p.autoPara;
+      // CaSR peu sensible (hypercalcémie hypocalciurique familiale) : la consigne de calcémie est déplacée vers le haut.
+      const shift = 0.32 * (1 - p.casr);
+      const pth = clamp(p.para * Math.min(4 + 40 * (p.para - 0.05), ex(-12 * (s.ca - 2.4 - shift))), 0, 20) + p.autoPara;
       const d = clamp(pw(pth, 0.6) * p.vitD, 0, 5);
-      const ca = 2.4 + 0.4 * ln((0.6 * (pth + 1.5 * p.pthrp) + 0.4) * (0.5 + 0.5 * d));
+      const ca = 2.4 + shift + 0.4 * ln((0.6 * (pth + 1.5 * p.pthrp) + 0.4) * (0.5 + 0.5 * d));
       return { pth, d, ca: clamp(ca, 1.5, 3.6) };
     },
     labs: [
@@ -541,24 +543,30 @@
       { key: 'pth', name: 'PTH', unit: 'pg/mL', range: '15–65 pg/mL (complément)', k: 35, lo: 15, hi: 65, min: 0, max: 300, dec: 0 },
       { key: 'vd', name: '25-OH vitamine D', unit: 'ng/mL', range: '30–60 ng/mL (complément)', lo: 30, hi: 60, min: 0, max: 80, dec: 0, fn: (s, p) => 40 * p.vitD },
       // La PTHrP est phosphaturique comme la PTH (complément) : phosphatémie basse dans l'hypercalcémie humorale.
+      // Calciurie : charge filtrée (calcémie) moins la réabsorption stimulée par la PTH (ou la PTHrP) ; le CaSR rénal peu sensible
+      // de l'hypercalcémie hypocalciurique familiale fait réabsorber davantage (complément).
+      { key: 'cau', name: 'Calciurie', unit: 'mmol/24 h', range: '2,5–7,5 mmol/24 h (complément)', lo: 2.5, hi: 7.5, min: 0, max: 16, dec: 1, fn: (s, p) => clamp((4.5 * ex(3 * (s.ca - 2.4)) * pw(p.casr, 1.2)) / (1 + 0.25 * ln(Math.max(s.pth + 1.5 * p.pthrp, 0.2))), 0.3, 15) },
       { key: 'phos', name: 'Phosphatémie', unit: 'mmol/L', range: '0,8–1,45 mmol/L (complément)', lo: 0.8, hi: 1.45, min: 0.3, max: 2.4, dec: 2, fn: (s, p) => clamp(1.1 - 0.3 * ln(Math.max(s.pth + 1.5 * p.pthrp, 0.05)) + 0.12 * (s.d - 1), 0.4, 2.3) }
     ],
     params: [
       { key: 'autoPara', label: 'Adénome parathyroïdien', min: 0, max: 6, step: 0.1, fmt: x100 },
       { key: 'para', label: 'Tissu parathyroïdien fonctionnel', min: 0.03, max: 1.5, step: 0.01, fmt: pct },
       { key: 'vitD', label: 'Statut en vitamine D', min: 0.05, max: 1.5, step: 0.01, fmt: pct },
-      { key: 'pthrp', label: 'PTHrP tumorale', min: 0, max: 4, step: 0.1, fmt: x100 }
+      { key: 'pthrp', label: 'PTHrP tumorale', min: 0, max: 4, step: 0.1, fmt: x100 },
+      { key: 'casr', label: 'Sensibilité du CaSR', min: 0.2, max: 1.2, step: 0.01, fmt: pct }
     ],
     scenarios: [
       { id: 'eu', name: 'Équilibre normal', note: 'Calcémie stable grâce au CaSR et à la PTH.', p: {} },
       { id: 'hpt', name: 'Hyperparathyroïdie primaire', note: 'Adénome : hypercalcémie avec PTH élevée ou inadaptée, phosphatémie basse ou normale basse.', p: { autoPara: 2.5 } },
       { id: 'hypo', name: 'Hypoparathyroïdie (post-chirurgicale)', note: 'Hypocalcémie avec PTH basse ou inadaptée, phosphatémie haute.', p: { para: 0.05 } },
       { id: 'vitd', name: 'Carence en vitamine D', note: 'Hyperparathyroïdie secondaire (complément) : calcémie basse ou normale, PTH élevée.', p: { vitD: 0.1 } },
-      { id: 'pthrp', name: 'Hypercalcémie tumorale', note: 'PTHrP (complément) : hypercalcémie avec PTH effondrée, phosphatémie basse.', p: { pthrp: 3.5 } }
+      { id: 'pthrp', name: 'Hypercalcémie tumorale', note: 'PTHrP (complément) : elle agit comme la PTH sur l\'os et sur le rein (réabsorption du calcium, fuite de phosphate) ; hypercalcémie avec PTH effondrée, phosphatémie basse.', p: { pthrp: 3.5 } },
+      { id: 'hhf', name: 'Hypercalcémie hypocalciurique familiale', note: 'Complément (absente du polycopié) : CaSR peu sensible (mutation inactivatrice) ; hypercalcémie modérée, PTH normale ou un peu élevée, calciurie basse. Bénigne : à distinguer de l\'hyperparathyroïdie primaire, car elle ne s\'opère pas.', p: { casr: 0.3 } }
     ],
     interpret(s, p, L) {
       const ca = L('ca'), pth = L('pth');
-      if (ca > 2.6 && pth >= 30) return { tone: 'bad', label: 'Hypercalcémie PTH-dépendante', text: 'PTH élevée ou inadaptée face à l\'hypercalcémie : hyperparathyroïdie primaire.' };
+      if (ca > 2.6 && L('cau') < 2.5) return { tone: 'warn', label: 'Hypercalcémie avec calciurie basse', text: 'PTH normale ou peu élevée et calciurie basse : évoquer une hypercalcémie hypocalciurique familiale (complément), bénigne, qui ne s\'opère pas.' };
+      if (ca > 2.6 && pth >= 30) return { tone: 'bad', label: 'Hypercalcémie PTH-dépendante', text: 'PTH élevée ou inadaptée face à l\'hypercalcémie : hyperparathyroïdie primaire. Calciurie élevée : la charge filtrée de calcium dépasse les capacités de réabsorption (polycopié p. 40–41).' };
       if (ca > 2.6) return { tone: 'bad', label: 'Hypercalcémie non parathyroïdienne', text: 'PTH freinée : rechercher une cause tumorale (PTHrP, métastases osseuses) ou une intoxication en vitamine D (complément).' };
       if (ca < 2.2 && pth < 30) return { tone: 'bad', label: 'Hypoparathyroïdie', text: 'Hypocalcémie avec PTH basse ou inadaptée.' };
       if (pth > 65) return { tone: 'warn', label: 'Hyperparathyroïdie secondaire', text: 'PTH élevée qui maintient la calcémie : carence en vitamine D ou insuffisance rénale (complément).' };
@@ -573,8 +581,8 @@
         { node: 'para', kind: 'cross', show: (p) => p.para < 0.5, label: 'glandes lésées (chirurgie)', ly: 34, title: 'Hypoparathyroïdie', text: 'Le plus souvent après chirurgie cervicale (thyroïdectomie) : glandes retirées ou dévascularisées.' },
         { node: 'para', kind: 'label', show: (p, s) => p.vitD < 0.5 && s.pth > 1.5, label: 'hyperplasie des 4 glandes', ly: -76, title: 'Hyperparathyroïdie secondaire', text: 'La carence en vitamine D stimule les quatre glandes, qui grossissent (complément).' }
       ],
-      extraNodes: [{ id: 'tumor', x: 1360, y: 760, label: 'Tumeur (PTHrP)', w: 220, color: 'bad', show: (p) => p.pthrp > 0.02, info: 'La PTHrP mime les effets de la PTH sur l\'os et le rein (complément).' }],
-      extraLinks: [{ from: 'tumor', to: 'bone', kind: 'stim', color: 'bad', label: 'PTHrP' }],
+      extraNodes: [{ id: 'tumor', x: 1360, y: 760, label: 'Tumeur (PTHrP)', w: 220, color: 'bad', show: (p) => p.pthrp > 0.02, info: 'La PTHrP se fixe sur le récepteur de la PTH : elle agit sur l\'os (résorption) et sur le rein (réabsorption du calcium, fuite de phosphate). Elle stimule peu la production de calcitriol (complément).' }],
+      extraLinks: [{ from: 'tumor', to: 'bone', kind: 'stim', color: 'bad', label: 'PTHrP' }, { from: 'tumor', to: 'kidney', kind: 'stim', color: 'bad', bend: 80, label: 'PTHrP' }],
       liveNode: { ca: (s) => f2(s.ca) + ' mmol/L' },
       levels: [{ label: 'Calcémie', mol: 'ca', fn: (s) => (s.ca - 2.0) * 2.5, max: 2 }, { label: 'PTH', mol: 'pth', v: 'pth', max: 4 }]
     }
@@ -641,11 +649,12 @@
   SIMS.glyc = {
     title: 'Bilan glucidique simulé',
     defaults: { beta: 1, sens: 1, tumor: 0, exo: 0, glucResp: 1, fast: 0, ogtt: 0, long: 0 },
-    init: { g: 0.9, ins: 1, glu: 1, ket: 0.1 },
-    tau: { g: 0.8, ins: 0.4, glu: 0.5, ket: 2 },
+    init: { g: 0.9, ins: 1, insE: 1, glu: 1, ket: 0.1 },
+    tau: { g: 0.8, ins: 0.4, insE: 0.4, glu: 0.5, ket: 2 },
     targets(p, s, T) {
       const food = meal(T) * (1 - p.fast) + 4 * p.ogtt; // repas, jeûne, charge orale de 75 g
-      const ins = p.beta * clamp((s.g - 0.65) * 4, 0, 8) + p.tumor + p.exo * (0.6 + 0.6 * meal(T));
+      const insE = p.beta * clamp((s.g - 0.65) * 4, 0, 8) + p.tumor; // insuline pancréatique (îlots, insulinome)
+      const ins = insE + p.exo * (0.6 + 0.6 * meal(T)); // + insuline injectée
       const eff = ins * p.sens;
       const glu = p.glucResp * clamp(1 + 4 * Math.max(0, 0.85 - s.g) - 0.3 * Math.min(eff, 2), 0.1, 6);
       // Production hépatique : freinée par l'insuline, emballée quand elle manque.
@@ -653,7 +662,7 @@
       const prod = ((0.55 + 0.45 * glu) * (1 + 5 * Math.max(0, 0.3 - eff)) * (1 - 0.45 * p.long)) / (1 + 0.8 * eff);
       const g = clamp(0.12 + 0.35 * food / (0.4 + 0.6 * Math.min(eff, 3)) + 1.25 * prod, 0.25, 6);
       const ket = clamp(0.05 + 10 * Math.max(0, 0.25 - eff), 0, 8);
-      return { ins, glu, g, ket };
+      return { ins, insE, glu, g, ket };
     },
     labs: [
       { key: 'g', name: 'Glycémie', unit: 'g/L', range: 'à jeun 0,80–1,10 g/L ; 0,70–1,40 sur la journée (complément)', k: 1, lo: 0.7, hi: 1.4, min: 0.2, max: 4, dec: 2 },
@@ -684,15 +693,16 @@
       return { tone: 'good', label: 'Glycémie normale', text: 'Équilibre insuline / glucagon conservé.' };
     },
     hooks: {
-      links: { 'islet>liver>insulin': 'ins', 'islet>muscle>insulin': 'ins', 'islet>fat>insulin': 'ins', 'islet>liver>glucagon': 'glu', 'liver>keto>ketone': 'ket', 'fat>liver>ffa': 'ket' },
+      links: { 'islet>liver>insulin': 'insE', 'islet>muscle>insulin': 'insE', 'islet>fat>insulin': 'insE', 'pen>liver>insulin': 'exoRate', 'pen>muscle>insulin': 'exoRate', 'pen>fat>insulin': 'exoRate', 'islet>liver>glucagon': 'glu', 'liver>keto>ketone': 'ket', 'fat>liver>ffa': 'ket' },
       dropMod: ['islet>liver>insulin', 'islet>muscle>insulin', 'islet>fat>insulin', 'islet>liver>glucagon', 'liver>keto>ketone', 'fat>liver>ffa'],
       cap: { islet: 'beta' },
       extraNodes: [
+        { id: 'pen', x: 1360, y: 700, label: 'Insuline injectée', w: 240, sub: 'sous-cutanée', color: 'p-blue2', show: (p) => p.exo > 0.02, info: 'Insuline exogène (stylo, pompe) : elle ne vient pas du pancréas et ne s\'adapte pas à la glycémie. Les cellules β détruites (DT1) ne sécrètent plus rien.' },
         { id: 'fast', x: 420, y: 600, label: 'Jeûne', w: 150, color: 'p-grey', show: (p) => p.fast > 0.02 && p.ogtt < 0.02, info: 'Plus d\'apport alimentaire : la glycémie dépend de la production hépatique, l\'insuline doit s\'effondrer.' },
         { id: 'ogtt', x: 430, y: 600, label: 'Glucose 75 g', w: 180, color: 'p-lime', show: (p) => p.ogtt > 0.02, info: 'Charge orale de l\'HGPO.' }
       ],
-      extraLinks: [{ from: 'fast', to: 'gut', kind: 'inhib', color: 'p-grey', label: '' }, { from: 'ogtt', to: 'glc', kind: 'stim', mol: 'glucose', v: 'ogttRate', label: '' }],
-      rates: { ogttRate: (s, p) => 3 * p.ogtt },
+      extraLinks: [{ from: 'pen', to: 'muscle', kind: 'stim', mol: 'insulin', label: 'insuline injectée', bend: -40 }, { from: 'pen', to: 'fat', kind: 'stim', mol: 'insulin', label: '', bend: -20 }, { from: 'pen', to: 'liver', kind: 'stim', mol: 'insulin', label: '', bend: -80 }, { from: 'fast', to: 'gut', kind: 'inhib', color: 'p-grey', label: '' }, { from: 'ogtt', to: 'glc', kind: 'stim', mol: 'glucose', v: 'ogttRate', label: '' }],
+      rates: { ogttRate: (s, p) => 3 * p.ogtt, exoRate: (s, p) => p.exo * 0.8 },
       scale: { fat: (p) => (p.sens < 0.6 ? 1.3 : 1) },
       lesions: [
         { node: 'islet', kind: 'infiltrate', dx: 6, dy: -24, show: (p) => p.beta < 0.5, label: 'insulite auto-immune', ly: -40, title: 'Diabète de type 1', text: 'Destruction auto-immune des cellules β (infiltrat lymphocytaire des îlots).' },
@@ -708,11 +718,12 @@
   /* ===================== Lipoprotéines ===================== */
   SIMS.lipid = {
     title: 'Bilan lipidique simulé',
-    defaults: { ldlr: 1, statin: 0, pcsk9i: 0, tg: 1 },
+    defaults: { ldlr: 1, apob: 1, pcsk9g: 0, statin: 0, pcsk9i: 0, tg: 1 },
     init: { ldl: 1, rec: 1 },
     tau: { ldl: 2.5 },
     targets(p, s) {
-      const rec = p.ldlr * (1 + 0.9 * p.statin) * (1 + 1.4 * p.pcsk9i);
+      // Récepteurs fonctionnels : mutation du récepteur (ldlr), de l'apoB (apob : LDL mal reconnues) ou gain de fonction de PCSK9 (pcsk9g).
+      const rec = p.ldlr * p.apob * (1 + 0.9 * p.statin) * (1 + 1.4 * p.pcsk9i) / (1 + p.pcsk9g * (1 - 0.8 * p.pcsk9i));
       return { rec, ldl: clamp(1 / Math.max(rec, 0.05), 0.15, 12) };
     },
     labs: [
@@ -722,6 +733,8 @@
     ],
     params: [
       { key: 'ldlr', label: 'Récepteurs des LDL fonctionnels', min: 0.02, max: 1.2, step: 0.01, fmt: pct },
+      { key: 'apob', label: 'ApoB100 reconnue (complément)', min: 0.1, max: 1, step: 0.01, fmt: pct },
+      { key: 'pcsk9g', label: 'PCSK9 gain de fonction (complément)', min: 0, max: 1.5, step: 0.05, fmt: x100 },
       { key: 'statin', label: 'Statine', min: 0, max: 1, step: 0.05, fmt: pct },
       { key: 'pcsk9i', label: 'Anti-PCSK9', min: 0, max: 1, step: 0.05, fmt: pct },
       { key: 'tg', label: 'Production de VLDL (triglycérides)', min: 0.3, max: 8, step: 0.1, fmt: x100 }
@@ -730,6 +743,8 @@
       { id: 'eu', name: 'Profil normal', note: 'LDL captées par leurs récepteurs.', p: {} },
       { id: 'hfhe', name: 'Hypercholestérolémie familiale hétérozygote', note: 'Moitié des récepteurs des LDL : LDL-c doublé (complément), xanthomes tendineux, arc cornéen précoce.', p: { ldlr: 0.5 } },
       { id: 'hfho', name: 'Hypercholestérolémie familiale homozygote', note: 'Récepteurs quasi absents : LDL-c très élevé dès l\'enfance.', p: { ldlr: 0.15 } },
+      { id: 'apob', name: 'HF par mutation de l\'apoB (complément)', note: 'Récepteurs normaux mais LDL mal reconnues (apoB100 mutée) : LDL-c élevé (complément ; le polycopié ne détaille pas les gènes).', p: { apob: 0.5 } },
+      { id: 'pcsk9g', name: 'HF par gain de fonction de PCSK9 (complément)', note: 'PCSK9 trop active : récepteurs dégradés en excès, peu de LDL internalisées (complément ; le polycopié ne détaille pas les gènes).', p: { pcsk9g: 1 } },
       { id: 'statin', name: 'HF hétérozygote sous statine', note: 'La statine (complément) freine l\'HMG-CoA réductase : plus de récepteurs des LDL. Risque d\'emblée élevé : objectif LDL-c < 0,70 g/L.', p: { ldlr: 0.5, statin: 1 } },
       { id: 'pcsk9', name: 'HF hétérozygote, statine + anti-PCSK9', note: 'Les récepteurs ne sont plus dégradés : baisse supplémentaire du LDL-c (complément).', p: { ldlr: 0.5, statin: 1, pcsk9i: 1 } },
       { id: 'htg', name: 'Hypertriglycéridémie', note: 'Excès de VLDL et de chylomicrons ; risque de pancréatite au-delà de 10 g/L.', p: { tg: 5 } }
@@ -738,7 +753,7 @@
       const ldl = L('ldl'), tg = L('tgl');
       // Objectifs de LDL-c selon le risque cardiovasculaire (polycopié) : < 0,55 / 0,70 / 1,00 / 1,90 g/L.
       // L'hypercholestérolémie familiale est d'emblée à risque élevé : objectif < 0,70 g/L.
-      const fh = p.ldlr < 0.7;
+      const fh = p.ldlr < 0.7 || p.apob < 0.7 || p.pcsk9g > 0.4;
       if (fh && ldl > 0.7) {
         const tx = p.statin > 0.02 || p.pcsk9i > 0.02 ? 'intensifier le traitement (ézétimibe, anti-PCSK9 ; complément).' : 'traitement hypolipémiant (statine ; complément).';
         return { tone: 'bad', label: ldl > 1.9 ? 'Hypercholestérolémie familiale' : 'LDL-c au-dessus de l\'objectif', text: 'Hypercholestérolémie familiale : risque cardiovasculaire d\'emblée élevé, objectif LDL-c < 0,70 g/L ; ' + tx };
@@ -749,16 +764,17 @@
       return { tone: 'good', label: 'Bilan lipidique normal', text: 'LDL-c < 1,90 g/L et triglycérides < 1,50 g/L : à confronter à l\'objectif fixé par le risque cardiovasculaire (< 0,55 à < 1,90 g/L).' };
     },
     hooks: {
-      links: { 'plasma>liver>ldl': 'recRate', 'plasma>artery>ldl': 'ldl', 'plasma>periph>ldl': 'ldl', 'liver>hmg>chol': 'rec', 'liver>plasma>vldl': 'tgRate', 'liver>pcsk9>pcsk9': 'pcsk9Rate', 'pcsk9>liver>pcsk9': 'pcsk9Rate' },
-      rates: { tgRate: (s, p) => p.tg, recRate: (s) => s.rec, pcsk9Rate: (s, p) => 1 - 0.9 * p.pcsk9i },
-      cap: { liver: 'ldlr' },
+      links: { 'plasma>ldlr>ldl': 'recRate', 'ldlr>liver>ldl': 'recRate', 'plasma>artery>ldl': 'ldl', 'plasma>periph>ldl': 'ldl', 'liver>hmg>chol': 'rec', 'liver>plasma>vldl': 'tgRate', 'liver>pcsk9>pcsk9': 'pcsk9Rate', 'pcsk9>ldlr>pcsk9': 'pcsk9Rate' },
+      // Peu de récepteurs : les LDL ne passent presque plus dans l'hépatocyte et s'accumulent dans le plasma.
+      rates: { tgRate: (s, p) => p.tg, recRate: (s) => Math.pow(Math.min(s.rec, 2.5), 1.6), pcsk9Rate: (s, p) => (1 - 0.9 * p.pcsk9i) * (1 + 2 * p.pcsk9g) },
+      scale: { plasma: (p, s) => clamp(0.85 + 0.12 * s.ldl, 0.85, 1.5) },
       extraNodes: [
         { id: 'statin', x: 1380, y: 570, label: 'Statine', w: 170, color: 'p-blue', show: (p) => p.statin > 0.02, info: 'Inhibe l\'HMG-CoA réductase : le cholestérol intracellulaire baisse, l\'hépatocyte exprime plus de récepteurs des LDL (complément).' },
         { id: 'antip', x: 1380, y: 870, label: 'Anti-PCSK9', w: 180, color: 'p-blue', show: (p) => p.pcsk9i > 0.02, info: 'Anticorps monoclonal (ou ARN interférent) : les récepteurs des LDL ne sont plus dégradés (complément).' }
       ],
       extraLinks: [{ from: 'statin', to: 'hmg', kind: 'inhib', color: 'p-blue', label: '' }, { from: 'antip', to: 'pcsk9', kind: 'inhib', color: 'p-blue', label: '' }],
       lesions: [
-        { node: 'liver', kind: 'label', show: (p) => p.ldlr < 0.7, label: 'récepteurs des LDL déficients', ly: -96, title: 'Hypercholestérolémie familiale', text: 'Mutation (complément : le plus souvent du gène du récepteur des LDL, plus rarement de l\'apoB ou gain de fonction de PCSK9) : moins de récepteurs hépatiques, LDL-c élevé ; xanthomes tendineux, arc cornéen.' },
+        { node: 'ldlr', kind: 'label', show: (p) => p.ldlr < 0.7 || p.apob < 0.7 || p.pcsk9g > 0.4, label: 'peu de LDL internalisées', ly: -96, title: 'Hypercholestérolémie familiale', text: 'Mutation (complément : le plus souvent du gène du récepteur des LDL, plus rarement de l\'apoB ou gain de fonction de PCSK9) : moins de récepteurs hépatiques, LDL-c élevé ; xanthomes tendineux, arc cornéen.' },
         { node: 'artery', kind: 'nodule', tone: 'yellow', dx: 0, dy: -4, show: (p, s) => s.ldl > 1.6, label: 'plaque d\'athérome', ly: -26, title: 'Athérome', text: 'Accumulation de LDL oxydées dans l\'intima (complément).' }
       ],
       levels: [{ label: 'LDL-c', mol: 'ldl', v: 'ldl', max: 5 }, { label: 'Récepteurs', mol: 'ldlr', v: 'rec', max: 3 }]

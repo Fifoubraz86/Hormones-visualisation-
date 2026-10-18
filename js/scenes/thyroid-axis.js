@@ -92,25 +92,26 @@
       const sc = a.el('g', { class: 'scinti', transform: 'translate(110 790)', 'data-info': 'scinti' });
       a.el('rect', { width: 230, height: 180, rx: 14, class: 'scinti-bg' }, sc);
       a.text(14, 26, 'Scintigraphie ¹²³I', 'scinti-t', null, sc);
-      const sg = a.el('g', { transform: 'translate(115 104) scale(3.4)' }, sc);
-      const lobeD = 'M -4,-1 C -5,-6 -8,-11 -11,-12 C -15,-12 -17,-6 -17,0 C -17,8 -14,13 -10,13 C -6,13 -4,9 -3,6 Z';
-      const mir = lobeD.replace(/(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/g, (m, x, y) => -parseFloat(x) + ',' + y);
-      const up1 = a.el('path', { d: lobeD, class: 'scinti-up' }, sg);
-      const up2 = a.el('path', { d: mir, class: 'scinti-up' }, sg);
-      const up3 = a.el('rect', { x: -4, y: 1, width: 8, height: 6, rx: 2, class: 'scinti-up' }, sg);
-      const holes = a.el('g', null, sg);
-      [[-11, -4], [-8, 6], [10, -5], [12, 5], [-13, 2]].forEach(([x, y]) => a.el('circle', { cx: x, cy: y, r: 2.4, class: 'scinti-hole' }, holes));
-      const hot = a.el('circle', { cx: 9.5, cy: 1, r: 4.5, class: 'scinti-hot' }, sg);
+      // Vraies images du polycopié (figures 9A et 9B) quand elles existent ; sinon « image manquante ».
+      const img = a.el('image', { x: 12, y: 36, width: 206, height: 112, preserveAspectRatio: 'xMidYMid meet' }, sc);
+      const miss = a.text(115, 98, 'image manquante', 'scinti-c', { anchor: 'middle' }, sc);
       const scTxt = a.text(115, 168, '', 'scinti-c', { anchor: 'middle' }, sc);
+      let shown = '';
       a.dyn(() => {
-        const u = HV.clamp(Math.pow(Math.max(S.stim, 0), 0.8) * Math.min(1, P.thy * 1.4) * 0.55, 0, 1);
         // Indiquée seulement devant une TSH basse : inutile devant une hypothyroïdie ou un goitre à TSH non basse.
         const ind = HV.model.lab('tsh') < 0.4;
         sc.setAttribute('opacity', ind ? 1 : 0.4);
-        [up1, up2, up3].forEach((e) => e.setAttribute('fill-opacity', (0.06 + 0.94 * u).toFixed(2)));
-        holes.setAttribute('opacity', P.thy < 0.6 || P.iodine < 0.5 ? 0.9 : 0);
-        hot.setAttribute('opacity', P.auto > 0.02 ? 1 : 0);
-        scTxt.textContent = !ind ? 'non indiquée : TSH non basse' : P.auto > 0.02 ? 'nodule chaud, extinction du reste' : P.trab > 0.05 ? 'fixation diffuse et intense' : u < 0.2 ? 'hypofixation globale' : P.iodine < 0.5 ? 'fixation hétérogène, nodulaire' : P.thy < 0.6 ? 'fixation hétérogène' : 'fixation homogène';
+        const fig = !ind ? '' : P.auto > 0.02 ? '9A' : P.trab > 0.05 ? '9B' : '';
+        if (fig !== shown) {
+          shown = fig;
+          if (fig) img.setAttribute('href', HV.polyFig(fig).src);
+          else img.removeAttribute('href');
+          img.setAttribute('visibility', fig ? 'visible' : 'hidden');
+          sc.setAttribute('data-figs', fig || null);
+          if (!fig) sc.removeAttribute('data-figs');
+        }
+        miss.setAttribute('visibility', ind && !fig ? 'visible' : 'hidden');
+        scTxt.textContent = !ind ? 'non indiquée : TSH non basse' : P.auto > 0.02 ? 'nodule chaud (fig. 9A du polycopié)' : P.trab > 0.05 ? 'fixation diffuse (fig. 9B du polycopié)' : 'TSH basse : autre cause';
       });
 
       /* --- Circulation --- */

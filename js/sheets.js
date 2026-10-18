@@ -88,28 +88,14 @@
     h('h2', null, S.title, t);
     h('h3', null, 'Anatomie et physiologie', body);
     rows(body, S.rows);
-    (S.imaging || []).forEach((k) => {
-      const P = HV.IMAGING[k];
-      const sec = h('section', 'sheet-img', null, body);
-      h('h3', null, P.title, sec);
-      const tabs = h('div', 'sheet-tabs', null, sec);
-      tabs.setAttribute('role', 'tablist');
-      const pic = h('div', 'sheet-pic', null, sec);
-      const cap = h('p', 'sheet-cap', null, sec);
-      const show = (v, btn) => {
-        HV.drawImaging(pic, k, v[0]);
-        cap.textContent = v[2];
-        tabs.querySelectorAll('button').forEach((b) => b.setAttribute('aria-selected', String(b === btn)));
-      };
-      P.variants.forEach((v, i) => {
-        const b = h('button', null, v[1], tabs);
-        b.type = 'button';
-        b.setAttribute('role', 'tab');
-        b.addEventListener('click', () => show(v, b));
-        if (!i) show(v, b);
-      });
-    });
-    if (S.imaging && S.imaging.length) h('p', 'sheet-src', 'Planches schématiques originales, pour l\'enseignement : elles illustrent les signes recherchés et ne remplacent pas des images réelles.', body);
+    // Imagerie : seules de vraies images sont montrées (figures du polycopié ci-dessous). Les examens sans image
+    // disponible sont listés comme « image manquante », pour qu'on puisse les fournir.
+    const missing = (S.imaging || []).map((k) => HV.IMAGING[k]).filter(Boolean);
+    if (missing.length) {
+      h('h3', null, 'Imagerie', body);
+      const ul = h('ul', 'sheet-missing', null, body);
+      missing.forEach((P) => h('li', null, `${P.title} : ${P.variants.map((v) => v[1].toLowerCase()).join(', ')} — image manquante, à fournir`, ul));
+    }
     if (S.figs && S.figs.length) {
       h('h3', null, 'Iconographie du polycopié CEEDMM', body);
       const imgs = [].concat(...S.figs.map((f) => HV.polyFigsRef(f.n)));
