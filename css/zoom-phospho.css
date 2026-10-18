@@ -1,1 +1,45 @@
-/* Loupes : phospho */
+/* Loupes : phospho (vitamine D, FGF23, remodelage osseux) */
+.zp-panel { fill: var(--scene-2); stroke: var(--line); stroke-width: 2; }
+.zp-panel.on { stroke: var(--accent); stroke-width: 3.5; }
+.zp-btn { cursor: pointer; }
+.zp-btn rect { fill: var(--panel-2); stroke: var(--line-2); stroke-width: 2; }
+.zp-btn:hover rect { stroke: var(--accent); }
+.zp-btn.on rect { fill: color-mix(in srgb, var(--accent) 24%, var(--panel)); stroke: var(--accent); stroke-width: 2.5; }
+.zp-btn-t { font: 500 17px var(--font-body); fill: var(--fg); pointer-events: none; }
+.zp-btn.on .zp-btn-t { font-weight: 600; }
+.zp-arrow { fill: none; stroke: var(--line-2); stroke-width: 2.5; marker-end: url(#zp-head); }
+.zp-head { fill: var(--line-2); }
+.zp-sun { fill: var(--p-gold); stroke: none; }
+.zp-ray { fill: none; stroke: var(--p-gold); stroke-width: 3; stroke-linecap: round; }
+.zp-skin { fill: color-mix(in srgb, var(--p-orange) 18%, var(--scene-1)); stroke: var(--p-orange); stroke-width: 2; }
+.zp-skin-c { fill: none; stroke: color-mix(in srgb, var(--p-orange) 55%, transparent); stroke-width: 1.5; }
+.zp-g-d3 { fill: var(--p-gold); stroke: rgba(0, 0, 0, 0.3); stroke-width: 1; }
+.zp-g-25d { fill: var(--p-orange); stroke: rgba(0, 0, 0, 0.3); stroke-width: 1; }
+.zp-g-fgf { fill: var(--p-violet); stroke: rgba(0, 0, 0, 0.3); stroke-width: 1; }
+.zp-g-pi { fill: var(--p-magenta); stroke: rgba(0, 0, 0, 0.25); stroke-width: 0.8; }
+.zp-g-scl { fill: var(--p-red2); stroke: rgba(0, 0, 0, 0.3); stroke-width: 1; }
+.zp-g-opg { fill: none; stroke: var(--p-sky); stroke-width: 3; stroke-linecap: round; }
+.zp-bone { fill: color-mix(in srgb, var(--o-bone) 55%, var(--scene-1)); stroke: color-mix(in srgb, var(--o-bone) 70%, var(--line-2)); stroke-width: 2; }
+.zp-lam { fill: none; stroke: color-mix(in srgb, var(--p-brown) 30%, transparent); stroke-width: 1.5; }
+.zp-lac { fill: var(--scene-1); stroke: color-mix(in srgb, var(--p-brown) 60%, transparent); stroke-width: 1.5; }
+.zp-cyte { fill: color-mix(in srgb, var(--p-teal) 45%, var(--scene-1)); stroke: var(--p-teal); stroke-width: 2; }
+.zp-canal { fill: none; stroke: var(--p-teal); stroke-width: 2; opacity: 0.7; }
+.zp-nuc { fill: color-mix(in srgb, var(--fg) 40%, transparent); }
+.zp-ocl { fill: color-mix(in srgb, var(--p-violet) 45%, var(--scene-1)); stroke: var(--p-violet); stroke-width: 2.5; }
+.zp-obl { fill: color-mix(in srgb, var(--p-sky) 45%, var(--scene-1)); stroke: var(--p-sky); stroke-width: 2; }
+.zp-rev { fill: color-mix(in srgb, var(--p-grey) 45%, var(--scene-1)); stroke: var(--p-grey); stroke-width: 2; }
+.zp-lining { fill: color-mix(in srgb, var(--p-sky) 30%, var(--scene-1)); stroke: var(--p-sky); stroke-width: 1.5; }
+.zp-marrow { fill: color-mix(in srgb, var(--p-rose) 8%, var(--scene-1)); stroke: none; }
+.zp-osteoid { fill: color-mix(in srgb, var(--p-sky) 20%, var(--scene-1)); stroke: var(--p-sky); stroke-width: 1.5; }
+.zp-newbone { fill: color-mix(in srgb, var(--o-bone) 55%, var(--scene-1)); stroke: none; }
+.zp-cavity { fill: var(--scene-1); stroke: var(--p-violet); stroke-width: 2; stroke-dasharray: 6 5; }
+.zp-seg { stroke: var(--scene-1); stroke-width: 3; }
+.zp-seg-t { font: 500 16px var(--font-body); fill: var(--fg); pointer-events: none; }
+.zp-cursor { fill: var(--accent); }
+.zp-rec { fill: var(--p-green); stroke: rgba(0, 0, 0, 0.3); stroke-width: 1; }
+.zp-klotho { fill: var(--p-lime); stroke: rgba(0, 0, 0, 0.3); stroke-width: 1; }
+.zp-npt { fill: var(--p-magenta); stroke: rgba(0, 0, 0, 0.3); stroke-width: 1.5; }
+.zp-ves { fill: color-mix(in srgb, var(--p-magenta) 25%, transparent); stroke: var(--p-magenta); stroke-width: 1.5; }
+.zp-villi { fill: none; stroke: var(--p-blue2); stroke-width: 2; }
+.zp-lumen { fill: color-mix(in srgb, var(--p-gold) 10%, var(--scene-1)); stroke: var(--line-2); stroke-width: 1.5; stroke-dasharray: 4 5; }
+.zp-cell { fill: color-mix(in srgb, var(--p-blue2) 8%, var(--scene-1)); stroke: var(--p-blue2); stroke-width: 5; }

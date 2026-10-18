@@ -63,3 +63,33 @@ Chaque loupe signale « (complément) » ce qui ne vient pas du polycopié. Cett
    - NPY/AgRP, POMC/CART, MC4R ; leptine ; ghréline ; PYY ; GLP-1 central.
    - Obésités monogéniques, métréleptine, setmélanotide.
    - À confirmer : Williams, « Obesity » ; Farooqi & O'Rahilly, *Nat Rev Endocrinol*.
+
+## Surrénales (loupes stéroïdogenèse, vascularisation, incidentalome, cellule principale)
+
+Pages du polycopié (partie 1) :
+- anatomie et vascularisation : p. 68–69 ;
+- stéroïdogenèse : p. 70–73 ;
+- PNMT : p. 74 ;
+- ENaC : p. 75 ;
+- cathétérisme : p. 78 ;
+- HCS : p. 80–82 ;
+- incidentalome : p. 82–85.
+
+1. **Stéroïdogenèse.**
+   - Pas de CYP17 dans la glomérulée ; 17,20-lyase faible sur la 17-OHP ; triple activité de CYP11B2 ; 17β-HSD surtout gonadique.
+   - À confirmer : Miller & Auchus, *Endocr Rev* 2011 ; Speiser et al., *JCEM* 2018.
+2. **Blocs rares** (11β-hydroxylase, 17α-hydroxylase, 3β-HSD) : fréquences et tableaux. À confirmer : PNDS HAS « Hyperplasie congénitale des surrénales ».
+3. **Vascularisation.**
+   - Artères surrénales supérieure, moyenne et inférieure ; circulation centripète.
+   - Induction de la PNMT par le cortisol.
+   - Veine droite courte, plus difficile à cathétériser.
+   - À confirmer : Sherlock et al., *Endocr Rev* 2020 ; Gray's Anatomy.
+4. **Incidentalome.**
+   - Cortisol ≤ 50 nmol/L après freinage minute ; rapport aldostérone/rénine si HTA ou hypokaliémie.
+   - **Priorité :** métanéphrines facultatives si ≤ 10 UH.
+   - Temps tardif à 15 min ; IRM ou TEP en cas de lésion indéterminée.
+   - À confirmer : Fassnacht et al., recommandations ESE/ENSAT, *Eur J Endocrinol* 2023.
+5. **Cellule principale.**
+   - Affinité du MR pour le cortisol ; SGK1 ; cellule intercalaire A.
+   - Réglisse et excès apparent de minéralocorticoïdes ; syndrome de Liddle ; acidose du déficit en aldostérone.
+   - À confirmer : Boron & Boulpaep ; Williams, chapitre « Mineralocorticoids ».
