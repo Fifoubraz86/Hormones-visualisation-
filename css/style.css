@@ -842,3 +842,8 @@ line.m-db { stroke: var(--mc); stroke-width: 0.9; }
 .hh-inset-ring { fill: none; stroke: var(--line-2); stroke-width: 3; }
 .hh-leader { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 4 4; }
 .sheet-missing li { color: var(--muted); font-size: 13px; margin: 3px 0; } .sheet-missing { padding-left: 18px; border-left: 3px dashed var(--line-2); }
+
+/* Fiches filtrées par chapitre : le reste est replié */
+.sheet-more { margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px; }
+.sheet-more > summary { cursor: pointer; color: var(--muted); font-size: 13px; font-weight: 600; }
+.sheet-more[open] > summary { margin-bottom: 8px; }

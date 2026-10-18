@@ -83,7 +83,7 @@
     nodes: [
       { id: 'hypo', at: 'hypo', leader: true, lx: 290, ly: -14, label: 'Hypothalamus', sub: 'noyau paraventriculaire : CRH', color: 'p-orange', info: 'Les neurones hypothalamiques libèrent la CRH dans le système porte.' },
       { id: 'pit', at: 'ant', leader: true, lx: 250, ly: 14, label: 'Antéhypophyse', sub: 'cellules corticotropes', color: 'p-orange2', info: 'Les cellules corticotropes sécrètent l\'ACTH (et l\'α-MSH, issue de la POMC).' },
-      { id: 'adr', x: 930, y: 380, organ: 'adrenalKidney', label: 'Corticosurrénale', sub: ['zone fasciculée : cortisol', 'zone réticulée : androgènes'], color: 'p-gold', info: 'Zone fasciculée : 75 à 80 % du volume du cortex, cortisol. Zone réticulée : DHEA, DHEA-S, androstènedione.' },
+      { id: 'adr', zoom: 'steroido', x: 930, y: 380, organ: 'adrenalKidney', label: 'Corticosurrénale', sub: ['zone fasciculée : cortisol', 'zone réticulée : androgènes'], color: 'p-gold', info: 'Zone fasciculée : 75 à 80 % du volume du cortex, cortisol. Zone réticulée : DHEA, DHEA-S, androstènedione.' },
       { id: 'liver', x: 1330, y: 240, organ: 'liver', s: 0.9, label: 'Foie', sub: 'néoglucogenèse', color: 'p-gold' },
       { id: 'muscle', x: 1330, y: 440, organ: 'muscle', s: 0.9, label: 'Muscle', sub: 'catabolisme protidique', color: 'p-gold' },
       { id: 'fat', x: 1330, y: 640, organ: 'fat', s: 0.9, label: 'Tissu adipeux', sub: 'lipogenèse viscérale', color: 'p-gold' },
@@ -179,7 +179,7 @@
       { id: 'post', at: 'post', lx: 60, ly: 10, label: 'Posthypophyse', sub: 'stockage, libération', color: 'p-sky', info: 'Terminaisons axonales : l\'ADH et l\'ocytocine y sont stockées puis libérées dans le sang.' },
       { id: 'osm', x: 730, y: 250, w: 380, h: 150, label: 'Osmolalité plasmatique', color: 'p-sky', gauge: { min: 265, max: 315, lo: 280, hi: 295, set: 287, ticks: [270, 280, 290, 300, 310], val: (s) => 2 * s.na + 10 }, info: 'Le « thermostat » de l\'eau : l\'hypothalamus compare l\'osmolalité plasmatique (≈ 2 × Na + 10) à sa consigne. Au-dessus : ADH et soif ; au-dessous : ADH effondrée, urines diluées.' },
       { id: 'thirst', x: 700, y: 450, label: 'Soif', w: 200, sub: 'apport d\'eau', color: 'p-sky', info: 'La soif apparaît pour une osmolalité un peu plus haute que le seuil de l\'ADH (complément). Elle protège de l\'hypernatrémie tant que le patient peut boire.' },
-      { id: 'kidney', x: 1090, y: 320, organ: 'nephron', s: 1.4, label: 'Rein : canal collecteur', sub: ['récepteur V2 → aquaporines 2', 'réabsorption d\'eau libre'], color: 'p-sky', info: 'Le polycopié parle du « tubule rénal ». Précisément (complément), l\'ADH se fixe au récepteur V2 des cellules du canal collecteur : les aquaporines 2 s\'insèrent dans la membrane apicale et l\'eau libre est réabsorbée.' },
+      { id: 'kidney', zoom: 'vol-osm', x: 1090, y: 320, organ: 'nephron', s: 1.4, label: 'Rein : canal collecteur', sub: ['récepteur V2 → aquaporines 2', 'réabsorption d\'eau libre'], color: 'p-sky', info: 'Le polycopié parle du « tubule rénal ». Précisément (complément), l\'ADH se fixe au récepteur V2 des cellules du canal collecteur : les aquaporines 2 s\'insèrent dans la membrane apicale et l\'eau libre est réabsorbée.' },
       { id: 'urine', x: 1420, y: 300, label: 'Urines', w: 270, color: 'p-gold', info: 'Volume et concentration des urines : leur osmolalité reflète l\'action de l\'ADH sur le rein.' },
       { id: 'vessel', x: 1420, y: 510, organ: 'vessel', s: 0.7, label: 'Artérioles', sub: 'V1a : vasoconstriction', color: 'p-red', info: 'Aux fortes concentrations (hypovolémie, hypotension), l\'ADH est vasoconstrictrice par le récepteur V1a.' },
       { id: 'baro', x: 150, y: 660, label: 'Hypovolémie, PA ↓', w: 250, sub: 'barorécepteurs', color: 'p-red', info: 'Une baisse importante de la volémie ou de la pression artérielle stimule l\'ADH, même si l\'osmolalité est normale (complément).' },
@@ -249,8 +249,8 @@
     nodes: [
       { id: 'hypo', at: 'hypo', leader: true, lx: 290, ly: -14, label: 'Neurones à GnRH', sub: 'sécrétion pulsatile', color: 'p-violet' },
       { id: 'pit', at: 'ant', leader: true, lx: 250, ly: 14, label: 'Antéhypophyse', sub: 'cellules gonadotropes', color: 'p-violet' },
-      { id: 'ovary', x: 920, y: 380, organ: 'ovary', s: 1.25, label: 'Ovaire', sub: ['thèque : androgènes (LH)', 'granulosa : E2 (FSH)', 'corps jaune : progestérone'], color: 'p-rose' },
-      { id: 'uterus', x: 1330, y: 300, organ: 'uterus', label: 'Utérus', sub: 'endomètre, glaire', color: 'p-rose' },
+      { id: 'ovary', zoom: 'folliculo', x: 920, y: 380, organ: 'ovary', s: 1.25, label: 'Ovaire', sub: ['thèque : androgènes (LH)', 'granulosa : E2 (FSH)', 'corps jaune : progestérone'], color: 'p-rose' },
+      { id: 'uterus', zoom: 'endometre', x: 1330, y: 300, organ: 'uterus', label: 'Utérus', sub: 'endomètre, glaire', color: 'p-rose' },
       { id: 'breast', x: 1330, y: 600, organ: 'breast', s: 0.85, label: 'Seins, os, peau', sub: 'effets trophiques, HDL ↑', color: 'p-rose' },
       { id: 'kiss', at: 'arc', dot: 9, hit: 16, leader: true, lx: 262, ly: 92, label: 'Neurones à kisspeptine', sub: 'noyau arqué · glutamate (+), GABA', color: 'p-magenta', info: 'Les neurones à kisspeptine de l\'hypothalamus (noyau arqué, complément) stimulent les neurones à GnRH, avec les neurones à glutamate ; le GABA module leur activité (polycopié, partie 2, p. 3).' },
       { id: 'lep', x: 560, y: 790, organ: 'fat', s: 0.8, label: 'Tissu adipeux blanc', sub: 'leptine (permissif)', color: 'p-amber', info: 'Effet permissif indirect de la leptine, sécrétée par le tissu adipeux blanc, sur les neurones à GnRH (polycopié).' }
@@ -282,7 +282,7 @@
     nodes: [
       { id: 'hypo', at: 'hypo', leader: true, lx: 290, ly: -14, label: 'Neurones à GnRH', sub: 'pulses ≈ 90 min (complément)', color: 'p-violet' },
       { id: 'pit', at: 'ant', leader: true, lx: 250, ly: 14, label: 'Antéhypophyse', sub: 'cellules gonadotropes', color: 'p-violet' },
-      { id: 'testis', x: 920, y: 380, organ: 'testis', s: 1.25, label: 'Testicule', sub: ['Leydig : testostérone (LH)', 'Sertoli : spermatogenèse (FSH)'], color: 'p-blue' },
+      { id: 'testis', zoom: 'testis-sec', x: 920, y: 380, organ: 'testis', s: 1.25, label: 'Testicule', sub: ['Leydig : testostérone (LH)', 'Sertoli : spermatogenèse (FSH)'], color: 'p-blue' },
       { id: 'muscle', x: 1330, y: 220, organ: 'muscle', s: 0.85, label: 'Muscle', sub: 'effet anabolisant', color: 'p-blue' },
       { id: 'bone', x: 1330, y: 420, organ: 'bone', s: 0.8, label: 'Os, moelle', sub: 'masse osseuse, érythropoïèse', color: 'p-blue' },
       { id: 'brain', x: 1330, y: 620, organ: 'brainLateral', s: 0.85, label: 'Cerveau, peau', sub: 'libido · pilosité, sébum', color: 'p-blue' },
@@ -317,8 +317,8 @@
     nodes: [
       { id: 'ca', x: 240, y: 400, label: 'Calcémie', sub: 'calcium ionisé', color: 'p-green', live: (T) => n2(calc(T)) + ' mmol/L', info: 'Calcium total : 2,20–2,60 mmol/L ; ionisé : 1,15–1,30 mmol/L.' },
       { id: 'para', x: 600, y: 400, organ: 'parathyroidBack', label: 'Parathyroïdes', sub: 'CaSR · cellules principales', color: 'p-green', info: '4 glandes dans 80 % des cas, à la face postérieure des pôles thyroïdiens ; ≈ 40 mg chacune.' },
-      { id: 'kidney', x: 980, y: 250, organ: 'kidney', label: 'Rein', sub: ['réabsorption du Ca', '1α-hydroxylation'], color: 'p-green' },
-      { id: 'bone', x: 980, y: 620, organ: 'bone', label: 'Os', sub: 'ostéocytes : libération rapide', color: 'p-green', info: '99 % du calcium de l\'organisme. Le remodelage équilibre résorption et minéralisation.' },
+      { id: 'kidney', zoom: 'ca-nephron', x: 980, y: 250, organ: 'kidney', label: 'Rein', sub: ['réabsorption du Ca', '1α-hydroxylation'], color: 'p-green' },
+      { id: 'bone', zoom: 'remodelage', x: 980, y: 620, organ: 'bone', label: 'Os', sub: 'ostéocytes : libération rapide', color: 'p-green', info: '99 % du calcium de l\'organisme. Le remodelage équilibre résorption et minéralisation.' },
       { id: 'gut', x: 1360, y: 400, organ: 'intestine', label: 'Intestin grêle', sub: 'absorption active du Ca', color: 'p-amber' },
       { id: 'ccell', x: 300, y: 830, label: 'Cellules C (thyroïde)', w: 260, color: 'tg', zoom: 'foll', info: 'Les cellules parafolliculaires sécrètent la calcitonine (polycopié), qui freine la résorption osseuse par les ostéoclastes (effet hypocalcémiant, mineur chez l\'homme ; complément).' }
     ],
@@ -344,7 +344,7 @@
     nodes: [
       { id: 'jga', bare: true, x: 626, y: 470, lx: -70, ly: 6, anchor: 'end', label: 'Appareil juxtaglomérulaire', sub: 'rénine', color: 'p-red', sheet: 'kidney', info: 'Les cellules juxtaglomérulaires de l\'artériole afférente libèrent la rénine quand la perfusion rénale ou la volémie baissent.' },
       { id: 'adr', bare: true, x: 650, y: 330, lx: -80, ly: -40, anchor: 'end', label: 'Corticosurrénale : zone glomérulée', sub: 'aldostérone synthase', color: 'p-teal', sheet: 'adrenal', info: 'La surrénale coiffe le pôle supérieur du rein. Sa zone glomérulée, la plus externe, fabrique l\'aldostérone.' },
-      { id: 'tub', bare: true, x: 760, y: 500, lx: 60, ly: 40, label: 'Tube distal, canal collecteur', sub: ['Na⁺ et eau réabsorbés', 'K⁺ et H⁺ excrétés'], color: 'p-teal', sheet: 'kidney' },
+      { id: 'tub', zoom: 'nephron-full', bare: true, x: 760, y: 500, lx: 60, ly: 40, label: 'Tube distal, canal collecteur', sub: ['Na⁺ et eau réabsorbés', 'K⁺ et H⁺ excrétés'], color: 'p-teal', sheet: 'kidney' },
       { id: 'liver', x: 230, y: 830, organ: 'liver', s: 0.85, label: 'Foie', sub: 'angiotensinogène (complément)', color: 'p-red' },
       { id: 'lung', x: 230, y: 590, organ: 'lungs', s: 0.85, label: 'Poumon', sub: 'enzyme de conversion (complément)', color: 'p-red' },
       { id: 'ecf', x: 1200, y: 330, organ: 'vessel', s: 1.1, label: 'Rétention hydrosodée', sub: 'Na⁺ puis eau retenus : volume extracellulaire ↑', color: 'p-teal', info: 'Le sodium réabsorbé entraîne l\'eau : le volume extracellulaire et la volémie augmentent, la pression artérielle monte.' },
@@ -389,8 +389,8 @@
     nodes: [
       { id: 'glc', x: 240, y: 400, label: 'Glycémie', color: 'p-lime', live: (T) => n2(gly(T)) + ' g/L', info: 'Résulte de l\'absorption alimentaire, de la production hépatique (glycogénolyse, néoglucogenèse) et de la consommation par les tissus.' },
       { id: 'islet', x: 600, y: 400, organ: 'islet', s: 1.2, label: 'Îlots de Langerhans', sub: 'β : insuline · α : glucagon', color: 'p-blue2', zoom: 'islet', info: 'Le pancréas endocrine représente 1 % du tissu pancréatique.' },
-      { id: 'liver', x: 980, y: 230, organ: 'liver', label: 'Foie', sub: 'glycogène, néoglucogenèse', color: 'p-lime' },
-      { id: 'muscle', x: 980, y: 470, organ: 'muscle', label: 'Muscle', sub: 'GLUT4', color: 'p-lime' },
+      { id: 'liver', zoom: 'liver-fast', x: 980, y: 230, organ: 'liver', label: 'Foie', sub: 'glycogène, néoglucogenèse', color: 'p-lime' },
+      { id: 'muscle', zoom: 'insulin-rec', x: 980, y: 470, organ: 'muscle', label: 'Muscle', sub: 'GLUT4', color: 'p-lime' },
       { id: 'fat', x: 980, y: 700, organ: 'fat', label: 'Tissu adipeux', sub: 'GLUT4 · lipolyse', color: 'p-amber' },
       { id: 'gut', x: 240, y: 760, organ: 'intestine', s: 0.9, label: 'Intestin', sub: 'repas', color: 'p-lime' },
       { id: 'kidney', x: 600, y: 780, organ: 'kidney', s: 0.85, label: 'Rein', sub: 'SGLT2 · seuil 1,80 g/L', color: 'p-lime' },

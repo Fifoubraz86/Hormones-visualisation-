@@ -75,8 +75,32 @@
     links(body, S.links);
   }
 
+  /* Chapitre en cours : l'axe (ou la scène racine) dont dépend la scène affichée. */
+  const CHAPTER_KW = {
+    thyro: /thyro|T3|T4|TSH|TRH|iode|désiodase|TBG|goitre/i,
+    cortico: /cortisol|ACTH|CRH|glucocortic|corticosurr|androgènes surr|CBG|Cushing/i,
+    somato: /\bGH\b|IGF|croissance|somato/i,
+    lacto: /prolactine|lactation|galactorrh|dopamine/i,
+    adh: /ADH|vasopressine|ocytocine|osmol|natrémie|\beau\b|V2|aquaporine/i,
+    medullo: /catécholamine|adrénaline|noradrénaline|médullo|phéochromocytome/i,
+    gonadoF: /œstrog|estradiol|progestérone|LH|FSH|GnRH|ovaire|endomètre|cycle|SHBG|ocytocine|leptine/i,
+    gonadoM: /testostérone|androgène|LH|FSH|GnRH|testicul|spermato|SHBG|aromatisation/i,
+    phospho: /calci|PTH|vitamine D|phosph|FGF23|ostéo/i,
+    raa: /rénine|angiotens|aldostérone|potassium|sodium|Na\b|K\b/i,
+    glyc: /glucose|glycog|insuline|glucagon|GLUT|SGLT|cétogenèse|néoglucogenèse|lipolyse|glyc/i,
+    lipid: /LDL|VLDL|HDL|cholest|lipid|lipoprot|PCSK9|chylomicron|triglyc/i
+  };
+  HV.currentChapter = function () {
+    let sc = HV.app && HV.app.current;
+    while (sc && sc.parent && !CHAPTER_KW[sc.id]) sc = HV.scenes[sc.parent];
+    return sc && CHAPTER_KW[sc.id] ? sc.id : null;
+  };
+
   function organSheet(body, key) {
     const S = HV.ORGAN_SHEETS[key];
+    // Seul ce qui concerne le chapitre en cours est affiché d'emblée ; le reste est replié dans « Autres rôles ».
+    const ch = HV.currentChapter(), kw = ch && CHAPTER_KW[ch];
+    const hit = (r) => !kw || kw.test(r[0] + ' ' + r[1]);
     const top = h('div', 'sheet-top', null, body);
     figure(top, (svg) => {
       const g = document.createElementNS(NS, 'g');
@@ -86,8 +110,14 @@
     const t = h('div', null, null, top);
     h('p', 'sheet-eyebrow', 'Anatomie · ' + S.cls, t);
     h('h2', null, S.title, t);
-    h('h3', null, 'Anatomie et physiologie', body);
-    rows(body, S.rows);
+    const mine = S.rows.filter(hit), other = S.rows.filter((r) => !hit(r));
+    h('h3', null, kw && mine.length ? 'Dans ce chapitre' : 'Anatomie et physiologie', body);
+    rows(body, mine.length ? mine : S.rows);
+    if (mine.length && other.length) {
+      const det = h('details', 'sheet-more', null, body);
+      h('summary', null, 'Autres rôles (' + other.length + ')', det);
+      rows(det, other);
+    }
     // Imagerie : seules de vraies images sont montrées (figures du polycopié ci-dessous). Les examens sans image
     // disponible sont listés comme « image manquante », pour qu'on puisse les fournir.
     const missing = (S.imaging || []).map((k) => HV.IMAGING[k]).filter(Boolean);
@@ -97,11 +127,21 @@
       missing.forEach((P) => h('li', null, `${P.title} : ${P.variants.map((v) => v[1].toLowerCase()).join(', ')} — image manquante, à fournir`, ul));
     }
     if (S.figs && S.figs.length) {
-      h('h3', null, 'Iconographie du polycopié CEEDMM', body);
-      const imgs = [].concat(...S.figs.map((f) => HV.polyFigsRef(f.n)));
-      if (imgs.length) HV.figThumbs(body, imgs);
-      const ul = h('ul', 'sheet-figs', null, body);
-      S.figs.filter((f) => !HV.polyFigsRef(f.n).length).forEach((f) => h('li', null, `Figure ${f.n} : ${f.t} (partie ${f.part}, page ${f.page} du PDF)`, ul));
+      // Figures du chapitre en cours d'abord ; les autres sont repliées.
+      const inCh = (f) => !ch || HV.polyFigsRef(f.n).some((F) => (F.scenes || []).indexOf(ch) >= 0);
+      const figList = (parent, list) => {
+        const imgs = [].concat(...list.map((f) => HV.polyFigsRef(f.n)));
+        if (imgs.length) HV.figThumbs(parent, imgs);
+        const ul = h('ul', 'sheet-figs', null, parent);
+        list.filter((f) => !HV.polyFigsRef(f.n).length).forEach((f) => h('li', null, `Figure ${f.n} : ${f.t} (partie ${f.part}, page ${f.page} du PDF)`, ul));
+      };
+      const fMine = S.figs.filter(inCh), fOther = S.figs.filter((f) => !inCh(f));
+      if (fMine.length) { h('h3', null, 'Iconographie du polycopié CEEDMM', body); figList(body, fMine); }
+      if (fOther.length) {
+        const det = h('details', 'sheet-more', null, body);
+        h('summary', null, (fMine.length ? 'Autres figures' : 'Iconographie du polycopié (autres chapitres)') + ' (' + fOther.length + ')', det);
+        figList(det, fOther);
+      }
     }
     links(body, S.links);
   }

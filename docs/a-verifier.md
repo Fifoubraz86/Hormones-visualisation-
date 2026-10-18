@@ -108,3 +108,22 @@ Pages du polycopié : partie 1, p. 35–46.
    - Cycle de 3 à 6 mois.
    - À confirmer : référentiel de rhumatologie (COFER) ; recommandations GRIO sur l'ostéoporose.
 4. **Absorption du calcium** : 30 à 35 % des apports (p. 36), à recouper avec la figure 11.
+
+## Thyroïde (loupes embryologie, anatomie chirurgicale, désiodases, EU-TIRADS, grossesse, auto-immunité)
+
+Pages du polycopié vérifiées : P1 p. 6-8, 10-11, 15-18, 22-23, 26-29, 31-34, 42-46. Hors polycopié, marqué « (complément) » :
+
+- **Embryologie** : foramen caecum, canal thyréoglosse, descente vers la 7e semaine, thyroïde linguale, kyste du tractus et résection de la partie moyenne de l'os hyoïde (Sistrunk) ; corps ultimobranchial (4e poche) → cellules C issues de la crête neurale ; dérivés des 1re et 2e poches. Références : Larsen's Human Embryology, Langman's Medical Embryology, EMC « Embryologie de la thyroïde ».
+- **Anatomie chirurgicale** : artère thyroïdienne supérieure (carotide externe) et inférieure (tronc thyro-cervical) ; boucles des récurrents (sous-clavière droite, crosse aortique), trajet plus oblique à droite ; branche externe du nerf laryngé supérieur (perte des aigus) ; atteinte récurrentielle bilatérale → dyspnée. Références : Rouvière-Delmas ; recommandations SFE/AFCE sur la chirurgie thyroïdienne ; référentiel du Collège ORL.
+- **Désiodases** : tissus de D1, D2 et D3 ; anneau externe ou interne ; T3 → T2 par D3 ; D1 dégrade la rT3 ; inhibition par PTU, amiodarone, glucocorticoïdes, propranolol à forte dose ; D1↓/D3↑ dans le syndrome de basse T3. Références : Bianco, Endocr Rev 2002 et 2019 ; Williams Textbook of Endocrinology ; Bartalena, Nat Rev Endocrinol 2018.
+- **EU-TIRADS et Bethesda** : nodule spongiforme = EU-TIRADS 2 ; seuils de cytoponction 20, 15 et 10 mm ; catégories de Bethesda et conduites. Références : Russ, Eur Thyroid J 2017 ; Ali, Thyroid 2023 ; consensus SFE-AFCE-SFMN 2022.
+- **Grossesse** : hCG (sous-unité α commune) stimulant le récepteur de la TSH, pic vers 10 SA ; TBG ≈ ×2, T4 totale ≈ +50 %, T4L en légère baisse aux 2e et 3e trimestres ; besoins en lévothyroxine accrus ; thyroïde fœtale fonctionnelle vers la fin du 1er trimestre ; passage placentaire des TRAb ; D3 placentaire. Références : Alexander, recommandations ATA, Thyroid 2017 ; ETA 2014 ; consensus SFE.
+- **Auto-immunité** : récepteur de la TSH couplé à l'AMPc ; TRAb bloquants ; destruction surtout cellulaire dans la maladie de Hashimoto ; anticorps anti-thyroglobuline ; fibroblastes orbitaires (récepteur de l'IGF-1, adipogenèse, glycosaminoglycanes). Références : Smith et Hegedüs, NEJM 2016 ; recommandations EUGOGO 2021 ; Ralli, Autoimmun Rev 2020.
+
+## Rein et eau (loupes néphron complet, volume et osmolalité, peptides natriurétiques, calcium au néphron)
+
+Les étiquettes marquées « (complément) » portent surtout sur la physiologie tubulaire, absente du polycopié : répartition de la réabsorption par segment, transporteurs (NHE3, NKCC2, NCC, ENaC, ROMK, aquaporines 1 et 2, CaSR de l'anse), gradient corticopapillaire, sites d'action des diurétiques (de l'anse, thiazidiques, épargneurs de potassium, inhibiteurs de SGLT2, acétazolamide), capteurs de volume, ANP, BNP et NT-proBNP. Références : Brenner and Rector's The Kidney ; Collège de néphrologie (référentiel ECN) ; recommandations ESC 2021 sur l'insuffisance cardiaque pour les seuils de BNP.
+
+## Notions transversales (loupes signalisation, interactions, rythmes, NEM, dosages, médicaments)
+
+Marqué « (complément) » : voies de signalisation (AMPc, Gq, JAK-STAT, récepteurs nucléaires) ; dénutrition et axes en épargne ; insuffisance surrénale démasquée par la lévothyroxine ; hyponatrémie de l'insuffisance corticotrope ; rythmes (GH, mélatonine, TSH, prolactine la nuit) ; NEM 1 et NEM 2, von Hippel-Lindau, gènes SDHx, morphotype marfanoïde ; immunodosages (compétition et sandwich), effet crochet, macroprolactinémie, anticorps hétérophiles, biotine ; horaires et conditions de prélèvement. Références : Williams Textbook of Endocrinology ; recommandations SFE ; Thakker, J Clin Endocrinol Metab 2012 (NEM 1) ; Wells, Thyroid 2015 (CMT, NEM 2).
