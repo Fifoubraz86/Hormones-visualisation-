@@ -45,3 +45,21 @@ Chaque loupe signale « (complément) » ce qui ne vient pas du polycopié. Cett
 5. **Sinus caverneux** : III, IV, V1, V2 dans la paroi latérale, VI près de la carotide. À confirmer : Gray's Anatomy ; Rouvière-Delmas.
 6. **Champ visuel** : atteinte d'abord des quadrants temporaux supérieurs. À confirmer : traité de neuro-ophtalmologie (Miller & Newman).
 7. **Apoplexie** : insuffisance corticotrope aiguë. À confirmer : Rajasekaran et al., *Clin Endocrinol* 2011.
+
+## Glucides (loupes récepteur de l'insuline, foie, incrétines, complications, appétit)
+
+1. **Récepteur de l'insuline.**
+   - Récepteur α2β2 ; IRS-1/2 → PI3K → AKT → GLUT4 ; Grb2–SOS → Ras → MAPK.
+   - Insulinorésistance : acides gras, inflammation, phosphorylation d'IRS sur sérine.
+   - À confirmer : Williams, « Insulin action » ; Saltiel, *Cell* 2021.
+2. **Foie** : GLUT2, glucokinase, glucose-6-phosphatase ; chronologie glycogénolyse puis néoglucogenèse ; substrats ; lipogenèse et VLDL. À confirmer : Lehninger ou Harper.
+3. **Incrétines.**
+   - Cellules K et L, effet glucose-dépendant, dégradation par la DPP-4.
+   - Effet incrétine diminué dans le DT2, effet du GIP réduit dans le DT2.
+   - Médicaments.
+   - À confirmer : Nauck & Meier, *Lancet Diabetes Endocrinol* 2016 et 2018 ; Drucker, *Cell Metab* 2018 ; SFD / ADA–EASD 2022.
+4. **Complications** : voie des polyols (aldose réductase, sorbitol). Le reste vient du polycopié, partie 2, p. 40–65. À confirmer : Brownlee, *Diabetes* 2005.
+5. **Appétit.**
+   - NPY/AgRP, POMC/CART, MC4R ; leptine ; ghréline ; PYY ; GLP-1 central.
+   - Obésités monogéniques, métréleptine, setmélanotide.
+   - À confirmer : Williams, « Obesity » ; Farooqi & O'Rahilly, *Nat Rev Endocrinol*.

@@ -11,7 +11,7 @@
   /* ---------- Outils communs ---------- */
   // Typographie française : espace insécable avant « : ; ? ! » et à l'intérieur des guillemets.
   const NB = (s) => String(s).replace(/ ([:;?!»%])/g, ' $1').replace(/« /g, '« ');
-  const fr = (v, d) => v.toFixed(d || 0).replace('.', ',');
+  const fr = (v, d) => v.toFixed(d || 0).replace('.', ',').replace(/^-/, '−');
   const wrap = (str, n) => {
     const out = [];
     let cur = '';
@@ -581,9 +581,9 @@
       const sls = [];
       const mk = (key, y, lbl, min, max, step, fmt, info) => sls.push(slider(a, CX0 + 16, y, CW - 32, { min, max, step, val: st[key], label: lbl, fmt, info, onChange: (v) => { st[key] = v; refresh(); } }));
       mk('size', 254, 'Taille (grand axe)', 1, 10, 0.5, (v) => fr(v, 1) + ' cm', 'za-i-size');
-      mk('u', 330, 'Densité sans injection', -30, 60, 1, (v) => Math.round(v) + ' UH', 'za-i-hu');
-      mk('p', 406, 'Densité au temps portal', -30, 200, 1, (v) => Math.round(v) + ' UH', 'za-i-wo');
-      mk('d', 482, 'Densité tardive', -30, 200, 1, (v) => Math.round(v) + ' UH', 'za-i-wo');
+      mk('u', 330, 'Densité sans injection', -30, 60, 1, (v) => fr(v, 0) + ' UH', 'za-i-hu');
+      mk('p', 406, 'Densité au temps portal', -30, 200, 1, (v) => fr(v, 0) + ' UH', 'za-i-wo');
+      mk('d', 482, 'Densité tardive', -30, 200, 1, (v) => fr(v, 0) + ' UH', 'za-i-wo');
       // Mini-graphe des trois temps
       const GX = CX0 + 80, GY = 540, GW = 400, GH = 190;
       const yv = (v) => GY + GH - ((v + 30) / 230) * GH;
@@ -593,7 +593,7 @@
       t(GX + GW - 4, yv(10) - 6, '10 UH', 'za-small', { anchor: 'end' });
       t(GX - 10, GY - 12, 'UH', 'za-small', { anchor: 'end' });
       const PXs = [GX + 60, GX + 200, GX + 340];
-      ['sans inj.', 'portal', 'tardif'].forEach((l, i) => t(PXs[i], GY + GH + 24, l, 'za-small', { anchor: 'middle' }));
+      ['S : sans inj.', 'P : portal', 'T : tardif'].forEach((l, i) => t(PXs[i], GY + GH + 24, l, 'za-small', { anchor: 'middle' }));
       const curve = a.path('', 'za-curve');
       const dots = PXs.map(() => a.el('circle', { r: 8, class: 'za-dot' }));
       // Résultats
@@ -635,7 +635,7 @@
     'za-enac': { t: 'ENaC', k: 'Canal sodique épithélial · pôle apical', d: 'Le sodium de l\'urine entre dans la cellule par ENaC : la lumière devient électronégative, ce qui favorise la sécrétion de K⁺ et de H⁺. Bloqué par l\'amiloride (diurétique épargneur de potassium, complément).' },
     'za-romk': { t: 'ROMK', k: 'Canal potassique apical (complément)', d: 'Le potassium accumulé par la pompe sort vers l\'urine : kaliurèse. Dans l\'hyperaldostéronisme, cette perte urinaire explique l\'hypokaliémie avec kaliurèse conservée.' },
     'za-pump': { t: 'Na⁺/K⁺-ATPase', k: 'Pôle basolatéral', d: 'Fait sortir 3 Na⁺ vers le sang et entrer 2 K⁺ dans la cellule, en consommant de l\'ATP : moteur de la réabsorption du sodium.' },
-    'za-hsd2': { t: '11β-HSD2', k: '11β-hydroxystéroïde déshydrogénase de type 2 (complément)', d: 'Inactive le cortisol en cortisone, qui ne se lie pas au MR : le récepteur reste réservé à l\'aldostérone, pourtant 100 à 1 000 fois moins concentrée que le cortisol. La glycyrrhizine de la réglisse l\'inhibe : syndrome d\'excès apparent de minéralocorticoïdes.' },
+    'za-hsd2': { t: '11β-HSD2', k: '11β-hydroxystéroïde déshydrogénase de type 2 (complément)', d: 'Inactive le cortisol en cortisone, qui ne se lie pas au MR : le récepteur reste réservé à l\'aldostérone, bien moins concentrée que le cortisol dans le plasma. La glycyrrhizine de la réglisse l\'inhibe : syndrome d\'excès apparent de minéralocorticoïdes.' },
     'za-cortisone': { t: 'Cortisone', k: 'Forme inactive (complément)', d: 'Produite par la 11β-HSD2 ; ne se lie pas au MR. Réactivée en cortisol par la 11β-HSD1 dans le foie et le tissu adipeux.' },
     'za-ic': { t: 'Cellule intercalaire de type A', k: 'Sécrétion d\'ions H⁺ (complément)', d: 'Une H⁺-ATPase apicale sécrète les ions H⁺ ; le bicarbonate repart vers le sang. L\'aldostérone stimule cette sécrétion : l\'hyperaldostéronisme tend vers l\'alcalose métabolique.' },
     'za-h': { t: 'Ion H⁺', k: 'Sécrété dans l\'urine', d: 'Sa perte urinaire, accrue par l\'aldostérone, explique la tendance à l\'alcalose métabolique de l\'hyperaldostéronisme.' },
