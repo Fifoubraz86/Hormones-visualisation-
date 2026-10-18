@@ -14,8 +14,11 @@
   HV.applySmallSources();
   const root = HV.el('g', { class: 'world' }, svg);
   HV.initTips(svg.parentNode);
+  HV.initSheets(svg.parentNode);
 
   HV.mount(root);
+  // Molécules de l'axe thyréotrope proposées en fiches dans toutes ses scènes
+  ['thyro', 'hypo', 'pit', 'foll', 'transp', 'cell'].forEach((id) => { HV.scenes[id].legend = new Set(['trh', 'tsh', 't4', 't3', 'rt3', 'iod', 'tg', 'trab', 'tbg', 'ttr', 'alb']); });
   const scenes = HV.sceneList;
   const TOUR = ['atlas', 'thyro', 'hypo', 'pit', 'foll', 'transp', 'cell', 'cortico', 'somato', 'gonadoF', 'gonadoM', 'lacto', 'adh', 'medullo', 'phospho', 'raa', 'glyc', 'lipid'];
 
@@ -141,7 +144,10 @@
         const sc = z && HV.scenes[z.getAttribute('data-zoom')];
         const inf = drag.target && drag.target.closest && drag.target.closest('[data-info]');
         // Un élément de la scène courante affiche sa fiche ; ailleurs, le clic fait entrer dans la scène.
-        if (inf && sc && HV.ancestors(current).includes(sc) && sc === current) HV.showTip(inf.getAttribute('data-info'), e.clientX, e.clientY, e.pointerType !== 'mouse');
+        // Dans la scène courante, un clic ouvre la fiche (molécule, organe) ; Maj + clic l'ouvre aussi sur un élément zoomable.
+        const sheet = HV.resolveSheet(drag.target);
+        if (sheet && (sc === current || e.shiftKey)) HV.openSheet(sheet);
+        else if (inf && sc === current) HV.showTip(inf.getAttribute('data-info'), e.clientX, e.clientY, e.pointerType !== 'mouse');
         else if (sc && (sc !== current || !tween)) flyTo(sc);
       } else scheduleDetect();
       drag = null;
@@ -149,8 +155,12 @@
   };
   function hover(e) {
     const inf = e.target.closest && e.target.closest('[data-info]');
-    if (inf) HV.showTip(inf.getAttribute('data-info'), e.clientX, e.clientY);
-    else HV.hideTip();
+    if (!inf) return HV.hideTip();
+    const sheet = HV.resolveSheet(e.target);
+    const z = e.target.closest('[data-zoom]');
+    const zooms = z && HV.scenes[z.getAttribute('data-zoom')] !== current;
+    const hint = sheet ? (zooms ? 'Clic : zoomer · Maj + clic : fiche détaillée' : 'Clic : fiche détaillée') : zooms ? 'Clic : zoomer' : '';
+    HV.showTip(inf.getAttribute('data-info'), e.clientX, e.clientY, false, hint);
   }
   svg.addEventListener('pointerleave', () => HV.hideTip());
   document.getElementById('legendBody').addEventListener('pointermove', (e) => {
@@ -158,6 +168,10 @@
     if (li) HV.showTip(li.dataset.info, e.clientX, e.clientY);
   });
   document.getElementById('legendBody').addEventListener('pointerleave', () => HV.hideTip());
+  document.getElementById('legendBody').addEventListener('click', (e) => {
+    const li = e.target.closest('[data-info]');
+    if (li) HV.openSheet(HV.sheetFor(li.dataset.info));
+  });
   svg.addEventListener('pointerup', end);
   svg.addEventListener('pointercancel', end);
   svg.addEventListener('wheel', (e) => {
@@ -168,7 +182,8 @@
 
   window.addEventListener('keydown', (e) => {
     if (e.target.closest && e.target.closest('input, select, textarea')) return;
-    if (e.key === 'Escape' || e.key === 'Backspace') { goUp(); e.preventDefault(); }
+    if (e.key === 'Escape' && HV.sheetOpen()) { HV.closeSheet(); e.preventDefault(); }
+    else if (e.key === 'Escape' || e.key === 'Backspace') { goUp(); e.preventDefault(); }
     else if (e.key === 'ArrowRight') tourStep(1);
     else if (e.key === 'ArrowLeft') tourStep(-1);
     else if (e.key === '+' || e.key === '=') zoomCenter(1 / 1.3);
@@ -236,6 +251,25 @@
         wrap.appendChild(b);
       });
       ex.appendChild(wrap);
+    }
+    const shWrap = $('sceneSheets');
+    shWrap.textContent = '';
+    const found = HV.sheetsInScene(sc);
+    if (found.organs.length || found.mols.length) {
+      shWrap.appendChild(Object.assign(document.createElement('p'), { className: 'explore-h', textContent: 'Fiches détaillées' }));
+      const wrap = document.createElement('div');
+      wrap.className = 'chips';
+      found.organs.forEach((k) => {
+        const b = Object.assign(document.createElement('button'), { type: 'button', className: 'chip organ', textContent: HV.ORGAN_SHEETS[k].title });
+        b.addEventListener('click', () => HV.openSheet({ type: 'organ', key: k }));
+        wrap.appendChild(b);
+      });
+      found.mols.forEach((k) => {
+        const b = Object.assign(document.createElement('button'), { type: 'button', className: 'chip mol', textContent: (HV.INFO[k] ? HV.INFO[k].t : k).split(' · ')[0] });
+        b.addEventListener('click', () => HV.openSheet({ type: 'mol', key: k }));
+        wrap.appendChild(b);
+      });
+      shWrap.appendChild(wrap);
     }
     const ti = TOUR.indexOf(sc.id);
     $('tourPos').textContent = ti >= 0 ? ti + 1 + ' / ' + TOUR.length : 'hors parcours';

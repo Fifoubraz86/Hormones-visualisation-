@@ -72,7 +72,7 @@
           const key = ax.id + '.' + n.id;
           HV.INFO[key] = { t: n.label.replace(/\n/g, ' '), k: Array.isArray(n.sub) ? n.sub.join(' ') : n.sub || '', d: n.info || '', live: n.live ? () => n.live(T) : null };
           const s = n.s || 1.15;
-          const grp = a.el('g', { class: 'ax-node' + (n.organ ? '' : ' signal'), 'data-info': key });
+          const grp = a.el('g', { class: 'ax-node' + (n.organ ? '' : ' signal'), 'data-info': key, 'data-sheet': n.organ ? HV.ORGAN_BY_ICON[n.organ] || null : null });
           if (n.organ) {
             const ic = a.el('g', { transform: `translate(${n.x} ${n.y}) scale(${s})` }, grp);
             a.el('circle', { r: 58, class: 'ax-halo', style: `--c: var(--${n.color || 'accent'})` }, ic);

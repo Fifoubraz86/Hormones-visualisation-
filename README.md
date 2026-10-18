@@ -41,6 +41,13 @@ Chaque scène a une ancre (`#thyro`, `#foll`, `#cell`…) pour y accéder direct
 5. **Transport plasmatique** : TBG, transthyrétine, albumine, fraction libre et entrée cellulaire.
 6. **Cellule cible** : MCT8/MCT10/OATP1C1, désiodases D2 et D3, récepteur nucléaire TR/RXR sur TRE, transcription.
 
+## Fiches détaillées
+
+Un clic sur une molécule (particule, étiquette, légende) ou sur un organe de la scène courante ouvre sa fiche ; sur un élément qui sert aussi à zoomer, Maj + clic. Le panneau liste aussi toutes les fiches de la scène.
+
+- **Molécules** : classe, structure, formule et masse (PubChem ou PDB), synthèse, transport, demi-vie, récepteur, effets, dosage, pharmacologie, liens PubChem / RCSB.
+- **Organes** : anatomie, histologie, rôle endocrine, planches d'imagerie schématiques en version normale et pathologique (échographie et scintigraphie thyroïdiennes, histologie, IRM hypophysaire, scanner surrénalien, échographie et MIBI des parathyroïdes, îlot de Langerhans, échographies ovarienne et testiculaire), figures correspondantes du polycopié CEEDMM (numéro, partie, page) et liens Radiopaedia / Wikimedia Commons.
+
 ## Vérification des molécules
 
 Les petites molécules ont été contrôlées dans PubChem (formule, nom IUPAC, position des substituants) ; les protéines sont dessinées à partir de leurs coordonnées dans la PDB (carbones α projetés, ponts disulfure, glycanes, T4 liée), grâce au script [`docs/tools/traces.py`](docs/tools/traces.py). La source de chaque structure (CID PubChem ou identifiant PDB) s'affiche dans sa fiche au survol.

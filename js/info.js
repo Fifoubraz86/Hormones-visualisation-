@@ -117,17 +117,17 @@
   HV.INFO = I;
 
   /* ---------- Infobulle ---------- */
-  let tip, tipT, tipK, tipD, tipL, tipS, liveFn = null, hideTimer = 0;
+  let tip, tipT, tipK, tipD, tipL, tipS, tipH, liveFn = null, hideTimer = 0;
   HV.initTips = function (container) {
     tip = document.createElement('div');
     tip.className = 'tip';
     tip.hidden = true;
     tip.setAttribute('role', 'tooltip');
-    tip.innerHTML = '<p class="tip-t"></p><p class="tip-k"></p><p class="tip-d"></p><p class="tip-l"></p><p class="tip-s"></p>';
+    tip.innerHTML = '<p class="tip-t"></p><p class="tip-k"></p><p class="tip-d"></p><p class="tip-l"></p><p class="tip-s"></p><p class="tip-h"></p>';
     container.appendChild(tip);
-    [tipT, tipK, tipD, tipL, tipS] = tip.querySelectorAll('p');
+    [tipT, tipK, tipD, tipL, tipS, tipH] = tip.querySelectorAll('p');
   };
-  HV.showTip = function (key, x, y, sticky) {
+  HV.showTip = function (key, x, y, sticky, hint) {
     const f = I[key];
     if (!f || !tip) return HV.hideTip();
     tipT.textContent = f.t;
@@ -135,6 +135,8 @@
     tipD.textContent = f.d || '';
     tipS.textContent = f.src || '';
     tipS.hidden = !f.src;
+    tipH.textContent = hint || '';
+    tipH.hidden = !hint;
     liveFn = f.live || null;
     tipL.hidden = !liveFn;
     if (liveFn) tipL.textContent = liveFn();
