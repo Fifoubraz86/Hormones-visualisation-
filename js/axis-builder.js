@@ -280,7 +280,7 @@
         };
 
         /* ---- Liens ---- */
-        const dynLinks = [];
+        const dynLinks = [], pills = [];
         allLinks.forEach((l) => {
           const LR = { key: l.from + '>' + l.to, from: l.from, to: l.to, mol: l.mol || '', on: true, els: [] };
           reg.links.push(LR);
@@ -322,6 +322,7 @@
             a.el('rect', { x: -w / 2, y: -15, width: w, height: 30, rx: 15 }, lg);
             a.text(0, 6, lab, 'ax-pill-t', { anchor: 'middle' }, lg);
             pillEl = lg;
+            pills.push(lg);
           }
           LR.els.push(track, sign && sign.g, pillEl);
           if (typeof l.kind === 'function') dynLinks.push({ l, track, sign });
@@ -356,6 +357,8 @@
         }
 
         if (ax.draw) ax.draw(a, nodes);
+        // Les noms d'hormones passent devant les organes, y compris ceux dessinés par ax.draw.
+        pills.forEach((pl) => pl.parentNode && pl.parentNode.appendChild(pl));
         HV.loupeCaptions(a, ax.id);
         /* ---- Iconographie du polycopié posée sur les organes ---- */
         const spots = (HV.FIG_SPOTS || {})[ax.id] || {};
