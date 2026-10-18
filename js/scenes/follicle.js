@@ -18,7 +18,7 @@
       'La TSH, via son récepteur couplé à Gs et l\'AMPc, stimule chaque étape ainsi que la croissance de la glande.',
       'Le NIS est inhibé par le perchlorate. La TPO est inhibée par les antithyroïdiens de synthèse (carbimazole, PTU).',
       'Dans la maladie de Basedow, les TRAb activent le récepteur de la TSH. Dans la thyroïdite de Hashimoto, la glande est détruite (anti-TPO).',
-      'En carence iodée, la thyroïde privilégie la T3, moins coûteuse en iode, et augmente de volume (goitre).'
+      'En carence iodée, la thyroïde augmente de volume (goitre) et privilégie la T3, moins coûteuse en iode (complément).'
     ],
     build(g, a) {
       a.frame('Follicule thyroïdien · thyréocyte', 'Captation de l\'iode → organification → couplage → sécrétion');

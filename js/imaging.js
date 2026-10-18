@@ -42,10 +42,10 @@
   P['thyroid-echo'] = {
     title: 'Échographie thyroïdienne, coupe transversale',
     variants: [
-      ['normal', 'Normale', 'Parenchyme homogène, iso- ou discrètement hyperéchogène par rapport aux muscles ; trachée médiane avec cône d\'ombre ; carotides et jugulaires anéchogènes en dehors.'],
-      ['nodule', 'Adénome toxique', 'Nodule solide unique, bien limité, entouré d\'un fin halo ; le reste du parenchyme est normal (et éteint en scintigraphie).'],
-      ['graves', 'Basedow', 'Glande augmentée de volume, globalement hypoéchogène, très vascularisée en Doppler couleur (aspect « d\'enfer thyroïdien »).'],
-      ['hashi', 'Hashimoto', 'Parenchyme hypoéchogène et hétérogène, micronodulaire, cloisonné ; glande parfois atrophique.'],
+      ['normal', 'Normale', 'Parenchyme homogène, hyperéchogène par rapport aux muscles sous-hyoïdiens ; trachée médiane avec cône d\'ombre ; carotides et jugulaires anéchogènes en dehors (complément ; voir polycopié, figure 6).'],
+      ['nodule', 'Adénome toxique', 'Nodule solide unique, bien limité, entouré d\'un fin halo (complément) ; le reste du parenchyme est normal (et éteint en scintigraphie).'],
+      ['graves', 'Basedow', 'Glande augmentée de volume, globalement hypoéchogène, très vascularisée en Doppler couleur (aspect « d\'enfer thyroïdien » ; complément).'],
+      ['hashi', 'Hashimoto', 'Parenchyme hypoéchogène et hétérogène, micronodulaire, cloisonné ; glande parfois atrophique (complément).'],
       ['gmn', 'Goitre multinodulaire', 'Glande augmentée de volume contenant plusieurs nodules d\'échogénicité variable, parfois kystiques.']
     ],
     draw(svg, v) {
@@ -98,7 +98,7 @@
       ['normal', 'Normale', 'Fixation homogène des deux lobes, modérée.'],
       ['nodule', 'Adénome toxique', 'Nodule hyperfixant (« chaud ») avec extinction du reste du parenchyme (TSH effondrée). Polycopié, figure 9A.'],
       ['graves', 'Basedow', 'Fixation diffuse, homogène et intense de toute la glande. Polycopié, figure 9B.'],
-      ['blank', 'Thyroïdite, surcharge iodée, LT4', 'Fixation nulle ou très faible (« scintigraphie blanche »).']
+      ['blank', 'Thyroïdite, surcharge iodée, LT4', 'Hypofixation globale (« scintigraphie blanche ») : thyroïdite, médicamenteuse ou autre (polycopié) ; surcharge iodée, prise d\'hormones thyroïdiennes (complément).']
     ],
     draw(svg, v) {
       base(svg, '#000');
@@ -120,8 +120,8 @@
     title: 'Histologie thyroïdienne',
     variants: [
       ['normal', 'Normale', 'Follicules bordés de thyréocytes cubiques, remplis de colloïde ; cellules C entre les follicules. Polycopié, figure 1.'],
-      ['graves', 'Basedow', 'Thyréocytes hauts (cylindriques), colloïde raréfiée et « festonnée » par les vacuoles de résorption.'],
-      ['hashi', 'Hashimoto', 'Infiltrat lymphocytaire avec follicules lymphoïdes à centre germinatif ; follicules thyroïdiens atrophiques.']
+      ['graves', 'Basedow', 'Thyréocytes hauts (cylindriques), colloïde raréfiée et « festonnée » par les vacuoles de résorption (complément).'],
+      ['hashi', 'Hashimoto', 'Infiltrat lymphocytaire avec follicules lymphoïdes à centre germinatif ; follicules thyroïdiens atrophiques (complément).']
     ],
     draw(svg, v) {
       base(svg, '#f3e6ee');
@@ -151,11 +151,11 @@
   P['pit-mri'] = {
     title: 'IRM hypophysaire, coupe sagittale T1',
     variants: [
-      ['normal', 'Normale', 'Glande dans la selle turcique, tige médiane, hypersignal spontané de la posthypophyse ; chiasma optique au-dessus.'],
-      ['micro', 'Microadénome', 'Lésion < 10 mm, en hyposignal T1 par rapport à la glande saine (polycopié, figure 22).'],
-      ['macro', 'Macroadénome', 'Lésion ≥ 10 mm avec extension suprasellaire au contact du chiasma (risque d\'hémianopsie bitemporale) et parfois vers le sinus sphénoïdal.'],
-      ['hypophysite', 'Hypophysite', 'Glande augmentée de volume, tige épaissie (polycopié, figure 23).'],
-      ['di', 'Diabète insipide central', 'Perte de l\'hypersignal spontané de la posthypophyse ; rechercher un épaississement de la tige.']
+      ['normal', 'Normale', 'Glande dans la selle turcique, tige médiane, hypersignal spontané de la posthypophyse (complément) ; chiasma optique au-dessus.'],
+      ['micro', 'Microadénome', 'Lésion < 10 mm (polycopié, figure 22A), en hyposignal T1 par rapport à la glande saine (complément).'],
+      ['macro', 'Macroadénome', 'Lésion ≥ 10 mm avec extension suprasellaire au contact du chiasma (risque d\'hémianopsie bitemporale) et parfois vers le sinus sphénoïdal (polycopié, figure 22B).'],
+      ['hypophysite', 'Hypophysite', 'Bombement de l\'hypophyse au contact du chiasma optique, légèrement refoulé vers le haut (polycopié, figure 23) ; épaississement de la tige possible (complément).'],
+      ['di', 'Diabète insipide central', 'Perte de l\'hypersignal spontané de la posthypophyse (complément) ; analyser l\'épaisseur de la tige.']
     ],
     draw(svg, v) {
       const B = base(svg, '#000');
@@ -163,7 +163,7 @@
       el('path', { d: 'M 0,220 L 0,170 C 60,160 110,170 120,150 L 210,150 C 230,168 280,172 320,170 L 320,220 Z', fill: '#262626', filter: B.blur }, svg); // base du crâne
       el('path', { d: 'M 96,196 C 100,180 120,176 160,178 C 200,176 220,182 226,198 L 226,220 L 96,220 Z', fill: '#060606' }, svg); // sinus sphénoïdal
       el('path', { d: 'M 120,150 C 118,190 210,190 210,150', fill: 'none', stroke: '#141414', 'stroke-width': 10 }, svg); // plancher sellaire (os cortical)
-      el('ellipse', { cx: 132, cy: 98, rx: 28, ry: 7, fill: '#7a7a7a', filter: B.blur }, svg); // chiasma
+      el('ellipse', { cx: 132, cy: v === 'hypophysite' ? 91 : 98, rx: 28, ry: 7, fill: '#7a7a7a', filter: B.blur }, svg); // chiasma (refoulé vers le haut dans l'hypophysite)
       const big = v === 'hypophysite' ? 1.25 : 1;
       el('path', { d: `M 160,96 C 156,112 ${162 - 3 * big},124 ${158 - 2 * big},140 L ${168 + 2 * big},140 C ${166 + 3 * big},124 168,112 168,96 Z`, fill: '#7b7b7b', filter: B.blur, transform: v === 'hypophysite' ? 'translate(-4 0) scale(1.03 1)' : null }, svg); // tige
       el('path', { d: `M ${130 - 6 * big},158 C ${128 - 6 * big},${144 - 4 * big} 150,140 168,142 C 178,144 184,150 182,166 C 178,${176 + 4 * big} ${140 - 4 * big},${178 + 4 * big} ${130 - 6 * big},158 Z`, fill: '#8a8a8a', filter: B.blur }, svg); // antéhypophyse
@@ -185,8 +185,8 @@
     title: 'Scanner surrénalien, coupe axiale',
     variants: [
       ['normal', 'Normal', 'Surrénales fines en Y ou en V inversé, en arrière de la veine cave (droite) et en dehors de l\'aorte (gauche).'],
-      ['adenoma', 'Adénome', 'Nodule unilatéral, rond, homogène, bien limité ; densité spontanée basse (< 10 UH : riche en lipides) en faveur d\'un adénome (complément).'],
-      ['hyper', 'Hyperplasie bilatérale', 'Surrénales épaissies des deux côtés (excès d\'ACTH, ou hyperaldostéronisme idiopathique).'],
+      ['adenoma', 'Adénome', 'Nodule unilatéral, rond, homogène, bien limité. En faveur de la bénignité (polycopié) : taille < 4 cm, densité spontanée < 10 UH (riche en lipides ; sensibilité 71 %, spécificité 98 % pour l\'adénome), lavage (wash-out) absolu > 60 % ou relatif > 40 %.'],
+      ['hyper', 'Hyperplasie bilatérale', 'Surrénales épaissies des deux côtés (excès d\'ACTH ; dans l\'hyperaldostéronisme idiopathique, surrénales souvent normales ou micronodulaires ; complément).'],
       ['pheo', 'Phéochromocytome', 'Masse plus volumineuse, hétérogène, souvent nécrotique, à densité élevée (complément).'],
       ['atrophy', 'Atrophie', 'Surrénales grêles (insuffisance surrénale auto-immune, corticothérapie prolongée, ou côté opposé à un adénome cortisolique).']
     ],
@@ -219,10 +219,10 @@
   /* ---------------- Surrénale : histologie ---------------- */
   P['adrenal-histo'] = {
     title: 'Histologie de la glande surrénale',
-    variants: [['normal', 'Normale', 'De la capsule vers le centre : zone glomérulée (aldostérone), fasciculée (cortisol, 75–80 % du cortex), réticulée (androgènes), médullaire (catécholamines). Polycopié, figure 25.']],
+    variants: [['normal', 'Normale', 'De la capsule vers le centre : zone glomérulée (aldostérone), fasciculée (cortisol, 75–80 % du volume du cortex), réticulée (androgènes), médullaire (catécholamines). Polycopié, figure 25.']],
     draw(svg) {
       base(svg, '#f6eadf');
-      const bands = [['#a33e5a', 18, 'capsule'], ['#e4a6b8', 36, 'glomérulée'], ['#f3d3dc', 66, 'fasciculée'], ['#d48aa5', 30, 'réticulée'], ['#8a6aa8', 60, 'médullaire']];
+      const bands = [['#a33e5a', 18, 'capsule'], ['#e4a6b8', 16, 'glomérulée'], ['#f3d3dc', 100, 'fasciculée'], ['#d48aa5', 16, 'réticulée'], ['#8a6aa8', 60, 'médullaire']];
       let y = 6;
       bands.forEach(([c, h, l]) => {
         el('rect', { x: 10, y, width: 230, height: h, fill: c }, svg);
@@ -238,7 +238,7 @@
     title: 'Échographie cervicale (parathyroïdes)',
     variants: [
       ['normal', 'Normale', 'Les parathyroïdes normales ne sont en général pas visibles.'],
-      ['adenoma', 'Adénome parathyroïdien', 'Formation ovalaire hypoéchogène, bien limitée, en arrière du pôle inférieur du lobe thyroïdien, avec un pédicule vasculaire en Doppler.']
+      ['adenoma', 'Adénome parathyroïdien', 'Formation ovalaire hypoéchogène, bien limitée, en arrière du pôle inférieur du lobe thyroïdien, avec un pédicule vasculaire en Doppler (complément).']
     ],
     draw(svg, v) {
       const B = base(svg);
@@ -275,7 +275,7 @@
   P['islet-histo'] = {
     title: 'Îlot de Langerhans (immunohistochimie schématique)',
     variants: [
-      ['normal', 'Normal', 'Cellules β (insuline, ≈ 60–70 %) au centre, cellules α (glucagon) en périphérie, cellules δ (somatostatine) dispersées ; acini exocrines autour.'],
+      ['normal', 'Normal', 'Cellules β (insuline, ≈ 60–70 % ; complément) au centre, cellules α (glucagon) en périphérie, cellules δ (somatostatine) dispersées ; acini exocrines autour (organisation schématique ; chez l\'homme, les cellules sont plus entremêlées : complément).'],
       ['dt1', 'Diabète de type 1', 'Insulite : infiltrat lymphocytaire de l\'îlot et disparition des cellules β.'],
       ['insulinoma', 'Insulinome', 'Prolifération tumorale de cellules β, sécrétant l\'insuline de façon autonome.']
     ],
@@ -302,9 +302,9 @@
   P['ovary-echo'] = {
     title: 'Échographie ovarienne',
     variants: [
-      ['normal', 'Phase folliculaire', 'Ovaire avec plusieurs petits follicules anéchogènes ; un follicule dominant (≈ 20 mm) avant l\'ovulation.'],
+      ['normal', 'Phase folliculaire', 'Ovaire avec plusieurs petits follicules anéchogènes ; un follicule dominant (≈ 20 mm ; complément) avant l\'ovulation.'],
       ['meno', 'Ménopause, insuffisance ovarienne', 'Ovaire petit, sans follicule visible.'],
-      ['sopk', 'Syndrome des ovaires polykystiques', 'Nombreux petits follicules en périphérie, stroma central augmenté (complément).']
+      ['sopk', 'Syndrome des ovaires polykystiques', 'Ovaires augmentés de volume (> 10 mL) avec plus de 20 follicules par ovaire (critère échographique de Rotterdam, polycopié) ; disposition périphérique et stroma augmenté (complément).']
     ],
     draw(svg, v) {
       const B = base(svg);
@@ -320,7 +320,7 @@
     title: 'Échographie testiculaire',
     variants: [
       ['normal', 'Normale', 'Testicule ovoïde homogène (15 à 20 mL), épididyme en arrière.'],
-      ['small', 'Klinefelter, atrophie', 'Testicule de petit volume, parfois hétérogène (complément).']
+      ['small', 'Klinefelter, atrophie', 'Atrophie testiculaire, volume < 4 mL (Klinefelter, polycopié) ; aspect parfois hétérogène (complément).']
     ],
     draw(svg, v) {
       const B = base(svg);

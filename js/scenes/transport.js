@@ -14,17 +14,17 @@
     level: 'Circulation',
     lead: 'Plus de 99 % des hormones thyroïdiennes circulent liées à des protéines. Seule la fraction libre entre dans les cellules et agit : c\'est elle que l\'on dose (T4L, T3L).',
     points: [
-      'Protéines de transport : TBG 75 %, TBPA (transthyrétine) 25 %.',
-      'Fraction libre : environ 0,03 % de la T4 et 0,3 % de la T3.',
-      'Les œstrogènes et la grossesse augmentent la TBG : la T4 totale monte, la T4L reste normale.',
-      'Demi-vie : T4 ≈ 7 jours, T3 ≈ 1 jour. On contrôle donc la TSH 6 à 8 semaines après un changement de dose de lévothyroxine.'
+      'Protéines de transport : TBG 75 %, TBPA (transthyrétine) 25 % (répartition simplifiée du polycopié ; en réalité TTR ≈ 10–15 % et albumine ≈ 10–20 %, complément).',
+      'Fraction libre : environ 0,03 % de la T4 et 0,3 % de la T3 (complément).',
+      'Les œstrogènes et la grossesse augmentent la TBG : la T4 totale monte, la T4L reste normale (complément).',
+      'Demi-vie : T4 ≈ 7 jours, T3 ≈ 1 jour (complément). On contrôle donc la TSH 6 à 8 semaines après un changement de dose de lévothyroxine.'
     ],
     build(g, a) {
       a.frame('Transport plasmatique', 'Formes liées (réservoir) et fraction libre (active)');
 
       // Répartition de la T4 liée
       const bar = a.el('g', { transform: 'translate(900 58)' });
-      a.text(0, 0, 'T4 liée', 'note strong', null, bar);
+      a.text(0, 0, 'T4 liée (répartition simplifiée du polycopié)', 'note strong', null, bar);
       [['tbg', 'TBG 75 %', 0.75], ['ttr', 'TBPA 25 %', 0.25]].reduce((x, [k, l, f]) => {
         const w = 640 * f;
         a.el('rect', { x, y: 14, width: w - 4, height: 26, rx: 6, class: 'bar-' + k }, bar);

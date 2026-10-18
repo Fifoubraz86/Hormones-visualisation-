@@ -1,6 +1,6 @@
 # Axes et boucles de régulation
 
-Extraits du *Polycopié de sémiologie endocrinienne* du CEEDMM (1re édition, 2023, parties 1 et 2), tels qu'ils sont représentés dans l'atlas. Les éléments marqués « (complément) » ne figurent pas dans le polycopié et relèvent de la physiologie classique.
+Extraits du *Polycopié de sémiologie endocrinienne* du CEEDMM (2e édition, 2023, parties 1 et 2), tels qu'ils sont représentés dans l'atlas. Les éléments marqués « (complément) » ne figurent pas dans le polycopié et relèvent de la physiologie classique.
 
 L'axe thyréotrope (non repris ici) est détaillé dans les scènes `thyro`, `hypo`, `pit`, `foll`, `transp` et `cell`.
 
@@ -15,9 +15,9 @@ La CRH hypothalamique stimule la sécrétion d'ACTH, qui stimule la production d
 | Corticosurrénale | Foie | Cortisol | → |
 | Corticosurrénale | Muscle | Cortisol | → |
 | Corticosurrénale | Tissu adipeux | Cortisol | → |
-| Corticosurrénale | Antéhypophyse | Cortisol (cortisol −) | (−) freine |
+| Corticosurrénale | Antéhypophyse | Cortisol | (−) freine |
 | Corticosurrénale | Hypothalamus | Cortisol | (−) freine |
-| Inflammation | Antéhypophyse | cytokines | (+) stimule |
+| Inflammation | Antéhypophyse | Cytokines | (+) stimule |
 | Corticosurrénale | Androgènes | DHEA, DHEA-S | → |
 
 - Rythme circadien : pic de cortisol le matin, nadir le soir (horloge à côté du titre).
@@ -36,7 +36,7 @@ La GHRH stimule et la somatostatine freine la sécrétion de GH. La GH, pulsatil
 | Antéhypophyse | Foie | GH | (+) stimule |
 | Foie | Cartilages de croissance | IGF-1 | → |
 | Foie | Muscles, viscères | IGF-1 | → |
-| Foie | Antéhypophyse | IGF-1 (IGF-1 −) | (−) freine |
+| Foie | Antéhypophyse | IGF-1 | (−) freine |
 | Foie | Hypothalamus | IGF-1 | (−) freine |
 | Hypoglycémie | Antéhypophyse | — | (+) stimule |
 | Hyperglycémie (HGPO) | Antéhypophyse | — | (−) freine |
@@ -52,8 +52,8 @@ La prolactine est la seule hormone antéhypophysaire freinée en permanence : la
 
 | De | Vers | Messager | Effet |
 | --- | --- | --- | --- |
-| Hypothalamus | Antéhypophyse | Dopamine (dopamine (tonus −)) | (−) freine |
-| Hypothalamus | Antéhypophyse | trh | (+) stimule |
+| Hypothalamus | Antéhypophyse | Dopamine (tonus −) | (−) freine |
+| Hypothalamus | Antéhypophyse | TRH | (+) stimule |
 | Œstrogènes | Antéhypophyse | Estradiol (E2) | (+) stimule |
 | Antéhypophyse | Glande mammaire | Prolactine | (+) stimule |
 | Antéhypophyse | Neurones à GnRH | Prolactine | (−) freine |
@@ -70,13 +70,13 @@ L'ADH est synthétisée par les noyaux supraoptiques et paraventriculaires, tran
 
 | De | Vers | Messager | Effet |
 | --- | --- | --- | --- |
-| Hypothalamus | Posthypophyse | ADH · vasopressine (transport axonal) | → |
-| Posthypophyse | Rein | ADH · vasopressine | (+) stimule |
-| Posthypophyse | Vaisseaux | ADH · vasopressine | (+) stimule |
+| Hypothalamus | Posthypophyse | ADH (transport axonal) | → |
+| Posthypophyse | Rein | ADH | (+) stimule |
+| Posthypophyse | Vaisseaux | ADH | (+) stimule |
 | Rein | Vaisseaux | Eau libre (eau réabsorbée) | → |
-| Posthypophyse | Utérus | Ocytocine | (+) stimule |
-| Posthypophyse | Sein | Ocytocine | (+) stimule |
-| Osmolalité ↑ | Hypothalamus | — | (+) stimule |
+| Posthypophyse | Utérus (contraction ; complément) | Ocytocine | (+) stimule |
+| Posthypophyse | Sein (éjection du lait ; complément) | Ocytocine | (+) stimule |
+| Osmolalité ↑ (complément) | Hypothalamus | — | (+) stimule |
 | Cortisol | Hypothalamus | Cortisol | (−) freine |
 
 - Diabète insipide : polyurie > 3 L/24 h, polydipsie, nycturie, urines diluées (densité < 1005, osmolalité < 200 mosmol/kg).
@@ -90,7 +90,7 @@ Les nerfs splanchniques du système sympathique stimulent les cellules chromaffi
 
 | De | Vers | Messager | Effet |
 | --- | --- | --- | --- |
-| Nerfs splanchniques | Médullosurrénale | influx sympathique | (+) stimule |
+| Nerfs splanchniques | Médullosurrénale | Influx sympathique | (+) stimule |
 | Médullosurrénale | Cœur | Adrénaline | (+) stimule |
 | Médullosurrénale | Vaisseaux | Noradrénaline | (+) stimule |
 | Médullosurrénale | Foie | Adrénaline | (+) stimule |
@@ -109,14 +109,14 @@ La GnRH pulsatile commande la LH et la FSH. La LH stimule la thèque interne (an
 | Neurones à GnRH | Antéhypophyse | GnRH | (+) stimule |
 | Antéhypophyse | Ovaire | LH | (+) stimule |
 | Antéhypophyse | Ovaire | FSH | (+) stimule |
-| Ovaire | Utérus | Estradiol (E2) (E2) | → |
-| Ovaire | Utérus | Progestérone (progestérone) | → |
+| Ovaire | Utérus | Estradiol (E2) | → |
+| Ovaire | Utérus | Progestérone | → |
 | Ovaire | Seins, os, peau | Estradiol (E2) | → |
-| Ovaire | Antéhypophyse | Estradiol (E2) (E2 (− / + mi-cycle)) | variable (− / + au milieu du cycle) |
+| Ovaire | Antéhypophyse | Estradiol (E2), − / + mi-cycle | variable (− / + au milieu du cycle) |
 | Ovaire | Neurones à GnRH | Estradiol (E2) | variable (− / + au milieu du cycle) |
-| Ovaire | Antéhypophyse | Inhibine B (inhibine B → FSH) | (−) freine |
+| Ovaire | Antéhypophyse | Inhibine B (→ FSH) | (−) freine |
 | Kisspeptines | Neurones à GnRH | Kisspeptines | (+) stimule |
-| Tissu adipeux blanc | Neurones à GnRH | leptine | (+) stimule |
+| Tissu adipeux blanc | Neurones à GnRH | Leptine (permissif) | permissif (indirect) |
 
 - J1–J14 : phase folliculaire, sélection d'un follicule sous FSH.
 - J14 : pic de LH, rupture du follicule, expulsion de l'ovocyte II.
@@ -130,17 +130,17 @@ La GnRH pulsatile entraîne une libération pulsatile de LH et de FSH. La LH sti
 
 | De | Vers | Messager | Effet |
 | --- | --- | --- | --- |
-| Neurones à GnRH | Antéhypophyse | GnRH | (+) stimule |
+| Neurones à GnRH (pulses ≈ 90 min ; complément) | Antéhypophyse | GnRH | (+) stimule |
 | Antéhypophyse | Testicule | LH | (+) stimule |
 | Antéhypophyse | Testicule | FSH | (+) stimule |
 | Testicule | Muscle | Testostérone | → |
 | Testicule | Os, moelle | Testostérone | → |
 | Testicule | Cerveau, peau | Testostérone | → |
-| Testicule | Antéhypophyse | Testostérone (testostérone −) | (−) freine |
-| Testicule | Neurones à GnRH | Testostérone | (−) freine |
-| Testicule | Antéhypophyse | Inhibine B (inhibine B → FSH) | (−) freine |
-| Kisspeptines | Neurones à GnRH | Kisspeptines | (+) stimule |
-| Tissu adipeux blanc | Neurones à GnRH | leptine | (+) stimule |
+| Testicule | Antéhypophyse | Testostérone | (−) freine |
+| Testicule | Neurones à GnRH (pulses ≈ 90 min ; complément) | Testostérone | (−) freine |
+| Testicule | Antéhypophyse | Inhibine B (→ FSH) | (−) freine |
+| Kisspeptines | Neurones à GnRH (pulses ≈ 90 min ; complément) | Kisspeptines | (+) stimule |
+| Tissu adipeux blanc | Neurones à GnRH (pulses ≈ 90 min ; complément) | Leptine (permissif) | permissif (indirect) |
 
 - Testicule : 15 à 20 mL ; tubes séminifères (cellules germinales et de Sertoli) et tissu interstitiel (cellules de Leydig).
 - Testostérone et cellules de Sertoli sont indispensables à la spermatogenèse.
@@ -160,7 +160,7 @@ Le calcium ionisé active le récepteur sensible au calcium (CaSR) des parathyro
 | Rein | Calcémie | Calcium ionisé (réabsorption) | → |
 | Os | Calcémie | Calcium ionisé (libération) | → |
 | Intestin grêle | Calcémie | Calcium ionisé (absorption) | → |
-| Cellules C (thyroïde) | Os | calcitonine | (+) stimule |
+| Cellules C (thyroïde) | Os | Calcitonine (− résorption) | (−) freine |
 
 - Calcémie totale 2,20–2,60 mmol/L, ionisée 1,15–1,30 mmol/L.
 - Calcémie corrigée (mmol/L) = Ca mesurée + 0,025 × (40 − albuminémie en g/L).
@@ -174,17 +174,17 @@ L'appareil juxtaglomérulaire libère la rénine, qui déclenche une cascade abo
 
 | De | Vers | Messager | Effet |
 | --- | --- | --- | --- |
-| Appareil juxtaglomérulaire | Foie | Rénine (rénine) | → |
-| Foie | Poumon | Angiotensine II (angiotensine I) | → |
-| Poumon | Zone glomérulée | Angiotensine II | (+) stimule |
+| Appareil juxtaglomérulaire | Foie (angiotensinogène ; complément) | Rénine | → |
+| Foie (angiotensinogène ; complément) | Poumon (enzyme de conversion ; complément) | Angiotensine I (angiotensinogène → angiotensine I) | → |
+| Poumon (enzyme de conversion ; complément) | Zone glomérulée | Angiotensine II | (+) stimule |
 | Zone glomérulée | Tube distal, canal collecteur | Aldostérone | (+) stimule |
 | Kaliémie ↑ | Zone glomérulée | Potassium | (+) stimule |
 | Tube distal, canal collecteur | Volémie, PA ↑ | Sodium (Na⁺) | → |
-| Volémie, PA ↑ | Appareil juxtaglomérulaire | freine la rénine | (−) freine |
+| Volémie, PA ↑ | Appareil juxtaglomérulaire | Freine la rénine | (−) freine |
 
 - Aldostérone : rôle important dans la régulation de la pression artérielle par la rétention sodée.
-- Toutes les hormones corticostéroïdes dérivent du cholestérol ; StAR est l'étape limitante.
-- Le retour de la volémie et de la pression artérielle freine la rénine (complément).
+- Toutes les hormones corticostéroïdes dérivent du cholestérol ; son transport mitochondrial par StAR est l'étape limitante.
+- L'hypovolémie, la baisse de la pression artérielle ou de la perfusion rénale stimulent la rénine ; l'expansion volémique la met au repos.
 
 ## Régulation de la glycémie
 
@@ -193,8 +193,8 @@ L'insuline (cellules β) fait baisser la glycémie : captation du glucose par le
 | De | Vers | Messager | Effet |
 | --- | --- | --- | --- |
 | Glycémie | Îlots de Langerhans | Glucose | (+) stimule |
-| Îlots de Langerhans | Foie | Insuline (insuline) | (−) freine |
-| Îlots de Langerhans | Foie | Glucagon (glucagon) | (+) stimule |
+| Îlots de Langerhans | Foie | Insuline | (−) freine |
+| Îlots de Langerhans | Foie | Glucagon | (+) stimule |
 | Îlots de Langerhans | Muscle | Insuline | (+) stimule |
 | Îlots de Langerhans | Tissu adipeux | Insuline | (+) stimule |
 | Foie | Glycémie | Glucose (production hépatique) | → |
@@ -211,21 +211,24 @@ L'insuline (cellules β) fait baisser la glycémie : captation du glucose par le
 
 ## Métabolisme des lipoprotéines
 
-L'intestin exporte les lipides alimentaires dans les chylomicrons, le foie sécrète les VLDL. La lipoprotéine lipase les appauvrit en triglycérides : VLDL → IDL → LDL. Les LDL sont captées par leur récepteur ; le cholestérol internalisé freine sa propre synthèse et l'expression du récepteur. Les HDL ramènent le cholestérol au foie.
+Le foie est au centre du métabolisme des LDL : l'hépatocyte sécrète les VLDL, porte 70 % des récepteurs des LDL et sécrète la PCSK9, qui agit surtout sur ses propres récepteurs (complément). Dans le plasma, la lipoprotéine lipase transforme les VLDL en IDL puis en LDL. Le cholestérol internalisé freine l'HMG-CoA réductase. Les HDL ramènent au foie le cholestérol des tissus.
 
 | De | Vers | Messager | Effet |
 | --- | --- | --- | --- |
-| Intestin | Capillaires | Chylomicrons | → |
-| Capillaires | Muscle, tissu adipeux | Acides gras libres (acides gras) | → |
-| Capillaires | Foie | Chylomicrons (remnants) | → |
-| Foie | Capillaires | VLDL | → |
-| Capillaires | Cellule (récepteur des LDL) | LDL (IDL → LDL) | → |
-| Cellule (récepteur des LDL) | Foie | HDL (HDL : retour au foie) | → |
-| Cellule (récepteur des LDL) | HMG-CoA réductase | Cholestérol (cholestérol) | (−) freine |
-| PCSK9 | Cellule (récepteur des LDL) | PCSK9 (dégrade le LDL-R) | (−) freine |
+| Intestin | Plasma | Chylomicrons | → |
+| Plasma | Muscle, tissu adipeux | Acides gras libres (acides gras) | → |
+| Foie : hépatocyte | Plasma | VLDL | → |
+| Plasma | Foie : hépatocyte | LDL (remnants → récepteurs) | → |
+| Plasma | Paroi artérielle | LDL (en excès) | → |
+| Plasma | Cellules périphériques | LDL | → |
+| Cellules périphériques | Foie : hépatocyte | HDL (retour du cholestérol) | → |
+| Foie : hépatocyte | HMG-CoA réductase | Cholestérol | (−) freine |
+| Foie : hépatocyte | PCSK9 (agit surtout sur l'hépatocyte ; complément) | PCSK9 (sécrétion) | → |
+| PCSK9 (agit surtout sur l'hépatocyte ; complément) | Foie : hépatocyte | PCSK9 (dégrade le LDL-R) | (−) freine |
 
-- 70 % des récepteurs des LDL sont hépatiques.
-- PCSK9 oriente le récepteur des LDL vers la dégradation lysosomale : LDL plasmatique ↑.
-- Le cholestérol rapporté au foie est éliminé en acides biliaires (cycle entéro-hépatique).
-- Les HDL sont anti-athérogènes et cardioprotectrices.
+- 70 % des récepteurs des LDL sont hépatiques, 30 % sur les autres cellules.
+- PCSK9, sécrétée par l'hépatocyte, se fixe au récepteur des LDL et l'oriente vers le lysosome au lieu du recyclage : moins de récepteurs, LDL plasmatique ↑.
+- Les statines freinent l'HMG-CoA réductase : la cellule exprime plus de récepteurs (SREBP-2) et capte plus de LDL. Les anti-PCSK9 empêchent la dégradation des récepteurs (complément).
+- Objectif de LDL-c selon le risque cardiovasculaire : < 0,55, < 0,70, < 1,00 ou < 1,90 g/L ; l'hypercholestérolémie familiale est d'emblée à risque élevé.
+- Un LDL-c élevé se dépose dans la paroi artérielle (athérome) ; les HDL sont anti-athérogènes.
 

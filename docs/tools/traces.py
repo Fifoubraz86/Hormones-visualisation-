@@ -39,7 +39,7 @@ def build(spec):
     gly = [(float(r['Cartn_x']), float(r['Cartn_y']), float(r['Cartn_z'])) for r in rows
            if r['group_PDB'] == 'HETATM' and r['label_comp_id'] in GLY and r['label_atom_id'] == 'C1' and r['auth_asym_id'] in spec['chains']]
     lig = [(float(r['Cartn_x']), float(r['Cartn_y']), float(r['Cartn_z'])) for r in rows
-           if r['group_PDB'] == 'HETATM' and r['label_comp_id'] in spec.get('ligand', ()) ]
+           if r['group_PDB'] == 'HETATM' and r['label_comp_id'] in spec.get('ligand', ()) and r['auth_asym_id'] in spec['chains']]
     allp = np.array([p[1:] for c in spec['chains'] for p in chains.get(c, [])])
     ctr = allp.mean(0)
     u, s, vt = np.linalg.svd(allp - ctr, full_matrices=False)
@@ -74,16 +74,16 @@ SPECS = {
   'tsh':     dict(file=D+'7T9I.cif', chains=['A', 'B'], size=24, src='PDB 7T9I (TSH native liée au TSHR, cryo-ME 2022)'),
   'lh':      dict(file=D+'1HRP.cif', chains=['A', 'B'], size=24, src='PDB 1HRP (hCG, même récepteur et même sous-unité α que la LH)'),
   'fsh':     dict(file=D+'4AY9.cif', chains=['A', 'B'], size=24, src='PDB 4AY9 (FSH liée à son récepteur)'),
-  'insulin': dict(file=D+'4INS.cif', chains=['A', 'B'], size=20, smooth=1, maxpts=40, src='PDB 4INS (insuline, chaînes A et B)'),
+  'insulin': dict(file=D+'4INS.cif', chains=['A', 'B'], size=20, smooth=1, maxpts=40, src='PDB 4INS (insuline porcine, chaînes A et B ; diffère de l\'humaine en B30)'),
   'gh':      dict(file=D+'3HHR.cif', chains=['A'], size=24, src='PDB 3HHR (GH liée à son récepteur)'),
   'prl':     dict(file=D+'1RW5.cif', chains=['A'], size=24, src='PDB 1RW5 (prolactine humaine, RMN)'),
   'igf1':    dict(file=D+'1GZR.cif', chains=['B'], size=20, smooth=1, maxpts=50, src='PDB 1GZR (IGF-1 humain)'),
-  'glucagon':dict(file=D+'1GCN.cif', chains=['A'], size=22, smooth=1, src='PDB 1GCN (glucagon)'),
+  'glucagon':dict(file=D+'1GCN.cif', chains=['A'], size=22, smooth=1, src='PDB 1GCN (glucagon porcin, séquence identique à l\'humaine)'),
   'pth':     dict(file=D+'1ET1.cif', chains=['A'], size=24, smooth=1, src='PDB 1ET1 (PTH 1-34)'),
   'renin':   dict(file=D+'2REN.cif', chains=['A'], size=24, src='PDB 2REN (rénine humaine)'),
   'pcsk9':   dict(file=D+'2P4E.cif', chains=['P', 'A'], size=24, src='PDB 2P4E (PCSK9)'),
   'ldlr':    dict(file=D+'1N7D.cif', chains=['A'], size=26, src='PDB 1N7D (domaine extracellulaire du récepteur des LDL)'),
-  'trab':    dict(file=D+'1IGT.cif', chains=['A', 'B', 'C', 'D'], size=26, maxpts=60, src='PDB 1IGT (IgG entière)'),
+  'trab':    dict(file=D+'1IGT.cif', chains=['A', 'B', 'C', 'D'], size=26, maxpts=60, src='PDB 1IGT (IgG2a murine entière, modèle d\'architecture)'),
   'ttr':     dict(file=D+'2ROX-a1.cif', chains=['A', 'A-2', 'B', 'B-2'], size=22, ligand=('T44',), src='PDB 2ROX (transthyrétine tétramérique avec T4)'),
   'tbg':     dict(file=D+'2CEO.cif', chains=['A'], size=30, ligand=('T44',), src='PDB 2CEO (TBG avec T4)'),
   'alb':     dict(file=D+'1AO6.cif', chains=['A'], size=30, src='PDB 1AO6 (albumine sérique humaine)'),

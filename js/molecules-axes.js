@@ -75,6 +75,13 @@
         if (v.chain === 'oh') oxy(g, c21, 20, 'h');
         if (v.o17) oxy(g, c17, 100, v.o17);  // 17α-OH
       } else if (v.o17) oxy(g, c17, 0, v.o17);
+      if (v.iso) {
+        // Cholestérol : chaîne isooctyle en C17 (C20 méthylé, C25 ramifié)
+        const z = [0, 1, 2, 3, 4].map((k) => [c17[0] + 2.4 * k, c17[1] - (k % 2 ? 1.4 : 0)]);
+        el('path', { d: 'M ' + z.map((q) => q[0] + ',' + q[1]).join(' L '), class: 'm-bond mcs' }, g);
+        bond(g, z[1][0], z[1][1], z[1][0], z[1][1] - 2.2);
+        bond(g, z[4][0], z[4][1], z[4][0] + 2, z[4][1] + 1.2);
+      }
       if (v.seco) {
         // Calcitriol : cycle B ouvert (sécostéroïde), triène, cycle A isolé avec 1α-OH et 3β-OH, chaîne avec 25-OH
         const a2 = [C[0] - s - 3, C[1] + 6];
@@ -133,7 +140,9 @@
     peptide('gnrh', 'p-violet', 10);
     peptide('kiss', 'p-magenta', 10);
     peptide('angio', 'p-red', 8);
-    peptide('sst', 'p-grey', 14, { ring: 12, ss: [2, 9] });
+    peptide('angio1', 'p-red', 10); // angiotensine I (décapeptide)
+    peptide('calcitonin', 'tg', 32, { helix: true });
+    peptide('sst', 'p-grey', 14, { ring: 12, ss: [0, 11] }); // pont Cys3–Cys14 fermant le cycle
     peptide('adh', 'p-sky', 9, { ring: 6, ss: [0, 5] });
     peptide('oxy', 'p-rose', 9, { ring: 6, ss: [0, 5] });
     peptide('glucagon', 'p-orange', 29, { helix: true });
@@ -267,10 +276,7 @@
     arc(gg, 4.9, -80, 40, 'm-apoA');
     arc(gg, 4.9, 60, 180, 'm-apoA');
     arc(gg, 4.9, 200, 260, 'm-apoA');
-    g = root('chol', 'p-gold', 0.75); // cholestérol libre (noyau stérol)
-    const rr = 3.2, ss = rr * R3;
-    [[-ss, 1.5 * rr], [0, 1.5 * rr], [ss / 2, 0]].forEach((c) => el('path', { d: polyD(hexV(c[0], c[1], rr)), class: 'm-ring mc' }, g));
-    atom(g, -ss - ss / 2 - 1.4, 1.5 * rr + 2.4, 1.2, 'm-O');
+    steroid('chol', 'p-gold', { c3: 'h', d5: true, iso: true }); // cholestérol : Δ5, 3β-OH, chaîne isooctyle
     g = root('pcsk9', 'p-magenta'); // PCSK9 : protéase à trois domaines
     [[-6, 0, 5], [2, -3, 5], [6, 4, 4]].forEach(([x, y, r]) => atom(g, x, y, r, 'm-prot'));
     g = root('ldlr', 'p-teal'); // récepteur des LDL (membranaire)

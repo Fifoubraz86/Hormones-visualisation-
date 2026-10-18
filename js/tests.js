@@ -21,20 +21,21 @@
       unit: 'nmol/L', label: 'Cortisol', thr: 500, thrDir: 'above', thrLabel: 'seuil 500 nmol/L (18 µg/dL)',
       span: 60, xUnit: 'min', duration: 14,
       samples: [{ x: 0.06, label: 'T0' }, { x: 0.55, label: '30 min' }, { x: 1, label: '60 min' }],
-      apply(p, x) { if (x > 0.08) p.syn = 25; },
+      apply(p, x) { if (x > 0.08) p.syn = 6; },
       measure: (sim) => sim.lab('cort'),
-      interpret(v, sim, st) {
-        const peak = Math.max(...v, ...st.trace.map((q) => q[1]));
-        if (peak >= 500) return { tone: 'good', text: `Pic à ${n0(peak)} nmol/L : réponse normale (≥ 500 nmol/L). Une insuffisance surrénale est éliminée.` };
-        const acth = sim.lab('acth');
-        return { tone: 'bad', text: `Pic à ${n0(peak)} nmol/L (< 500) : réponse insuffisante. ` + (acth > 50 ? 'Avec une ACTH élevée : insuffisance surrénale périphérique.' : 'Avec une ACTH basse ou normale : insuffisance corticotrope ancienne, avec atrophie surrénalienne.') };
+      interpret(v, sim) {
+        // Seules les valeurs prélevées aux temps du protocole comptent (T0, 30 et 60 min).
+        const peak = Math.max(...v);
+        if (peak >= 500) return { tone: 'good', text: `Cortisol maximal sur les prélèvements : ${n0(peak)} nmol/L (≥ 500 nmol/L, 18 µg/dL) : réponse normale. Une insuffisance surrénale est éliminée (sauf insuffisance corticotrope récente, avant l'atrophie surrénalienne).` };
+        const acth = sim.lab('acth') > 52; // ACTH endogène (le Synacthène n'est pas dosé comme ACTH)
+        return { tone: 'bad', text: `Cortisol maximal sur les prélèvements : ${n0(peak)} nmol/L (< 500) : réponse insuffisante. ` + (acth ? 'Avec une ACTH élevée : insuffisance surrénale périphérique.' : 'Avec une ACTH basse ou normale : insuffisance corticotrope ancienne, avec atrophie surrénalienne.') };
       }
     },
     {
       id: 'dxm', name: 'Freinage minute à la dexaméthasone', poly: true,
       what: 'Dépiste un hypercortisolisme : le cortisol se freine-t-il sous un glucocorticoïde exogène ?',
-      proto: '1 mg de dexaméthasone à 23 h ; cortisol plasmatique le lendemain à 8 h.',
-      unit: 'nmol/L', label: 'Cortisol', thr: 50, thrDir: 'below', thrLabel: 'freinage normal < 50 nmol/L (1,8 µg/dL)',
+      proto: '1 mg de dexaméthasone à 23 h ; cortisol plasmatique le lendemain à 8 h. Seuil de freinage normal < 50 nmol/L (1,8 µg/dL) : complément (Endocrine Society 2008), non chiffré dans le polycopié.',
+      unit: 'nmol/L', label: 'Cortisol', thr: 50, thrDir: 'below', thrLabel: 'freinage normal < 50 nmol/L (1,8 µg/dL ; complément)',
       span: 9, xUnit: 'h', x0: 23, duration: 16,
       samples: [{ x: 0.04, label: '23 h' }, { x: 1, label: '8 h' }],
       apply(p, x) { if (x > 0.06) p.dxm = 3; },
@@ -50,16 +51,16 @@
     {
       id: 'ith', name: 'Hypoglycémie insulinique', poly: true,
       what: 'Explore l\'ensemble de l\'axe (hypothalamus, hypophyse, surrénale) : un stress hypoglycémique fait-il monter le cortisol ?',
-      proto: 'Insuline IV jusqu\'à une glycémie < 0,40 g/L ; cortisol et ACTH avant, puis toutes les 15 à 30 min. Contre-indiquée en cas de cardiopathie ischémique ou d\'épilepsie.',
+      proto: 'Insuline IV jusqu\'à une glycémie < 0,40 g/L ; cortisol et ACTH avant, puis après l\'injection (toutes les 15 à 30 min ; complément). Contre-indiquée en cas de cardiopathie ischémique ou d\'épilepsie (complément).',
       unit: 'nmol/L', label: 'Cortisol', thr: 500, thrDir: 'above', thrLabel: 'élévation > 500 nmol/L (18 µg/dL)',
       span: 90, xUnit: 'min', duration: 15,
       samples: [{ x: 0.04, label: 'T0' }, { x: 0.34, label: '30' }, { x: 0.67, label: '60' }, { x: 1, label: '90' }],
       apply(p, x) { p.ith = bell(x); },
       measure: (sim) => sim.lab('cort'),
-      interpret(v, sim, st) {
-        const peak = Math.max(...v, ...st.trace.map((q) => q[1]));
-        if (peak >= 500) return { tone: 'good', text: `Pic de cortisol à ${n0(peak)} nmol/L, pour une glycémie < 0,40 g/L : axe corticotrope fonctionnel.` };
-        return { tone: 'bad', text: `Pic de cortisol à ${n0(peak)} nmol/L (< 500) : insuffisance de l'axe. ` + (sim.lab('acth') > 50 ? 'L\'ACTH monte : l\'atteinte est surrénalienne.' : 'L\'ACTH ne monte pas : atteinte hypothalamo-hypophysaire (insuffisance corticotrope).') };
+      interpret(v, sim) {
+        const peak = Math.max(...v); // valeurs prélevées seulement
+        if (peak >= 500) return { tone: 'good', text: `Cortisol maximal sur les prélèvements : ${n0(peak)} nmol/L, pour une glycémie < 0,40 g/L : axe corticotrope fonctionnel.` };
+        return { tone: 'bad', text: `Cortisol maximal sur les prélèvements : ${n0(peak)} nmol/L (< 500) : insuffisance de l'axe. ` + (sim.lab('acth') > 52 ? 'ACTH élevée : atteinte surrénalienne (test non nécessaire : le couple cortisol bas, ACTH élevée suffit au diagnostic).' : 'L\'ACTH ne monte pas : atteinte hypothalamo-hypophysaire (insuffisance corticotrope).') };
       }
     },
     {
@@ -77,7 +78,7 @@
         if (v[0] < 550) return { tone: 'warn', text: `Variation : ${pc}. Le test n'a d'intérêt qu'en cas d'hypercortisolisme ACTH-dépendant confirmé.` };
         if (st.base.autoAdr > 0.02) return { tone: 'warn', text: `Variation : ${pc}. ACTH effondrée : Cushing ACTH-indépendant (surrénalien), le test d'orientation hypophyse/ectopie n'est pas indiqué.` };
         if (fall >= 0.5) return { tone: 'good', text: `Baisse du cortisol de ${pc} (≥ 50 %) : freinage partiel en faveur d'un adénome corticotrope (maladie de Cushing).` };
-        return { tone: 'bad', text: `Freinage du cortisol : ${pc} (< 50 %) : absence de freinage, en faveur d'une sécrétion ectopique d'ACTH.` };
+        return { tone: 'bad', text: `Baisse du cortisol : ${pc} (< 50 %), absence de freinage en faveur d'une sécrétion ectopique d'ACTH.` };
       }
     }
   );
@@ -101,17 +102,17 @@
   T.somato.push({
     id: 'ith-gh', name: 'Hypoglycémie insulinique', poly: true,
     what: 'Test de référence du déficit somatotrope : l\'hypoglycémie fait-elle monter la GH ?',
-    proto: 'Insuline IV jusqu\'à une glycémie < 0,40 g/L ; GH (et cortisol) avant, puis toutes les 15 à 30 min. Contre-indiquée en cas de cardiopathie ischémique ou d\'épilepsie.',
+    proto: 'Insuline IV jusqu\'à une glycémie < 0,40 g/L ; GH (et cortisol) avant, puis après l\'injection (toutes les 15 à 30 min ; complément). Contre-indiquée en cas de cardiopathie ischémique ou d\'épilepsie (complément).',
     unit: 'ng/mL', label: 'GH', thr: 3, thrDir: 'above', thrLabel: 'pic < 3 : déficit complet · < 6 : partiel',
     span: 90, xUnit: 'min', duration: 15,
     samples: [{ x: 0.04, label: 'T0' }, { x: 0.34, label: '30' }, { x: 0.67, label: '60' }, { x: 1, label: '90' }],
     apply(p, x) { p.ith = bell(x); },
     measure: (sim) => sim.lab('gh'),
-    interpret(v, sim, st) {
-      const peak = Math.max(...v, ...st.trace.map((q) => q[1]));
-      if (peak >= 6) return { tone: 'good', text: `Pic de GH à ${n2(peak)} ng/mL (≥ 6) : réponse normale.` };
-      if (peak >= 3) return { tone: 'warn', text: `Pic de GH à ${n2(peak)} ng/mL (entre 3 et 6) : insuffisance somatotrope partielle.` };
-      return { tone: 'bad', text: `Pic de GH à ${n2(peak)} ng/mL (< 3) : insuffisance somatotrope complète.` };
+    interpret(v) {
+      const peak = Math.max(...v); // valeurs prélevées seulement
+      if (peak >= 6) return { tone: 'good', text: `GH maximale sur les prélèvements : ${n2(peak)} ng/mL (≥ 6) : réponse normale.` };
+      if (peak >= 3) return { tone: 'warn', text: `GH maximale sur les prélèvements : ${n2(peak)} ng/mL (entre 3 et 6) : insuffisance somatotrope partielle.` };
+      return { tone: 'bad', text: `GH maximale sur les prélèvements : ${n2(peak)} ng/mL (< 3) : insuffisance somatotrope complète.` };
     }
   });
   T.raa = [{
@@ -125,7 +126,7 @@
     measure: (sim) => sim.lab('aldo'),
     interpret(v) {
       const a = v[v.length - 1];
-      if (a < 140) return { tone: 'good', text: `Aldostérone à ${n0(a)} pmol/L après charge : freinage normal, l'hyperaldostéronisme primaire est exclu.` };
+      if (a < 140) return { tone: 'good', text: `Aldostérone à ${n0(a)} pmol/L après charge : freinage normal, l'hyperaldostéronisme primaire est peu probable.` };
       if (a > 280) return { tone: 'bad', text: `Aldostérone à ${n0(a)} pmol/L malgré la charge sodée (> 280 pmol/L, 10 ng/dL) : sécrétion autonome, hyperaldostéronisme primaire confirmé. Étape suivante : scanner surrénalien et cathétérisme des veines surrénales.` };
       return { tone: 'warn', text: `Aldostérone à ${n0(a)} pmol/L : zone intermédiaire, à confronter aux autres tests (fludrocortisone, captopril).` };
     }
@@ -135,32 +136,41 @@
       id: 'hgpo', name: 'HGPO à 75 g', poly: true,
       what: 'Diagnostic du diabète et de l\'intolérance au glucose.',
       proto: '75 g de glucose per os à jeun ; glycémie à T0, 1 h et 2 h.',
-      unit: 'g/L', label: 'Glycémie', thr: 2, thrDir: 'below', thrLabel: '2 h : ≥ 2,00 diabète · 1,40–1,99 intolérance',
+      unit: 'g/L', label: 'Glycémie', thr: 2, thrDir: 'below', thrLabel: '2 h : ≥ 2,00 diabète · 1,40–1,99 intolérance (à jeun : ≥ 1,26 diabète)',
       span: 120, xUnit: 'min', duration: 14,
       samples: [{ x: 0.04, label: 'T0' }, { x: 0.5, label: '60' }, { x: 1, label: '120' }],
-      apply(p, x) { p.fast = 1; const u = (x - 0.06) / 0.25; p.ogtt = u > 0 ? u * Math.exp(1 - u) : 0; /* absorption digestive */ },
+      apply(p, x) { p.fast = 1; const u = (x - 0.06) / 0.33; p.ogtt = u > 0 ? u * Math.exp(1 - u) : 0; /* absorption digestive */ },
       measure: (sim) => sim.lab('g'),
       interpret(v) {
         const g0 = v[0], g2 = v[v.length - 1], f = (x) => x.toFixed(2).replace('.', ',');
-        const fast = g0 >= 1.26 ? ` La glycémie à jeun (${f(g0)} g/L) est déjà ≥ 1,26 g/L.` : '';
-        if (g2 >= 2) return { tone: 'bad', text: `Glycémie à 2 h : ${f(g2)} g/L (≥ 2,00) : diabète.` + fast };
-        if (g2 >= 1.4) return { tone: 'warn', text: `Glycémie à 2 h : ${f(g2)} g/L (1,40–1,99) : intolérance au glucose (prédiabète).` + fast };
-        return { tone: 'good', text: `Glycémie à 2 h : ${f(g2)} g/L (< 1,40) : tolérance normale.` + fast };
+        // On classe d'abord sur la glycémie à jeun, puis à 2 h ; on retient la catégorie la plus haute (polycopié, tableau 8).
+        const c0 = g0 >= 1.26 ? 3 : g0 >= 1.1 ? 1 : 0;
+        const c2 = g2 >= 2 ? 3 : g2 >= 1.4 ? 2 : 0;
+        const t0 = `À jeun : ${f(g0)} g/L` + (c0 === 3 ? ' (≥ 1,26 : diabète)' : c0 === 1 ? ' (1,10–1,25 : hyperglycémie modérée à jeun)' : ' (< 1,10 : normale)');
+        const t2 = `à 2 h : ${f(g2)} g/L` + (c2 === 3 ? ' (≥ 2,00 : diabète)' : c2 === 2 ? ' (1,40–1,99 : intolérance au glucose)' : ' (< 1,40 : normale)');
+        const head = `${t0} ; ${t2}. `;
+        const noInd = c0 === 3 ? ' L\'HGPO n\'était pas indiquée : le diagnostic se pose sur la glycémie à jeun (≥ 1,26 g/L, à contrôler une seconde fois).' : '';
+        const c = Math.max(c0, c2);
+        if (c === 3) return { tone: 'bad', text: head + 'Conclusion : diabète.' + noInd };
+        if (c === 2) return { tone: 'warn', text: head + 'Conclusion : intolérance au glucose (prédiabète)' + (c0 === 1 ? ', avec hyperglycémie modérée à jeun.' : '.') };
+        if (c === 1) return { tone: 'warn', text: head + 'Conclusion : hyperglycémie modérée à jeun (prédiabète).' };
+        return { tone: 'good', text: head + 'Conclusion : tolérance normale au glucose.' };
       }
     },
     {
       id: 'jeune', name: 'Épreuve de jeûne de 72 h', poly: false,
       what: 'Recherche une hypoglycémie organique : pendant le jeûne, l\'insuline doit s\'effondrer et la glycémie rester ≥ 0,50 g/L.',
-      proto: 'Jeûne surveillé en hospitalisation ; glycémie répétée, insuline et peptide C au moment d\'une hypoglycémie (triade de Whipple, citée dans le polycopié).',
+      proto: 'Jeûne surveillé en hospitalisation ; glycémie répétée, insuline et peptide C (complément) au moment d\'une hypoglycémie (triade de Whipple, citée dans le polycopié). Non indiquée chez un diabétique traité.',
       unit: 'g/L', label: 'Glycémie', thr: 0.5, thrDir: 'above', thrLabel: 'hypoglycémie < 0,50 g/L',
       span: 72, xUnit: 'h', duration: 18,
       samples: [{ x: 0.03, label: '0 h' }, { x: 0.33, label: '24 h' }, { x: 0.67, label: '48 h' }, { x: 1, label: '72 h' }],
-      apply(p, x) { if (x > 0.04) p.fast = 1; },
+      apply(p, x) { if (x > 0.04) { p.fast = 1; p.long = Math.min(1, (x - 0.04) / 0.6); } },
       measure: (sim) => sim.lab('g'),
       interpret(v, sim) {
         const min = Math.min(...v), ins = sim.lab('ins'), f = (x) => x.toFixed(2).replace('.', ',');
-        if (min >= 0.5) return { tone: 'good', text: `Glycémie minimale ${f(min)} g/L sans hypoglycémie ; insuline freinée (${ins.toFixed(1).replace('.', ',')} µUI/mL). Pas d'hyperinsulinisme.` };
-        if (ins > 3) return { tone: 'bad', text: `Hypoglycémie à ${f(min)} g/L avec une insuline non freinée (${ins.toFixed(1).replace('.', ',')} µUI/mL) : hyperinsulinisme. Peptide C élevé : insulinome ; peptide C bas : insuline exogène.` };
+        const iTxt = ins.toFixed(1).replace('.', ',') + ' µUI/mL';
+        if (min >= 0.5) return { tone: 'good', text: `Glycémie minimale ${f(min)} g/L, sans hypoglycémie ; insuline ${ins < 3 ? 'freinée' : 'adaptée à la glycémie'} en fin de jeûne (${iTxt}). Pas d'hypoglycémie organique.` };
+        if (ins >= 3) return { tone: 'bad', text: `Hypoglycémie à ${f(min)} g/L avec une insuline non freinée (${iTxt}, ≥ 3 µUI/mL ; complément) : hyperinsulinisme. Peptide C élevé : hyperinsulinisme endogène (insulinome, ou prise de sulfamides hypoglycémiants, à rechercher dans le plasma) ; peptide C bas : insuline exogène.` };
         return { tone: 'warn', text: `Hypoglycémie à ${f(min)} g/L avec une insuline freinée : cause non insulinique à rechercher.` };
       }
     }
@@ -200,19 +210,31 @@
     {
       id: 'restriction', name: 'Épreuve de restriction hydrique', poly: true,
       what: 'Diagnostic du diabète insipide : les urines se concentrent-elles quand on arrête de boire ? En fin d\'épreuve, la desmopressine distingue l\'origine centrale de l\'origine rénale (complément).',
-      proto: 'En hospitalisation, après imagerie : arrêt des boissons ; poids, diurèse, osmolalités urinaire et plasmatique, natrémie ; desmopressine en fin d\'épreuve.',
-      unit: 'mosmol/kg', label: 'Osmolalité urinaire', thr: 600, thrDir: 'above', thrLabel: 'urines concentrées > 600 mosmol/kg',
+      proto: 'En hospitalisation, après imagerie : arrêt des boissons ; poids, diurèse, osmolalités urinaire et plasmatique, natrémie ; desmopressine en fin d\'épreuve (complément). Devant une hyponatrémie (SIADH), la restriction est seulement partielle (500 à 800 mL/j, complément), sans desmopressine.',
+      unit: 'mosmol/kg', label: 'Osmolalité urinaire', thr: 600, thrDir: 'above', thrLabel: 'urines concentrées > 600 mosmol/kg (complément)',
       span: 10, xUnit: 'h', duration: 20,
       samples: [{ x: 0.03, label: '0 h' }, { x: 0.2, label: '2 h' }, { x: 0.4, label: '4 h' }, { x: 0.6, label: '6 h' }, { x: 0.79, label: '8 h' }, { x: 1, label: 'DDAVP' }],
-      apply(p, x) { if (x > 0.05) p.restrict = 1; if (x > 0.8) p.ddavp = 1; },
-      measure: (sim) => sim.lab('uosm'),
+      apply(p, x) {
+        const siadh = p.siadh > 0.02;
+        // SIADH : restriction partielle (500 à 800 mL/j) et correction lente ; jamais de desmopressine.
+        if (x > 0.05) p.restrict = siadh ? 0.2 : 1;
+        if (x > 0.8 && !siadh) p.ddavp = 1;
+      },
+      measure: (sim) => {
+        const st = HV.Tests.state();
+        if (st && !st.trace.length) st.na0 = sim.lab('na'); // natrémie de départ
+        return sim.lab('uosm');
+      },
       track: (sim) => sim.lab('diur') / 24, // litres par heure
       interpret(v, sim, st) {
         const u8 = v[4], ud = v[5], na = sim.lab('na');
         const loss = (st.acc / 70) * 100;
         const extra = ` Natrémie finale ${n0(na)} mmol/L ; perte de poids ≈ ${loss.toFixed(1).replace('.', ',')} %.` + (loss > 3 || na > 148 ? ' En pratique, l\'épreuve est interrompue avant ce stade (perte de poids > 3 à 5 % ou natrémie qui dépasse la normale ; complément).' : '');
+        if (st.base.siadh > 0.02) {
+          const na0 = st.na0 != null ? st.na0 : na, d = na - na0;
+          return { tone: 'warn', text: `Restriction hydrique partielle (500 à 800 mL/j ; complément) : les urines restent inappropriément concentrées et la natrémie remonte lentement, de ${n0(na0)} à ${n0(na)} mmol/L (+${d.toFixed(1).replace('.', ',')} mmol/L) : argument pour un SIADH (épreuve diagnostique et thérapeutique). Pas de desmopressine dans un SIADH. Mise en garde : corriger de 8 à 10 mmol/L par 24 h au plus (risque de myélinolyse osmotique ; complément).` };
+        }
         if (u8 >= 600) {
-          if (HV.scenes.adh.sim.p.siadh > 0.02) return { tone: 'warn', text: 'Les urines restent concentrées et la natrémie remonte : la restriction corrige l\'hyponatrémie, argument pour un SIADH (épreuve diagnostique et thérapeutique).' + extra };
           return { tone: 'good', text: `Osmolalité urinaire à ${n0(u8)} mosmol/kg à 8 h : concentration normale, pas de diabète insipide.` + extra };
         }
         if (ud > u8 * 1.5 && ud > 400) return { tone: 'bad', text: `Urines non concentrées (${n0(u8)} mosmol/kg) puis concentration après desmopressine (${n0(ud)}) : diabète insipide central.` + extra };

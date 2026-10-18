@@ -26,8 +26,8 @@ Le site fonctionne aussi tel quel sur GitHub Pages.
 | Clic sur une carte, un organe ou une loupe | zoom animé vers la scène |
 | Molette / pincement | zoom libre |
 | Glisser | déplacement |
-| Échap ou « Dézoomer » | remonter d'un niveau |
-| ← / → | parcours guidé (atlas → axe → hypothalamus → hypophyse → follicule → transport → cellule cible) |
+| Échap, Retour arrière ou « Dézoomer » | remonter d'un niveau |
+| ← / → | parcours guidé en 18 étapes (atlas → axe thyréotrope → hypothalamus → hypophyse → follicule → transport → cellule cible → axes corticotrope, somatotrope, gonadotropes féminin et masculin, lactotrope, ADH, médullosurrénale, phosphocalcique, SRAA, glycémie, lipides) |
 | Espace | pause / lecture |
 
 Chaque scène a une ancre (`#thyro`, `#foll`, `#cell`…) pour y accéder directement.
@@ -78,11 +78,18 @@ js/info.js          fiches au survol et légende
 js/axis-builder.js  construction d'une scène d'axe à partir de sa description
 js/axes-data.js     axes et boucles tirés du polycopié
 js/axes-sim.js      modèles, bilans et scénarios cliniques des axes
+js/tests.js         tests dynamiques animés (Synacthène, freinages, HGPO, charge sodée, restriction hydrique…)
+js/sheets.js        panneau des fiches détaillées (molécules et organes)
+js/sheets-molecules.js fiches biochimiques des molécules
+js/sheets-organs.js fiches anatomiques des organes et figures du polycopié
+js/imaging.js       planches d'imagerie schématiques (normales et pathologiques)
 js/protein-traces.js tracés protéiques extraits de la PDB (généré)
 js/protein-glyphs.js glyphes protéiques à partir des tracés
 js/scenes/*.js      atlas et scènes détaillées de l'axe thyréotrope
 js/app.js           caméra, navigation, panneau, boucle d'animation
 ```
+
+Documentation : [`docs/axes-polycopie.md`](docs/axes-polycopie.md) (boucles extraites du polycopié), [`docs/tests-dynamiques.md`](docs/tests-dynamiques.md) (tests dynamiques), [`docs/audit.md`](docs/audit.md) (audit médical).
 
 ## Ajouter ou détailler un axe
 
