@@ -1,1 +1,44 @@
-/* Loupes : rein */
+/* Loupes rein et eau (zoom-rein.js) : néphron et diurétiques, deux boucles volémie / osmolalité,
+   peptides natriurétiques, rein et calcium. Couleurs portées par --c ; thèmes gérés par les variables. */
+.zr-zone { stroke: none; }
+.zr-zone-line { stroke: var(--line-2); stroke-width: 1.5; stroke-dasharray: 6 8; }
+.zr-seg { fill: none; stroke: var(--c); stroke-width: 14; stroke-linecap: round; stroke-linejoin: round; }
+.zr-seg.thin { stroke-width: 8; }
+.zr-seg.cd { stroke-width: 22; }
+.zr-hit { fill: none; stroke: transparent; stroke-width: 36; stroke-linecap: round; }
+.zr-segg:hover .zr-seg { stroke-width: 18; }
+.zr-segg:hover .zr-seg.thin { stroke-width: 12; }
+.zr-segg:hover .zr-seg.cd { stroke-width: 26; }
+.zr-caps { fill: color-mix(in srgb, var(--o-kidney) 12%, var(--scene-1)); stroke: var(--o-kidney); stroke-width: 4; }
+.zr-tuft { fill: none; stroke: var(--o-aorta); stroke-width: 5; stroke-linecap: round; }
+.zr-md { fill: var(--p-teal); stroke: var(--fg); stroke-width: 1.5; }
+.zr-badge circle { fill: var(--c); stroke: var(--scene-1); stroke-width: 3; }
+.zr-badge text, .zr-num { font: 700 17px var(--font-body); fill: var(--scene-1); }
+.zr-card { fill: color-mix(in srgb, var(--c) 7%, var(--scene-1)); stroke: color-mix(in srgb, var(--c) 55%, var(--line-2)); stroke-width: 2; }
+.zr-chip rect { fill: color-mix(in srgb, var(--c) 18%, var(--scene-1)); stroke: var(--c); stroke-width: 1.5; }
+.zr-chip-t { font: 600 16px var(--font-body); fill: var(--fg); }
+.zr-chip:hover rect { stroke-width: 3; }
+.zr-pill rect { fill: color-mix(in srgb, var(--bad) 13%, var(--scene-1)); stroke: var(--bad); stroke-width: 2; }
+.zr-pill.none rect { fill: var(--scene-1); stroke: var(--line-2); stroke-dasharray: 5 5; }
+.zr-pill:hover rect { stroke-width: 3.5; }
+.zr-share { font: 600 17px var(--font-data); fill: var(--fg); }
+.zr-live { font: 600 18px var(--font-data); fill: var(--fg); }
+.zr-big { font: 600 28px var(--font-data); fill: var(--fg); }
+.zr-msg { font: 600 25px var(--font-display); fill: var(--fg); }
+.zr-arrow { fill: none; stroke: var(--mc, var(--muted)); stroke-width: 3; stroke-linecap: round; opacity: 0.75; }
+.zr-arrow.ret { stroke: var(--inhib); stroke-dasharray: 10 8; }
+.zr-head { fill: var(--muted); }
+.zr-label-bg { fill: var(--scene-1); stroke: var(--line-2); stroke-width: 1.5; }
+.zr-divider { stroke: var(--line-2); stroke-width: 2; stroke-dasharray: 3 9; stroke-linecap: round; }
+.zr-heart { fill: color-mix(in srgb, var(--p-red) 22%, var(--scene-1)); stroke: var(--p-red); stroke-width: 4; }
+.zr-atrium { fill: color-mix(in srgb, var(--p-rose) 26%, var(--scene-1)); stroke: var(--p-rose); stroke-width: 4; }
+.zr-septum { fill: none; stroke: var(--p-red); stroke-width: 3; opacity: 0.6; }
+.zr-gran { fill: var(--p-rose); opacity: 0.8; }
+.zr-gran.v { fill: var(--p-magenta); }
+.zr-bar-bg { fill: var(--line); }
+.zr-bar { fill: var(--c); }
+.zr-ref { stroke: var(--fg); stroke-width: 2; stroke-dasharray: 3 3; }
+.zr-mol-anp { fill: var(--p-rose); stroke: var(--fg); stroke-width: 0.8; }
+.zr-mol-bnp { fill: var(--p-magenta); stroke: var(--fg); stroke-width: 0.8; }
+.zr-mol-pi { fill: var(--p-lime); stroke: var(--fg); stroke-width: 0.8; }
+.zr-mol-t { font: 700 5px var(--font-body); fill: var(--fg); }

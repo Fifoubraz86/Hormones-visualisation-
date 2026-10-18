@@ -93,3 +93,18 @@ Pages du polycopié (partie 1) :
    - Affinité du MR pour le cortisol ; SGK1 ; cellule intercalaire A.
    - Réglisse et excès apparent de minéralocorticoïdes ; syndrome de Liddle ; acidose du déficit en aldostérone.
    - À confirmer : Boron & Boulpaep ; Williams, chapitre « Mineralocorticoids ».
+
+## Phosphocalcique (loupes vitamine D, FGF23, remodelage osseux)
+
+Pages du polycopié : partie 1, p. 35–46.
+
+1. **Vitamine D** : régulation des 1α- et 24-hydroxylases (⊕ hypophosphatémie, ⊖ FGF23, ⊖ calcitriol) ; rôle de la DBP. À confirmer : recommandations GRIO sur la vitamine D ; Williams, chapitre « Vitamin D ».
+2. **FGF23 et klotho.**
+   - NPT2a, XLH (PHEX, burosumab), ostéomalacie oncogénique, FGF23 dans l'IRC.
+   - Seule la phosphaturie liée à la PTH vient du polycopié (p. 41).
+   - À confirmer : Collège de néphrologie (troubles minéraux et osseux de l'IRC).
+3. **Remodelage.**
+   - RANKL/OPG, sclérostine, mécanismes des bisphosphonates, du dénosumab, du romosozumab et du tériparatide.
+   - Cycle de 3 à 6 mois.
+   - À confirmer : référentiel de rhumatologie (COFER) ; recommandations GRIO sur l'ostéoporose.
+4. **Absorption du calcium** : 30 à 35 % des apports (p. 36), à recouper avec la figure 11.

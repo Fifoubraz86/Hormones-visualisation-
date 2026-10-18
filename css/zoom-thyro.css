@@ -1,1 +1,82 @@
-/* Loupes : thyro */
+/* Loupes : thyro (embryologie, anatomie chirurgicale, désiodases, EU-TIRADS, grossesse, auto-immunité) */
+
+/* Boutons interactifs dans les scènes */
+.zt-btn { cursor: pointer; }
+.zt-btn rect { fill: var(--panel-2); stroke: var(--line-2); stroke-width: 2; }
+.zt-btn text { font: 500 16px var(--font-body); fill: var(--fg); pointer-events: none; }
+.zt-btn:hover rect { stroke: var(--accent); }
+.zt-btn.on rect { fill: color-mix(in srgb, var(--accent) 22%, var(--scene-1)); stroke: var(--accent); stroke-width: 3; }
+.zt-btn.on text { font-weight: 600; }
+.zt-btn.off { opacity: 0.35; pointer-events: none; }
+
+/* Textes */
+.zt-in { font: 600 16px var(--font-body); fill: var(--fg); paint-order: stroke; stroke: var(--scene-1); stroke-width: 4px; stroke-linejoin: round; }
+.zt-big { font: 700 46px var(--font-display); fill: var(--fg); }
+.zt-mid { font: 600 22px var(--font-body); fill: var(--fg); }
+.zt-anom-t { font: italic 600 17px var(--font-body); fill: var(--bad); }
+
+/* Boîtes */
+.zt-card { fill: var(--scene-1); stroke: var(--line-2); stroke-width: 2; }
+.zt-card.hot { stroke: var(--accent); stroke-width: 3; }
+.zt-hover { cursor: help; }
+.zt-hover:hover .zt-card { stroke: var(--accent); stroke-width: 3; }
+
+/* Anatomie */
+.zt-skin { fill: none; stroke: var(--muted); stroke-width: 3; stroke-linecap: round; }
+.zt-soft { fill: none; stroke: var(--line-2); stroke-width: 3; stroke-linecap: round; }
+.zt-tongue { fill: color-mix(in srgb, var(--p-rose) 22%, var(--scene-2)); stroke: var(--p-rose); stroke-width: 2.5; }
+.zt-bone { fill: var(--o-bone); stroke: var(--o-line); stroke-width: 2; }
+.zt-oeso { fill: color-mix(in srgb, var(--p-orange) 16%, var(--scene-2)); stroke: var(--p-orange); stroke-width: 2; }
+.zt-pharynx { fill: color-mix(in srgb, var(--p-rose) 14%, var(--scene-2)); stroke: var(--p-rose); stroke-width: 2.5; }
+.zt-duct { fill: none; stroke: var(--o-thyroid); stroke-width: 5; stroke-linecap: round; }
+.zt-track { fill: none; stroke: var(--line-2); stroke-width: 2; stroke-dasharray: 4 8; stroke-linecap: round; }
+.zt-anom { fill: none; stroke: var(--bad); stroke-width: 3; stroke-dasharray: 6 5; }
+.zt-thymus { fill: color-mix(in srgb, var(--p-violet) 40%, var(--scene-1)); stroke: var(--p-violet); stroke-width: 2; }
+.zt-ub { fill: color-mix(in srgb, var(--p-teal) 45%, var(--scene-1)); stroke: var(--p-teal); stroke-width: 2; }
+.zt-ccell { fill: var(--p-teal); }
+.zt-art { fill: none; stroke: var(--o-aorta); stroke-linecap: round; }
+.zt-nerve { fill: none; stroke: var(--p-gold); stroke-width: 5; stroke-linecap: round; }
+.zt-nerve.thin { stroke-width: 3.5; }
+.zt-lobe { fill-opacity: 0.8; }
+.zt-behind { stroke-dasharray: 4 3; stroke-width: 2; stroke: var(--fg); }
+.zt-muscle { fill: var(--o-muscle); fill-opacity: 0.75; stroke: var(--o-line); stroke-width: 1.5; }
+.zt-fat { fill: color-mix(in srgb, var(--o-fat) 55%, var(--scene-1)); stroke: color-mix(in srgb, var(--o-fat) 70%, var(--fg)); stroke-width: 1.2; }
+.zt-globe { fill: var(--scene-1); stroke: var(--fg); stroke-width: 3; }
+.zt-orbit { fill: color-mix(in srgb, var(--o-bone) 35%, var(--scene-2)); stroke: var(--o-line); stroke-width: 3; }
+.zt-hl .zt-nerve, .zt-nerve.zt-hl { stroke: var(--accent); stroke-width: 9; }
+.zt-hl ellipse, ellipse.zt-hl { stroke: var(--accent); stroke-width: 5; stroke-dasharray: none; }
+.zt-hl .zt-art { stroke: var(--accent); }
+
+/* Désiodases */
+.zt-enz circle { fill: color-mix(in srgb, var(--p-lime) 28%, var(--scene-1)); stroke: var(--p-lime); stroke-width: 3; }
+.zt-enz.d3 circle { fill: color-mix(in srgb, var(--p-red) 22%, var(--scene-1)); stroke: var(--p-red); }
+.zt-enz text { font: 700 18px var(--font-data); fill: var(--fg); }
+.zt-arrow { fill: none; stroke: var(--line-2); stroke-width: 3; }
+
+/* Échographie (image : niveaux de gris fixes) */
+.zt-us-bg { fill: #0c0c0e; }
+.zt-us-t { font: 15px var(--font-body); fill: #d6d6d6; }
+.zt-us-line { stroke: #d0d0d0; fill: none; }
+
+/* Courbes */
+.zt-curve { fill: none; stroke: var(--c); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.zt-axis { stroke: var(--muted); stroke-width: 2; fill: none; }
+.zt-grid { stroke: var(--line); stroke-width: 1.5; fill: none; }
+.zt-base { stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 6 6; fill: none; }
+.zt-band { fill: var(--fg); opacity: 0.045; }
+.zt-cursor { stroke: var(--accent); stroke-width: 3; }
+.zt-dotc { fill: var(--c); stroke: var(--scene-1); stroke-width: 2; }
+
+/* Auto-immunité */
+.zt-lympho { fill: color-mix(in srgb, var(--p-violet) 30%, var(--scene-1)); stroke: var(--p-violet); stroke-width: 2; }
+.zt-tcell { fill: color-mix(in srgb, var(--p-red) 25%, var(--scene-1)); stroke: var(--p-red); stroke-width: 2; }
+.zt-dead { opacity: 0.4; stroke-dasharray: 6 5; }
+.zt-ab { fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.zt-ab.tpo { stroke: var(--p-magenta); }
+.zt-ab.tg { stroke: var(--p-brown); }
+.zt-tpo { fill: color-mix(in srgb, var(--p-magenta) 30%, var(--scene-1)); stroke: var(--p-magenta); stroke-width: 2; }
+.zt-recep { fill: var(--p-blue); stroke: rgba(0, 0, 0, 0.3); stroke-width: 1.5; }
+.zt-recep.blocked { fill: var(--muted); }
+.zt-camp { fill: color-mix(in srgb, var(--p-gold) 35%, var(--scene-1)); stroke: var(--p-gold); stroke-width: 2.5; }
+.zt-colloid { fill: var(--colloid); stroke: var(--colloid-line); stroke-width: 2.5; }
+.zt-tcell-wall { fill: var(--cell); stroke: var(--cell-line); stroke-width: 3; }
