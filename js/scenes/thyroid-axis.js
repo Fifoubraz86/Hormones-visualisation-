@@ -120,10 +120,10 @@
       a.info(a.vessel('M 700,712 C 700,800 716,860 800,860', 18), 'vessel');
 
       /* --- Flux hormonaux --- */
-      a.flow('M 698,272 C 702,312 712,340 712,374', { mol: 'trh', rate: () => 2 * S.trh, size: 0.9, speed: 38, track: false });
-      a.flow('M 696,444 C 770,480 800,540 772,596', { mol: 'tsh', rate: () => cap(2.4 * S.tsh, 22), size: 1.05, speed: 55, track: false, max: 30 });
-      a.flow('M 700,712 C 700,800 716,860 800,860', { mol: 't4', rate: () => cap(3 * S.t4prod, 24), size: 1.2, speed: 70, track: false });
-      a.flow('M 700,712 C 700,800 716,860 800,860', { mol: 't3', rate: () => cap(1.1 * S.t3prod, 14), size: 1.2, speed: 70, track: false });
+      a.flow('M 698,272 C 702,312 712,340 712,374', { mol: 'trh', pace: () => HV.paceOf(S.trh), rate: () => 2 * S.trh, size: 0.9, speed: 38, track: false });
+      a.flow('M 696,444 C 770,480 800,540 772,596', { mol: 'tsh', pace: () => HV.paceOf(S.tsh), rate: () => cap(2.4 * S.tsh, 22), size: 1.05, speed: 55, track: false, max: 30 });
+      a.flow('M 700,712 C 700,800 716,860 800,860', { mol: 't4', pace: () => HV.paceOf(S.t4prod), rate: () => cap(3 * S.t4prod, 24), size: 1.2, speed: 70, track: false });
+      a.flow('M 700,712 C 700,800 716,860 800,860', { mol: 't3', pace: () => HV.paceOf(S.t3prod), rate: () => cap(1.1 * S.t3prod, 14), size: 1.2, speed: 70, track: false });
       a.flow('M 530,860 L 1572,860', { mol: 't4', rate: () => cap(3 * S.t4, 26), size: 1.05, speed: 150, jitter: 14, track: false, max: 60 });
       a.flow('M 530,860 L 1572,860', { mol: 't3', rate: () => cap(1.2 * S.t3, 14), size: 1.05, speed: 150, jitter: 14, track: false, max: 40 });
 

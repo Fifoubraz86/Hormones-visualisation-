@@ -279,7 +279,7 @@
           if (l.mol) {
             legendMols.add(l.mol);
             const base = l.rate || 1.6;
-            a.flow(d, { mol: l.mol, rate: () => (vis() && LR.on ? base * (l.mod && keepMod ? l.mod(T) : 1) * (sim && v ? Math.min(6, val(v)) : 1) : 0), size: l.size || 1.6, speed: l.speed || 120, track: false, max: 30 });
+            a.flow(d, { mol: l.mol, rate: () => (vis() && LR.on ? base * (l.mod && keepMod ? l.mod(T) : 1) * (sim && v ? Math.min(6, val(v)) : 1) : 0), size: l.size || 1.6, speed: l.speed || 120, track: false, max: 30, pace: sim && v ? () => HV.paceOf(val(v)) : null });
           }
           let sign = null;
           if (kind !== 'flow') {
@@ -329,6 +329,8 @@
           });
           a.flow(`M ${c.x + 28},${c.y + 22} L ${c.x + 28},${c.y + 22 + (c.steps.length - 1) * c.dy}`, { mol: 'dot', style: 'fill: var(--accent)', rate: () => 1.2, speed: 60, size: 0.8, track: false });
         }
+
+        if (ax.draw) ax.draw(a, nodes);
 
         /* ---- Notes libres ---- */
         (ax.notes || []).forEach((nt) => a.text(nt.x, nt.y, nt.text, 'note' + (nt.cls ? ' ' + nt.cls : ''), { anchor: nt.anchor || 'start', lh: 1.3 }));

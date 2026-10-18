@@ -365,9 +365,13 @@
     clockLabel: (T) => n2(gly(T)) + ' g/L',
     lead: 'L\'insuline (cellules β) fait baisser la glycémie : captation du glucose par le muscle et le tissu adipeux (GLUT4) et frein de la production hépatique. Le glucagon (cellules α) mobilise les réserves du foie. Au jeûne prolongé, la lipolyse fournit des acides gras et une cétogenèse limitée.',
     points: ['Glycémie à jeun normale 0,80–1,10 g/L ; diabète ≥ 1,26 g/L à deux reprises, ou ≥ 2,00 g/L avec symptômes ou à 2 h d\'une HGPO.', 'SGLT2 réabsorbe tout le glucose filtré ; glycosurie au-delà de 1,80 g/L.', 'Contre-régulation de l\'hypoglycémie : baisse de l\'insuline, glucagon, catécholamines, GH, puis cortisol (plus tardif), et prise de glucides.', 'Hypoglycémie : < 0,50 g/L hors diabète, < 0,70 g/L chez le diabétique (niveau 2 : < 0,54 g/L).'],
+    draw(a) {
+      a.path('M 660,450 C 820,540 1000,540 1196,620', 'connector');
+      a.childCaption('islet', 'Îlot et cellule β ⊕');
+    },
     nodes: [
       { id: 'glc', x: 240, y: 400, label: 'Glycémie', color: 'p-lime', live: (T) => n2(gly(T)) + ' g/L', info: 'Résulte de l\'absorption alimentaire, de la production hépatique (glycogénolyse, néoglucogenèse) et de la consommation par les tissus.' },
-      { id: 'islet', x: 600, y: 400, organ: 'islet', s: 1.2, label: 'Îlots de Langerhans', sub: 'β : insuline · α : glucagon', color: 'p-blue2', info: 'Le pancréas endocrine représente 1 % du tissu pancréatique.' },
+      { id: 'islet', x: 600, y: 400, organ: 'islet', s: 1.2, label: 'Îlots de Langerhans', sub: 'β : insuline · α : glucagon', color: 'p-blue2', zoom: 'islet', info: 'Le pancréas endocrine représente 1 % du tissu pancréatique.' },
       { id: 'liver', x: 980, y: 230, organ: 'liver', label: 'Foie', sub: 'glycogène, néoglucogenèse', color: 'p-lime' },
       { id: 'muscle', x: 980, y: 470, organ: 'muscle', label: 'Muscle', sub: 'GLUT4', color: 'p-lime' },
       { id: 'fat', x: 980, y: 700, organ: 'fat', label: 'Tissu adipeux', sub: 'GLUT4 · lipolyse', color: 'p-amber' },

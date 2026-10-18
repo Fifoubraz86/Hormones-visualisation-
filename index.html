@@ -89,11 +89,18 @@
       <div class="anim">
         <button type="button" id="btnPlay" class="play">Pause</button>
         <div class="speeds" role="group" aria-label="Vitesse">
+          <button type="button" data-speed="0.25" aria-pressed="false">0,25×</button>
           <button type="button" data-speed="0.5" aria-pressed="false">0,5×</button>
           <button type="button" data-speed="1" aria-pressed="true">1×</button>
           <button type="button" data-speed="2" aria-pressed="false">2×</button>
           <button type="button" data-speed="4" aria-pressed="false">4×</button>
         </div>
+      </div>
+      <div class="pace">
+        <label for="paceRange">Vitesse des hormones <output id="paceOut">1×</output></label>
+        <input type="range" id="paceRange" min="0.25" max="3" step="0.05" value="1">
+        <label class="pace-gain"><input type="checkbox" id="paceGain"> Accentuer : la vitesse suit fortement le taux sécrété</label>
+        <p class="pace-help">Densité et vitesse des particules reflètent la sécrétion : une hormone en excès défile vite et serrée, une hormone effondrée se raréfie et ralentit.</p>
       </div>
     </section>
 
@@ -130,6 +137,7 @@
 <script src="js/scenes/follicle.js"></script>
 <script src="js/scenes/transport.js"></script>
 <script src="js/scenes/target-cell.js"></script>
+<script src="js/scenes/islet.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

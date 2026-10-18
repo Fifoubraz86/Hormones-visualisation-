@@ -8,6 +8,10 @@
   const HV = (window.HV = window.HV || {});
   const NS = 'http://www.w3.org/2000/svg';
   HV.W = 1600;
+  // Vitesse de défilement des hormones : réglage global, et accentuation du lien vitesse ↔ taux sécrété.
+  HV.flowPace = 1;
+  HV.flowGain = 0.4;
+  HV.paceOf = (level) => HV.clamp(Math.pow(Math.max(level, 0.02), HV.flowGain), 0.2, 3);
   HV.H = 1000;
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   HV.clamp = clamp;
@@ -94,7 +98,7 @@
     }
     for (let i = this.ps.length - 1; i >= 0; i--) {
       const p = this.ps[i];
-      p.t += (dt / this.dur) * p.v;
+      p.t += (dt / this.dur) * p.v * HV.flowPace * (this.o.pace ? this.o.pace() : 1);
       if (p.t >= 1) {
         p.e.style.display = 'none';
         this.pool.push(p.e);

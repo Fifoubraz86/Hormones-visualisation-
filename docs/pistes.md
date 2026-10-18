@@ -8,7 +8,7 @@ L'axe thyréotrope descend déjà jusqu'au neurone à TRH, à la cellule thyréo
 
 | Zoom | Ce que l'on verrait bouger |
 | --- | --- |
-| ★ **Îlot de Langerhans** | Cellules α, β, δ, PP et ε, avec leur répartition et leur vascularisation. Couplage glucose-insuline dans la cellule β : GLUT2 → glucokinase → ATP/ADP → fermeture des canaux K-ATP → dépolarisation → entrée de Ca²⁺ → exocytose en deux phases. Paracrinie (somatostatine, insuline sur la cellule α). Incrétines (GLP-1, GIP). Cibles des traitements : sulfamides, analogues du GLP-1, inhibiteurs de DPP-4. |
+| ✅ **Îlot de Langerhans** (fait) | Cellules α, β, δ, PP et ε, avec leur répartition et leur vascularisation. Couplage glucose-insuline dans la cellule β : GLUT2 → glucokinase → ATP/ADP → fermeture des canaux K-ATP → dépolarisation → entrée de Ca²⁺ → exocytose en deux phases. Paracrinie (somatostatine, insuline sur la cellule α). Incrétines (GLP-1, GIP). Cibles des traitements : sulfamides, analogues du GLP-1, inhibiteurs de DPP-4. |
 | ★ **Corticosurrénale en trois zones et médullaire** | Stéroïdogenèse complète (StAR, CYP11A1, 3β-HSD, CYP21, CYP11B1/B2, CYP17). Blocs enzymatiques de l'hyperplasie congénitale des surrénales (21-hydroxylase : accumulation de 17-OHP, androgènes ↑). Gradient de cortisol vers la médullaire et rôle de la PNMT. |
 | **Hypophyse en histologie** | Les cinq types cellulaires, la tige, le système porte (plexus primaire et secondaire), les axones magnocellulaires. Compression du chiasma par un macroadénome. |
 | **Follicule ovarien** | Folliculogenèse, modèle « deux cellules, deux gonadotrophines », sélection du follicule dominant, rupture, corps jaune, lutéolyse ou relais par l'hCG. |

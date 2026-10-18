@@ -38,6 +38,14 @@ Chaque axe a un bouton « Comprendre pas à pas » dans le panneau. La boucle es
 
 Les axes hypophysaires partagent une coupe sagittale cerveau – hypothalamus – tige – hypophyse. Elle montre le système porte (antéhypophyse) et les axones magnocellulaires (posthypophyse).
 
+## Vitesse des hormones
+
+La densité et la vitesse des particules suivent le taux sécrété : une hormone en excès défile vite et serrée, une hormone effondrée se raréfie et ralentit. Le panneau propose un curseur « Vitesse des hormones » (0,25× à 3×), une case « Accentuer » qui renforce le lien entre vitesse et taux, et une vitesse du temps simulé à partir de 0,25×.
+
+## Îlot de Langerhans
+
+L'îlot est un zoom de la régulation glycémique. On y voit l'architecture de l'îlot (cellules β, α, δ, PP, ε, capillaires, acini exocrines) et la cellule β : GLUT2, glucokinase, ATP, canal K-ATP, potentiel de membrane, canal calcique, granules, incrétines. Tout est animé par le modèle glycémique (scénarios DT1, DT2, insulinome, HGPO) et dispose d'un pas à pas en 8 étapes.
+
 ## Les scènes de l'axe thyréotrope
 
 1. **Axe** : TRH, TSH, T4/T3, apport iodé, TRAb, lévothyroxine, rétrocontrôle négatif et effets périphériques (fréquence cardiaque, métabolisme basal, thermogenèse).

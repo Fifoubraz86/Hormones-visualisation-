@@ -792,3 +792,33 @@ line.m-db { stroke: var(--mc); stroke-width: 0.9; }
 .body-skin ellipse.body-fill { stroke: var(--body-line); stroke-width: 2.5; }
 .body-line { fill: none; stroke: var(--body-line); stroke-width: 1.6; opacity: 0.55; stroke-linecap: round; }
 .body-shade { fill: url(#bodyShade); stroke: none; pointer-events: none; }
+/* Vitesse des hormones */
+.pace { margin-top: 12px; display: grid; gap: 6px; font-size: 13px; }
+.pace label { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.pace output { font: 500 12px var(--font-data); color: var(--accent); }
+.pace input[type=range] { width: 100%; accent-color: var(--accent); }
+.pace-gain { justify-content: flex-start !important; color: var(--muted); }
+.pace-help { margin: 0; font-size: 12px; color: var(--faint); line-height: 1.4; }
+/* Îlot de Langerhans */
+.acinus { fill: color-mix(in srgb, var(--o-pancreas) 30%, transparent); stroke: color-mix(in srgb, var(--o-pancreas) 70%, transparent); stroke-width: 2; }
+.acinus-n { fill: color-mix(in srgb, var(--o-pancreas) 80%, #000); opacity: 0.5; }
+.islet-caps { fill: color-mix(in srgb, var(--p-blue2) 6%, transparent); stroke: color-mix(in srgb, var(--p-blue2) 50%, transparent); stroke-width: 3; stroke-dasharray: 8 6; }
+.islet-cap { fill: none; stroke: var(--o-aorta); stroke-width: 14; stroke-linecap: round; opacity: 0.55; }
+.icell { stroke: rgba(0, 0, 0, 0.25); stroke-width: 1.5; }
+.icell-n { fill: rgba(0, 0, 0, 0.35); }
+.icells.beta .icell { fill: var(--p-blue2); }
+.icells.alpha .icell { fill: var(--p-orange); }
+.icells.delta .icell { fill: var(--p-grey); }
+.icells.pp .icell { fill: var(--p-violet); }
+.icells.eps .icell { fill: var(--p-lime); }
+.bcell { fill: color-mix(in srgb, var(--p-blue2) 9%, var(--scene-1, transparent)); stroke: var(--p-blue2); stroke-width: 6; }
+.bcell-n { fill: color-mix(in srgb, var(--p-blue2) 25%, transparent); stroke: var(--p-blue2); stroke-width: 2; }
+.chan { fill: var(--p-violet); stroke: rgba(0, 0, 0, 0.3); stroke-width: 1.5; }
+.chan-pore { fill: var(--scene-1, #fff); }
+.chan-t { font: 600 17px var(--font-body); fill: var(--fg); }
+.enz { fill: color-mix(in srgb, var(--p-lime) 25%, transparent); stroke: var(--p-lime); stroke-width: 2; }
+.mito { fill: color-mix(in srgb, var(--p-orange) 30%, transparent); stroke: var(--p-orange); stroke-width: 3; }
+.mito-cr { fill: none; stroke: var(--p-orange); stroke-width: 2.5; }
+.gran { fill: color-mix(in srgb, var(--p-blue2) 30%, transparent); stroke: var(--p-blue2); stroke-width: 1.5; }
+.gran-c { fill: var(--p-blue2); }
+.gran.docked { stroke-width: 3; }
