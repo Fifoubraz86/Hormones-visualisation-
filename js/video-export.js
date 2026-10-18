@@ -92,7 +92,7 @@
   let fontsP = null;
   function fontCss() {
     if (fontsP) return fontsP;
-    const link = document.querySelector('link[href*="fonts.googleapis.com"]');
+    const link = document.querySelector('link[rel="stylesheet"][href*="fonts.googleapis.com"]');
     if (!link) return (fontsP = Promise.resolve(''));
     fontsP = (async () => {
       const css = await (await fetch(link.href)).text();
@@ -122,6 +122,8 @@
     const close = '</g>'.repeat(chain.length);
     const head = `<svg xmlns="${NS}" xmlns:xlink="http://www.w3.org/1999/xlink" width="${W}" height="${H}" viewBox="${x0.toFixed(1)} ${y0.toFixed(1)} ${vbW.toFixed(1)} ${vbH.toFixed(1)}" data-theme="${o.theme}"><style><![CDATA[${res.fonts}\n${res.css}]]></style>`;
     const bg = `<rect class="world-bg" x="${x0 - 10}" y="${y0 - 10}" width="${vbW + 20}" height="${vbH + 20}"/>`;
+    // Schéma seul : les loupes posées hors du cadre sont coupées.
+    const clip = `<clipPath id="ve-clip"><rect x="${-PAD}" y="${-PAD}" width="${HV.W + 2 * PAD}" height="${HV.H + 2 * PAD}"/></clipPath>`;
     // Éléments référencés hors de la scène (glyphes #mol-…, dégradés, marqueurs) : clos par références successives.
     const mainDefs = document.querySelector('#stage > defs');
     const defsCache = new Map();
@@ -161,7 +163,7 @@
       }
       // Animations CSS figées à l'instant t (rendu déterministe).
       const anim = `<style>*{animation-delay:-${t.toFixed(3)}s !important;animation-play-state:paused !important;transition:none !important}</style>`;
-      return head + anim + defsFor(body) + bg + open + body + close + cap + '</svg>';
+      return head + anim + defsFor(body) + `<defs>${clip}</defs>` + bg + '<g clip-path="url(#ve-clip)">' + open + body + close + '</g>' + cap + '</svg>';
     };
   }
 
