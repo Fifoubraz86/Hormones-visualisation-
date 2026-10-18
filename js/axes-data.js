@@ -25,6 +25,7 @@
     crh: { t: 'CRH', k: 'Corticolibérine · peptide de 41 acides aminés (complément)', d: 'Sécrétée par l\'hypothalamus, elle stimule les cellules corticotropes à sécréter l\'ACTH. Freinée par le cortisol.' },
     acth: { t: 'ACTH', k: 'Corticotrophine · 39 acides aminés (complément), issue de la POMC', d: 'Stimule la sécrétion de cortisol et d\'androgènes surrénaliens : augmente StAR, puis les enzymes P450 ; en excès chronique, hyperplasie surrénalienne. Rythme circadien, pic le matin. Sa sécrétion augmente avec certaines molécules de l\'inflammation. L\'α-MSH, issue du même précurseur, explique la mélanodermie de l\'insuffisance surrénale périphérique.' },
     cortisol: { t: 'Cortisol', k: 'Principal glucocorticoïde · zone fasciculée', d: 'Néoglucogenèse (hyperglycémiant), catabolisme protidique, lipogenèse viscérale et facio-tronculaire, inhibition de l\'ADH, effet anti-inflammatoire, tonus vasculaire, effet minéralocorticoïde à forte dose. Rétrocontrôle négatif sur la CRH et l\'ACTH. Pic en début de matinée, nadir le soir.' },
+    fig26: { t: 'Figure 26 · Stéroïdogenèse surrénalienne', k: 'Polycopié, partie 1, p. 71', d: 'Du cholestérol à l\'aldostérone (zone glomérulée), au cortisol (zone fasciculée) et aux androgènes (zone réticulée). Un bloc en 21-hydroxylase arrête la voie du cortisol et de l\'aldostérone : la 17-OHP s\'accumule et part vers les androgènes. Clic : agrandir la figure ; la loupe « Stéroïdogenèse » anime les blocs.' },
     dhea: { t: 'DHEA, DHEA-S', k: 'Androgènes surrénaliens · zone réticulée', d: 'Avec l\'androstènedione. Production dépendante de l\'ACTH ; pas de rétrocontrôle sur l\'axe, contrairement au cortisol (complément).' },
     ghrh: { t: 'GHRH', k: 'Somatolibérine', d: 'Stimule les cellules somatotropes à sécréter la GH.' },
     sst: { t: 'Somatostatine', k: 'Peptide cyclique inhibiteur', d: 'Freine la sécrétion de GH, et aussi celle de TSH. Les analogues de la somatostatine traitent l\'acromégalie.' },
@@ -86,8 +87,8 @@
       { id: 'liver', x: 1330, y: 240, organ: 'liver', s: 0.9, label: 'Foie', sub: 'néoglucogenèse', color: 'p-gold' },
       { id: 'muscle', x: 1330, y: 440, organ: 'muscle', s: 0.9, label: 'Muscle', sub: 'catabolisme protidique', color: 'p-gold' },
       { id: 'fat', x: 1330, y: 640, organ: 'fat', s: 0.9, label: 'Tissu adipeux', sub: 'lipogenèse viscérale', color: 'p-gold' },
-      { id: 'inflam', x: 230, y: 760, label: 'Inflammation', sub: 'cytokines', color: 'bad', info: 'Certaines molécules de la réponse inflammatoire augmentent la sécrétion d\'ACTH : l\'axe interagit avec le système immunitaire.' },
-      { id: 'andro', x: 930, y: 760, label: 'Androgènes', sub: 'pas de rétrocontrôle', color: 'p-sky', info: 'Les androgènes surrénaliens dépendent de l\'ACTH mais ne freinent pas l\'axe (complément).' }
+      { id: 'inflam', x: 230, y: 735, label: 'Inflammation', sub: 'cytokines', color: 'bad', info: 'Certaines molécules de la réponse inflammatoire augmentent la sécrétion d\'ACTH : l\'axe interagit avec le système immunitaire.' },
+      { id: 'andro', x: 930, y: 760, label: 'Androgènes surrénaliens', w: 280, sub: ['SDHEA, androstènedione', 'pas de rétrocontrôle'], color: 'p-sky', info: 'Les androgènes surrénaliens (DHEA, SDHEA, androstènedione) dépendent de l\'ACTH (polycopié p. 73) mais ne freinent pas l\'axe (complément). Ils baissent dans toutes les insuffisances surrénales et dans l\'adénome cortisolique ; ils augmentent dans le bloc en 21-hydroxylase.' }
     ],
     links: [
       { from: 'hypo', to: 'pit', kind: 'stim', mol: 'crh', mod: R.circadian, labelOff: 150 },
@@ -100,7 +101,14 @@
       { from: 'inflam', to: 'pit', kind: 'stim', color: 'bad', info: 'cortico.inflam', label: 'cytokines' },
       { from: 'adr', to: 'andro', mol: 'dhea', rate: 1 }
     ],
-    levels: { x: 1180, y: 830, w: 340, items: [{ label: 'ACTH', mol: 'acth', fn: R.circadian, max: 1.1 }, { label: 'Cortisol', mol: 'cortisol', fn: (T) => R.circadian({ h: T.h - 1 }), max: 1.1 }] }
+    draw(a) {
+      // Figure 26 du polycopié : la vraie planche, cliquable (agrandissement), avec un accès à la loupe détaillée.
+      const g = a.el('g', { class: 'scinti fig-vign', transform: 'translate(1160 760)', 'data-figs': '26', 'data-info': 'fig26' });
+      a.el('rect', { width: 340, height: 222, rx: 14, class: 'scinti-bg' }, g);
+      a.text(14, 24, 'Stéroïdogenèse · figure 26', 'scinti-t', null, g);
+      a.el('image', { x: 10, y: 32, width: 320, height: 182, href: HV.polyFig('26').src, preserveAspectRatio: 'xMidYMid meet' }, g);
+    },
+    levels: { x: 60, y: 912, w: 340, items: [{ label: 'ACTH', mol: 'acth', fn: R.circadian, max: 1.1 }, { label: 'Cortisol', mol: 'cortisol', fn: (T) => R.circadian({ h: T.h - 1 }), max: 1.1 }] }
   });
 
   /* ===================== Axe somatotrope ===================== */
@@ -260,7 +268,7 @@
       { from: 'kiss', to: 'hypo', kind: 'stim', mol: 'kiss', rate: 0.6, label: '', bend: 12 },
       { from: 'lep', to: 'hypo', kind: 'stim', color: 'p-amber', label: 'leptine (permissif)', info: 'gonadoF.lep', effect: 'permissif (indirect)' }
     ],
-    levels: { x: 1180, y: 790, w: 340, items: [{ label: 'LH', mol: 'lh', fn: R.lh, max: 2.8 }, { label: 'FSH', mol: 'fsh', fn: R.fsh, max: 2.8 }, { label: 'Estradiol', mol: 'e2', fn: R.e2, max: 1.6 }, { label: 'Progestérone', mol: 'prog', fn: R.prog, max: 1.6 }] }
+    levels: { x: 60, y: 860, w: 300, items: [{ label: 'LH', mol: 'lh', fn: R.lh, max: 2.8 }, { label: 'FSH', mol: 'fsh', fn: R.fsh, max: 2.8 }, { label: 'Estradiol', mol: 'e2', fn: R.e2, max: 1.6 }, { label: 'Progestérone', mol: 'prog', fn: R.prog, max: 1.6 }] }
   });
 
   /* ===================== Axe gonadotrope masculin ===================== */

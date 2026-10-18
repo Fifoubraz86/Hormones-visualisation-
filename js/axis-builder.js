@@ -400,7 +400,7 @@
         if (sim && hk.levels) {
           LV = Object.assign({ x: 1180, y: 830, w: 340 }, ax.levels || {}, { title: 'Niveaux simulés' });
           LV.items = hk.levels.map((it) => Object.assign({}, it, { fn: it.fn ? () => it.fn(sim.s) : () => sim.s[it.v] }));
-          LV.y = Math.min(LV.y, 960 - 30 - LV.items.length * 34);
+          LV.y = Math.min(LV.y, 972 - LV.items.length * 34); // le cadre doit tenir dans la scène
         }
         if (LV) {
           const L = LV;

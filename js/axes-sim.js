@@ -67,8 +67,8 @@
   /* ===================== Axe corticotrope ===================== */
   SIMS.cortico = {
     title: 'Bilan corticotrope simulé',
-    defaults: { hypo: 1, pit: 1, adr: 1, autoPit: 0, autoAdr: 0, ecto: 0, exo: 0, syn: 0, dxm: 0, ith: 0 },
-    init: { crh: 1, acth: 1, cort: 1, reg: 1, troph: 1 },
+    defaults: { hypo: 1, pit: 1, adr: 1, autoPit: 0, autoAdr: 0, ecto: 0, exo: 0, syn: 0, dxm: 0, ith: 0, cyp21: 1 },
+    init: { crh: 1, acth: 1, cort: 1, reg: 1, troph: 1, ohp: 1, andro: 1 },
     tau: { troph: 6 },
     targets(p, s) {
       const fb = s.cort + p.exo + p.dxm; // la dexaméthasone freine l'axe mais n'est pas dosée comme cortisol
@@ -82,8 +82,16 @@
       const troph = testing ? s.troph : clamp(pw(Math.max(acth, 0.01), 0.8), 0.15, 1.6);
       // Réponse surrénalienne saturable ; le Synacthène (ACTH 1-24) s'ajoute à l'ACTH endogène.
       const drive = Math.max(acth, 0) + p.syn;
-      const cort = clamp((p.adr * s.troph * 2.8 * drive) / (drive + 1.8) + 0.03 * p.adr + p.autoAdr, 0, 12);
-      return { crh, acth, cort, reg, troph };
+      // Bloc en 21-hydroxylase (HCS, figure 26) : le cortisol baisse, l'ACTH monte et la 17-OHP accumulée
+      // est détournée vers les androgènes surrénaliens.
+      const f21 = pw(p.cyp21, 0.7), sat = drive / (drive + 1.8);
+      const cort = clamp((p.adr * s.troph * 2.8 * drive) / (drive + 1.8) * f21 + 0.03 * p.adr + p.autoAdr, 0, 12);
+      // Valeurs relatives (1 = normale) : les androgènes surrénaliens dépendent de l'ACTH (SDHEA bas dans l'adénome
+      // cortisolique et dans toutes les insuffisances surrénales, polycopié p. 80 et 85).
+      const zone = p.adr * s.troph * sat / 0.357;
+      const ohp = clamp(zone * (1 + 12 * (1 - f21)), 0, 60);
+      const andro = clamp(zone * (1 + 3 * (1 - f21)), 0, 20);
+      return { crh, acth, cort, reg, troph, ohp, andro };
     },
     labs: [
       { key: 'acth', name: 'ACTH à 8 h', unit: 'pg/mL', range: '20–52 pg/mL (4,5–12 pmol/L)', k: 25, lo: 20, hi: 52, min: 0, max: 250, dec: 0 },
@@ -94,9 +102,12 @@
           const acth = Math.max(s.acth, 1e-6), regShare = clamp(s.reg / acth, 0, 1);
           const cortAuto = p.autoAdr, cortAxis = Math.max(0, s.cort - cortAuto);
           return 400 * (cortAuto + cortAxis * (0.09 * regShare + (1 - regShare)));
-        } }
+        } },
+      { key: 'andro', name: 'Androgènes surrénaliens (SDHEA)', unit: '× N', k: 1, range: 'valeur relative ; normes selon l\'âge et le sexe', lo: 0.5, hi: 2, min: 0, max: 10, dec: 1 },
+      { key: 'ohp', name: '17-hydroxyprogestérone', unit: '× N', k: 1, range: 'valeur relative (dosage de base ou après Synacthène)', lo: 0, hi: 3, min: 0, max: 40, dec: 1 }
     ],
     params: [
+      { key: 'cyp21', label: '21-hydroxylase (CYP21A2)', min: 0.02, max: 1, step: 0.01, fmt: pct },
       { key: 'adr', label: 'Réserve surrénalienne', min: 0.02, max: 1.5, step: 0.01, fmt: pct },
       { key: 'pit', label: 'Réserve corticotrope', min: 0.02, max: 1.5, step: 0.01, fmt: pct },
       { key: 'autoPit', label: 'Adénome corticotrope', min: 0, max: 4, step: 0.1, fmt: x100 },
@@ -111,14 +122,21 @@
       { id: 'ecto', name: 'Sécrétion ectopique d\'ACTH', note: 'Tumeur (bronches, pancréas…) : ACTH et cortisol très élevés.', p: { ecto: 5 } },
       { id: 'addison', name: 'Insuffisance surrénale périphérique', note: 'Cortisol bas, ACTH très élevée (mélanodermie par excès de POMC/α-MSH).', p: { adr: 0.06 } },
       { id: 'corticotrope', name: 'Insuffisance corticotrope', note: 'Atteinte hypophysaire : cortisol bas avec ACTH basse ou normale.', p: { pit: 0.03 } },
+      { id: 'hcs', name: 'Bloc en 21-hydroxylase, forme classique', note: 'HCS (CYP21A2, 95 % des cas) : cortisol bas, ACTH élevée, 17-OHP très élevée, androgènes surrénaliens en excès ; perte de sel possible (aldostérone non simulée ici). Dépistage néonatal à J3 (17-OHP).', p: { cyp21: 0.03 } },
+      { id: 'hcsnc', name: 'Bloc en 21-hydroxylase, forme non classique', note: 'L\'ACTH compense : cortisol conservé, 17-OHP et androgènes modérément élevés ; 17-OHP de base ou après test au Synacthène.', p: { cyp21: 0.4 } },
       { id: 'cortico', name: 'Corticothérapie prolongée', note: 'Les corticoïdes freinent l\'axe : ACTH et cortisol endogène bas, risque d\'insuffisance surrénale à l\'arrêt (complément).', p: { exo: 1.6 } }
     ],
     interpret(s, p, L) {
-      const a = L('acth'), c = L('cort'), m = L('mid');
+      const a = L('acth'), c = L('cort'), m = L('mid'), oh = L('ohp');
+      // Hyperplasie congénitale des surrénales (polycopié p. 80–82, figure 26).
+      if (oh > 3 && p.cyp21 < 0.9) {
+        if (c < 275) return { tone: 'bad', label: 'Bloc en 21-hydroxylase, forme classique', text: 'Cortisol bas, ACTH élevée, 17-OHP très élevée et androgènes surrénaliens en excès : hyperplasie congénitale des surrénales. Fille : virilisation des organes génitaux externes ; perte de sel (hyponatrémie, hyperkaliémie, déshydratation) si l\'aldostérone est aussi touchée. Dépistage néonatal : 17-OHP à J3.' };
+        return { tone: 'warn', label: 'Bloc en 21-hydroxylase, forme non classique', text: 'Cortisol maintenu au prix d\'une ACTH élevée ; 17-OHP et androgènes surrénaliens augmentés : pubarche précoce, âge osseux avancé, hyperandrogénie de l\'adolescente (acné, hirsutisme, troubles des règles). Diagnostic : 17-OHP de base ou après test au Synacthène.' };
+      }
       // Cortisol à 8 h (polycopié) : < 5 µg/dL (≈ 138 nmol/L) très évocateur d'insuffisance surrénale,
       // > 18 µg/dL (500 nmol/L) l'exclut ; entre les deux, zone grise : test au Synacthène.
       if (m > 50) {
-        if (a < 10) return { tone: 'bad', label: 'Cushing ACTH-indépendant', text: 'Hypercortisolisme (cycle nycthéméral aboli) avec ACTH effondrée : origine surrénalienne.' };
+        if (a < 10) return { tone: 'bad', label: 'Cushing ACTH-indépendant', text: 'Hypercortisolisme (cycle nycthéméral aboli) avec ACTH effondrée : origine surrénalienne. SDHEA bas dans l\'adénome cortisolique (androgènes sous contrôle de l\'ACTH) ; androgènes ou estrogènes sécrétés par un corticosurrénalome.' };
         const both = 'origine hypophysaire (maladie de Cushing : IRM hypophysaire) ou sécrétion ectopique (recherche d\'une tumeur bronchique ou pancréatique).';
         if (a > 150) return { tone: 'bad', label: 'Cushing ACTH-dépendant, ACTH très élevée', text: 'Hypercortisolisme avec ACTH très élevée, plutôt en faveur d\'une sécrétion ectopique (seuil indicatif, complément) : ' + both };
         return { tone: 'bad', label: 'Cushing ACTH-dépendant', text: 'Hypercortisolisme avec ACTH normale ou élevée et cycle nycthéméral aboli : ' + both };
@@ -126,8 +144,8 @@
       if (c > 550) return { tone: 'warn', label: 'Cortisol à 8 h élevé isolé', text: 'Ne suffit pas au diagnostic de syndrome de Cushing : cortisol libre urinaire des 24 h, freinage minute à la dexaméthasone, cortisol salivaire à minuit (deux tests anormaux sur trois).' };
       if (p.exo > 0.05 && c < 500) return { tone: 'warn', label: 'Axe freiné par les corticoïdes', text: 'ACTH et cortisol endogène bas : décroissance progressive et prudente à l\'arrêt (complément).' };
       if (c < 138) {
-        if (a > 52) return { tone: 'bad', label: 'Insuffisance surrénale périphérique', text: 'Cortisol à 8 h < 138 nmol/L (5 µg/dL) et ACTH élevée : atteinte surrénalienne (mélanodermie).' };
-        return { tone: 'bad', label: 'Insuffisance corticotrope', text: 'Cortisol à 8 h < 138 nmol/L (5 µg/dL) avec ACTH basse ou inadaptée : origine hypothalamo-hypophysaire.' };
+        if (a > 52) return { tone: 'bad', label: 'Insuffisance surrénale périphérique', text: 'Cortisol à 8 h < 138 nmol/L (5 µg/dL) et ACTH élevée : atteinte surrénalienne (mélanodermie). Toutes les hormones corticosurrénaliennes manquent : minéralocorticoïdes, glucocorticoïdes et androgènes surrénaliens (SDHEA bas).' };
+        return { tone: 'bad', label: 'Insuffisance corticotrope', text: 'Cortisol à 8 h < 138 nmol/L (5 µg/dL) avec ACTH basse ou inadaptée : origine hypothalamo-hypophysaire. Cortisol et androgènes surrénaliens bas, minéralocorticoïdes conservés (rénine et aldostérone normales).' };
       }
       if (a > 52 && c < 500) return { tone: 'warn', label: 'ACTH élevée, cortisol non effondré', text: 'ACTH au-dessus de la normale avec un cortisol à 8 h < 500 nmol/L (18 µg/dL) : insuffisance surrénale périphérique débutante possible, test au Synacthène.' };
       if (c < 275) return { tone: 'warn', label: 'Cortisol à 8 h en zone grise', text: 'Entre 138 et 500 nmol/L (5–18 µg/dL), le cortisol à 8 h ne permet ni d\'affirmer ni d\'exclure une insuffisance surrénale : test au Synacthène.' };
@@ -135,7 +153,7 @@
       return { tone: 'good', label: 'Axe corticotrope normal', text: 'Cortisol à 8 h ≥ 500 nmol/L (18 µg/dL) : insuffisance surrénale exclue ; rythme circadien conservé.' };
     },
     hooks: {
-      links: { 'hypo>pit>crh': 'crh', 'pit>adr>acth': 'acth', 'adr>liver>cortisol': 'cort', 'adr>muscle>cortisol': 'cort', 'adr>fat>cortisol': 'cort', 'adr>pit>cortisol': 'cort', 'adr>hypo>cortisol': 'cort', 'adr>andro>dhea': 'acth' },
+      links: { 'hypo>pit>crh': 'crh', 'pit>adr>acth': 'acth', 'adr>liver>cortisol': 'cort', 'adr>muscle>cortisol': 'cort', 'adr>fat>cortisol': 'cort', 'adr>pit>cortisol': 'cort', 'adr>hypo>cortisol': 'cort', 'adr>andro>dhea': 'andro', 'adr>ohp>prog': 'ohp', 'ohp>andro>dhea': 'ohp' },
       cap: { adr: 'adr', pit: 'pit' },
       // Hyperplasie surrénalienne sous excès d'ACTH, atrophie quand l'ACTH est effondrée.
       scale: { adr: (p, s) => clamp(0.72 + 0.28 * pw(Math.max(s.acth, 0.01), 0.35), 0.7, 1.45) },
@@ -145,13 +163,15 @@
         { node: 'adr', kind: 'nodule', tone: 'yellow', dx: -34, dy: -30, show: (p) => p.autoAdr > 0.02, ly: -26, label: 'adénome cortisolique', title: 'Adénome surrénalien cortisolique', text: 'Tumeur de la zone fasciculée. L\'ACTH effondrée entraîne l\'atrophie de la surrénale controlatérale et du cortex sain.' },
         { node: 'adr', kind: 'infiltrate', dy: -10, show: (p) => p.adr < 0.5, label: 'destruction surrénalienne', title: 'Insuffisance surrénale périphérique', text: 'Destruction des deux surrénales : auto-immune dans 80 à 90 % des cas, la tuberculose étant la cause historique ; plus rarement hémorragie surrénalienne bilatérale ou métastases.' },
         { node: 'adr', kind: 'label', show: (p, s) => s.acth < 0.3, label: 'cortex atrophique', ly: -96, title: 'Atrophie corticosurrénalienne', text: 'Sans ACTH, la zone fasciculée s\'atrophie : risque d\'insuffisance surrénale à l\'arrêt d\'une corticothérapie ou après exérèse d\'un adénome.' },
-        { node: 'adr', kind: 'label', show: (p, s) => s.acth > 2.5, label: 'hyperplasie bilatérale', ly: -70, title: 'Hyperplasie surrénalienne', text: 'L\'excès chronique d\'ACTH induit une hyperplasie et une hypertrophie des surrénales.' }
+        { node: 'adr', kind: 'label', show: (p) => p.cyp21 < 0.7, label: 'bloc en 21-hydroxylase', ly: -96, title: 'Hyperplasie congénitale des surrénales', text: 'Déficit en 21-hydroxylase (CYP21A2, chromosome 6p21.3), autosomique récessif : 95 % des HCS. Voir la figure 26 et la loupe « Stéroïdogenèse ».' },
+        { node: 'adr', kind: 'label', show: (p, s) => s.acth > 2.5 && p.cyp21 >= 0.7, label: 'hyperplasie bilatérale', ly: -70, title: 'Hyperplasie surrénalienne', text: 'L\'excès chronique d\'ACTH induit une hyperplasie et une hypertrophie des surrénales.' }
       ],
       extraNodes: [
         { id: 'ecto', x: 570, y: 760, label: 'Tumeur ectopique', sub: 'ACTH non freinable', color: 'bad', show: (p) => p.ecto > 0.02, info: 'Sécrétion ectopique (paranéoplasique) d\'ACTH, par exemple par une tumeur bronchique ou pancréatique.' },
         { id: 'exo', x: 230, y: 600, label: 'Corticoïdes exogènes', w: 250, color: 'p-gold', show: (p) => p.exo > 0.02, info: 'Les glucocorticoïdes de synthèse exercent le même rétrocontrôle négatif que le cortisol.' },
         { id: 'syn', x: 930, y: 600, label: 'Synacthène 250 µg', w: 240, color: 'p-orange2', show: (p) => p.syn > 0.02, info: 'Tétracosactide (ACTH 1-24) : stimulation maximale de la corticosurrénale.' },
         { id: 'dxm', x: 400, y: 600, label: 'Dexaméthasone', w: 220, color: 'p-gold', show: (p) => p.dxm > 0.02, info: 'Glucocorticoïde puissant non dosé par le dosage du cortisol : freine CRH et ACTH.' },
+        { id: 'ohp', x: 620, y: 890, label: '17-OHP accumulée', w: 230, color: 'bad', show: (p) => p.cyp21 < 0.9, info: 'En amont du bloc, la 17-hydroxyprogestérone s\'accumule et se détourne vers les androgènes surrénaliens (figure 26).' },
         { id: 'ins', x: 640, y: 600, label: 'Insuline IV', w: 190, color: 'p-blue2', show: (p) => p.ith > 0.02, info: 'L\'hypoglycémie induite (< 0,40 g/L) est un stress qui stimule les axes corticotrope et somatotrope.' }
       ],
       extraLinks: [
@@ -161,10 +181,12 @@
         { from: 'syn', to: 'adr', kind: 'stim', mol: 'acth', v: 'synRate', label: 'ACTH 1-24' },
         { from: 'dxm', to: 'pit', kind: 'inhib', color: 'p-gold', label: '' },
         { from: 'dxm', to: 'hypo', kind: 'inhib', color: 'p-gold', label: '' },
-        { from: 'ins', to: 'hypo', kind: 'stim', color: 'p-blue2', label: 'hypoglycémie' }
+        { from: 'ins', to: 'hypo', kind: 'stim', color: 'p-blue2', label: 'hypoglycémie' },
+        { from: 'adr', to: 'ohp', mol: 'prog', label: '' },
+        { from: 'ohp', to: 'andro', kind: 'stim', mol: 'dhea', label: 'détournée' }
       ],
       rates: { ectoRate: (s, p) => p.ecto / 2, synRate: (s, p) => Math.min(4, p.syn / 5) },
-      levels: [{ label: 'ACTH', mol: 'acth', v: 'acth', max: 4 }, { label: 'Cortisol', mol: 'cortisol', v: 'cort', max: 4 }]
+      levels: [{ label: 'ACTH', mol: 'acth', v: 'acth', max: 4 }, { label: 'Cortisol', mol: 'cortisol', v: 'cort', max: 4 }, { label: 'Androgènes', mol: 'dhea', v: 'andro', max: 4 }]
     }
   };
 
@@ -407,16 +429,17 @@
   /* ===================== Axe gonadotrope féminin ===================== */
   SIMS.gonadoF = {
     title: 'Bilan gonadotrope simulé (femme)',
-    defaults: { hypo: 1, ovary: 1, prl: 0 },
+    defaults: { hypo: 1, ovary: 1, prl: 0, sopk: 0 },
     init: { lh: 1, fsh: 1, e2: 1, prog: 0.1, cyc: 1 },
     tau: { lh: 0.3, fsh: 0.4, e2: 0.5, prog: 0.6, cyc: 1 },
     targets(p, s, T) {
       const drive = p.hypo / (1 + 2 * p.prl);
-      const cyc = drive > 0.5 && p.ovary > 0.3;
+      // SOPK : oligo-anovulation chronique (polycopié, partie 2, p. 15).
+      const cyc = drive > 0.5 && p.ovary > 0.3 && p.sopk < 0.5;
       const res = 1 / (0.15 + 0.85 * Math.min(1, p.ovary)); // levée du rétrocontrôle quand l'ovaire s'épuise
       return {
         fsh: drive * (cyc ? R.fsh(T) : 0.6) * res,
-        lh: drive * (cyc ? R.lh(T) : 0.45) / (0.2 + 0.8 * Math.min(1, p.ovary)),
+        lh: drive * (cyc ? R.lh(T) : 0.45 * (1 + 0.8 * p.sopk)) / (0.2 + 0.8 * Math.min(1, p.ovary)), // LH tonique plutôt haute dans le SOPK (complément)
         e2: 0.04 + p.ovary * (cyc ? R.e2(T) : 0.1 + 0.2 * Math.min(1, drive)),
         prog: cyc ? R.prog(T) : 0.03,
         cyc: cyc ? 1 : 0 // cycle ovulatoire en cours : pic de LH et phase lutéale
@@ -427,21 +450,26 @@
       { key: 'lh', name: 'LH', unit: 'UI/L', range: '2–12 UI/L hors pic ovulatoire, pic jusqu\'à 70–80 (complément)', k: 14, lo: 2, hi: 12, min: 0, max: 80, dec: 1 },
       { key: 'e2', name: 'Estradiol', unit: 'pg/mL', range: '25–400 pg/mL selon la phase (complément)', k: 140, lo: 25, hi: 400, min: 0, max: 400, dec: 0 },
       { key: 'prog', name: 'Progestérone', unit: 'ng/mL', range: '> 5 ng/mL en phase lutéale (complément)', k: 10, lo: 0, hi: 25, min: 0, max: 20, dec: 1 },
+      { key: 'testo', name: 'Testostérone totale', unit: '× N', range: 'valeur relative (complément : normes selon la technique)', lo: 0, hi: 1.5, min: 0, max: 6, dec: 1, fn: (s, p) => (0.3 + 0.7 * Math.min(1, p.ovary)) * (1 + 1.6 * p.sopk) },
       { key: 'prl', name: 'Prolactine', unit: 'ng/mL', range: '< 25 ng/mL (complément)', lo: 3, hi: 25, min: 1, max: 1000, log: true, dec: 0, fn: (s, p) => 12 * (1 + 4 * p.prl) }
     ],
     params: [
       { key: 'ovary', label: 'Réserve ovarienne', min: 0, max: 1, step: 0.01, fmt: pct },
       { key: 'hypo', label: 'Activité des neurones à GnRH', min: 0.02, max: 1.2, step: 0.01, fmt: pct },
+      { key: 'sopk', label: 'Syndrome des ovaires polykystiques', min: 0, max: 1, step: 0.05, fmt: pct },
       { key: 'prl', label: 'Hyperprolactinémie', min: 0, max: 3, step: 0.05, fmt: x100 }
     ],
     scenarios: [
       { id: 'eu', name: 'Cycle normal', note: 'Phase folliculaire, pic de LH à J14, phase lutéale.', p: {} },
       { id: 'meno', name: 'Ménopause, insuffisance ovarienne', note: 'Plus de rétrocontrôle : FSH et LH élevées, estradiol bas, aménorrhée.', p: { ovary: 0 } },
       { id: 'hh', name: 'Déficit gonadotrope (anorexie mentale)', note: 'Baisse de la GnRH (anorexie mentale : baisse de la leptine ; complément) : LH, FSH et estradiol bas, aménorrhée.', p: { hypo: 0.12 } },
-      { id: 'prl', name: 'Hyperprolactinémie', note: 'La prolactine inhibe la pulsatilité de la GnRH : aménorrhée.', p: { prl: 1.5 } }
+      { id: 'prl', name: 'Hyperprolactinémie', note: 'La prolactine inhibe la pulsatilité de la GnRH : aménorrhée.', p: { prl: 1.5 } },
+      { id: 'sopk', name: 'Syndrome des ovaires polykystiques (SOPK)', note: 'Cause la plus fréquente d\'hirsutisme : hyperandrogénie (hirsutisme, acné, hyperséborrhée) et oligo-anovulation chronique, souvent obésité et hyperinsulinisme par insulinorésistance (acanthosis nigricans).', p: { sopk: 1 } }
     ],
     interpret(s, p, L, T) {
       const f = L('fsh'), e = L('e2'), prl = L('prl');
+      // SOPK : 2 critères de Rotterdam sur 3, après exclusion des autres diagnostics (polycopié, partie 2, p. 15).
+      if (p.sopk >= 0.5 && prl <= 25 && p.ovary > 0.3) return { tone: 'bad', label: 'Anovulation avec hyperandrogénie : SOPK ?', text: 'Critères de Rotterdam (2 sur 3) : troubles du cycle (spanioménorrhée, aménorrhée, infertilité) ; hyperandrogénie clinique ou biologique ; ovaires > 10 mL avec plus de 20 follicules par ovaire à l\'échographie. Diagnostic d\'exclusion : éliminer un bloc en 21-hydroxylase non classique (17-OHP), un syndrome de Cushing, une tumeur virilisante, une hyperprolactinémie. Rechercher l\'insulinorésistance (obésité, acanthosis nigricans).' };
       // « Ovulatoire » seulement si le cycle simulé comporte un pic de LH et une phase lutéale (progestérone > 5 ng/mL vers J21).
       if (s.cyc > 0.5) {
         if (T && T.d < 6 && f > 12) return { tone: 'warn', label: 'Cycle ovulatoire, FSH élevée', text: 'Pic de LH et phase lutéale conservés, mais FSH élevée en début de phase folliculaire : baisse de la réserve ovarienne (seuil indicatif ; complément).' };
@@ -461,8 +489,18 @@
       lesions: [
         { node: 'ovary', kind: 'label', show: (p) => p.ovary < 0.3, label: 'ovaire sans follicules', ly: -84, title: 'Épuisement folliculaire', text: 'Ménopause ou insuffisance ovarienne précoce (avant 40 ans) : plus de follicules, donc plus d\'estradiol ni d\'inhibine.' },
         { node: 'hypo', kind: 'label', show: (p) => p.hypo < 0.5, label: 'GnRH freinée', ly: -76, title: 'Aménorrhée hypothalamique', text: 'Baisse de la pulsatilité de la GnRH : insuffisance gonadotrope fonctionnelle. Causes (complément) : anorexie mentale, activité physique intense, stress (baisse de la leptine).' },
+        { node: 'ovary', kind: 'label', show: (p) => p.sopk >= 0.5, label: 'ovaires multifolliculaires', ly: -96, title: 'Aspect échographique du SOPK', text: 'Ovaires augmentés de volume (> 10 mL) avec plus de 20 follicules pré-antraux par ovaire (critère de Rotterdam ; polycopié, partie 2, p. 15). La thèque produit les androgènes sous LH.' },
         { node: 'pit', kind: 'nodule', tone: 'magenta', dx: 30, dy: -26, show: (p) => p.prl > 0.3, label: 'prolactinome', title: 'Adénome à prolactine', text: 'La prolactine en excès inhibe la pulsatilité de la GnRH.' }
       ],
+      extraNodes: [
+        { id: 'skin', x: 920, y: 740, label: 'Peau, follicule pileux', w: 260, sub: 'hirsutisme, acné, hyperséborrhée', color: 'bad', show: (p) => p.sopk > 0.02, info: 'Hirsutisme : pilosité excessive dans les zones normalement glabres chez la femme ; score de Ferriman-Gallwey > 8 (polycopié, partie 2, p. 14).' },
+        { id: 'ir', x: 1260, y: 820, label: 'Hyperinsulinisme', w: 220, sub: 'insulinorésistance, obésité', color: 'p-blue2', show: (p) => p.sopk > 0.02, info: 'Souvent associé au SOPK : hyperinsulinisme secondaire à une insulinorésistance, acanthosis nigricans (polycopié, partie 2, p. 15). L\'insuline stimule la production d\'androgènes par la thèque (complément).' }
+      ],
+      extraLinks: [
+        { from: 'ovary', to: 'skin', mol: 'testo', v: 'sopkRate', label: 'androgènes' },
+        { from: 'ir', to: 'ovary', kind: 'stim', mol: 'insulin', v: 'sopkRate', label: 'insuline' }
+      ],
+      rates: { sopkRate: (s, p) => 0.4 + 1.2 * p.sopk },
       levels: [{ label: 'LH', mol: 'lh', v: 'lh', max: 3 }, { label: 'FSH', mol: 'fsh', v: 'fsh', max: 3 }, { label: 'Estradiol', mol: 'e2', v: 'e2', max: 1.6 }, { label: 'Progestérone', mol: 'prog', v: 'prog', max: 1.6 }]
     }
   };
