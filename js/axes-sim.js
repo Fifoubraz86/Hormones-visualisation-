@@ -66,16 +66,21 @@
   /* ===================== Axe corticotrope ===================== */
   SIMS.cortico = {
     title: 'Bilan corticotrope simulé',
-    defaults: { hypo: 1, pit: 1, adr: 1, autoPit: 0, autoAdr: 0, ecto: 0, exo: 0 },
-    init: { crh: 1, acth: 1, cort: 1, reg: 1 },
+    defaults: { hypo: 1, pit: 1, adr: 1, autoPit: 0, autoAdr: 0, ecto: 0, exo: 0, syn: 0, dxm: 0 },
+    init: { crh: 1, acth: 1, cort: 1, reg: 1, troph: 1 },
+    tau: { troph: 6 },
     targets(p, s) {
-      const fb = s.cort + p.exo;
+      const fb = s.cort + p.exo + p.dxm; // la dexaméthasone freine l'axe mais n'est pas dosée comme cortisol
       const crh = clamp(p.hypo * ex(-1.5 * (fb - 1)), 0, 3);
       const reg = clamp(p.pit * pw(s.crh, 0.8) * ex(-2 * (fb - 1)), 0, 12);
       // Adénome corticotrope : sécrétion partiellement freinable ; ACTH ectopique : non freinable.
       const acth = reg + p.autoPit * (0.4 + 0.6 * ex(-0.6 * (fb - 1))) + p.ecto;
-      const cort = clamp(p.adr * pw(Math.max(acth, 0), 0.7) + p.autoAdr, 0, 12);
-      return { crh, acth, cort, reg };
+      // Trophicité du cortex : s'atrophie lentement sans ACTH (insuffisance corticotrope, corticothérapie).
+      const troph = clamp(pw(Math.max(acth, 0.01), 0.5), 0.25, 1.6);
+      // Réponse surrénalienne saturable ; le Synacthène (ACTH 1-24) s'ajoute à l'ACTH endogène.
+      const drive = Math.max(acth, 0) + p.syn;
+      const cort = clamp((p.adr * s.troph * 2.2 * drive) / (drive + 1.2) + p.autoAdr, 0, 12);
+      return { crh, acth, cort, reg, troph };
     },
     labs: [
       { key: 'acth', name: 'ACTH à 8 h', unit: 'pg/mL', k: 25, lo: 10, hi: 50, min: 0, max: 250, dec: 0 },
@@ -134,14 +139,19 @@
       ],
       extraNodes: [
         { id: 'ecto', x: 570, y: 760, label: 'Tumeur ectopique', sub: 'ACTH non freinable', color: 'bad', show: (p) => p.ecto > 0.02, info: 'Sécrétion ectopique (paranéoplasique) d\'ACTH, par exemple par une tumeur bronchique ou pancréatique.' },
-        { id: 'exo', x: 230, y: 600, label: 'Corticoïdes exogènes', w: 250, color: 'p-gold', show: (p) => p.exo > 0.02, info: 'Les glucocorticoïdes de synthèse exercent le même rétrocontrôle négatif que le cortisol.' }
+        { id: 'exo', x: 230, y: 600, label: 'Corticoïdes exogènes', w: 250, color: 'p-gold', show: (p) => p.exo > 0.02, info: 'Les glucocorticoïdes de synthèse exercent le même rétrocontrôle négatif que le cortisol.' },
+        { id: 'syn', x: 930, y: 600, label: 'Synacthène 250 µg', w: 240, color: 'p-orange2', show: (p) => p.syn > 0.02, info: 'Tétracosactide (ACTH 1-24) : stimulation maximale de la corticosurrénale.' },
+        { id: 'dxm', x: 400, y: 600, label: 'Dexaméthasone 1 mg', w: 250, color: 'p-gold', show: (p) => p.dxm > 0.02, info: 'Glucocorticoïde puissant non dosé par le dosage du cortisol : freine CRH et ACTH.' }
       ],
       extraLinks: [
         { from: 'ecto', to: 'adr', kind: 'stim', mol: 'acth', v: 'ectoRate', label: '' },
         { from: 'exo', to: 'pit', kind: 'inhib', color: 'p-gold', label: '' },
-        { from: 'exo', to: 'hypo', kind: 'inhib', color: 'p-gold', label: '' }
+        { from: 'exo', to: 'hypo', kind: 'inhib', color: 'p-gold', label: '' },
+        { from: 'syn', to: 'adr', kind: 'stim', mol: 'acth', v: 'synRate', label: 'ACTH 1-24' },
+        { from: 'dxm', to: 'pit', kind: 'inhib', color: 'p-gold', label: '' },
+        { from: 'dxm', to: 'hypo', kind: 'inhib', color: 'p-gold', label: '' }
       ],
-      rates: { ectoRate: (s, p) => p.ecto / 2 },
+      rates: { ectoRate: (s, p) => p.ecto / 2, synRate: (s, p) => Math.min(4, p.syn / 5) },
       levels: [{ label: 'ACTH', mol: 'acth', v: 'acth', max: 4 }, { label: 'Cortisol', mol: 'cortisol', v: 'cort', max: 4 }]
     }
   };
@@ -149,11 +159,11 @@
   /* ===================== Axe somatotrope ===================== */
   SIMS.somato = {
     title: 'Bilan somatotrope simulé',
-    defaults: { hypo: 1, pit: 1, autoPit: 0, liver: 1 },
+    defaults: { hypo: 1, pit: 1, autoPit: 0, liver: 1, load: 0 },
     init: { ghrh: 1, gh: 1, igf: 1, reg: 1 },
     targets(p, s) {
       const ghrh = clamp(p.hypo * ex(-1 * (s.igf - 1)), 0, 6);
-      const reg = clamp(p.pit * pw(s.ghrh, 0.8) * ex(-1.5 * (s.igf - 1)), 0, 10);
+      const reg = clamp(p.pit * pw(s.ghrh, 0.8) * ex(-1.5 * (s.igf - 1)) * ex(-2.3 * p.load), 0, 10); // l'hyperglycémie freine la GH normale
       const gh = reg + p.autoPit;
       const igf = clamp(p.liver * pw(gh, 0.6), 0, 6);
       return { ghrh, gh, igf, reg };
@@ -185,6 +195,9 @@
     hooks: {
       links: { 'hypo>pit>ghrh': 'ghrh', 'pit>liver>gh': 'gh', 'liver>bone>igf1': 'igf', 'liver>muscle>igf1': 'igf', 'liver>pit>igf1': 'igf', 'liver>hypo>igf1': 'igf' },
       cap: { pit: 'pit', liver: 'liver' },
+      extraNodes: [{ id: 'load', x: 980, y: 770, label: 'Glucose 75 g (HGPO)', w: 260, color: 'p-lime', show: (p) => p.load > 0.02, info: 'La charge orale en glucose freine normalement la GH.' }],
+      extraLinks: [{ from: 'load', to: 'pit', kind: 'inhib', mol: 'glucose', v: 'loadRate', label: '' }],
+      rates: { loadRate: (s, p) => 2 * p.load },
       lesions: [
         { node: 'pit', kind: 'mass', tone: 'sky', dy: -4, show: (p) => p.autoPit > 0.02, size: (p) => clamp(0.6 + 0.12 * p.autoPit, 0.6, 1.3), label: 'adénome somatotrope', ly: 52, title: 'Adénome somatotrope', text: 'Souvent un macroadénome au diagnostic (extension vers le sinus caverneux ou le chiasma).' },
         { node: 'pit', kind: 'mass', tone: 'grey', dy: -4, show: (p) => p.pit < 0.5, label: 'lésion hypophysaire', ly: 52, title: 'Insuffisance somatotrope', text: 'Atteinte hypophysaire (tumeur, chirurgie, radiothérapie). Le test de référence est l\'hypoglycémie insulinique.' },
@@ -245,14 +258,15 @@
   /* ===================== Posthypophyse ===================== */
   SIMS.adh = {
     title: 'Bilan hydrique simulé',
-    defaults: { hypo: 1, kidney: 1, siadh: 0 },
+    defaults: { hypo: 1, kidney: 1, siadh: 0, restrict: 0, ddavp: 0 },
     init: { na: 140, adh: 1, eff: 1 },
     tau: { na: 3 },
     targets(p, s) {
       const adh = clamp(p.hypo * ex((s.na - 140) / 3), 0, 12) + p.siadh;
-      const eff = clamp((p.kidney * adh) / (adh + 0.5) * 1.5, 0, 1.5);
-      // Rétention d'eau libre → baisse de la natrémie ; perte d'eau compensée en partie par la soif.
-      const na = eff >= 1 ? 140 - 40 * (eff - 1) : 140 + 7 * (1 - eff);
+      const a2 = adh + 5 * p.ddavp; // desmopressine : agoniste V2
+      const eff = clamp((p.kidney * a2) / (a2 + 0.5) * 1.5, 0, 1.5);
+      // Rétention d'eau libre → baisse de la natrémie ; perte d'eau compensée par la soif, sauf en restriction hydrique.
+      const na = 140 + 3 * p.restrict + (eff >= 1 ? -40 * (eff - 1) * (1 - p.restrict) : (7 + 18 * p.restrict) * (1 - eff));
       return { adh, eff, na };
     },
     labs: [
@@ -284,9 +298,12 @@
         { node: 'hypo', kind: 'mass', tone: 'grey', dx: 50, dy: 46, size: () => 0.8, show: (p) => p.hypo < 0.5, label: 'lésion de la tige', ly: 42, title: 'Lésion hypothalamo-tigellaire', text: 'Le polycopié cite : hypophysite, craniopharyngiome, gliome du chiasma, méningiome, pathologie infiltrative, métastase. Un adénome hypophysaire n\'en donne pas, sauf apoplexie ou chirurgie.' },
         { node: 'kidney', kind: 'cross', show: (p) => p.kidney < 0.5, label: 'récepteur V2 inactif', title: 'Diabète insipide néphrogénique', text: 'Le rein ne répond pas à l\'ADH (complément : origine génétique, lithium, hypercalcémie, hypokaliémie).' }
       ],
-      extraNodes: [{ id: 'ectoadh', x: 960, y: 850, label: 'Tumeur ou médicament', w: 270, color: 'bad', show: (p) => p.siadh > 0.02, info: 'SIADH : de nombreux médicaments, ou une tumeur responsable d\'un syndrome paranéoplasique.' }],
-      extraLinks: [{ from: 'ectoadh', to: 'kidney', kind: 'stim', mol: 'adh', bend: -200, v: 'siadhRate', label: '' }],
-      rates: { siadhRate: (s, p) => p.siadh / 2 },
+      extraNodes: [
+        { id: 'restr', x: 230, y: 600, label: 'Restriction hydrique', w: 250, color: 'p-sky', show: (p) => p.restrict > 0.02, info: 'Arrêt des boissons en milieu hospitalier : l\'osmolalité monte et l\'ADH doit concentrer les urines.' },
+        { id: 'ddavp', x: 1350, y: 820, label: 'Desmopressine', w: 220, color: 'p-sky', show: (p) => p.ddavp > 0.02, info: 'Agoniste V2 : concentre les urines si le rein répond (diabète insipide central), pas dans le diabète insipide néphrogénique.' },
+        { id: 'ectoadh', x: 960, y: 850, label: 'Tumeur ou médicament', w: 270, color: 'bad', show: (p) => p.siadh > 0.02, info: 'SIADH : de nombreux médicaments, ou une tumeur responsable d\'un syndrome paranéoplasique.' }],
+      extraLinks: [{ from: 'ectoadh', to: 'kidney', kind: 'stim', mol: 'adh', bend: -200, v: 'siadhRate', label: '' }, { from: 'restr', to: 'hypo', kind: 'stim', color: 'p-sky', label: 'osmolalité ↑' }, { from: 'ddavp', to: 'kidney', kind: 'stim', mol: 'adh', v: 'ddavpRate', label: '' }],
+      rates: { siadhRate: (s, p) => p.siadh / 2, ddavpRate: (s, p) => 2 * p.ddavp },
       levels: [{ label: 'ADH', mol: 'adh', v: 'adh', max: 6 }]
     }
   };
@@ -639,13 +656,19 @@
       return { tone: 'good', label: 'Bilan lipidique normal', text: 'LDL-c et triglycérides dans les valeurs usuelles.' };
     },
     hooks: {
-      links: { 'cap>hep>ldl': 'ldl', 'hep>hmg>chol': 'rec', 'liver>cap>vldl': 'tgRate' },
-      rates: { tgRate: (s, p) => p.tg },
-      cap: { hep: 'ldlr' },
-      lesions: [
-        { node: 'hep', kind: 'label', show: (p) => p.ldlr < 0.7, label: 'récepteurs des LDL déficients', ly: -84, title: 'Hypercholestérolémie familiale', text: 'Mutation (le plus souvent du gène du récepteur des LDL) : moins de récepteurs, LDL-c élevé ; xanthomes tendineux, arc cornéen.' }
+      links: { 'plasma>liver>ldl': 'recRate', 'plasma>artery>ldl': 'ldl', 'plasma>periph>ldl': 'ldl', 'liver>hmg>chol': 'rec', 'liver>plasma>vldl': 'tgRate', 'liver>pcsk9>pcsk9': 'pcsk9Rate', 'pcsk9>liver>pcsk9': 'pcsk9Rate' },
+      rates: { tgRate: (s, p) => p.tg, recRate: (s) => s.rec, pcsk9Rate: (s, p) => 1 - 0.9 * p.pcsk9i },
+      cap: { liver: 'ldlr' },
+      extraNodes: [
+        { id: 'statin', x: 1380, y: 570, label: 'Statine', w: 170, color: 'p-blue', show: (p) => p.statin > 0.02, info: 'Inhibe l\'HMG-CoA réductase : le cholestérol intracellulaire baisse, l\'hépatocyte exprime plus de récepteurs des LDL.' },
+        { id: 'antip', x: 1380, y: 870, label: 'Anti-PCSK9', w: 180, color: 'p-blue', show: (p) => p.pcsk9i > 0.02, info: 'Anticorps monoclonal (ou ARN interférent) : les récepteurs des LDL ne sont plus dégradés.' }
       ],
-      levels: [{ label: 'LDL-c', mol: 'ldl', v: 'ldl', max: 5 }]
+      extraLinks: [{ from: 'statin', to: 'hmg', kind: 'inhib', color: 'p-blue', label: '' }, { from: 'antip', to: 'pcsk9', kind: 'inhib', color: 'p-blue', label: '' }],
+      lesions: [
+        { node: 'liver', kind: 'label', show: (p) => p.ldlr < 0.7, label: 'récepteurs des LDL déficients', ly: -96, title: 'Hypercholestérolémie familiale', text: 'Mutation (le plus souvent du gène du récepteur des LDL, plus rarement de l\'apoB ou gain de fonction de PCSK9) : moins de récepteurs hépatiques, LDL-c élevé ; xanthomes tendineux, arc cornéen.' },
+        { node: 'artery', kind: 'nodule', tone: 'yellow', dx: 0, dy: -4, show: (p, s) => s.ldl > 1.6, label: 'plaque d\'athérome', ly: -26, title: 'Athérome', text: 'Accumulation de LDL oxydées dans l\'intima.' }
+      ],
+      levels: [{ label: 'LDL-c', mol: 'ldl', v: 'ldl', max: 5 }, { label: 'Récepteurs', mol: 'ldlr', v: 'rec', max: 3 }]
     }
   };
 

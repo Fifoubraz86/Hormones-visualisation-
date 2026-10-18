@@ -694,3 +694,24 @@ line.m-db { stroke: var(--mc); stroke-width: 0.9; }
 .img-d { fill: #3a2a3a; }
 .sheet-cap { margin: 0; font-size: 13px; color: var(--muted); }
 @media (max-width: 860px) { .sheet { top: 6px; bottom: 6px; } }
+
+/* ---------- Tests dynamiques ---------- */
+.tests-body { display: flex; flex-direction: column; gap: 8px; }
+.chip.test.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.tests-hint, .test-proto { margin: 0; font-size: 12.5px; color: var(--muted); }
+.test-what { margin: 0; font-size: 13.5px; }
+.test-chart { border: 1px solid var(--line); border-radius: 10px; background: var(--panel-2); }
+.test-svg { display: block; width: 100%; height: auto; }
+.test-svg .ax { stroke: var(--line-2); stroke-width: 1; }
+.test-svg .tk { font: 10px var(--font-data); fill: var(--muted); }
+.test-svg .thr { stroke: var(--warn); stroke-width: 1.2; stroke-dasharray: 4 4; }
+.test-svg .thr-t { font: 9.5px var(--font-body); fill: var(--warn); }
+.test-svg .trace { fill: none; stroke: var(--accent); stroke-width: 2; }
+.test-svg .pt { stroke: var(--panel); stroke-width: 1.5; }
+.test-svg .pt.ok { fill: var(--good); }
+.test-svg .pt.ko { fill: var(--bad); }
+.test-res { margin: 0; font-size: 13.5px; padding: 8px 10px; border-radius: 8px; background: var(--panel-2); border-left: 3px solid var(--line-2); }
+.test-res[data-tone="good"] { border-left-color: var(--good); }
+.test-res[data-tone="bad"] { border-left-color: var(--bad); }
+.test-res[data-tone="warn"] { border-left-color: var(--warn); }
+.test-res:empty { display: none; }

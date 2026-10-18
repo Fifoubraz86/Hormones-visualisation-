@@ -304,6 +304,7 @@
     prov = P;
     $('labCard').hidden = !P;
     $('scenarioCard').hidden = !P;
+    HV.renderTests($('testCard'), P && P !== M ? P : null);
     if (!P) return;
     $('labTitle').textContent = P.title || 'Bilan simulé';
     hist = {};
@@ -336,6 +337,7 @@
       lab.className = 'scenario';
       lab.innerHTML = `<input type="radio" name="scenario" id="sc-${P.id}-${sc.id}" value="${sc.id}"${(P.active || P.SCENARIOS[0].id) === sc.id ? ' checked' : ''}><span class="sc-name">${sc.name}</span><span class="sc-note">${sc.note}</span>`;
       lab.querySelector('input').addEventListener('change', () => {
+        HV.Tests.reset();
         P.active = sc.id;
         P.setScenario(sc.id);
         syncSliders();
@@ -351,6 +353,7 @@
       row.innerHTML = `<label for="p-${P.id}-${Q.key}">${Q.label}<output></output></label><input type="range" id="p-${P.id}-${Q.key}" min="${Q.min}" max="${Q.max}" step="${Q.step}">`;
       const input = row.querySelector('input');
       input.addEventListener('input', () => {
+        HV.Tests.reset();
         P.p[Q.key] = parseFloat(input.value);
         row.querySelector('output').textContent = Q.fmt(P.p[Q.key]);
         const radio = document.querySelector('input[name="scenario"]:checked');
@@ -405,6 +408,7 @@
   }
   $('btnReset').addEventListener('click', () => {
     if (!prov) return;
+    HV.Tests.reset();
     prov.reset();
     prov.active = prov.SCENARIOS[0].id;
     const r = document.getElementById(`sc-${prov.id}-${prov.active}`);
@@ -438,6 +442,7 @@
     stepTween(now);
     const sdt = playing ? dt * speed : 0;
     M.step(sdt);
+    HV.Tests.update(sdt);
     for (const sc of scenes) {
       // Le décor d'une scène parente s'efface quand on est loin à l'intérieur d'une de ses scènes enfants.
       const ratio = (HV.W * sc.world.s) / cam.w;

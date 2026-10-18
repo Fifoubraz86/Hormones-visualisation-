@@ -371,27 +371,31 @@
   AX.push({
     id: 'lipid', card: { side: 'R', row: 5 }, color: 'p-orange', target: [774, 436],
     name: 'Métabolisme des lipoprotéines', sub: 'Chylomicrons · VLDL · IDL · LDL · HDL · récepteur des LDL',
-    lead: 'L\'intestin exporte les lipides alimentaires dans les chylomicrons, le foie sécrète les VLDL. La lipoprotéine lipase les appauvrit en triglycérides : VLDL → IDL → LDL. Les LDL sont captées par leur récepteur ; le cholestérol internalisé freine sa propre synthèse et l\'expression du récepteur. Les HDL ramènent le cholestérol au foie.',
-    points: ['70 % des récepteurs des LDL sont hépatiques.', 'PCSK9 oriente le récepteur des LDL vers la dégradation lysosomale : LDL plasmatique ↑.', 'Le cholestérol rapporté au foie est éliminé en acides biliaires (cycle entéro-hépatique).', 'Les HDL sont anti-athérogènes et cardioprotectrices.'],
+    lead: 'Le foie est au centre du métabolisme des LDL : l\'hépatocyte sécrète les VLDL, porte 70 % des récepteurs des LDL et sécrète la PCSK9, qui agit surtout sur ses propres récepteurs. Dans le plasma, la lipoprotéine lipase transforme les VLDL en IDL puis en LDL. Le cholestérol internalisé freine l\'HMG-CoA réductase. Les HDL ramènent au foie le cholestérol des tissus.',
+    points: ['70 % des récepteurs des LDL sont hépatiques, 30 % sur les autres cellules.', 'PCSK9, sécrétée par l\'hépatocyte, se fixe au récepteur des LDL et l\'oriente vers le lysosome au lieu du recyclage : moins de récepteurs, LDL plasmatique ↑.', 'Les statines freinent l\'HMG-CoA réductase : la cellule exprime plus de récepteurs (SREBP-2) et capte plus de LDL. Les anti-PCSK9 empêchent la dégradation des récepteurs.', 'Un LDL-c élevé se dépose dans la paroi artérielle (athérome) ; les HDL sont anti-athérogènes.'],
     nodes: [
-      { id: 'gut', x: 220, y: 330, organ: 'intestine', label: 'Intestin', sub: 'entérocyte', color: 'p-amber' },
-      { id: 'cap', x: 600, y: 330, organ: 'vessel', label: 'Capillaires', sub: 'lipoprotéine lipase', color: 'p-amber', info: 'La lipoprotéine lipase hydrolyse les triglycérides des chylomicrons et des VLDL ; les acides gras sont captés par le muscle et le tissu adipeux.' },
-      { id: 'liver', x: 220, y: 720, organ: 'liver', label: 'Foie', sub: 'VLDL, HDL naissantes', color: 'p-gold' },
-      { id: 'hep', x: 980, y: 720, organ: 'cellIcon', label: 'Cellule (récepteur des LDL)', sub: 'internalisation', color: 'p-teal' },
-      { id: 'tissue', x: 980, y: 330, organ: 'muscle', s: 0.9, label: 'Muscle, tissu adipeux', sub: 'acides gras', color: 'p-amber' },
-      { id: 'hmg', x: 1360, y: 620, label: 'HMG-CoA réductase', w: 250, sub: 'synthèse du cholestérol', color: 'p-gold', info: 'Freinée par le cholestérol issu des LDL internalisées.' },
-      { id: 'pcsk9', x: 1360, y: 840, label: 'PCSK9', color: 'p-magenta' }
+      { id: 'gut', x: 200, y: 280, organ: 'intestine', label: 'Intestin', sub: 'chylomicrons (apoB48)', color: 'p-amber' },
+      { id: 'plasma', x: 620, y: 280, organ: 'vessel', s: 1.3, label: 'Plasma', sub: ['lipoprotéine lipase', 'VLDL → IDL → LDL'], color: 'p-amber', info: 'La lipoprotéine lipase hydrolyse les triglycérides des chylomicrons et des VLDL ; les VLDL deviennent IDL puis LDL (lipase hépatique).' },
+      { id: 'tissue', x: 1060, y: 190, organ: 'muscle', s: 0.85, label: 'Muscle, tissu adipeux', sub: 'acides gras', color: 'p-amber' },
+      { id: 'artery', x: 1060, y: 420, organ: 'vessel', s: 0.9, label: 'Paroi artérielle', sub: 'dépôt de LDL : athérome', color: 'bad', info: 'Les LDL en excès pénètrent dans l\'intima et s\'y oxydent : début de la plaque d\'athérome.' },
+      { id: 'liver', x: 620, y: 700, organ: 'liver', s: 1.45, label: 'Foie : hépatocyte', sub: ['70 % des récepteurs des LDL', 'sécrète VLDL, HDL et PCSK9'], color: 'p-gold' },
+      { id: 'periph', x: 200, y: 700, organ: 'cellIcon', label: 'Cellules périphériques', sub: '30 % des récepteurs des LDL', color: 'p-teal' },
+      { id: 'hmg', x: 1060, y: 570, label: 'HMG-CoA réductase', w: 250, sub: 'synthèse du cholestérol', color: 'p-gold', info: 'Enzyme limitante de la synthèse du cholestérol, freinée par le cholestérol issu des LDL internalisées ; cible des statines.' },
+      { id: 'pcsk9', x: 1060, y: 870, label: 'PCSK9', w: 200, sub: 'agit surtout sur l\'hépatocyte', color: 'p-magenta', info: 'Sécrétée par l\'hépatocyte, elle se lie au récepteur des LDL de la surface et entraîne sa dégradation lysosomale.' }
     ],
     links: [
-      { from: 'gut', to: 'cap', mol: 'chylo', rate: 1.2 },
-      { from: 'cap', to: 'tissue', mol: 'ffa', rate: 1.2, label: 'acides gras' },
-      { from: 'cap', to: 'liver', mol: 'chylo', bend: 60, label: 'remnants', rate: 0.7 },
-      { from: 'liver', to: 'cap', mol: 'vldl', bend: 60, rate: 1.2 },
-      { from: 'cap', to: 'hep', mol: 'ldl', rate: 1.4, label: 'IDL → LDL' },
-      { from: 'hep', to: 'liver', mol: 'hdl', bend: -60, rate: 1, label: 'HDL : retour au foie' },
-      { from: 'hep', to: 'hmg', kind: 'inhib', mol: 'chol', rate: 1, label: 'cholestérol' },
-      { from: 'pcsk9', to: 'hep', kind: 'inhib', mol: 'pcsk9', rate: 0.6, label: 'dégrade le LDL-R' }
-    ]
+      { from: 'gut', to: 'plasma', mol: 'chylo', rate: 1.2 },
+      { from: 'plasma', to: 'tissue', mol: 'ffa', rate: 1.2, label: 'acides gras' },
+      { from: 'liver', to: 'plasma', mol: 'vldl', bend: -90, rate: 1.2, label: 'VLDL' },
+      { from: 'plasma', to: 'liver', mol: 'ldl', bend: -90, rate: 1.4, label: 'LDL, remnants → récepteurs' },
+      { from: 'plasma', to: 'artery', mol: 'ldl', rate: 0.5, label: 'LDL en excès' },
+      { from: 'plasma', to: 'periph', mol: 'ldl', rate: 0.6, label: '' },
+      { from: 'periph', to: 'liver', mol: 'hdl', rate: 1, label: 'HDL : retour du cholestérol' },
+      { from: 'liver', to: 'hmg', kind: 'inhib', mol: 'chol', rate: 1, label: 'cholestérol' },
+      { from: 'liver', to: 'pcsk9', mol: 'pcsk9', bend: 70, rate: 0.6, label: 'sécrétion' },
+      { from: 'pcsk9', to: 'liver', kind: 'inhib', mol: 'pcsk9', bend: 70, rate: 0.6, label: 'dégrade le LDL-R' }
+    ],
+    levels: { x: 60, y: 880, w: 300, items: [] }
   });
 
   HV.AXES = AX;
