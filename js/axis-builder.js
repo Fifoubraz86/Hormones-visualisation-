@@ -129,7 +129,16 @@
         /* ---- Coupe cerveau – hypothalamus – hypophyse (axes hypophysaires) ---- */
         const hh = ax.hh || null;
         if (hh) {
-          const hg = a.el('g', { class: 'hh', transform: `translate(${hh.x} ${hh.y}) scale(${hh.flip ? -hh.s : hh.s} ${hh.s})` });
+          // Médaillon : la coupe est agrandie et découpée dans un cercle centré sur la région hypothalamo-hypophysaire.
+          let host = null;
+          if (hh.inset) {
+            const I = hh.inset, cid = 'hhclip-' + ax.id;
+            a.el('circle', { cx: I.cx, cy: I.cy, r: I.r, fill: 'black' }, a.el('clipPath', { id: cid }, a.el('defs')));
+            a.el('circle', { cx: I.cx, cy: I.cy, r: I.r, class: 'hh-inset-bg' });
+            host = a.el('g', { 'clip-path': `url(#${cid})` });
+          }
+          const hg = a.el('g', { class: 'hh', transform: `translate(${hh.x} ${hh.y}) scale(${hh.flip ? -hh.s : hh.s} ${hh.s})` }, host);
+          if (hh.inset) a.el('circle', { cx: hh.inset.cx, cy: hh.inset.cy, r: hh.inset.r, class: 'hh-inset-ring' });
           HV.organs.hhSagittal(hg, hh);
           reg.extras.hh = hg;
           const fx = hh.flip ? -1 : 1, HX = (lx) => hh.x + lx * hh.s * fx, HY = (ly) => hh.y + ly * hh.s;
@@ -137,8 +146,9 @@
           // Légendes discrètes, du côté postérieur (libre) de la tige.
           const back = fx > 0 ? 'start' : 'end';
           const caps = hh.portal === false ? [[HX(26), HY(96), ['tige pituitaire', '(axones)'], back]] : [];
-          if (!used.has('post')) caps.push([HX(46), HY(214), ['posthypophyse'], 'middle']);
+          if (!used.has('post')) caps.push(hh.inset ? [HX(40), HY(196), ['posthypophyse'], 'middle'] : [HX(46), HY(214), ['posthypophyse'], 'middle']);
           if (!used.has('ant')) caps.push([HX(-30), HY(218), ['antéhypophyse'], 'middle']);
+          if (hh.inset) caps.push([hh.inset.cx, hh.inset.cy + hh.inset.r + 26, ['coupe sagittale agrandie'], 'middle']);
           caps.concat(hh.captions || []).forEach((c) => a.text(c[0], c[1], c[2], 'hh-cap', { anchor: c[3] || 'start', lh: 1.15 }));
         }
         const T = { h: ax.startHour != null ? ax.startHour : 8, d: 1 };
@@ -168,15 +178,20 @@
           const s = n.s || 1.15;
           const grp = a.el('g', { class: 'ax-node' + (n.organ || n.at ? '' : ' signal'), 'data-info': key, 'data-sheet': n.organ ? HV.ORGAN_BY_ICON[n.organ] || null : n.sheet || null });
           reg.nodes[n.id] = grp;
-          if (n.at) {
-            // Point d'ancrage sur la coupe cerveau – hypophyse : pas d'icône, juste une zone sensible et l'étiquette.
-            const P = HV.organs.HH[n.at];
-            n.x = hh.x + P[0] * hh.s * (hh.flip ? -1 : 1);
-            n.y = hh.y + P[1] * hh.s;
+          if (n.at || n.bare) {
+            // Point d'ancrage sur un dessin partagé (coupe cerveau – hypophyse, rein et surrénale) :
+            // pas d'icône, juste une zone sensible et l'étiquette.
+            if (n.at) {
+              const P = HV.organs.HH[n.at];
+              n.x = hh.x + P[0] * hh.s * (hh.flip ? -1 : 1);
+              n.y = hh.y + P[1] * hh.s;
+            }
+            if (n.dot) a.el('circle', { cx: n.x, cy: n.y, r: n.dot, class: 'hh-dot', style: `--c: var(--${n.color || 'accent'})` }, grp);
             a.el('circle', { cx: n.x, cy: n.y, r: n.hit || 30, class: 'hh-hit', style: `--c: var(--${n.color || 'accent'})` }, grp);
             n.r = n.rr || 30;
             const lx = n.x + (n.lx != null ? n.lx : 46), ly = n.y + (n.ly || 0);
             const anc = n.anchor || 'start';
+            if (n.leader) a.path(`M ${n.x},${n.y} L ${lx + (anc === 'end' ? 8 : -8)},${ly - 6}`, 'hh-leader', grp);
             a.text(lx, ly, n.label.split('\n'), 'lbl ax-lbl', { anchor: anc, lh: 1.15 }, grp);
             if (n.sub) a.text(lx, ly + 24 + (n.label.includes('\n') ? 26 : 0), Array.isArray(n.sub) ? n.sub : [n.sub], 'note', { anchor: anc, lh: 1.25 }, grp);
           } else if (n.organ) {

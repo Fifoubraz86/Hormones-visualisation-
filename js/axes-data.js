@@ -75,13 +75,13 @@
   AX.push({
     id: 'cortico', card: { side: 'L', row: 1 }, color: 'p-gold', target: [761, 452],
     name: 'Axe corticotrope', sub: 'Hypothalamus · antéhypophyse · corticosurrénale', clock: 'day',
-    hh: { x: 270, y: 340, s: 1.05, flip: true },
+    hh: { x: 280, y: 341, s: 1.8, flip: true, inset: { cx: 300, cy: 480, r: 235 } },
     clockInfo: 'Le cortisol est le plus élevé en début de matinée et le plus bas le soir, du fait du rythme circadien de l\'ACTH.',
     lead: 'La CRH hypothalamique stimule la sécrétion d\'ACTH, qui stimule la production de cortisol (et d\'androgènes) par la corticosurrénale. Le cortisol, et non les androgènes, freine en retour la CRH et l\'ACTH.',
     points: ['Rythme circadien : pic de cortisol le matin, nadir le soir (horloge à côté du titre).', 'L\'inflammation augmente la sécrétion d\'ACTH.', 'Exploration : cortisol à 8 h, test au Synacthène, freinage minute à la dexaméthasone, cortisol libre urinaire ou salivaire à minuit.', 'L\'excès chronique d\'ACTH entraîne une hyperplasie surrénalienne.'],
     nodes: [
-      { id: 'hypo', at: 'hypo', lx: 96, ly: 50, label: 'Hypothalamus', sub: 'noyau paraventriculaire : CRH', color: 'p-orange', info: 'Les neurones hypothalamiques libèrent la CRH dans le système porte.' },
-      { id: 'pit', at: 'ant', lx: 40, ly: 96, label: 'Antéhypophyse', sub: 'cellules corticotropes', color: 'p-orange2', info: 'Les cellules corticotropes sécrètent l\'ACTH (et l\'α-MSH, issue de la POMC).' },
+      { id: 'hypo', at: 'hypo', leader: true, lx: 290, ly: -14, label: 'Hypothalamus', sub: 'noyau paraventriculaire : CRH', color: 'p-orange', info: 'Les neurones hypothalamiques libèrent la CRH dans le système porte.' },
+      { id: 'pit', at: 'ant', leader: true, lx: 250, ly: 14, label: 'Antéhypophyse', sub: 'cellules corticotropes', color: 'p-orange2', info: 'Les cellules corticotropes sécrètent l\'ACTH (et l\'α-MSH, issue de la POMC).' },
       { id: 'adr', x: 930, y: 380, organ: 'adrenalKidney', label: 'Corticosurrénale', sub: ['zone fasciculée : cortisol', 'zone réticulée : androgènes'], color: 'p-gold', info: 'Zone fasciculée : 75 à 80 % du volume du cortex, cortisol. Zone réticulée : DHEA, DHEA-S, androstènedione.' },
       { id: 'liver', x: 1330, y: 240, organ: 'liver', s: 0.9, label: 'Foie', sub: 'néoglucogenèse', color: 'p-gold' },
       { id: 'muscle', x: 1330, y: 440, organ: 'muscle', s: 0.9, label: 'Muscle', sub: 'catabolisme protidique', color: 'p-gold' },
@@ -90,7 +90,7 @@
       { id: 'andro', x: 930, y: 760, label: 'Androgènes', sub: 'pas de rétrocontrôle', color: 'p-sky', info: 'Les androgènes surrénaliens dépendent de l\'ACTH mais ne freinent pas l\'axe (complément).' }
     ],
     links: [
-      { from: 'hypo', to: 'pit', kind: 'stim', mol: 'crh', mod: R.circadian, labelOff: 64 },
+      { from: 'hypo', to: 'pit', kind: 'stim', mol: 'crh', mod: R.circadian, labelOff: 150 },
       { from: 'pit', to: 'adr', kind: 'stim', mol: 'acth', mod: R.circadian },
       { from: 'adr', to: 'liver', mol: 'cortisol', mod: R.circadian, rate: 1 },
       { from: 'adr', to: 'muscle', mol: 'cortisol', mod: R.circadian, rate: 1, label: '' },
@@ -107,13 +107,13 @@
   AX.push({
     id: 'somato', card: { side: 'L', row: 2 }, color: 'p-sky', target: [790, 198],
     name: 'Axe somatotrope', sub: 'Hypothalamus · antéhypophyse · foie', clock: 'day', startHour: 20,
-    hh: { x: 270, y: 340, s: 1.05, flip: true },
+    hh: { x: 280, y: 341, s: 1.8, flip: true, inset: { cx: 300, cy: 480, r: 235 } },
     clockInfo: 'La GH est sécrétée de façon pulsatile, particulièrement la nuit.',
     lead: 'La GHRH stimule et la somatostatine freine la sécrétion de GH. La GH, pulsatile et surtout nocturne, stimule la production hépatique d\'IGF-1, qui freine en retour la GH et la GHRH.',
     points: ['Les analogues de la somatostatine traitent l\'acromégalie.', 'Diagnostic de l\'acromégalie : IGF-1 élevée et absence de freination de la GH sous HGPO (GH ≥ 0,4 ng/mL).', 'La GH est l\'une des hormones de contre-régulation de l\'hypoglycémie.', 'Avant la soudure des cartilages, l\'excès de GH donne un gigantisme.'],
     nodes: [
-      { id: 'hypo', at: 'hypo', lx: 96, ly: 50, label: 'Hypothalamus', sub: 'GHRH (+) · somatostatine (−)', color: 'p-sky' },
-      { id: 'pit', at: 'ant', lx: 40, ly: 96, label: 'Antéhypophyse', sub: 'cellules somatotropes', color: 'p-sky' },
+      { id: 'hypo', at: 'hypo', leader: true, lx: 290, ly: -14, label: 'Hypothalamus', sub: 'GHRH (+) · somatostatine (−)', color: 'p-sky' },
+      { id: 'pit', at: 'ant', leader: true, lx: 250, ly: 14, label: 'Antéhypophyse', sub: 'cellules somatotropes', color: 'p-sky' },
       { id: 'liver', x: 980, y: 380, organ: 'liver', label: 'Foie', sub: 'IGF-1', color: 'p-blue' },
       { id: 'bone', x: 1360, y: 260, organ: 'bone', s: 0.9, label: 'Cartilages de croissance', sub: 'croissance staturale', color: 'p-blue' },
       { id: 'muscle', x: 1360, y: 500, organ: 'muscle', s: 0.9, label: 'Muscles, viscères', sub: 'croissance tissulaire', color: 'p-blue' },
@@ -121,8 +121,8 @@
       { id: 'hgpo', x: 600, y: 770, label: 'Hyperglycémie (HGPO)', w: 270, color: 'p-lime', info: 'La charge en glucose freine normalement la GH : test dynamique de freination de l\'acromégalie.' }
     ],
     links: [
-      { from: 'hypo', to: 'pit', kind: 'stim', mol: 'ghrh', bend: -40, mod: R.ghNight, labelOff: 40 },
-      { from: 'hypo', to: 'pit', kind: 'inhib', mol: 'sst', bend: 50, rate: 0.8, labelOff: 70 },
+      { from: 'hypo', to: 'pit', kind: 'stim', mol: 'ghrh', bend: -50, mod: R.ghNight, labelOff: -150 },
+      { from: 'hypo', to: 'pit', kind: 'inhib', mol: 'sst', bend: 50, rate: 0.8, labelOff: 150 },
       { from: 'pit', to: 'liver', kind: 'stim', mol: 'gh', mod: R.ghNight, rate: 2.2 },
       { from: 'liver', to: 'bone', mol: 'igf1' },
       { from: 'liver', to: 'muscle', mol: 'igf1', label: '' },
@@ -138,19 +138,19 @@
   AX.push({
     id: 'lacto', card: { side: 'L', row: 3 }, color: 'p-magenta', target: [764, 352],
     name: 'Axe lactotrope', sub: 'Hypothalamus · antéhypophyse · glande mammaire',
-    hh: { x: 270, y: 340, s: 1.05, flip: true },
+    hh: { x: 280, y: 341, s: 1.8, flip: true, inset: { cx: 300, cy: 480, r: 235 } },
     lead: 'La prolactine est la seule hormone antéhypophysaire freinée en permanence : la dopamine hypothalamique exerce un tonus inhibiteur. TRH et œstrogènes la stimulent. Il n\'y a pas de boucle de rétrocontrôle hormonal comme dans les quatre autres axes.',
     points: ['Une section ou une compression de la tige lève le frein dopaminergique : hyperprolactinémie de déconnexion (prolactine en général < 200 ng/mL).', 'Prolactine > 200 ng/mL : évoque un macroadénome à prolactine.', 'L\'hyperprolactinémie inhibe la pulsatilité de la GnRH : aménorrhée, insuffisance gonadotrope fonctionnelle.', 'Écarter les causes connues (médicaments, grossesse, macroprolactinémie).'],
     nodes: [
-      { id: 'hypo', at: 'hypo', lx: 96, ly: 50, label: 'Hypothalamus', sub: 'dopamine (−) · TRH (+)', color: 'p-grey', info: 'Les neurones dopaminergiques tubéro-infundibulaires (noyau arqué) libèrent la dopamine dans le système porte de la tige (complément).' },
-      { id: 'pit', at: 'ant', lx: 40, ly: 96, label: 'Antéhypophyse', sub: 'cellules lactotropes', color: 'p-magenta' },
+      { id: 'hypo', at: 'hypo', leader: true, lx: 290, ly: -14, label: 'Hypothalamus', sub: 'dopamine (−) · TRH (+)', color: 'p-grey', info: 'Les neurones dopaminergiques tubéro-infundibulaires (noyau arqué) libèrent la dopamine dans le système porte de la tige (complément).' },
+      { id: 'pit', at: 'ant', leader: true, lx: 250, ly: 14, label: 'Antéhypophyse', sub: 'cellules lactotropes', color: 'p-magenta' },
       { id: 'breast', x: 1020, y: 380, organ: 'breast', label: 'Glande mammaire', sub: 'lactation', color: 'p-magenta' },
       { id: 'e2', x: 620, y: 800, label: 'Œstrogènes', sub: 'grossesse', color: 'p-rose' },
       { id: 'gnrh', x: 1020, y: 770, label: 'Neurones à GnRH', w: 250, sub: 'pulsatilité freinée', color: 'p-violet', zoom: 'gonadoF', info: 'L\'excès de prolactine inhibe la pulsatilité de la GnRH hypothalamique.' }
     ],
     links: [
-      { from: 'hypo', to: 'pit', kind: 'inhib', mol: 'dopa', bend: -50, rate: 2.2, label: 'dopamine (tonus −)', labelOff: 120 },
-      { from: 'hypo', to: 'pit', kind: 'stim', mol: 'trh', bend: 60, rate: 0.8, labelOff: 60 },
+      { from: 'hypo', to: 'pit', kind: 'inhib', mol: 'dopa', bend: -50, rate: 2.2, label: 'dopamine (tonus −)', labelOff: -150 },
+      { from: 'hypo', to: 'pit', kind: 'stim', mol: 'trh', bend: 60, rate: 0.8, labelOff: 150 },
       { from: 'e2', to: 'pit', kind: 'stim', mol: 'e2', rate: 0.8 },
       { from: 'pit', to: 'breast', kind: 'stim', mol: 'prl', rate: 1.4 },
       { from: 'pit', to: 'gnrh', kind: 'inhib', mol: 'prl', rate: 0.6, label: '' }
@@ -235,29 +235,29 @@
   AX.push({
     id: 'gonadoF', card: { side: 'R', row: 0 }, color: 'p-rose', target: [832, 592],
     name: 'Axe gonadotrope féminin', sub: 'GnRH pulsatile · LH, FSH · ovaire · cycle de 28 jours', clock: 'cycle',
-    hh: { x: 270, y: 340, s: 1.05, flip: true },
+    hh: { x: 280, y: 341, s: 1.8, flip: true, inset: { cx: 300, cy: 480, r: 235 } },
     lead: 'La GnRH pulsatile commande la LH et la FSH. La LH stimule la thèque interne (androgènes), la FSH la granulosa, qui les aromatise en estradiol. Le rétrocontrôle de l\'estradiol est négatif, sauf en milieu de cycle où il devient positif et déclenche le pic de LH et l\'ovulation.',
     points: ['J1–J14 : phase folliculaire, sélection d\'un follicule sous FSH.', 'J14 : pic de LH, rupture du follicule, expulsion de l\'ovocyte II.', 'J14–J28 : phase lutéale, le corps jaune sécrète progestérone et estradiol.', 'L\'inhibine B freine la FSH (action hypophysaire). La leptine a un effet permissif sur la GnRH.', 'Observez le signe du rétrocontrôle de l\'estradiol passer de − à + autour de J12–J14.'],
     nodes: [
-      { id: 'hypo', at: 'hypo', lx: 96, ly: 50, label: 'Neurones à GnRH', sub: 'sécrétion pulsatile', color: 'p-violet' },
-      { id: 'pit', at: 'ant', lx: 40, ly: 96, label: 'Antéhypophyse', sub: 'cellules gonadotropes', color: 'p-violet' },
+      { id: 'hypo', at: 'hypo', leader: true, lx: 290, ly: -14, label: 'Neurones à GnRH', sub: 'sécrétion pulsatile', color: 'p-violet' },
+      { id: 'pit', at: 'ant', leader: true, lx: 250, ly: 14, label: 'Antéhypophyse', sub: 'cellules gonadotropes', color: 'p-violet' },
       { id: 'ovary', x: 920, y: 380, organ: 'ovary', s: 1.25, label: 'Ovaire', sub: ['thèque : androgènes (LH)', 'granulosa : E2 (FSH)', 'corps jaune : progestérone'], color: 'p-rose' },
       { id: 'uterus', x: 1330, y: 300, organ: 'uterus', label: 'Utérus', sub: 'endomètre, glaire', color: 'p-rose' },
       { id: 'breast', x: 1330, y: 600, organ: 'breast', s: 0.85, label: 'Seins, os, peau', sub: 'effets trophiques, HDL ↑', color: 'p-rose' },
-      { id: 'kiss', x: 220, y: 770, label: 'Kisspeptines', sub: 'glutamate (+) · GABA', color: 'p-magenta' },
+      { id: 'kiss', at: 'arc', dot: 9, hit: 16, leader: true, lx: 262, ly: 92, label: 'Neurones à kisspeptine', sub: 'noyau arqué · glutamate (+), GABA', color: 'p-magenta', info: 'Les neurones à kisspeptine de l\'hypothalamus (noyau arqué, complément) stimulent les neurones à GnRH, avec les neurones à glutamate ; le GABA module leur activité (polycopié, partie 2, p. 3).' },
       { id: 'lep', x: 560, y: 790, organ: 'fat', s: 0.8, label: 'Tissu adipeux blanc', sub: 'leptine (permissif)', color: 'p-amber', info: 'Effet permissif indirect de la leptine, sécrétée par le tissu adipeux blanc, sur les neurones à GnRH (polycopié).' }
     ],
     links: [
-      { from: 'hypo', to: 'pit', kind: 'stim', mol: 'gnrh', mod: R.gnrhPulse, rate: 2, labelOff: 64 },
-      { from: 'pit', to: 'ovary', kind: 'stim', mol: 'lh', bend: -40, mod: R.lh },
-      { from: 'pit', to: 'ovary', kind: 'stim', mol: 'fsh', bend: 40, mod: R.fsh },
+      { from: 'hypo', to: 'pit', kind: 'stim', mol: 'gnrh', mod: R.gnrhPulse, rate: 2, labelOff: 150 },
+      { from: 'pit', to: 'ovary', kind: 'stim', mol: 'lh', bend: -40, mod: R.lh, labelAt: 0.72 },
+      { from: 'pit', to: 'ovary', kind: 'stim', mol: 'fsh', bend: 40, mod: R.fsh, labelAt: 0.72 },
       { from: 'ovary', to: 'uterus', mol: 'e2', mod: R.e2, label: 'E2' },
       { from: 'ovary', to: 'uterus', mol: 'prog', bend: 50, mod: R.prog, label: 'progestérone' },
       { from: 'ovary', to: 'breast', mol: 'e2', mod: R.e2, label: '' },
-      { from: 'ovary', to: 'pit', kind: e2Kind, mol: 'e2', bend: -110, mod: R.e2, rate: 0.9, label: 'E2 (− / + mi-cycle)' },
+      { from: 'ovary', to: 'pit', kind: e2Kind, mol: 'e2', bend: -110, mod: R.e2, rate: 0.9, label: 'E2 (− / + mi-cycle)', labelAt: 0.25 },
       { from: 'ovary', to: 'hypo', kind: e2Kind, mol: 'e2', bend: -230, mod: R.e2, rate: 0.9, label: '' },
-      { from: 'ovary', to: 'pit', kind: 'inhib', mol: 'inhib', bend: 120, rate: 0.6, label: 'inhibine B → FSH' },
-      { from: 'kiss', to: 'hypo', kind: 'stim', mol: 'kiss', rate: 0.8, label: '' },
+      { from: 'ovary', to: 'pit', kind: 'inhib', mol: 'inhib', bend: 120, rate: 0.6, label: 'inhibine B → FSH', labelAt: 0.25 },
+      { from: 'kiss', to: 'hypo', kind: 'stim', mol: 'kiss', rate: 0.6, label: '', bend: 12 },
       { from: 'lep', to: 'hypo', kind: 'stim', color: 'p-amber', label: 'leptine (permissif)', info: 'gonadoF.lep', effect: 'permissif (indirect)' }
     ],
     levels: { x: 1180, y: 790, w: 340, items: [{ label: 'LH', mol: 'lh', fn: R.lh, max: 2.8 }, { label: 'FSH', mol: 'fsh', fn: R.fsh, max: 2.8 }, { label: 'Estradiol', mol: 'e2', fn: R.e2, max: 1.6 }, { label: 'Progestérone', mol: 'prog', fn: R.prog, max: 1.6 }] }
@@ -267,31 +267,31 @@
   AX.push({
     id: 'gonadoM', card: { side: 'R', row: 1 }, color: 'p-blue', target: [806, 674],
     name: 'Axe gonadotrope masculin', sub: 'GnRH pulsatile · LH, FSH · testicule', clock: 'day',
-    hh: { x: 270, y: 340, s: 1.05, flip: true },
+    hh: { x: 280, y: 341, s: 1.8, flip: true, inset: { cx: 300, cy: 480, r: 235 } },
     clockInfo: 'Pulses de GnRH environ toutes les 90 minutes (complément), suivis de pulses de LH.',
     lead: 'La GnRH pulsatile entraîne une libération pulsatile de LH et de FSH. La LH stimule les cellules de Leydig (testostérone), la FSH les cellules de Sertoli (spermatogenèse, inhibine B). La testostérone freine l\'axe ; l\'inhibine B freine la FSH.',
     points: ['Testicule : 15 à 20 mL ; tubes séminifères (cellules germinales et de Sertoli) et tissu interstitiel (cellules de Leydig).', 'Testostérone et cellules de Sertoli sont indispensables à la spermatogenèse.', 'La fonction endocrine décline lentement avec l\'âge, la production de gamètes persiste.', 'Une hyperprolactinémie peut freiner l\'axe.'],
     nodes: [
-      { id: 'hypo', at: 'hypo', lx: 96, ly: 50, label: 'Neurones à GnRH', sub: 'pulses ≈ 90 min (complément)', color: 'p-violet' },
-      { id: 'pit', at: 'ant', lx: 40, ly: 96, label: 'Antéhypophyse', sub: 'cellules gonadotropes', color: 'p-violet' },
+      { id: 'hypo', at: 'hypo', leader: true, lx: 290, ly: -14, label: 'Neurones à GnRH', sub: 'pulses ≈ 90 min (complément)', color: 'p-violet' },
+      { id: 'pit', at: 'ant', leader: true, lx: 250, ly: 14, label: 'Antéhypophyse', sub: 'cellules gonadotropes', color: 'p-violet' },
       { id: 'testis', x: 920, y: 380, organ: 'testis', s: 1.25, label: 'Testicule', sub: ['Leydig : testostérone (LH)', 'Sertoli : spermatogenèse (FSH)'], color: 'p-blue' },
       { id: 'muscle', x: 1330, y: 220, organ: 'muscle', s: 0.85, label: 'Muscle', sub: 'effet anabolisant', color: 'p-blue' },
       { id: 'bone', x: 1330, y: 420, organ: 'bone', s: 0.8, label: 'Os, moelle', sub: 'masse osseuse, érythropoïèse', color: 'p-blue' },
       { id: 'brain', x: 1330, y: 620, organ: 'brainLateral', s: 0.85, label: 'Cerveau, peau', sub: 'libido · pilosité, sébum', color: 'p-blue' },
-      { id: 'kiss', x: 220, y: 770, label: 'Kisspeptines', sub: 'glutamate (+) · GABA', color: 'p-magenta' },
+      { id: 'kiss', at: 'arc', dot: 9, hit: 16, leader: true, lx: 262, ly: 92, label: 'Neurones à kisspeptine', sub: 'noyau arqué · glutamate (+), GABA', color: 'p-magenta', info: 'Les neurones à kisspeptine de l\'hypothalamus (noyau arqué, complément) stimulent les neurones à GnRH, avec les neurones à glutamate ; le GABA module leur activité (polycopié, partie 2, p. 3).' },
       { id: 'lep', x: 560, y: 790, organ: 'fat', s: 0.8, label: 'Tissu adipeux blanc', sub: 'leptine (permissif)', color: 'p-amber', info: 'Effet permissif indirect de la leptine, sécrétée par le tissu adipeux blanc, sur les neurones à GnRH (polycopié).' }
     ],
     links: [
-      { from: 'hypo', to: 'pit', kind: 'stim', mol: 'gnrh', mod: R.gnrhPulse, rate: 2, labelOff: 64 },
-      { from: 'pit', to: 'testis', kind: 'stim', mol: 'lh', bend: -40, mod: R.gnrhPulse },
-      { from: 'pit', to: 'testis', kind: 'stim', mol: 'fsh', bend: 40 },
+      { from: 'hypo', to: 'pit', kind: 'stim', mol: 'gnrh', mod: R.gnrhPulse, rate: 2, labelOff: 150 },
+      { from: 'pit', to: 'testis', kind: 'stim', mol: 'lh', bend: -40, mod: R.gnrhPulse, labelAt: 0.72 },
+      { from: 'pit', to: 'testis', kind: 'stim', mol: 'fsh', bend: 40, labelAt: 0.72 },
       { from: 'testis', to: 'muscle', mol: 'testo' },
       { from: 'testis', to: 'bone', mol: 'testo', label: '' },
       { from: 'testis', to: 'brain', mol: 'testo', label: '' },
-      { from: 'testis', to: 'pit', kind: 'inhib', mol: 'testo', bend: -110, rate: 0.9, label: 'testostérone −' },
+      { from: 'testis', to: 'pit', kind: 'inhib', mol: 'testo', bend: -110, rate: 0.9, label: 'testostérone −', labelAt: 0.25 },
       { from: 'testis', to: 'hypo', kind: 'inhib', mol: 'testo', bend: -230, rate: 0.9, label: '' },
-      { from: 'testis', to: 'pit', kind: 'inhib', mol: 'inhib', bend: 120, rate: 0.6, label: 'inhibine B → FSH' },
-      { from: 'kiss', to: 'hypo', kind: 'stim', mol: 'kiss', rate: 0.8, label: '' },
+      { from: 'testis', to: 'pit', kind: 'inhib', mol: 'inhib', bend: 120, rate: 0.6, label: 'inhibine B → FSH', labelAt: 0.25 },
+      { from: 'kiss', to: 'hypo', kind: 'stim', mol: 'kiss', rate: 0.6, label: '', bend: 12 },
       { from: 'lep', to: 'hypo', kind: 'stim', color: 'p-amber', label: 'leptine (permissif)', info: 'gonadoM.lep', effect: 'permissif (indirect)' }
     ],
     levels: { x: 1180, y: 830, w: 340, items: [{ label: 'GnRH / LH', mol: 'lh', fn: R.gnrhPulse, max: 1.8 }, { label: 'Testostérone', mol: 'testo', fn: () => 1, max: 1.6 }] }
@@ -334,22 +334,31 @@
     lead: 'L\'appareil juxtaglomérulaire libère la rénine, qui déclenche une cascade aboutissant à l\'angiotensine II. Celle-ci stimule l\'aldostérone de la zone glomérulée. L\'aldostérone fait réabsorber le sodium et excréter le potassium et les ions H⁺ au tube distal et au canal collecteur. La kaliémie stimule aussi l\'aldostérone.',
     points: ['Aldostérone : rôle important dans la régulation de la pression artérielle par la rétention sodée.', 'Toutes les hormones corticostéroïdes dérivent du cholestérol ; son transport mitochondrial par StAR est l\'étape limitante.', 'L\'hypovolémie, la baisse de la pression artérielle ou de la perfusion rénale stimulent la rénine ; l\'expansion volémique la met au repos.'],
     nodes: [
-      { id: 'jga', x: 230, y: 350, organ: 'kidney', label: 'Appareil juxtaglomérulaire', sub: 'rénine', color: 'p-red' },
-      { id: 'liver', x: 230, y: 740, organ: 'liver', s: 0.85, label: 'Foie', sub: 'angiotensinogène (complément)', color: 'p-red' },
-      { id: 'lung', x: 600, y: 740, organ: 'lungs', s: 0.85, label: 'Poumon', sub: 'enzyme de conversion (complément)', color: 'p-red' },
-      { id: 'adr', x: 960, y: 350, organ: 'adrenalKidney', label: 'Zone glomérulée', sub: 'aldostérone synthase', color: 'p-teal' },
-      { id: 'tub', x: 1340, y: 350, organ: 'kidney', label: 'Tube distal, canal collecteur', sub: ['Na⁺ réabsorbé', 'K⁺ et H⁺ excrétés'], color: 'p-teal' },
-      { id: 'k', x: 960, y: 760, label: 'Kaliémie ↑', color: 'p-violet', info: 'La concentration de potassium régule directement la sécrétion d\'aldostérone.' },
-      { id: 'vol', x: 1340, y: 760, label: 'Volémie, PA ↑', w: 220, sub: 'rétention sodée', color: 'p-teal', info: 'La rétention de sodium restaure la volémie et la pression artérielle, ce qui met au repos la production de rénine.' }
+      { id: 'jga', bare: true, x: 626, y: 470, lx: -70, ly: 6, anchor: 'end', label: 'Appareil juxtaglomérulaire', sub: 'rénine', color: 'p-red', sheet: 'kidney', info: 'Les cellules juxtaglomérulaires de l\'artériole afférente libèrent la rénine quand la perfusion rénale ou la volémie baissent.' },
+      { id: 'adr', bare: true, x: 650, y: 330, lx: -80, ly: -40, anchor: 'end', label: 'Corticosurrénale : zone glomérulée', sub: 'aldostérone synthase', color: 'p-teal', sheet: 'adrenal', info: 'La surrénale coiffe le pôle supérieur du rein. Sa zone glomérulée, la plus externe, fabrique l\'aldostérone.' },
+      { id: 'tub', bare: true, x: 760, y: 500, lx: 60, ly: 40, label: 'Tube distal, canal collecteur', sub: ['Na⁺ et eau réabsorbés', 'K⁺ et H⁺ excrétés'], color: 'p-teal', sheet: 'kidney' },
+      { id: 'liver', x: 230, y: 830, organ: 'liver', s: 0.85, label: 'Foie', sub: 'angiotensinogène (complément)', color: 'p-red' },
+      { id: 'lung', x: 230, y: 590, organ: 'lungs', s: 0.85, label: 'Poumon', sub: 'enzyme de conversion (complément)', color: 'p-red' },
+      { id: 'ecf', x: 1200, y: 330, organ: 'vessel', s: 1.1, label: 'Rétention hydrosodée', sub: 'Na⁺ puis eau retenus : volume extracellulaire ↑', color: 'p-teal', info: 'Le sodium réabsorbé entraîne l\'eau : le volume extracellulaire et la volémie augmentent, la pression artérielle monte.' },
+      { id: 'k', x: 760, y: 820, label: 'Kaliémie', color: 'p-violet', info: 'La concentration de potassium régule directement la sécrétion d\'aldostérone ; l\'aldostérone fait excréter le potassium (rétrocontrôle).' },
+      { id: 'vol', x: 1360, y: 620, label: 'Volémie, PA', w: 260, color: 'p-teal', info: 'La rétention de sodium restaure la volémie et la pression artérielle, ce qui met au repos la production de rénine.' }
     ],
+    draw(a) {
+      // Rein et surrénale réunis : la surrénale coiffe le pôle supérieur du rein.
+      const g = a.el('g', { transform: 'translate(690 420) scale(3.1)', class: 'raa-organ', 'data-sheet': 'adrenal' });
+      HV.organs.adrenalKidney(g);
+    },
     links: [
-      { from: 'jga', to: 'liver', mol: 'renin', label: 'rénine', rate: 1.2 },
-      { from: 'liver', to: 'lung', mol: 'angio1', label: 'angiotensinogène → angiotensine I', rate: 1.2 },
-      { from: 'lung', to: 'adr', kind: 'stim', mol: 'angio', rate: 1.4 },
-      { from: 'adr', to: 'tub', kind: 'stim', mol: 'aldo', rate: 1.4 },
-      { from: 'k', to: 'adr', kind: 'stim', mol: 'k', rate: 1 },
-      { from: 'tub', to: 'vol', mol: 'nai', rate: 1.6, label: 'Na⁺' },
-      { from: 'vol', to: 'jga', kind: 'inhib', color: 'p-teal', bend: -420, label: 'freine la rénine', info: 'raa.vol' }
+      { from: 'jga', to: 'liver', mol: 'renin', label: 'rénine', rate: 1.2, bend: -60 },
+      { from: 'liver', to: 'lung', mol: 'angio1', label: 'angiotensine I', rate: 1.2, bend: 60, labelOff: -30 },
+      { from: 'lung', to: 'adr', kind: 'stim', mol: 'angio', rate: 1.4, label: 'angiotensine II', labelAt: 0.28, labelOff: 26 },
+      { from: 'adr', to: 'tub', kind: 'stim', mol: 'aldo', rate: 1.4, bend: -60, label: 'aldostérone' },
+      { from: 'k', to: 'adr', kind: 'stim', mol: 'k', rate: 1, bend: -120, label: 'K⁺ ↑ stimule' },
+      { from: 'tub', to: 'k', mol: 'k', rate: 0.8, bend: -40, label: 'K⁺ excrété' },
+      { from: 'tub', to: 'ecf', mol: 'nai', rate: 1.6, label: 'Na⁺', bend: -30 },
+      { from: 'tub', to: 'ecf', mol: 'water', rate: 1.2, label: '', bend: 30 },
+      { from: 'ecf', to: 'vol', kind: 'stim', color: 'p-teal', label: '' },
+      { from: 'vol', to: 'jga', kind: 'inhib', color: 'p-teal', bend: 360, label: 'freine la rénine', info: 'raa.vol' }
     ]
   });
 

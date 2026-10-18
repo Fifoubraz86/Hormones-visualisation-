@@ -76,7 +76,7 @@
      l'antéhypophyse. opts.portal / opts.axons : afficher l'une ou l'autre voie (par défaut les deux).
      Repères (repère local) : hypothalamus (0, 0), éminence médiane (4, 20), antéhypophyse (-22, 156),
      posthypophyse (38, 152). */
-  O.HH = { hypo: [0, -2], me: [4, 20], ant: [-22, 156], post: [38, 152] };
+  O.HH = { hypo: [0, -2], me: [4, 20], ant: [-22, 156], post: [38, 152], arc: [-16, 11] };
   O.hhSagittal = function (g, opts) {
     opts = opts || {};
     const parts = O.brainSagittal(g);

@@ -87,8 +87,8 @@
     { t: 'Le rein détecte la baisse de perfusion', d: 'L\'appareil juxtaglomérulaire sécrète la rénine quand la pression de perfusion, la volémie ou le sodium délivré baissent.', on: ['jga'] },
     { t: 'De l\'angiotensinogène à l\'angiotensine II', d: 'La rénine coupe l\'angiotensinogène hépatique en angiotensine I, que l\'enzyme de conversion (poumon) transforme en angiotensine II.', on: ['jga>liver', 'liver', 'liver>lung', 'lung'] },
     { t: 'L\'aldostérone est sécrétée', d: 'L\'angiotensine II stimule la zone glomérulée ; la kaliémie aussi.', on: ['lung>adr', 'adr', 'k', 'k>adr'] },
-    { t: 'Action au tube distal', d: 'L\'aldostérone fait réabsorber le sodium et excréter le potassium et les ions H⁺.', on: ['adr>tub', 'tub'] },
-    { t: 'Rétrocontrôle par la volémie', d: 'La rétention de sodium restaure la volémie et la pression artérielle, ce qui freine la rénine. Dans l\'hyperaldostéronisme primaire, l\'aldostérone est autonome : la rénine est effondrée.', on: ['tub>vol', 'vol', 'vol>jga'] }
+    { t: 'Action au tube distal', d: 'L\'aldostérone fait réabsorber le sodium et excréter le potassium et les ions H⁺.', on: ['adr>tub', 'tub', 'tub>k', 'k'] },
+    { t: 'Rétrocontrôle par la volémie', d: 'La rétention de sodium restaure la volémie et la pression artérielle, ce qui freine la rénine. Dans l\'hyperaldostéronisme primaire, l\'aldostérone est autonome : la rénine est effondrée.', on: ['tub>ecf', 'ecf', 'ecf>vol', 'vol', 'vol>jga'] }
   ];
 
   S.glyc = [

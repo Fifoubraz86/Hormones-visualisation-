@@ -837,3 +837,7 @@ line.m-db { stroke: var(--mc); stroke-width: 0.9; }
 .fig-badge:hover circle:first-child { fill: color-mix(in srgb, var(--accent) 22%, var(--panel)); }
 .fig-badge-i { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; }
 .fig-badge-n { font: 600 14px var(--font-data); fill: var(--accent); }
+.hh-dot { fill: var(--c); stroke: var(--panel); stroke-width: 2; }
+.hh-inset-bg { fill: color-mix(in srgb, var(--panel) 70%, transparent); }
+.hh-inset-ring { fill: none; stroke: var(--line-2); stroke-width: 3; }
+.hh-leader { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 4 4; }

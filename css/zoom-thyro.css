@@ -53,10 +53,6 @@
 .zt-enz text { font: 700 18px var(--font-data); fill: var(--fg); }
 .zt-arrow { fill: none; stroke: var(--line-2); stroke-width: 3; }
 
-/* Échographie (image : niveaux de gris fixes) */
-.zt-us-bg { fill: #0c0c0e; }
-.zt-us-t { font: 15px var(--font-body); fill: #d6d6d6; }
-.zt-us-line { stroke: #d0d0d0; fill: none; }
 
 /* Courbes */
 .zt-curve { fill: none; stroke: var(--c); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
@@ -80,3 +76,12 @@
 .zt-camp { fill: color-mix(in srgb, var(--p-gold) 35%, var(--scene-1)); stroke: var(--p-gold); stroke-width: 2.5; }
 .zt-colloid { fill: var(--colloid); stroke: var(--colloid-line); stroke-width: 2.5; }
 .zt-tcell-wall { fill: var(--cell); stroke: var(--cell-line); stroke-width: 3; }
+/* Schéma de nodule : niveaux de gris fixes selon la convention échographique (blanc = échogène, noir = anéchogène) */
+.zt-paren { fill: #a3a3a3; stroke: var(--o-thyroid); stroke-width: 3; }
+.zt-art-c { fill: #111; stroke: var(--o-aorta); stroke-width: 3; }
+.zt-nod { stroke: var(--fg); stroke-width: 2; }
+.zt-nod.anech { fill: #0b0b0b; }
+.zt-nod.spong, .zt-nod.iso { fill: #b4b4b4; }
+.zt-nod.mhypo { fill: #6a6a6a; }
+.zt-nod.shypo { fill: #2c2c2c; }
+.zt-calc { fill: #fff; stroke: #333; stroke-width: 1; }

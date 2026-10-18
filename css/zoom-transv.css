@@ -1,1 +1,49 @@
-/* Loupes : transv */
+/* Loupes : transv (signalisation, interactions, rythmes, NEM, dosages, traitements) */
+.ztr-t { font: 600 17px var(--font-body); fill: var(--fg); }
+.ztr-s { font: 16px var(--font-body); fill: var(--muted); }
+.ztr-src { font-style: italic; }
+.ztr-box { fill: color-mix(in srgb, var(--c) 13%, var(--scene-1)); stroke: var(--c); stroke-width: 2; transition: fill 0.25s, stroke-width 0.25s; }
+.ztr-box.on { fill: color-mix(in srgb, var(--c) 42%, var(--scene-1)); stroke-width: 4; }
+.ztr-cell { fill: color-mix(in srgb, var(--c) 6%, var(--scene-1)); stroke: var(--c); stroke-width: 4; }
+.ztr-nuc { fill: color-mix(in srgb, var(--p-violet) 12%, transparent); stroke: var(--p-violet); stroke-width: 2; stroke-dasharray: 7 5; }
+.ztr-arrow { fill: none; stroke: var(--line-2); stroke-width: 2.5; }
+
+/* Réseau d'interactions */
+.ztr-arc { fill: none; stroke-width: 3.5; opacity: 0.75; transition: stroke-width 0.3s, opacity 0.3s; }
+.ztr-arc.inhib { stroke: var(--inhib); stroke-dasharray: 10 8; }
+.ztr-arc.cause { stroke: var(--p-sky); }
+.ztr-arc.hot { stroke-width: 7; opacity: 1; }
+.ztr-head { fill: var(--p-sky); }
+.ztr-hit { fill: none; stroke: transparent; stroke-width: 28; pointer-events: stroke; cursor: help; }
+.ztr-lbl { font: 500 16px var(--font-body); fill: var(--fg); paint-order: stroke; stroke: var(--scene-1); stroke-width: 6px; stroke-linejoin: round; }
+.ztr-node { cursor: help; }
+
+/* Rythmes */
+.ztr-night { fill: color-mix(in srgb, var(--p-violet) 11%, transparent); }
+.ztr-grid { stroke: var(--line); stroke-width: 1.5; }
+.ztr-grid.faint { opacity: 0.45; }
+.ztr-base { stroke: var(--line-2); stroke-width: 1.5; }
+.ztr-meal { stroke: var(--p-gold); stroke-width: 2; stroke-dasharray: 3 5; opacity: 0.8; }
+.ztr-curve { fill: none; stroke: var(--c); stroke-width: 3; stroke-linejoin: round; }
+.ztr-area { fill: var(--c); opacity: 0.12; stroke: none; }
+.ztr-dot { fill: var(--c); stroke: var(--scene-1); stroke-width: 2.5; }
+.ztr-cursor { stroke: var(--accent); stroke-width: 2.5; }
+.ztr-hitbox { fill: transparent; }
+
+/* NEM et carte des traitements */
+.ztr-mark { fill: var(--c); stroke: var(--scene-1); stroke-width: 3; }
+.ztr-halo { fill: var(--c); opacity: 0.22; }
+.ztr-lead { fill: none; stroke: var(--c, var(--line-2)); stroke-width: 2; stroke-dasharray: 3 5; opacity: 0.85; }
+.ztr-fade { transition: opacity 0.4s; }
+.ztr-dim { opacity: 0.35; }
+.ztr-organs { opacity: 0.75; }
+.ztr-tgt { fill: var(--fg); stroke: var(--scene-1); stroke-width: 2; opacity: 0.85; }
+
+/* Immunodosages */
+.ztr-solid { fill: var(--line-2); }
+.ztr-ab { fill: none; stroke: var(--c); stroke-width: 5; stroke-linecap: round; }
+.ztr-ag { fill: var(--p-magenta); stroke: var(--scene-1); stroke-width: 2; transition: opacity 0.3s; }
+.ztr-ag.lab { fill: var(--p-gold); }
+.ztr-star { fill: var(--p-gold); stroke: var(--scene-1); stroke-width: 1.5; }
+.ztr-axis { fill: none; stroke: var(--muted); stroke-width: 2; }
+.ztr-stripe { fill: var(--c); }

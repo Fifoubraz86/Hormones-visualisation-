@@ -619,8 +619,12 @@
       return { tone: 'good', label: 'SRAA normal', text: 'Rénine et aldostérone adaptées.' };
     },
     hooks: {
-      links: { 'jga>liver>renin': 'renin', 'liver>lung>angio1': 'renin', 'lung>adr>angio': 'renin', 'adr>tub>aldo': 'aldo', 'tub>vol>nai': 'aldo' },
-      cap: { adr: 'adr' },
+      links: { 'jga>liver>renin': 'renin', 'liver>lung>angio1': 'renin', 'lung>adr>angio': 'renin', 'adr>tub>aldo': 'aldo', 'tub>ecf>nai': 'aldo', 'tub>ecf>water': 'aldo', 'tub>k>k': 'aldo' },
+      scale: { ecf: (p, s) => clamp(0.85 + 1.2 * (s.vol - 1), 0.7, 1.4) },
+      liveNode: {
+        k: (s) => f1(s.k) + ' mmol/L' + (s.k < 3.5 ? ' ↓' : s.k > 5 ? ' ↑' : ''),
+        vol: (s) => 'PAS ' + Math.round(clamp(120 + 250 * (s.vol - 1), 75, 210)) + ' mmHg' + (s.vol > 1.06 ? ' ↑' : s.vol < 0.95 ? ' ↓' : '')
+      },
       extraNodes: [{ id: 'salt', x: 1060, y: 760, label: 'Sérum salé', w: 180, color: 'p-amber', show: (p) => p.salt > 0.02, info: 'L\'expansion volémique freine la rénine, donc normalement l\'aldostérone.' }],
       extraLinks: [{ from: 'salt', to: 'vol', kind: 'stim', mol: 'nai', label: '' }],
       lesions: [

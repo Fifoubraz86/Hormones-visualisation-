@@ -158,8 +158,8 @@
       a.text(440, 528, 'et l\'interstitium se concentre', 'note');
       a.text(232, 600, 'H₂O', 'note strong', { anchor: 'end', attrs: { 'data-info': 'zr-aqp1' } });
       a.text(690, 694, 'H₂O : AQP2 (ADH)', 'note strong', { anchor: 'end', attrs: { 'data-info': 'zr-aqp2' } });
-      a.text(728, 204, 'ENaC, ROMK', 'note strong', { anchor: 'end', attrs: { 'data-info': 'zr-enac' } });
-      a.text(728, 226, '(aldostérone)', 'note', { anchor: 'end' });
+      a.text(728, 182, 'ENaC, ROMK', 'note strong', { anchor: 'end', attrs: { 'data-info': 'zr-enac' } });
+      a.text(728, 203, '(aldostérone)', 'note', { anchor: 'end' });
       a.text(758, 968, 'urine', 'note strong');
       HV.figBadge(a, 120, 300, ['29']);
 
@@ -181,7 +181,7 @@
       a.flow('M 740,920 L 740,985', { mol: 'water', rate: () => 0.5 + 0.8 * clamp(1.2 - adh().eff, 0.1, 1.2), size: 1.5, speed: 40, track: false });
 
       // Fiches des segments, à droite
-      const X = 815, W = 740, H = 140;
+      const X = 815, W = 740, H = 144;
       const CARDS = [
         { k: 'pct', t: 'Tube contourné proximal', share: 'Na⁺ ≈ 65 % · Ca²⁺ 65 %', chips: [['SGLT2', 'zr-sglt2'], ['NHE3', 'zr-nhe3'], ['anh. carbonique', 'zr-ac'], ['NPT2a (phosphate)', 'zr-npt2a'], ['Ca²⁺ passif', 'zr-capass']], pills: [['iSGLT2 · acétazolamide', 'zr-d-pct']], fx: 'diurèse modeste', e: 'K⁺ ↓ et acidose métabolique (acétazolamide) · glycosurie (iSGLT2)' },
         { k: 'thin', t: 'Anse de Henlé, branche descendante', share: 'perméable à l\'eau', chips: [['AQP1 (eau)', 'zr-aqp1']], pills: [['pas de diurétique propre', 'zr-d-thin', true]], fx: 'l\'eau sort vers l\'interstitium', e: 'Le liquide tubulaire se concentre jusqu\'à la papille' },
@@ -195,14 +195,14 @@
         const cg = a.el('g', { style: `--c: var(--${SEGC[C.k]})` });
         a.el('rect', { x: X, y, width: W, height: H, rx: 16, class: 'zr-card', 'data-info': 'zr-' + C.k }, cg);
         badge(a, X + 26, y + 26, i + 1, SEGC[C.k], cg);
-        a.text(X + 52, y + 33, C.t, 'lbl-s strong', { attrs: { 'data-info': 'zr-' + C.k } }, cg);
-        a.text(X + W - 18, y + 33, C.share, 'zr-share', { anchor: 'end' }, cg);
+        a.text(X + 52, y + 31, C.t, 'lbl-s strong', { attrs: { 'data-info': 'zr-' + C.k } }, cg);
+        a.text(X + W - 18, y + 31, C.share, 'zr-share', { anchor: 'end' }, cg);
         let cx = X + 18;
-        C.chips.forEach(([l, key]) => { cx += chip(a, cx, y + 66, l, key, SEGC[C.k], cg) + 10; });
+        C.chips.forEach(([l, key]) => { cx += chip(a, cx, y + 60, l, key, SEGC[C.k], cg) + 10; });
         let px = X + 18;
-        C.pills.forEach(([l, key, none]) => { px += pill(a, px, y + 102, l, key, none, cg) + 12; });
-        if (C.fx) a.text(px + 2, y + 108, C.fx, 'note', null, cg);
-        a.text(X + 18, y + 132, C.e, 'note strong', null, cg);
+        C.pills.forEach(([l, key, none]) => { px += pill(a, px, y + 95, l, key, none, cg) + 12; });
+        if (C.fx) a.text(px + 2, y + 101, C.fx, 'note', null, cg);
+        a.text(X + 18, y + 131, C.e, 'note strong', null, cg);
       });
       const live = a.text(X + 4, 946, '', 'note strong', { attrs: { 'data-info': 'zr-live1' } });
       a.text(X + 4, 972, 'En amont du tube collecteur, tout diurétique augmente la kaliurèse (complément).', 'note');
@@ -221,7 +221,7 @@
         { t: 'Le glomérule filtre', d: 'Le plasma est filtré dans la capsule de Bowman : eau, sodium, glucose, phosphate et calcium ionisé (calcium ultrafiltrable, P1 p. 36) passent dans le tube. Tout ce qui n\'est pas réabsorbé ensuite part dans l\'urine.', spot: [[500, 245, 80]] },
         { t: '1. Tube proximal : la masse', d: 'Environ 65 % du sodium et de l\'eau (complément), 65 % du calcium (P1 p. 37), tout le glucose par SGLT2 (P2 p. 31), l\'essentiel du phosphate par NPT2a (complément). Inhibiteurs de SGLT2 et acétazolamide y agissent ; leur effet diurétique reste modeste.', spot: [[350, 270, 130], sp(0)] },
         { t: '2. Branche descendante : l\'eau sort', d: 'Perméable à l\'eau (aquaporine 1) mais pas au NaCl : l\'eau gagne l\'interstitium, de plus en plus concentré vers la papille (complément).', spot: [[280, 690, 110], sp(1)] },
-        { t: '3. Branche ascendante large : le moteur du gradient', d: 'NKCC2 réabsorbe le NaCl sans eau (environ 25 % du sodium, complément) ; ROMK recycle le K⁺ et rend la lumière positive, ce qui pousse le Ca²⁺ et le Mg²⁺ entre les cellules (25 % du calcium, P1 p. 37), sous le contrôle du CaSR. Le furosémide bloque NKCC2 : hypokaliémie, hypercalciurie, gradient effondré.', spot: [[400, 540, 130], sp(2)] },
+        { t: '3. Branche ascendante large : le moteur du gradient', d: 'NKCC2 réabsorbe le NaCl sans eau (environ 25 % du sodium, complément) ; ROMK recycle le K⁺ et rend la lumière positive, ce qui pousse le Ca²⁺ et le Mg²⁺ entre les cellules (25 % du calcium, P1 p. 37), sous le contrôle du CaSR. Le furosémide bloque NKCC2 : hypokaliémie, hypercalciurie, gradient effondré.', spot: [[450, 540, 165], sp(2)] },
         { t: '4. Tube distal : NCC et calcium sous PTH', d: 'NCC réabsorbe 5 à 10 % du sodium (complément) ; la PTH et le calcitriol stimulent la réabsorption complémentaire de calcium (P1 p. 37-38). Les thiazidiques bloquent NCC : hypokaliémie mais hypocalciurie.', spot: [[600, 330, 100], sp(3)] },
         { t: '5. Tube collecteur : aldostérone et ADH', d: 'L\'aldostérone fait réabsorber le Na⁺ par ENaC contre le K⁺ et le H⁺ (P1 p. 75) ; l\'ADH, via V2, insère les aquaporines et l\'urine s\'équilibre avec l\'interstitium (P1 p. 50). Spironolactone et amiloride épargnent le K⁺ (hyperkaliémie) ; les vaptans bloquent V2 (complément).', spot: [[740, 560, 120], sp(4)] },
         { t: 'Gradient et potassium', d: 'Le gradient corticopapillaire (≈ 300 à ≈ 1 200 mosmol/kg, complément) permet de concentrer l\'urine. Tout diurétique agissant en amont du tube collecteur y délivre plus de sodium et augmente la sécrétion de potassium : seuls les épargneurs y échappent (complément).', spot: [[150, 560, 120], [X - 6, 920, W + 12, 64]] }
@@ -263,7 +263,7 @@
       a.frame('Volémie et osmolalité : deux boucles', 'La natrémie reflète l\'eau, la volémie reflète le sodium');
       defV.sim = simOf('adh');
       arrowDefs(a, 'zr-ah-v');
-      const Wcol = { cx: 415, c: 'p-sky', title: 'Boucle de l\'eau', sub: 'règle l\'osmolalité → la natrémie', icons: ['vessel', 'hypothalamusIcon', 'pituitaryIcon', 'kidney', null] };
+      const Wcol = { cx: 415, c: 'p-sky', title: 'Boucle de l\'eau', sub: 'règle l\'osmolalité → la natrémie', icons: ['vessel', 'hypothalamusIcon', null, 'kidney', null] };
       const Scol = { cx: 1185, c: 'p-teal', title: 'Boucle du sodium', sub: 'règle la volémie → le volume extracellulaire', icons: ['vessel', 'heart', 'adrenalKidney', 'kidney', null] };
       const BW = 520, BH = 100, Y0 = 232, GAP = 26;
       const by = (i) => Y0 + i * (BH + GAP);
@@ -302,9 +302,9 @@
       a.el('line', { x1: 800, y1: 214, x2: 800, y2: 838, class: 'zr-divider' });
       const crossG = a.el('g', { 'data-info': 'zr-cross' });
       a.path(`M ${Scol.cx - BW / 2 - 6},${by(1) + 70} C 860,${by(1) + 90} 760,${by(2) + 20} ${Wcol.cx + BW / 2 + 8},${by(2) + 40}`, 'zr-arrow', crossG, { style: '--mc: var(--p-amber)', 'stroke-dasharray': '4 7', 'marker-end': 'url(#zr-ah-v)' });
-      a.el('rect', { x: 712, y: by(2) - 30, width: 168, height: 52, rx: 10, class: 'zr-label-bg' }, crossG);
-      a.text(796, by(2) - 9, 'hypovolémie sévère', 'note strong', { anchor: 'middle' }, crossG);
-      a.text(796, by(2) + 13, '→ ADH non osmotique', 'note', { anchor: 'middle' }, crossG);
+      a.el('rect', { x: 702, y: by(2) - 30, width: 184, height: 52, rx: 10, class: 'zr-label-bg' }, crossG);
+      a.text(794, by(2) - 9, 'hypovolémie sévère', 'note strong', { anchor: 'middle' }, crossG);
+      a.text(794, by(2) + 13, '→ ADH non osmotique', 'note', { anchor: 'middle' }, crossG);
       // Message clé
       const mg = a.el('g', { 'data-info': 'zr-msg', style: '--c: var(--accent)' });
       a.el('rect', { x: 60, y: 862, width: 1480, height: 96, rx: 20, class: 'sig-box' }, mg);
@@ -386,8 +386,8 @@
       a.path('M 150,462 C 140,580 250,700 335,790 C 420,700 530,580 520,462 C 450,440 220,440 150,462 Z', 'zr-heart', vg);
       a.path('M 335,456 L 335,770', 'zr-septum', vg);
       for (let k = 0; k < 10; k++) a.el('circle', { cx: 230 + (k % 5) * 50, cy: 540 + Math.floor(k / 5) * 60, r: 4.5, class: 'zr-gran v' }, vg);
-      a.text(335, 290, 'oreillettes distendues', 'lbl-s strong', { anchor: 'middle', attrs: { 'data-info': 'zr-atria' } });
-      a.text(335, 314, 'étirement → ANP', 'note', { anchor: 'middle' });
+      a.text(335, 250, 'oreillettes distendues', 'lbl-s strong', { anchor: 'middle', attrs: { 'data-info': 'zr-atria' } });
+      a.text(335, 274, 'étirement → ANP', 'note', { anchor: 'middle' });
       a.text(335, 824, 'ventricules : surcharge → BNP', 'lbl-s strong', { anchor: 'middle', attrs: { 'data-info': 'zr-ventr' } });
       a.text(335, 848, 'proBNP → BNP actif + NT-proBNP', 'note', { anchor: 'middle', attrs: { 'data-info': 'zr-ventr' } });
       const liveA = a.text(335, 900, '', 'zr-live', { anchor: 'middle', attrs: { 'data-info': 'zr-atria' } });
@@ -416,7 +416,6 @@
         a.flow(d, { mol: 'zr-anp', rate: () => 0.7 * anpOf(), pace: () => HV.paceOf(anpOf()), size: 1.5, speed: 90, track: false, max: 10 });
         if (i === 0 || i === 4) a.flow(`M 470,600 C 640,600 650,${y + TH / 2 + 10} ${TX - 26},${y + TH / 2 + 10}`, { mol: 'zr-bnp', rate: () => 0.4, size: 1.5, speed: 90, track: false, max: 6 });
       });
-      a.flow('M 335,445 L 335,410', { mol: 'zr-anp', rate: () => 0.5 * anpOf(), size: 1.2, speed: 20, track: false, max: 4 });
       // Encadrés : marqueurs et néprilysine
       const ic = a.el('g', { 'data-info': 'zr-ic', style: '--c: var(--p-magenta)' });
       a.el('rect', { x: TX, y: 700, width: 370, height: 230, rx: 18, class: 'sig-box' }, ic);
@@ -515,9 +514,9 @@
       const casrT = a.text(440, 592, '', 'note strong', null, tl);
       pill(a, 440, 628, 'furosémide : calciurie ↑', 'zr-c-furo');
       const dl = a.el('g', { 'data-info': 'zr-c-dct' });
-      a.text(450, 404, 'complément : TRPV5', 'note strong', null, dl);
-      a.text(450, 428, 'sous PTH et calcitriol', 'note', null, dl);
-      pill(a, 450, 460, 'thiazidiques : calciurie ↓', 'zr-c-thz');
+      a.text(450, 394, 'complément : TRPV5', 'note strong', null, dl);
+      a.text(450, 414, 'sous PTH et calcitriol', 'note', null, dl);
+      pill(a, 450, 452, 'thiazidiques : calciurie ↓', 'zr-c-thz');
       const exT = a.text(758, 968, 'urine', 'note strong', { attrs: { 'data-info': 'zr-c-ex' } });
       a.text(726, 900, 'calciurie', 'note strong', { anchor: 'end', attrs: { 'data-info': 'zr-c-ex' } });
       const exV = a.text(726, 924, '', 'note', { anchor: 'end', attrs: { 'data-info': 'zr-c-ex' } });
