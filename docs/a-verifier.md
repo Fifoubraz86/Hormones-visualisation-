@@ -32,3 +32,16 @@ Chaque loupe signale « (complément) » ce qui ne vient pas du polycopié. Cett
    - Déficit en 5α-réductase ; insensibilité complète aux androgènes.
    - À confirmer : PNDS HAS « Anomalies du développement génital ».
 7. **Puberté** : pulses nocturnes de LH en début de puberté ; adrénarche. À confirmer : référentiel de pédiatrie (puberté).
+
+## Hypophyse (loupes noyaux hypothalamiques, loge hypophysaire, antéhypophyse, ordre de perte)
+
+1. **Noyaux.**
+   - Paraventriculaire (CRH, TRH ; parvo- et magnocellulaire) ; arqué (GHRH, dopamine, kisspeptine, POMC/NPY) ; périventriculaire (somatostatine) ; neurones à GnRH dans l'aire préoptique ; suprachiasmatiques (horloge).
+   - Éminence médiane et plexus porte.
+   - À confirmer : Williams Textbook of Endocrinology, chapitre « Neuroendocrinology ».
+2. **Proportions des cellules antéhypophysaires** : somatotropes ≈ 50 %, lactotropes et corticotropes 15–20 %, gonadotropes ≈ 10 %, thyréotropes ≈ 5 %. À confirmer : Melmed, *The Pituitary* ; manuel d'histologie.
+3. **Régulations ajoutées** : l'ADH stimule l'ACTH ; la somatostatine freine la TSH ; stéroïdes sexuels et inhibine sur LH et FSH. À confirmer : Williams, chapitre « Anterior Pituitary ».
+4. **Ordre de perte GH → LH/FSH → TSH → ACTH.** À confirmer : Fleseriu et al., *JCEM* 2016 (hypopituitarisme) ; référentiel du CEEDMM.
+5. **Sinus caverneux** : III, IV, V1, V2 dans la paroi latérale, VI près de la carotide. À confirmer : Gray's Anatomy ; Rouvière-Delmas.
+6. **Champ visuel** : atteinte d'abord des quadrants temporaux supérieurs. À confirmer : traité de neuro-ophtalmologie (Miller & Newman).
+7. **Apoplexie** : insuffisance corticotrope aiguë. À confirmer : Rajasekaran et al., *Clin Endocrinol* 2011.
