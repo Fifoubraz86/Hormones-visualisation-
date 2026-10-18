@@ -219,6 +219,8 @@
       HV.figBadge(a, 770, 200, ['2', '17']);
       HV.figBadge(a, 610, 560, ['8']);
 
+      HV.loupeCaptions(a, 'thyro');
+
       /* --- Pas à pas --- */
       HV.spotlight(HV.scenes.thyro, a, [
         { t: 'L\'hypothalamus sécrète la TRH', d: 'Les neurones du noyau paraventriculaire fabriquent la TRH, un tripeptide, et la libèrent dans les capillaires de l\'éminence médiane. Zoomez sur l\'hypothalamus pour voir le neurone à TRH.', spot: [[700, 252, 92]] },

@@ -81,6 +81,8 @@
       gland(832, 592, 5, 'trh', 'gonadoF', 'Ovaires', 'start', 'ovary');
       gland(800, 674, 5, 'trh', 'gonadoM', 'Testicules', 'start', 'testis');
       a.text(800, 1000 - 14, 'Silhouette schématique · positions approximatives', 'atlas-foot', { anchor: 'middle' });
+      a.text(800, 1032, 'Notions transversales', 'atlas-sub', { anchor: 'middle' });
+      HV.loupeCaptions(a, 'atlas');
 
     },
     update(dt, t) {}

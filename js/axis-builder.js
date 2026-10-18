@@ -94,6 +94,16 @@
     def.stepIndex = () => cur;
   };
 
+  /* Loupes : scènes de zoom posées hors du cadre de leur scène parente (à droite des cartes de gauche,
+     à gauche des cartes de droite). Chaque loupe déclare `loupe: 'légende'` ; le parent écrit la légende. */
+  HV.LOUPE = { L: (k) => ({ x: 1680, y: k * 175, scale: 0.15 }), R: (k) => ({ x: -330, y: k * 175, scale: 0.15 }) };
+  HV.loupeCaptions = function (a, parentId) {
+    HV.sceneList.filter((s) => s.parent === parentId && s.loupe).forEach((ch) => {
+      const x = ch.x + (HV.W * ch.scale) / 2, y = ch.y + HV.H * ch.scale + 26;
+      a.text(x, y, ch.loupe + ' ⊕', 'loupe-cap', { anchor: 'middle', attrs: { 'data-zoom': ch.id } });
+    });
+  };
+
   HV.axisScene = function (ax) {
     const pos = ax.card;
     const legendMols = new Set();
@@ -331,6 +341,7 @@
         }
 
         if (ax.draw) ax.draw(a, nodes);
+        HV.loupeCaptions(a, ax.id);
         /* ---- Iconographie du polycopié posée sur les organes ---- */
         const spots = (HV.FIG_SPOTS || {})[ax.id] || {};
         Object.keys(spots).forEach((id) => {
