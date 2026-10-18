@@ -1,0 +1,50 @@
+/* Éditeur vidéo : bouton du panneau, boîte de dialogue et bandeau incrusté dans le rendu. */
+.ve-open {
+  display: block; width: 100%; padding: 9px 12px; border-radius: 10px; cursor: pointer;
+  border: 1px solid var(--line-2); background: var(--panel-2); color: var(--fg); font: 600 14px var(--font-body);
+}
+.ve-open:hover { border-color: var(--accent); }
+
+.ve-back {
+  position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: 16px;
+  background: color-mix(in srgb, var(--bg) 72%, transparent); backdrop-filter: blur(3px);
+}
+.ve-dlg {
+  position: relative; width: min(560px, 100%); max-height: calc(100% - 8px); overflow-y: auto;
+  display: flex; flex-direction: column; gap: 10px; padding: 18px 20px 16px;
+  background: var(--panel); border: 1px solid var(--line-2); border-radius: 14px;
+  box-shadow: 0 12px 40px color-mix(in srgb, var(--bg) 60%, transparent);
+}
+.ve-dlg h2 { margin: 0; font: 600 23px/1.15 var(--font-display); letter-spacing: 0; text-transform: none; color: var(--fg); }
+.ve-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; }
+.ve-form label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); min-width: 0; }
+.ve-form .ve-wide { grid-column: 1 / -1; }
+.ve-form select, .ve-form input[type=number], .ve-form input[type=text] {
+  font: 14px var(--font-body); color: var(--fg); background: var(--panel-2);
+  border: 1px solid var(--line-2); border-radius: 8px; padding: 6px 8px; min-width: 0;
+}
+.ve-form input[type=range] { width: 100%; accent-color: var(--accent); }
+.ve-form output { font: 500 12px var(--font-data); color: var(--accent); }
+.ve-form .ve-check { flex-direction: row; align-items: center; gap: 8px; color: var(--fg); }
+.ve-form .ve-check input { accent-color: var(--accent); margin: 0; }
+.ve-form .ve-check input[type=number] { width: 64px; padding: 3px 6px; }
+.ve-form fieldset { border: 1px solid var(--line); border-radius: 10px; margin: 0; padding: 6px 10px 8px; display: grid; gap: 6px; }
+.ve-form legend { font-size: 13px; color: var(--muted); padding: 0 4px; }
+.ve-form :disabled { opacity: 0.6; }
+.ve-prog { display: flex; align-items: center; gap: 10px; font: 12px var(--font-data); color: var(--muted); }
+.ve-prog progress { flex: 1; height: 8px; accent-color: var(--accent); }
+.ve-msg { margin: 0; font-size: 13px; color: var(--fg); }
+.ve-msg:empty { display: none; }
+.ve-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+.ve-actions button {
+  border: 1px solid var(--line-2); background: var(--panel-2); border-radius: 8px; padding: 7px 14px; cursor: pointer; font-size: 13.5px;
+}
+.ve-actions button:hover:not(:disabled) { border-color: var(--accent); }
+.ve-actions .ve-go { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+.ve-actions button:disabled { opacity: 0.5; cursor: default; }
+@media (max-width: 520px) { .ve-form { grid-template-columns: minmax(0, 1fr); } }
+
+/* Bandeau du rendu vidéo (dans le SVG sérialisé) */
+.ve-band-bg { fill: var(--bg-2); }
+.ve-step { font: 600 30px var(--font-body); fill: var(--accent); }
+.ve-cap { font: 600 44px var(--font-display); fill: var(--fg); }

@@ -495,11 +495,11 @@
 
   let last = performance.now();
   let labTimer = 0;
-  function frame(now) {
-    const dt = clamp((now - last) / 1000, 0, 0.05);
-    last = now;
+  let paused = false;
+  // Une image : `run` force l'avance du temps simulé (export vidéo image par image).
+  function tick(dt, now, run) {
     stepTween(now);
-    const sdt = playing ? dt * speed : 0;
+    const sdt = playing || run ? dt * speed : 0;
     M.step(sdt);
     HV.Tests.update(sdt);
     for (const sc of scenes) {
@@ -518,10 +518,21 @@
     labTimer -= dt;
     if (labTimer <= 0) {
       labTimer = 0.1;
-      updateLabs(playing ? 0.1 * speed : 0);
+      updateLabs(playing || run ? 0.1 * speed : 0);
       HV.refreshTip();
     }
+  }
+  function frame(now) {
+    const dt = clamp((now - last) / 1000, 0, 0.05);
+    last = now;
+    if (!paused) tick(dt, now, false);
     requestAnimationFrame(frame);
+  }
+  // Après un export, le panneau reflète l'état restauré du modèle.
+  function refreshPanel() {
+    if (!prov) return;
+    document.querySelectorAll('input[name="scenario"]').forEach((r) => { r.checked = r.value === prov.active; });
+    syncSliders();
   }
 
   /* ---------- Démarrage ---------- */
@@ -541,5 +552,15 @@
     apply();
   });
   requestAnimationFrame(frame);
-  HV.app = { flyTo, cam, get current() { return current; } };
+  HV.app = {
+    flyTo, cam, refreshPanel,
+    get current() { return current; },
+    get provider() { return prov; },
+    // Boucle temps réel suspendue pendant un export ; advance(dt) joue une image de durée fixe.
+    pause() { paused = true; },
+    resume() { paused = false; last = performance.now(); },
+    advance(dt) { tick(dt, performance.now(), true); },
+    stepShow,
+    setView(c) { cam.cx = c.cx; cam.cy = c.cy; cam.w = c.w; tween = null; apply(); }
+  };
 })();

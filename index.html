@@ -17,6 +17,7 @@
 <link rel="stylesheet" href="css/zoom-phospho.css">
 <link rel="stylesheet" href="css/zoom-glyc.css">
 <link rel="stylesheet" href="css/zoom-transv.css">
+<link rel="stylesheet" href="css/video-export.css">
 </head>
 <body>
 <div class="app">
@@ -82,8 +83,8 @@
       </div>
       <div class="lab-rows" id="labRows"></div>
       <p class="interp" id="labInterp"></p>
-      <p class="anat" id="labAnat" hidden></p>
       <p class="lab-note">Valeurs de référence indicatives : elles varient d'un laboratoire et d'une technique à l'autre.</p>
+      <p class="anat" id="labAnat" hidden></p>
     </section>
 
     <section class="card" id="scenarioCard">
@@ -112,6 +113,11 @@
         <label class="pace-gain"><input type="checkbox" id="paceGain"> Accentuer : la vitesse suit fortement le taux sécrété</label>
         <p class="pace-help">Densité et vitesse des particules reflètent la sécrétion : une hormone en excès défile vite et serrée, une hormone effondrée se raréfie et ralentit.</p>
       </div>
+    </section>
+
+    <section class="card ve-card">
+      <button type="button" class="ve-open" id="veOpen">Exporter en vidéo</button>
+      <p class="pace-help">MP4 à insérer dans PowerPoint : le schéma de la scène, animé, avec scénario et pas à pas au choix.</p>
     </section>
 
     <section class="card" id="testCard" hidden>
@@ -158,5 +164,6 @@
 <script src="js/scenes/zoom-glyc.js"></script>
 <script src="js/scenes/zoom-transv.js"></script>
 <script src="js/app.js"></script>
+<script src="js/video-export.js"></script>
 </body>
 </html>
