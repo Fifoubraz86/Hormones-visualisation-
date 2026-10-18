@@ -32,6 +32,12 @@ Le site fonctionne aussi tel quel sur GitHub Pages.
 
 Chaque scène a une ancre (`#thyro`, `#foll`, `#cell`…) pour y accéder directement.
 
+## Comprendre pas à pas
+
+Chaque axe a un bouton « Comprendre pas à pas » dans le panneau. La boucle est racontée étape par étape, du premier signal (TRH, CRH, osmostat…) jusqu'à l'action hormonale et au rétrocontrôle. L'étape en cours s'allume, les étapes déjà vues restent visibles en plus pâle et la suite est estompée. On avance avec les boutons ou les flèches ← →. Les étapes sont décrites dans `js/axes-steps.js` ; l'axe thyréotrope, dessiné à la main, utilise des projecteurs (`HV.spotlight`).
+
+Les axes hypophysaires partagent une coupe sagittale cerveau – hypothalamus – tige – hypophyse. Elle montre le système porte (antéhypophyse) et les axones magnocellulaires (posthypophyse).
+
 ## Les scènes de l'axe thyréotrope
 
 1. **Axe** : TRH, TSH, T4/T3, apport iodé, TRAb, lévothyroxine, rétrocontrôle négatif et effets périphériques (fréquence cardiaque, métabolisme basal, thermogenèse).
