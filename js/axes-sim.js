@@ -37,6 +37,7 @@
         P.settle();
       },
       interpret() {
+        if (HV.Tests && HV.Tests.running()) return { tone: 'warn', label: 'Test en cours', text: 'Valeurs mesurées sous stimulation ou freinage : l\'interprétation se lit dans le résultat du test ci-dessous.' };
         return d.interpret(s, p, (k) => P.lab(k), P.T);
       },
       step(dt, T) {
@@ -66,15 +67,15 @@
   /* ===================== Axe corticotrope ===================== */
   SIMS.cortico = {
     title: 'Bilan corticotrope simulé',
-    defaults: { hypo: 1, pit: 1, adr: 1, autoPit: 0, autoAdr: 0, ecto: 0, exo: 0, syn: 0, dxm: 0 },
+    defaults: { hypo: 1, pit: 1, adr: 1, autoPit: 0, autoAdr: 0, ecto: 0, exo: 0, syn: 0, dxm: 0, ith: 0 },
     init: { crh: 1, acth: 1, cort: 1, reg: 1, troph: 1 },
     tau: { troph: 6 },
     targets(p, s) {
       const fb = s.cort + p.exo + p.dxm; // la dexaméthasone freine l'axe mais n'est pas dosée comme cortisol
-      const crh = clamp(p.hypo * ex(-1.5 * (fb - 1)), 0, 3);
+      const crh = clamp(p.hypo * ex(-1.5 * (fb - 1)) * (1 + 5 * p.ith), 0, 8); // l'hypoglycémie est un stress qui active la CRH
       const reg = clamp(p.pit * pw(s.crh, 0.8) * ex(-2 * (fb - 1)), 0, 12);
       // Adénome corticotrope : sécrétion partiellement freinable ; ACTH ectopique : non freinable.
-      const acth = reg + p.autoPit * (0.4 + 0.6 * ex(-0.6 * (fb - 1))) + p.ecto;
+      const acth = reg + p.autoPit * (0.15 + 0.85 * ex(-0.8 * (fb - 1))) + p.ecto;
       // Trophicité du cortex : s'atrophie lentement sans ACTH (insuffisance corticotrope, corticothérapie).
       const troph = clamp(pw(Math.max(acth, 0.01), 0.5), 0.25, 1.6);
       // Réponse surrénalienne saturable ; le Synacthène (ACTH 1-24) s'ajoute à l'ACTH endogène.
@@ -103,7 +104,7 @@
     ],
     scenarios: [
       { id: 'eu', name: 'Axe normal', note: 'Cortisol élevé le matin, bas le soir.', p: {} },
-      { id: 'cushing', name: 'Maladie de Cushing', note: 'Adénome corticotrope : ACTH normale ou élevée, cortisol élevé, rythme aboli.', p: { autoPit: 1.8 } },
+      { id: 'cushing', name: 'Maladie de Cushing', note: 'Adénome corticotrope : ACTH normale ou élevée, cortisol élevé, rythme aboli.', p: { autoPit: 2.3 } },
       { id: 'adeno', name: 'Adénome surrénalien cortisolique', note: 'Cushing ACTH-indépendant : ACTH effondrée, cortisol élevé non freinable.', p: { autoAdr: 1.6 } },
       { id: 'ecto', name: 'Sécrétion ectopique d\'ACTH', note: 'Tumeur (bronches, pancréas…) : ACTH et cortisol très élevés.', p: { ecto: 5 } },
       { id: 'addison', name: 'Insuffisance surrénale périphérique', note: 'Cortisol bas, ACTH très élevée (mélanodermie par excès de POMC/α-MSH).', p: { adr: 0.06 } },
@@ -141,7 +142,8 @@
         { id: 'ecto', x: 570, y: 760, label: 'Tumeur ectopique', sub: 'ACTH non freinable', color: 'bad', show: (p) => p.ecto > 0.02, info: 'Sécrétion ectopique (paranéoplasique) d\'ACTH, par exemple par une tumeur bronchique ou pancréatique.' },
         { id: 'exo', x: 230, y: 600, label: 'Corticoïdes exogènes', w: 250, color: 'p-gold', show: (p) => p.exo > 0.02, info: 'Les glucocorticoïdes de synthèse exercent le même rétrocontrôle négatif que le cortisol.' },
         { id: 'syn', x: 930, y: 600, label: 'Synacthène 250 µg', w: 240, color: 'p-orange2', show: (p) => p.syn > 0.02, info: 'Tétracosactide (ACTH 1-24) : stimulation maximale de la corticosurrénale.' },
-        { id: 'dxm', x: 400, y: 600, label: 'Dexaméthasone 1 mg', w: 250, color: 'p-gold', show: (p) => p.dxm > 0.02, info: 'Glucocorticoïde puissant non dosé par le dosage du cortisol : freine CRH et ACTH.' }
+        { id: 'dxm', x: 400, y: 600, label: 'Dexaméthasone', w: 220, color: 'p-gold', show: (p) => p.dxm > 0.02, info: 'Glucocorticoïde puissant non dosé par le dosage du cortisol : freine CRH et ACTH.' },
+        { id: 'ins', x: 640, y: 600, label: 'Insuline IV', w: 190, color: 'p-blue2', show: (p) => p.ith > 0.02, info: 'L\'hypoglycémie induite (< 0,40 g/L) est un stress qui stimule les axes corticotrope et somatotrope.' }
       ],
       extraLinks: [
         { from: 'ecto', to: 'adr', kind: 'stim', mol: 'acth', v: 'ectoRate', label: '' },
@@ -149,7 +151,8 @@
         { from: 'exo', to: 'hypo', kind: 'inhib', color: 'p-gold', label: '' },
         { from: 'syn', to: 'adr', kind: 'stim', mol: 'acth', v: 'synRate', label: 'ACTH 1-24' },
         { from: 'dxm', to: 'pit', kind: 'inhib', color: 'p-gold', label: '' },
-        { from: 'dxm', to: 'hypo', kind: 'inhib', color: 'p-gold', label: '' }
+        { from: 'dxm', to: 'hypo', kind: 'inhib', color: 'p-gold', label: '' },
+        { from: 'ins', to: 'hypo', kind: 'stim', color: 'p-blue2', label: 'hypoglycémie' }
       ],
       rates: { ectoRate: (s, p) => p.ecto / 2, synRate: (s, p) => Math.min(4, p.syn / 5) },
       levels: [{ label: 'ACTH', mol: 'acth', v: 'acth', max: 4 }, { label: 'Cortisol', mol: 'cortisol', v: 'cort', max: 4 }]
@@ -159,11 +162,13 @@
   /* ===================== Axe somatotrope ===================== */
   SIMS.somato = {
     title: 'Bilan somatotrope simulé',
-    defaults: { hypo: 1, pit: 1, autoPit: 0, liver: 1, load: 0 },
+    defaults: { hypo: 1, pit: 1, autoPit: 0, liver: 1, load: 0, ith: 0 },
     init: { ghrh: 1, gh: 1, igf: 1, reg: 1 },
+    tau: { ghrh: 0.5, reg: 0.5, gh: 0.4, igf: 8 },
     targets(p, s) {
       const ghrh = clamp(p.hypo * ex(-1 * (s.igf - 1)), 0, 6);
-      const reg = clamp(p.pit * pw(s.ghrh, 0.8) * ex(-1.5 * (s.igf - 1)) * ex(-3 * p.load), 0, 10); // l'hyperglycémie freine la GH normale
+      // L'hyperglycémie freine la GH normale ; l'hypoglycémie la stimule (décharge proportionnelle à la réserve).
+      const reg = clamp(p.pit * pw(s.ghrh, 0.8) * ex(-1.5 * (s.igf - 1)) * ex(-3 * p.load) + 9 * p.ith * p.pit * p.hypo, 0, 20);
       const gh = reg + p.autoPit;
       const igf = clamp(p.liver * pw(gh, 0.6), 0, 6);
       return { ghrh, gh, igf, reg };
@@ -183,6 +188,7 @@
       { id: 'eu', name: 'Axe normal', note: 'GH pulsatile nocturne, IGF-1 normale, GH freinée par l\'HGPO.', p: {} },
       { id: 'acro', name: 'Acromégalie', note: 'Adénome somatotrope : IGF-1 élevée, GH non freinée sous HGPO (≥ 0,4 ng/mL).', p: { autoPit: 2.5 } },
       { id: 'def', name: 'Déficit somatotrope', note: 'IGF-1 basse, GH basse.', p: { pit: 0.06 } },
+      { id: 'defp', name: 'Déficit somatotrope partiel', note: 'Réserve diminuée : pic de GH entre 3 et 6 ng/mL à l\'hypoglycémie insulinique.', p: { pit: 0.42 } },
       { id: 'res', name: 'Dénutrition, insuffisance hépatique', note: 'Résistance à la GH (complément) : IGF-1 basse malgré une GH élevée.', p: { liver: 0.25 } }
     ],
     interpret(s, p, L) {
@@ -195,8 +201,11 @@
     hooks: {
       links: { 'hypo>pit>ghrh': 'ghrh', 'pit>liver>gh': 'gh', 'liver>bone>igf1': 'igf', 'liver>muscle>igf1': 'igf', 'liver>pit>igf1': 'igf', 'liver>hypo>igf1': 'igf' },
       cap: { pit: 'pit', liver: 'liver' },
-      extraNodes: [{ id: 'load', x: 980, y: 770, label: 'Glucose 75 g (HGPO)', w: 260, color: 'p-lime', show: (p) => p.load > 0.02, info: 'La charge orale en glucose freine normalement la GH.' }],
-      extraLinks: [{ from: 'load', to: 'pit', kind: 'inhib', mol: 'glucose', v: 'loadRate', label: '' }],
+      extraNodes: [
+        { id: 'load', x: 980, y: 770, label: 'Glucose 75 g (HGPO)', w: 260, color: 'p-lime', show: (p) => p.load > 0.02, info: 'La charge orale en glucose freine normalement la GH.' },
+        { id: 'ins', x: 230, y: 600, label: 'Insuline IV', w: 190, color: 'p-blue2', show: (p) => p.ith > 0.02, info: 'L\'hypoglycémie induite stimule la GHRH et la GH : test de référence du déficit somatotrope.' }
+      ],
+      extraLinks: [{ from: 'load', to: 'pit', kind: 'inhib', mol: 'glucose', v: 'loadRate', label: '' }, { from: 'ins', to: 'hypo', kind: 'stim', color: 'p-blue2', label: '' }],
       rates: { loadRate: (s, p) => 2 * p.load },
       lesions: [
         { node: 'pit', kind: 'mass', tone: 'sky', dy: -4, show: (p) => p.autoPit > 0.02, size: (p) => clamp(0.6 + 0.12 * p.autoPit, 0.6, 1.3), label: 'adénome somatotrope', ly: 52, title: 'Adénome somatotrope', text: 'Souvent un macroadénome au diagnostic (extension vers le sinus caverneux ou le chiasma).' },
@@ -512,13 +521,13 @@
   /* ===================== SRAA ===================== */
   SIMS.raa = {
     title: 'Bilan rénine-aldostérone simulé',
-    defaults: { conn: 0, sten: 0, adr: 1 },
+    defaults: { conn: 0, sten: 0, adr: 1, salt: 0 },
     init: { renin: 1, aldo: 1, k: 4.2, vol: 1 },
     tau: { k: 2, vol: 2 },
     targets(p, s) {
-      const renin = clamp((1 + 3 * p.sten) * ex(-8 * (s.vol - 1)), 0.02, 20);
+      const renin = clamp((1 + 3 * p.sten) * ex(-8 * (s.vol - 1) - 2.2 * p.salt), 0.02, 20); // la charge sodée freine la rénine (macula densa, volémie)
       const aldo = clamp(p.adr * pw(renin, 0.8) * ex(1.2 * (s.k - 4.2)), 0, 20) + p.conn;
-      const vol = 1 + 0.1 * ln(Math.max(aldo, 0.05));
+      const vol = 1 + 0.1 * ln(Math.max(aldo, 0.05)) + 0.04 * p.salt; // charge sodée : expansion volémique
       const k = clamp(4.2 - 0.55 * ln(Math.max(aldo, 0.05)), 2.2, 7);
       return { renin, aldo, vol, k };
     },
@@ -550,6 +559,8 @@
     hooks: {
       links: { 'jga>liver>renin': 'renin', 'liver>lung>angio': 'renin', 'lung>adr>angio': 'renin', 'adr>tub>aldo': 'aldo', 'tub>vol>nai': 'aldo' },
       cap: { adr: 'adr' },
+      extraNodes: [{ id: 'salt', x: 1060, y: 760, label: 'Sérum salé', w: 180, color: 'p-amber', show: (p) => p.salt > 0.02, info: 'L\'expansion volémique freine la rénine, donc normalement l\'aldostérone.' }],
+      extraLinks: [{ from: 'salt', to: 'vol', kind: 'stim', mol: 'nai', label: '' }],
       lesions: [
         { node: 'adr', kind: 'nodule', tone: 'yellow', dx: -34, dy: -30, show: (p) => p.conn > 0.02, ly: -26, label: 'adénome de Conn', title: 'Adénome de Conn', text: 'Sécrétion unilatérale d\'aldostérone (1/3 des cas) ; sinon hyperplasie bilatérale (2/3). Le cathétérisme des veines surrénales distingue les deux.' },
         { node: 'jga', kind: 'stenosis', dx: 30, dy: -46, show: (p) => p.sten > 0.05, label: 'sténose de l\'artère rénale', ly: -24, title: 'Hypoperfusion rénale', text: 'La baisse de perfusion stimule la rénine : hyperaldostéronisme secondaire.' },
@@ -563,16 +574,17 @@
   const meal = (T) => R.meals.reduce((a, m) => a + G(((T.h - m + 24) % 24), 0.8, 0.6), 0);
   SIMS.glyc = {
     title: 'Bilan glucidique simulé',
-    defaults: { beta: 1, sens: 1, tumor: 0, exo: 0, glucResp: 1 },
+    defaults: { beta: 1, sens: 1, tumor: 0, exo: 0, glucResp: 1, fast: 0, ogtt: 0 },
     init: { g: 0.9, ins: 1, glu: 1, ket: 0.1 },
     tau: { g: 0.8, ins: 0.4, glu: 0.5, ket: 2 },
     targets(p, s, T) {
+      const food = meal(T) * (1 - p.fast) + 4 * p.ogtt; // repas, jeûne, charge orale de 75 g
       const ins = p.beta * clamp((s.g - 0.65) * 4, 0, 8) + p.tumor + p.exo * (0.6 + 0.6 * meal(T));
       const eff = ins * p.sens;
       const glu = p.glucResp * clamp(1 + 4 * Math.max(0, 0.85 - s.g) - 0.3 * Math.min(eff, 2), 0.1, 6);
       // Production hépatique : freinée par l'insuline, emballée quand elle manque.
       const prod = ((0.55 + 0.45 * glu) * (1 + 5 * Math.max(0, 0.3 - eff))) / (1 + 0.8 * eff);
-      const g = clamp(0.12 + 0.35 * meal(T) / (0.4 + 0.6 * Math.min(eff, 3)) + 1.25 * prod, 0.25, 6);
+      const g = clamp(0.12 + 0.35 * food / (0.4 + 0.6 * Math.min(eff, 3)) + 1.25 * prod, 0.25, 6);
       const ket = clamp(0.05 + 10 * Math.max(0, 0.25 - eff), 0, 8);
       return { ins, glu, g, ket };
     },
@@ -608,6 +620,12 @@
       links: { 'islet>liver>insulin': 'ins', 'islet>muscle>insulin': 'ins', 'islet>fat>insulin': 'ins', 'islet>liver>glucagon': 'glu', 'liver>keto>ketone': 'ket', 'fat>liver>ffa': 'ket' },
       dropMod: ['islet>liver>insulin', 'islet>muscle>insulin', 'islet>fat>insulin', 'islet>liver>glucagon', 'liver>keto>ketone', 'fat>liver>ffa'],
       cap: { islet: 'beta' },
+      extraNodes: [
+        { id: 'fast', x: 420, y: 600, label: 'Jeûne', w: 150, color: 'p-grey', show: (p) => p.fast > 0.02 && p.ogtt < 0.02, info: 'Plus d\'apport alimentaire : la glycémie dépend de la production hépatique, l\'insuline doit s\'effondrer.' },
+        { id: 'ogtt', x: 430, y: 600, label: 'Glucose 75 g', w: 180, color: 'p-lime', show: (p) => p.ogtt > 0.02, info: 'Charge orale de l\'HGPO.' }
+      ],
+      extraLinks: [{ from: 'fast', to: 'gut', kind: 'inhib', color: 'p-grey', label: '' }, { from: 'ogtt', to: 'glc', kind: 'stim', mol: 'glucose', v: 'ogttRate', label: '' }],
+      rates: { ogttRate: (s, p) => 3 * p.ogtt },
       scale: { fat: (p) => (p.sens < 0.6 ? 1.3 : 1) },
       lesions: [
         { node: 'islet', kind: 'infiltrate', dx: 6, dy: -24, show: (p) => p.beta < 0.5, label: 'insulite auto-immune', ly: -40, title: 'Diabète de type 1', text: 'Destruction auto-immune des cellules β (infiltrat lymphocytaire des îlots).' },

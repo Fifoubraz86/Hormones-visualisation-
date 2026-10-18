@@ -4,6 +4,23 @@ Liste de travail pour les futures animations de l'atlas. **(P)** : cité dans le
 
 Principe général : un test de **stimulation** cherche un **déficit** (la glande ne répond pas), un test de **freinage** cherche une **hypersécrétion autonome** (la sécrétion ne baisse pas).
 
+## Tests déjà animés dans l'atlas
+
+Chaque test se lance depuis la carte « Tests dynamiques » du panneau, sur le scénario clinique choisi (sujet sain ou pathologie de l'axe) : la courbe, les prélèvements et l'interprétation s'adaptent au scénario.
+
+| Axe | Test | Scénarios où le résultat est discriminant |
+| --- | --- | --- |
+| Corticotrope | Synacthène immédiat (P) | sain, Addison, insuffisance corticotrope, corticothérapie |
+| Corticotrope | Freinage minute à 1 mg (P) | sain, Cushing hypophysaire, surrénalien, ectopique |
+| Corticotrope | Hypoglycémie insulinique (P) | sain, insuffisance corticotrope, Addison |
+| Corticotrope | Freinage fort à 8 mg | Cushing hypophysaire (freinage ≥ 50 %), ectopique (pas de freinage) |
+| Somatotrope | HGPO avec GH (P) | sain, acromégalie |
+| Somatotrope | Hypoglycémie insulinique (P) | sain (pic ≥ 6 ng/mL), déficit partiel (3–6), complet (< 3) |
+| Rénine-aldostérone | Charge sodée (P) | sain, hyperaldostéronisme primaire |
+| Glycémie | HGPO à 75 g (P) | sain, DT2, DT1 |
+| Glycémie | Épreuve de jeûne de 72 h | sain, insulinome |
+| Posthypophyse | Restriction hydrique + desmopressine (P) | sain, diabète insipide central, néphrogénique |
+
 ## Axe corticotrope et corticosurrénale
 
 | Test | Principe | Ce que l'on cherche | Réponse normale / pathologique |
