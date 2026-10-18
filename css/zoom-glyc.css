@@ -1,1 +1,55 @@
-/* Loupes : glyc */
+/* Loupes de l'axe glycémique (zoom-glyc.js) */
+.zgl-cell { fill: color-mix(in srgb, var(--p-red2) 7%, var(--scene-1)); stroke: var(--p-red2); stroke-width: 12; }
+.zgl-cell-in { fill: none; stroke: var(--scene-1); stroke-width: 2.5; stroke-dasharray: 3 9; pointer-events: none; }
+.zgl-alpha { fill: color-mix(in srgb, var(--p-blue) 30%, var(--scene-1)); stroke: var(--p-blue); stroke-width: 2.5; }
+.zgl-betasub { fill: var(--p-violet); stroke: rgba(0, 0, 0, 0.25); stroke-width: 1.5; }
+.zgl-kin { fill: color-mix(in srgb, var(--p-violet) 30%, var(--scene-1)); stroke: var(--p-violet); stroke-width: 2.5; }
+.zgl-p { fill: var(--p-gold); stroke: var(--scene-1); stroke-width: 2; }
+.zgl-p-t { font: 700 15px var(--font-body); fill: var(--scene-1); pointer-events: none; }
+.zgl-ves { fill: color-mix(in srgb, var(--p-teal) 16%, var(--scene-1)); stroke: var(--p-teal); stroke-width: 2.5; }
+.zgl-glut { fill: var(--p-teal); stroke: rgba(0, 0, 0, 0.25); stroke-width: 1.5; }
+.zgl-btn { cursor: pointer; }
+.zgl-btn rect { fill: color-mix(in srgb, var(--accent) 16%, var(--scene-1)); stroke: var(--accent); stroke-width: 2.5; }
+.zgl-btn:hover rect { fill: color-mix(in srgb, var(--accent) 30%, var(--scene-1)); }
+.zgl-btn-t { font: 600 18px var(--font-body); fill: var(--fg); pointer-events: none; }
+.zgl-hep { fill: color-mix(in srgb, var(--o-liver) 10%, var(--scene-1)); stroke: var(--o-liver); stroke-width: 10; }
+.zgl-glyco { fill: color-mix(in srgb, var(--p-lime) 55%, var(--scene-1)); stroke: var(--p-lime); stroke-width: 1.5; }
+.zgl-big { font: 600 23px var(--font-body); fill: var(--fg); }
+.zgl-ph text { fill: var(--muted); }
+.zgl-ph.on text { fill: var(--fg); font-weight: 600; }
+.zgl-dot { fill: var(--line-2); }
+.zgl-ph.on .zgl-dot { fill: var(--accent); }
+.zgl-stom { fill: color-mix(in srgb, var(--o-stomach, var(--p-rose)) 55%, var(--scene-1)); stroke: var(--o-stomach, var(--p-rose)); stroke-width: 3; }
+.zgl-gut { fill: none; stroke: color-mix(in srgb, var(--p-rose) 45%, var(--scene-1)); stroke-width: 48; stroke-linecap: round; }
+.zgl-gut-l { fill: none; stroke: color-mix(in srgb, var(--p-rose) 12%, var(--scene-1)); stroke-width: 26; stroke-linecap: round; pointer-events: none; }
+.zgl-ecell { stroke-width: 2.5; }
+.zgl-ecell.k { fill: color-mix(in srgb, var(--p-violet) 22%, var(--scene-1)); stroke: var(--p-violet); }
+.zgl-ecell.l { fill: color-mix(in srgb, var(--p-teal) 22%, var(--scene-1)); stroke: var(--p-teal); }
+.zgl-ecell-g.k { fill: var(--p-violet); }
+.zgl-ecell-g.l { fill: var(--p-teal); }
+.zgl-g circle { stroke: rgba(0, 0, 0, 0.3); stroke-width: 1; }
+.zgl-g.glp1 { fill: var(--p-teal); }
+.zgl-g.gip { fill: var(--p-violet); }
+.zgl-g.lep { fill: var(--p-gold); }
+.zgl-g.ghr { fill: var(--p-orange); }
+.zgl-g.pyy { fill: var(--p-sky); }
+.zgl-g.amsh { fill: var(--p-green); }
+.zgl-g.agrp { fill: var(--p-red2); }
+.zgl-g.frag { fill: var(--p-grey); }
+.zgl-dpp { fill: color-mix(in srgb, var(--p-red) 22%, var(--scene-1)); stroke: var(--p-red); stroke-width: 3; }
+.zgl-dpp-x { fill: none; stroke: var(--p-red); stroke-width: 4; stroke-linecap: round; }
+.zgl-axis { fill: none; stroke: var(--line-2); stroke-width: 2; }
+.zgl-curve { fill: none; stroke: var(--p-blue2); stroke-width: 4; stroke-linecap: round; }
+.zgl-curve.iv { stroke-dasharray: 9 7; opacity: 0.8; }
+.zgl-body { fill: color-mix(in srgb, var(--p-grey) 14%, var(--scene-1)); stroke: var(--line-2); stroke-width: 3; }
+.zgl-eye { fill: color-mix(in srgb, var(--p-violet) 40%, var(--scene-1)); stroke: var(--p-violet); stroke-width: 2.5; }
+.zgl-kid { fill: color-mix(in srgb, var(--o-kidney) 60%, var(--scene-1)); stroke: var(--o-kidney); stroke-width: 2.5; }
+.zgl-art { fill: none; stroke: var(--p-red); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+.zgl-nerve { fill: none; stroke: var(--p-gold); stroke-width: 3.5; stroke-dasharray: 8 5; stroke-linecap: round; }
+.zgl-ulcer { fill: var(--p-amber); stroke: var(--p-red2); stroke-width: 3; }
+.zgl-hot rect.sig-box { stroke-width: 4.5; }
+.zgl-nuc { fill: color-mix(in srgb, var(--o-hypo) 8%, transparent); stroke: var(--o-hypo); stroke-width: 3; stroke-dasharray: 9 7; }
+.zgl-neuron { fill: color-mix(in srgb, var(--c) 24%, var(--scene-1)); stroke: var(--c); stroke-width: 3; }
+.zgl-dend { fill: none; stroke: var(--c); stroke-width: 5; stroke-linecap: round; }
+.zgl-halo { fill: var(--c); }
+.zgl-mark { fill: var(--accent); stroke: var(--scene-1); stroke-width: 4; }

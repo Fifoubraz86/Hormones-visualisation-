@@ -1,1 +1,59 @@
-/* Loupes : hypo */
+/* Loupes : hypo (noyaux hypothalamiques, loge hypophysaire, mosaïque antéhypophysaire, adénome) */
+.zh-tissue { fill: color-mix(in srgb, var(--o-hypo) 30%, var(--scene-1)); stroke: var(--o-hypo); stroke-width: 2.5; }
+.zh-brain { fill: color-mix(in srgb, var(--o-brain) 30%, var(--scene-1)); stroke: var(--o-brain); stroke-width: 2; }
+.zh-v3 { fill: var(--csf, color-mix(in srgb, var(--p-sky) 22%, var(--scene-1))); stroke: color-mix(in srgb, var(--p-sky) 60%, var(--scene-1)); stroke-width: 2; }
+.zh-nuc { fill: color-mix(in srgb, var(--c) 20%, transparent); stroke: var(--c); stroke-width: 2.5; }
+.zh-dot { fill: var(--c); stroke: var(--scene-1); stroke-width: 1; }
+.zh-me { fill: color-mix(in srgb, var(--o-aorta) 30%, var(--scene-1)); stroke: var(--o-aorta); stroke-width: 2.5; }
+.zh-stalk { fill: color-mix(in srgb, var(--o-pit-post) 50%, var(--scene-1)); stroke: var(--o-pit-post); stroke-width: 2; }
+.zh-portal { fill: none; stroke: var(--o-aorta); stroke-width: 6; opacity: 0.7; stroke-linecap: round; }
+.zh-axon { fill: none; stroke: var(--o-hypo); stroke-width: 3; stroke-dasharray: 3 6; stroke-linecap: round; opacity: 0.9; }
+.zh-tract { fill: var(--o-callosum); stroke: var(--o-line); stroke-width: 1.5; }
+.zh-chiasm { fill: none; stroke: var(--o-callosum); stroke-linecap: round; }
+.zh-lead { fill: none; stroke: var(--muted); stroke-width: 1.5; opacity: 0.75; }
+.zh-chip { fill: color-mix(in srgb, var(--c) 22%, var(--scene-1)); stroke: var(--c); stroke-width: 2; }
+.zh-chip.post { stroke-dasharray: 5 4; }
+.zh-chip.loc { fill: var(--scene-1); stroke-width: 1.5; }
+.zh-chip-t { font: 600 16px var(--font-body); fill: var(--fg); }
+.zh-btn { cursor: pointer; }
+.zh-btn rect { fill: var(--scene-1); stroke: var(--line-2); stroke-width: 2; }
+.zh-btn:hover rect { stroke: var(--accent); }
+.zh-btn.on rect { fill: color-mix(in srgb, var(--accent) 25%, var(--scene-1)); stroke: var(--accent); stroke-width: 3; }
+.zh-btn-t { font: 600 17px var(--font-body); fill: var(--fg); pointer-events: none; }
+/* Loge hypophysaire */
+.zh-bone { fill: var(--o-sella); stroke: color-mix(in srgb, var(--o-sella) 60%, #000); stroke-width: 2; }
+.zh-air { fill: var(--bg); stroke: color-mix(in srgb, var(--o-sella) 60%, #000); stroke-width: 2; }
+.zh-septum { fill: none; stroke: var(--o-sella); stroke-width: 6; stroke-linecap: round; }
+.zh-cav { fill: color-mix(in srgb, var(--o-vein) 28%, var(--scene-1)); stroke: var(--o-vein); stroke-width: 2.5; }
+.zh-ica { fill: var(--o-aorta); stroke: color-mix(in srgb, var(--o-aorta) 60%, #000); stroke-width: 2; }
+.zh-nerve { fill: var(--p-gold); stroke: color-mix(in srgb, var(--p-gold) 55%, #000); stroke-width: 1.5; }
+.zh-gland { fill: var(--o-pit-ant); stroke: color-mix(in srgb, var(--o-pit-ant) 60%, #000); stroke-width: 2; }
+.zh-gland-p { fill: var(--o-pit-post); stroke: color-mix(in srgb, var(--o-pit-post) 60%, #000); stroke-width: 2; }
+.zh-dura { fill: none; stroke: var(--muted); stroke-width: 3; stroke-dasharray: 8 5; }
+.zh-tumor { fill: color-mix(in srgb, var(--p-grey) 55%, var(--scene-1)); stroke: var(--fg); stroke-width: 2.5; fill-opacity: 0.85; }
+.zh-hemo { fill: var(--p-red); opacity: 0; }
+.zh-vf-bg { fill: var(--scene-1); stroke: var(--line-2); stroke-width: 2; }
+.zh-vf-q { fill: var(--fg); opacity: 0; transition: opacity 0.6s; }
+.zh-vf-ax { stroke: var(--line-2); stroke-width: 1.5; }
+.zh-val { font: 500 17px var(--font-body); fill: var(--fg); }
+.zh-val.bad { fill: var(--bad); }
+.zh-val.warn { fill: var(--warn); }
+/* Mosaïque */
+.zh-cell { fill: color-mix(in srgb, var(--c) 45%, var(--scene-1)); stroke: var(--c); stroke-width: 1.5; transition: opacity 0.3s; }
+.zh-cell-n { fill: color-mix(in srgb, var(--c) 55%, #000); pointer-events: none; transition: opacity 0.3s; }
+.zh-mosaic[data-hl] .zh-ctype { opacity: 0.15; transition: opacity 0.3s; }
+.zh-mosaic[data-hl="somato"] .zh-ctype.somato, .zh-mosaic[data-hl="lacto"] .zh-ctype.lacto, .zh-mosaic[data-hl="cortico"] .zh-ctype.cortico,
+.zh-mosaic[data-hl="gonado"] .zh-ctype.gonado, .zh-mosaic[data-hl="thyreo"] .zh-ctype.thyreo { opacity: 1; }
+.zh-row rect.zh-row-bg { fill: color-mix(in srgb, var(--c) 8%, var(--scene-1)); stroke: color-mix(in srgb, var(--c) 55%, var(--line-2)); stroke-width: 2; }
+.zh-row:hover rect.zh-row-bg, .zh-row.on rect.zh-row-bg { stroke: var(--c); stroke-width: 4; }
+.zh-capil { fill: none; stroke: var(--o-aorta); stroke-width: 12; opacity: 0.35; stroke-linecap: round; }
+.zh-adeno { fill: color-mix(in srgb, var(--o-pit-ant) 18%, var(--scene-1)); stroke: var(--o-pit-ant); stroke-width: 3; }
+/* Adénome */
+.zh-gauge-bg { fill: var(--line); }
+.zh-gauge { fill: var(--c); transition: fill 0.3s; }
+.zh-mark { stroke: var(--bad); stroke-width: 2.5; stroke-dasharray: 4 3; }
+.zh-track { stroke: var(--line-2); stroke-width: 8; stroke-linecap: round; }
+.zh-knob { fill: var(--accent); stroke: var(--scene-1); stroke-width: 3; cursor: ew-resize; }
+.zh-lost { opacity: 0.35; }
+.zh-strike { stroke: var(--bad); stroke-width: 3; opacity: 0; }
+.zh-halo { paint-order: stroke; stroke: var(--scene-1); stroke-width: 5px; stroke-linejoin: round; }

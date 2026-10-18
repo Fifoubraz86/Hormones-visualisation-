@@ -1,1 +1,105 @@
-/* Loupes : adrenal */
+/* Loupes : surrénale (stéroïdogenèse, zonation, incidentalome) et cellule principale du tube collecteur. */
+.za-arrhead { fill: var(--muted); }
+.za-hit { fill: transparent; }
+.za-small { font: 16px var(--font-body); fill: var(--muted); }
+.za-small.strong { fill: var(--fg); font-weight: 600; }
+.za-txt { font: 16px var(--font-body); fill: var(--fg); }
+
+/* Boutons et curseurs */
+.za-btn { cursor: pointer; }
+.za-btn rect { fill: var(--panel-2); stroke: var(--line-2); stroke-width: 2; }
+.za-btn:hover rect { stroke: var(--accent); }
+.za-btn.on rect { fill: color-mix(in srgb, var(--accent) 24%, var(--scene-1)); stroke: var(--accent); stroke-width: 3; }
+.za-btn-t { font: 600 18px var(--font-body); fill: var(--fg); pointer-events: none; }
+.za-slider { cursor: ew-resize; }
+.za-sl-hit { fill: transparent; }
+.za-sl-track { fill: var(--line); }
+.za-sl-fill { fill: var(--accent); opacity: 0.7; }
+.za-sl-knob { fill: var(--accent); stroke: var(--scene-1); stroke-width: 3; }
+.za-sl-l { font: 500 17px var(--font-body); fill: var(--fg); }
+.za-sl-v { font: 600 17px var(--font-data); fill: var(--accent); }
+
+/* Stéroïdogenèse */
+.za-band { fill: color-mix(in srgb, var(--c) 7%, transparent); stroke: color-mix(in srgb, var(--c) 40%, transparent); stroke-width: 2; }
+.za-band-t { font: 600 20px var(--font-display); fill: var(--fg); }
+.za-node-r { fill: color-mix(in srgb, var(--c) 16%, var(--scene-1)); stroke: var(--c); stroke-width: 2.5; transition: stroke-width 0.3s, opacity 0.3s; }
+.za-node.final .za-node-r { stroke-width: 4; }
+.za-node.peri .za-node-r { stroke-dasharray: 8 6; }
+.za-node-t { font: 600 18px var(--font-body); fill: var(--fg); }
+.za-node.small .za-node-t { font-size: 15.5px; }
+.za-node.lv-acc .za-node-r { stroke: var(--bad); stroke-width: 6; fill: color-mix(in srgb, var(--bad) 22%, var(--scene-1)); }
+.za-node.lv-up .za-node-r { stroke: var(--warn); stroke-width: 4; }
+.za-node.lv-down { opacity: 0.45; }
+.za-node.lv-none { opacity: 0.22; }
+.za-lv circle { fill: var(--scene-1); stroke: var(--line-2); stroke-width: 2; }
+.za-node.lv-acc .za-lv circle, .za-node.lv-up .za-lv circle { stroke: var(--bad); }
+.za-lv-t { font: 700 16px var(--font-data); fill: var(--fg); }
+.za-edge { fill: none; stroke: var(--muted); stroke-width: 3; }
+.za-edge.peri, .za-edge.weak { stroke-dasharray: 7 6; }
+.za-edge.blocked { stroke: var(--bad); opacity: 0.5; }
+.za-cross path { stroke: var(--bad); stroke-width: 7; stroke-linecap: round; fill: none; }
+.za-enz rect { fill: color-mix(in srgb, var(--p-lime) 22%, var(--scene-1)); stroke: var(--p-lime); stroke-width: 2; }
+.za-enz.bare rect { fill: transparent; stroke: none; }
+.za-enz.blocked rect { stroke: var(--bad); fill: color-mix(in srgb, var(--bad) 18%, var(--scene-1)); }
+.za-enz.blocked .za-enz-t, .za-enz.blocked .za-enz-s { fill: var(--bad); text-decoration: line-through; }
+.za-enz-t { font: 600 16px var(--font-data); fill: var(--fg); }
+.za-enz-s { font: 15px var(--font-body); fill: var(--muted); }
+.za-chip rect { fill: var(--scene-1); stroke: var(--line-2); stroke-width: 2; stroke-dasharray: 5 5; }
+.za-chip-t { font: 600 16px var(--font-body); fill: var(--faint); }
+.za-chip.on rect { fill: color-mix(in srgb, var(--bad) 20%, var(--scene-1)); stroke: var(--bad); stroke-dasharray: none; }
+.za-chip.on .za-chip-t { fill: var(--fg); }
+
+/* Zonation et vaisseaux */
+.za-cap { fill: color-mix(in srgb, var(--p-grey) 40%, var(--scene-1)); }
+.za-layer { fill: color-mix(in srgb, var(--c) 14%, var(--scene-1)); stroke: color-mix(in srgb, var(--c) 50%, transparent); stroke-width: 1.5; }
+.za-c { fill: color-mix(in srgb, var(--c) 35%, var(--scene-1)); stroke: var(--c); stroke-width: 1.5; }
+.za-c.chrom { fill: color-mix(in srgb, var(--c) 28%, var(--scene-1)); }
+.za-sinus { fill: none; stroke: var(--vessel-line); stroke-width: 9; opacity: 0.55; stroke-linecap: round; }
+.za-artmed { fill: none; stroke: var(--o-aorta); stroke-width: 6; opacity: 0.8; }
+.za-vein { fill: color-mix(in srgb, var(--o-vein) 45%, var(--scene-1)); stroke: var(--o-vein); stroke-width: 3; }
+.za-vein-out { fill: none; stroke: var(--o-vein); stroke-width: 10; stroke-linecap: round; }
+.za-centri { fill: none; stroke: var(--muted); stroke-width: 3; stroke-dasharray: 2 8; stroke-linecap: round; }
+.za-kidney { fill: color-mix(in srgb, var(--o-kidney) 55%, var(--scene-1)); stroke: var(--o-kidney); stroke-width: 3; }
+.za-adr { fill: var(--o-adrenal); stroke: var(--o-line); stroke-width: 2; }
+.za-ivc { fill: none; stroke: var(--o-vein); stroke-width: 30; stroke-linecap: round; }
+.za-vein-s { fill: none; stroke: var(--o-vein); stroke-width: 14; stroke-linecap: round; }
+.za-vadr { fill: none; stroke: var(--o-vein); stroke-width: 8; stroke-linecap: round; }
+.za-vadr.thin { stroke-width: 5; stroke-dasharray: 6 5; }
+.za-cath { fill: none; stroke: var(--accent); stroke-width: 3; stroke-dasharray: 9 7; }
+
+/* Incidentalome */
+.za-dbox rect { fill: color-mix(in srgb, var(--c) 10%, var(--scene-1)); stroke: var(--c); stroke-width: 2; transition: stroke-width 0.3s; }
+.za-dbox.root rect { stroke-width: 3; }
+.za-dbox.hit rect { stroke-width: 6; fill: color-mix(in srgb, var(--c) 24%, var(--scene-1)); }
+.za-dbox-h { font: 600 19px var(--font-body); fill: var(--fg); }
+.za-darr { fill: none; stroke: var(--muted); stroke-width: 2.5; }
+.za-szrow { opacity: 0.55; }
+.za-szrow.hit { opacity: 1; }
+.za-plot { fill: var(--scene-1); stroke: var(--line); }
+.za-grid { stroke: var(--line); stroke-width: 1; }
+.za-thr { stroke: var(--good); stroke-width: 2; stroke-dasharray: 8 6; }
+.za-curve { fill: none; stroke: var(--accent); stroke-width: 3.5; }
+.za-dot { fill: var(--accent); stroke: var(--scene-1); stroke-width: 2; }
+.za-res { font: 600 17px var(--font-data); fill: var(--fg); }
+.za-verdict { font: 600 18px var(--font-body); fill: var(--fg); }
+.za-verdict.good { fill: var(--good); }
+.za-verdict.warn { fill: var(--warn); }
+.za-verdict.bad { fill: var(--bad); }
+
+/* Cellule principale */
+.za-lumen { fill: color-mix(in srgb, var(--p-amber) 10%, var(--scene-1)); stroke: color-mix(in srgb, var(--p-amber) 45%, transparent); stroke-width: 2; }
+.za-blood { fill: color-mix(in srgb, var(--vessel-line) 10%, var(--scene-1)); stroke: color-mix(in srgb, var(--vessel-line) 45%, transparent); stroke-width: 2; }
+.za-ic { stroke: var(--p-teal); }
+.za-cell-t { font: italic 600 18px var(--font-display); fill: var(--muted); }
+.za-tj { fill: var(--p-grey); }
+.za-pump { fill: color-mix(in srgb, var(--p-violet) 40%, var(--scene-1)); stroke: var(--p-violet); stroke-width: 3; }
+.za-mr { fill: color-mix(in srgb, var(--p-amber) 25%, var(--scene-1)); stroke: var(--p-amber); stroke-width: 4; }
+.za-mr-site { fill: var(--scene-1); stroke: var(--p-amber); stroke-width: 2; }
+.za-xmark { fill: none; stroke: var(--bad); stroke-width: 6; stroke-linecap: round; }
+.za-hglyph { fill: var(--p-red); stroke: rgba(0, 0, 0, 0.3); stroke-width: 1; }
+.za-hglyph-t { font: 700 12px var(--font-body); fill: #fff; }
+.za-bglyph { fill: var(--p-teal); stroke: rgba(0, 0, 0, 0.3); stroke-width: 1; }
+.za-bglyph-t { font: 700 11px var(--font-body); fill: #fff; }
+.za-enz.bare.blocked rect { fill: transparent; stroke: none; }
+.za-node.lv-acc .za-node-r { animation: za-pulse 1.4s ease-in-out infinite; }
+@keyframes za-pulse { 50% { stroke-width: 11; } }
