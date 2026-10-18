@@ -111,10 +111,21 @@
     return { tone: 'good', label: 'Euthyroïdie', text: 'TSH, T4L et T3L dans les valeurs de référence.' };
   }
 
+  // Substrat anatomique affiché dans le panneau et dessiné sur la glande
+  function anat() {
+    const out = [];
+    if (p.auto > 0.02) out.push('nodule thyroïdien autonome (adénome toxique), parenchyme éteint');
+    if (p.trab > 0.05) out.push('goitre diffus hypervasculaire (maladie de Basedow)');
+    if (p.thy < 0.6) out.push('thyroïdite lymphocytaire (Hashimoto)');
+    if (p.iodine < 0.5) out.push('goitre multinodulaire');
+    if (p.pit < 0.5) out.push('macroadénome hypophysaire non sécrétant');
+    return out.join(' · ');
+  }
+
   function reset() {
     setScenario('eu');
     for (const k in s) s[k] = 1;
   }
 
-  HV.model = { id: 'thyro', title: 'Bilan thyroïdien simulé', active: 'eu', p, s, DEFAULTS, LABS, PARAMS, SCENARIOS, step, setScenario, lab, interpret, targets, reset };
+  HV.model = { id: 'thyro', title: 'Bilan thyroïdien simulé', active: 'eu', p, s, DEFAULTS, LABS, PARAMS, SCENARIOS, step, setScenario, lab, interpret, targets, reset, anat };
 })();

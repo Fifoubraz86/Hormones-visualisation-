@@ -97,8 +97,46 @@
             shown.push(() => tu.setAttribute('opacity', sim.p[hk.tumor[n.id]] > 0.02 ? 1 : 0));
           }
           if (n.show) shown.push(() => grp.setAttribute('visibility', n.show(sim.p) ? 'visible' : 'hidden'));
+          if (sim && hk.scale && hk.scale[n.id] && n.organ) {
+            const icg = grp.firstChild, s0 = n.s || 1.15;
+            shown.push(() => icg.setAttribute('transform', `translate(${n.x} ${n.y}) scale(${(s0 * hk.scale[n.id](sim.p, sim.s)).toFixed(3)})`));
+          }
           n.vis = () => !n.show || n.show(sim.p);
           nodes[n.id] = n;
+        });
+
+        /* ---- Substrat anatomique des scénarios (adénome, hyperplasie, infiltrat, sténose…) ---- */
+        (hk.lesions || []).forEach((L, i) => {
+          const n = nodes[L.node], s2 = n.s || 1.15;
+          const key = ax.id + '.les' + i;
+          HV.INFO[key] = { t: L.title, k: 'Substrat anatomique', d: L.text };
+          const g = a.el('g', { class: 'lesion', 'data-info': key });
+          const cx = n.x + (L.dx || 0) * s2, cy = n.y + (L.dy || 0) * s2;
+          const inner = a.el('g', { transform: `translate(${cx} ${cy})` }, g);
+          const body = a.el('g', null, inner);
+          if (L.kind === 'nodule') {
+            a.el('circle', { r: 17, class: 'les-cap' }, body);
+            a.el('circle', { r: 14, class: 'les-nod ' + (L.tone || '') }, body);
+            a.el('circle', { r: 14, fill: 'url(#shine)' }, body);
+          } else if (L.kind === 'mass') {
+            const d = 'M -30,4 C -32,-20 -6,-34 14,-26 C 34,-18 36,6 24,20 C 12,34 -24,30 -30,4 Z';
+            a.el('path', { d, class: 'les-mass ' + (L.tone || '') }, body);
+            a.el('path', { d, fill: 'url(#shine)' }, body);
+          } else if (L.kind === 'infiltrate') {
+            for (let k = 0; k < 9; k++) a.el('circle', { cx: Math.cos(k * 2.4) * (12 + (k % 3) * 9), cy: Math.sin(k * 2.4) * (10 + (k % 3) * 8), r: 4.5, class: 'les-lympho' }, body);
+          } else if (L.kind === 'stenosis') {
+            a.el('path', { d: 'M -26,-10 C -8,-10 -6,-3 0,-3 C 6,-3 8,-10 26,-10 M -26,10 C -8,10 -6,3 0,3 C 6,3 8,10 26,10', class: 'les-sten' }, body);
+            a.el('path', { d: 'M -6,-18 L 0,-8 L 6,-18', class: 'les-arrow' }, body);
+          } else if (L.kind === 'cross') {
+            a.el('path', { d: 'M -14,-14 L 14,14 M 14,-14 L -14,14', class: 'les-cross' }, body);
+          }
+          if (L.label) a.text(L.lx || 0, L.ly != null ? L.ly : 36, L.label, 'les-lbl', { anchor: 'middle' }, inner);
+          shown.push(() => {
+            const on = L.show(sim.p, sim.s);
+            g.setAttribute('opacity', on ? 1 : 0);
+            g.setAttribute('visibility', on ? 'visible' : 'hidden');
+            if (L.size) body.setAttribute('transform', `scale(${L.size(sim.p, sim.s).toFixed(2)})`);
+          });
         });
 
         const edge = (n, toward) => {

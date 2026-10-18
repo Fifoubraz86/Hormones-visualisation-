@@ -105,6 +105,11 @@
     food: { t: 'Apport iodé', k: 'Sel iodé, produits de la mer, laitages', d: 'La carence iodée reste la première cause de goitre dans le monde.', live: () => 'Apport simulé : ' + Math.round(M.p.iodine * 150) + ' µg/j' },
     levo: { t: 'Lévothyroxine (LT4)', k: 'Traitement substitutif', d: 'T4 de synthèse, à jeun, environ 1,6 µg/kg/j en substitution complète. Adaptation sur la TSH 6 à 8 semaines après chaque changement de dose.', live: () => (M.p.levo > 0.02 ? 'Dose simulée : ' + Math.round((M.p.levo * 112) / 12.5) * 12.5 + ' µg/j' : 'Non prise') },
     plasma: { t: 'Plasma', k: 'Compartiment de transport', d: 'Plus de 99 % des hormones thyroïdiennes y sont liées aux protéines.' },
+    'les-graves': { t: 'Maladie de Basedow', k: 'Goitre diffus hypervasculaire', d: 'Glande augmentée de volume de façon homogène, vascularisée (souffle, frémissement). Scintigraphie : fixation diffuse et intense.' },
+    'les-hashi': { t: 'Thyroïdite de Hashimoto', k: 'Infiltrat lymphocytaire', d: 'Destruction auto-immune (anti-TPO) : goitre ferme hétérogène, puis atrophie. La scintigraphie est inutile devant une hypothyroïdie.' },
+    'les-gmn': { t: 'Goitre multinodulaire', k: 'Carence iodée', d: 'Stimulation chronique : augmentation de volume puis apparition de nodules.' },
+    'les-pitmass': { t: 'Macroadénome hypophysaire', k: 'Non sécrétant', d: 'Comprime l\'hypophyse saine : déficits antéhypophysaires (dont thyréotrope) et risque de compression du chiasma.' },
+    scinti: { t: 'Scintigraphie thyroïdienne à l\'iode 123', k: 'Imagerie fonctionnelle', d: 'Indiquée devant une hyperthyroïdie avec nodule(s) ou pour en préciser la cause : nodule chaud avec extinction du parenchyme (adénome toxique), fixation diffuse intense (Basedow), fixation nulle (thyroïdite, surcharge iodée, LT4). Inutile devant une hypothyroïdie ou un goitre à TSH non basse.' },
     tumor: { t: 'Tumeur sécrétante', k: 'Sécrétion autonome', d: 'Lésion qui sécrète indépendamment de la boucle de régulation : le rétrocontrôle ne peut plus la freiner (ou seulement en partie).' },
     tissue: { t: 'Cellules des tissus', k: 'Entrée par transporteurs', d: 'Les hormones libres entrent via MCT8, MCT10 et OATP1C1.' }
   };

@@ -50,11 +50,64 @@
       const thyG = a.el('g', { transform: 'translate(700 650)' });
       const lobes = HV.organs.thyroidNeck(thyG);
       a.zoomable(lobes, 'foll');
-      const nodule = a.el('circle', { cx: 62, cy: 8, r: 20, class: 'nodule', 'data-info': 'nodule' }, lobes);
+      /* --- Substrat anatomique selon le scénario --- */
+      // Basedow : hypervascularisation diffuse
+      const vasc = a.el('g', { class: 'les-vasc', 'data-info': 'les-graves' }, lobes);
+      [[-60, -40], [-80, 10], [-62, 50], [60, -40], [80, 10], [62, 50], [-40, 10], [40, 10]].forEach(([x, y], i) =>
+        a.path(`M ${x - 14},${y} q 7,${i % 2 ? -8 : 8} 14,0 t 14,0`, 'les-vessel', vasc));
+      // Hashimoto : infiltrat lymphocytaire et parenchyme hétérogène
+      const lymph = a.el('g', { class: 'les-lymph', 'data-info': 'les-hashi' }, lobes);
+      [[-70, -30], [-56, -10], [-82, 20], [-60, 40], [-74, 62], [70, -30], [56, -10], [82, 20], [60, 40], [74, 62], [-48, 66], [48, 66], [-88, -6], [88, -6]].forEach(([x, y]) => a.el('circle', { cx: x, cy: y, r: 5, class: 'les-lympho' }, lymph));
+      // Carence iodée : goitre multinodulaire
+      const gmn = a.el('g', { class: 'les-gmn', 'data-info': 'les-gmn' }, lobes);
+      [[-66, -36, 13], [-76, 36, 16], [70, -10, 14], [60, 50, 11]].forEach(([x, y, r]) => {
+        a.el('circle', { cx: x, cy: y, r, class: 'les-nod-soft' }, gmn);
+        a.el('circle', { cx: x, cy: y, r, fill: 'url(#shine)' }, gmn);
+      });
+      // Adénome toxique : nodule unique encapsulé, hyperfonctionnel
+      const nodule = a.el('g', { class: 'les-adenoma', 'data-info': 'nodule' }, lobes);
+      a.el('circle', { cx: 62, cy: 14, r: 26, class: 'les-cap' }, nodule);
+      a.el('circle', { cx: 62, cy: 14, r: 22, class: 'nodule' }, nodule);
+      a.el('circle', { cx: 62, cy: 14, r: 22, fill: 'url(#shine)' }, nodule);
+      const lesLbl = a.text(0, 140, '', 'les-lbl', { anchor: 'middle' }, thyG);
+      // Hypothyroïdie centrale : macroadénome hypophysaire non sécrétant
+      const pitMass = a.el('g', { class: 'les-adenoma', 'data-info': 'les-pitmass', transform: 'translate(-20 150)' }, br);
+      a.el('path', { d: 'M -46,6 C -50,-30 -10,-52 22,-40 C 52,-28 56,10 38,32 C 18,52 -36,46 -46,6 Z', class: 'les-mass' }, pitMass);
+      a.el('path', { d: 'M -46,6 C -50,-30 -10,-52 22,-40 C 52,-28 56,10 38,32 C 18,52 -36,46 -46,6 Z', fill: 'url(#shine)' }, pitMass);
       a.dyn(() => {
         const k = (0.55 + 0.45 * Math.min(1, P.thy)) * Math.sqrt(S.goitre);
         lobes.setAttribute('transform', `scale(${k.toFixed(3)})`);
-        nodule.setAttribute('opacity', P.auto > 0.02 ? 1 : 0);
+        const on = (el, c) => el.setAttribute('opacity', c ? 1 : 0);
+        on(nodule, P.auto > 0.02);
+        on(vasc, P.trab > 0.05);
+        on(lymph, P.thy < 0.6);
+        on(gmn, P.iodine < 0.5);
+        on(pitMass, P.pit < 0.5);
+        // Parenchyme « éteint » quand la TSH est effondrée (adénome toxique, surdosage en LT4)
+        lobes.classList.toggle('quiet', S.tsh < 0.15 && P.trab < 0.05);
+        lesLbl.textContent = P.auto > 0.02 ? 'nodule autonome, reste du parenchyme éteint' : P.trab > 0.05 ? 'goitre diffus hypervasculaire' : P.thy < 0.6 ? 'infiltrat lymphocytaire' : P.iodine < 0.5 ? 'goitre multinodulaire' : '';
+      });
+
+      /* --- Scintigraphie à l'iode 123 (vignette) --- */
+      const sc = a.el('g', { class: 'scinti', transform: 'translate(110 790)', 'data-info': 'scinti' });
+      a.el('rect', { width: 230, height: 180, rx: 14, class: 'scinti-bg' }, sc);
+      a.text(14, 26, 'Scintigraphie ¹²³I', 'scinti-t', null, sc);
+      const sg = a.el('g', { transform: 'translate(115 104) scale(3.4)' }, sc);
+      const lobeD = 'M -4,-1 C -5,-6 -8,-11 -11,-12 C -15,-12 -17,-6 -17,0 C -17,8 -14,13 -10,13 C -6,13 -4,9 -3,6 Z';
+      const mir = lobeD.replace(/(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/g, (m, x, y) => -parseFloat(x) + ',' + y);
+      const up1 = a.el('path', { d: lobeD, class: 'scinti-up' }, sg);
+      const up2 = a.el('path', { d: mir, class: 'scinti-up' }, sg);
+      const up3 = a.el('rect', { x: -4, y: 1, width: 8, height: 6, rx: 2, class: 'scinti-up' }, sg);
+      const holes = a.el('g', null, sg);
+      [[-11, -4], [-8, 6], [10, -5], [12, 5], [-13, 2]].forEach(([x, y]) => a.el('circle', { cx: x, cy: y, r: 2.4, class: 'scinti-hole' }, holes));
+      const hot = a.el('circle', { cx: 9.5, cy: 1, r: 4.5, class: 'scinti-hot' }, sg);
+      const scTxt = a.text(115, 168, '', 'scinti-c', { anchor: 'middle' }, sc);
+      a.dyn(() => {
+        const u = HV.clamp(Math.pow(Math.max(S.stim, 0), 0.8) * Math.min(1, P.thy * 1.4) * 0.55, 0, 1);
+        [up1, up2, up3].forEach((e) => e.setAttribute('fill-opacity', (0.06 + 0.94 * u).toFixed(2)));
+        holes.setAttribute('opacity', P.thy < 0.6 ? 0.9 : 0);
+        hot.setAttribute('opacity', P.auto > 0.02 ? 1 : 0);
+        scTxt.textContent = P.auto > 0.02 ? 'nodule chaud, extinction du reste' : P.trab > 0.05 ? 'fixation diffuse et intense' : u < 0.2 ? 'fixation faible' : P.thy < 0.6 ? 'fixation hétérogène' : 'fixation homogène';
       });
 
       /* --- Circulation --- */

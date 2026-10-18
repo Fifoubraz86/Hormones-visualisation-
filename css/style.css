@@ -337,7 +337,7 @@ h2 { margin: 0; font: 600 13px var(--font-body); letter-spacing: 0.06em; text-tr
 .trachea { fill: var(--bg-2); stroke: var(--line-2); stroke-width: 2; }
 .trachea-ring { stroke: var(--line-2); stroke-width: 3; }
 .thyroid { fill: color-mix(in srgb, var(--t4) 30%, var(--organ)); stroke: var(--t4); stroke-width: 3; }
-.nodule { fill: var(--t3); opacity: 0; transition: opacity 0.6s; }
+.nodule { fill: var(--t3); }
 .food { fill: color-mix(in srgb, var(--iod) 22%, var(--scene-1)); stroke: var(--iod); stroke-width: 2.5; }
 .food-t { font: 600 20px var(--font-body); fill: var(--iod); }
 .lympho { fill: color-mix(in srgb, var(--trab) 22%, var(--scene-1)); stroke: var(--trab); stroke-width: 2.5; }
@@ -623,3 +623,33 @@ line.m-db { stroke: var(--mc); stroke-width: 0.9; }
 .m-trace-g .m-ss { stroke-width: 0.7; }
 .tumor { fill: var(--bad); stroke: var(--bg); stroke-width: 3; transition: opacity 0.5s; }
 .lab .card-head { flex-wrap: wrap; }
+
+/* ---------- Substrat anatomique des pathologies ---------- */
+.lesion, .les-vasc, .les-lymph, .les-gmn, .les-adenoma { transition: opacity 0.6s; }
+.les-cap { fill: none; stroke: var(--fg); stroke-width: 2; opacity: 0.7; }
+.les-nod { fill: var(--bad); }
+.les-nod.yellow { fill: #e9c23a; }
+.les-nod.brown { fill: #b8743a; }
+.les-nod.magenta { fill: var(--p-magenta); }
+.les-nod.blue { fill: var(--p-blue2); }
+.les-mass { fill: #b7a3a0; stroke: var(--o-line); stroke-width: 2; }
+.les-mass.grey { fill: #9aa3ad; }
+.les-mass.sky { fill: var(--p-sky); }
+.les-mass.magenta { fill: var(--p-magenta); }
+.les-mass.brown { fill: #a8673a; }
+.les-nod-soft { fill: color-mix(in srgb, var(--o-thyroid) 70%, #fff); stroke: var(--o-line); stroke-width: 1.5; }
+.les-lympho { fill: #3a3f8f; opacity: 0.85; }
+.les-vessel { fill: none; stroke: #ff4d5e; stroke-width: 3; stroke-linecap: round; opacity: 0.9; }
+.les-sten { fill: none; stroke: var(--rbc); stroke-width: 5; stroke-linecap: round; }
+.les-arrow { fill: none; stroke: var(--bad); stroke-width: 3; }
+.les-cross { stroke: var(--bad); stroke-width: 6; stroke-linecap: round; }
+.les-lbl { font: italic 600 17px var(--font-body); fill: var(--bad); paint-order: stroke; stroke: var(--scene-1); stroke-width: 5px; }
+.thy-lobes.quiet .o-thyroid { filter: saturate(0.25) brightness(0.8); }
+.thy-lobes .o-thyroid { transition: filter 0.8s; }
+.scinti-bg { fill: #07080c; stroke: var(--line-2); stroke-width: 2; }
+.scinti-t { font: 600 17px var(--font-body); fill: #e8edf5; }
+.scinti-c { font: 15px var(--font-body); fill: #c2cad6; }
+.scinti-up { fill: #ffb000; transition: fill-opacity 0.6s; }
+.scinti-hole { fill: #07080c; transition: opacity 0.6s; }
+.scinti-hot { fill: #fff3c0; filter: drop-shadow(0 0 2px #ffb000); transition: opacity 0.6s; }
+.anat { margin: 0; font-size: 13px; color: var(--fg); padding: 6px 8px; border-left: 3px solid var(--bad); background: var(--panel-2); border-radius: 4px; }

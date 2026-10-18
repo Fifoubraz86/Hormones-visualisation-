@@ -365,6 +365,9 @@
     pill.textContent = it.label;
     pill.dataset.tone = it.tone;
     $('labInterp').textContent = it.text;
+    const an = prov.anat ? prov.anat() : '';
+    $('labAnat').hidden = !an;
+    $('labAnat').textContent = an ? 'Substrat anatomique : ' + an : '';
   }
   $('btnReset').addEventListener('click', () => {
     if (!prov) return;

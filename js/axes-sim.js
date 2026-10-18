@@ -50,6 +50,10 @@
       },
       settle() {
         for (let i = 0; i < 400; i++) P.step(0.1);
+      },
+      anat() {
+        const h = d.hooks || {};
+        return (h.lesions || []).filter((L) => L.show(p, s)).map((L) => L.title).filter((t, i, a) => a.indexOf(t) === i).join(' · ');
       }
     };
     P.settle();
@@ -117,7 +121,17 @@
     },
     hooks: {
       links: { 'hypo>pit>crh': 'crh', 'pit>adr>acth': 'acth', 'adr>liver>cortisol': 'cort', 'adr>muscle>cortisol': 'cort', 'adr>fat>cortisol': 'cort', 'adr>pit>cortisol': 'cort', 'adr>hypo>cortisol': 'cort', 'adr>andro>dhea': 'acth' },
-      cap: { adr: 'adr', pit: 'pit' }, tumor: { pit: 'autoPit', adr: 'autoAdr' },
+      cap: { adr: 'adr', pit: 'pit' },
+      // Hyperplasie surrénalienne sous excès d'ACTH, atrophie quand l'ACTH est effondrée.
+      scale: { adr: (p, s) => clamp(0.72 + 0.28 * pw(Math.max(s.acth, 0.01), 0.35), 0.7, 1.45) },
+      lesions: [
+        { node: 'pit', kind: 'nodule', dx: 30, dy: -26, show: (p) => p.autoPit > 0.02, label: 'microadénome', title: 'Adénome corticotrope', text: 'Maladie de Cushing : le plus souvent un microadénome, parfois invisible en IRM. Hyperplasie surrénalienne bilatérale secondaire.' },
+        { node: 'pit', kind: 'mass', dy: -6, tone: 'grey', show: (p) => p.pit < 0.5, label: 'lésion hypophysaire', ly: 50, title: 'Lésion hypothalamo-hypophysaire', text: 'Insuffisance corticotrope : adénome, chirurgie, radiothérapie, apoplexie, hypophysite…' },
+        { node: 'adr', kind: 'nodule', tone: 'yellow', dx: -34, dy: -30, show: (p) => p.autoAdr > 0.02, ly: -26, label: 'adénome cortisolique', title: 'Adénome surrénalien cortisolique', text: 'Tumeur de la zone fasciculée. L\'ACTH effondrée entraîne l\'atrophie de la surrénale controlatérale et du cortex sain.' },
+        { node: 'adr', kind: 'infiltrate', dy: -10, show: (p) => p.adr < 0.5, label: 'destruction surrénalienne', title: 'Insuffisance surrénale périphérique', text: 'Destruction des deux surrénales, le plus souvent auto-immune (complément : parfois tuberculeuse, hémorragique, métastatique).' },
+        { node: 'adr', kind: 'label', show: (p, s) => s.acth < 0.3, label: 'cortex atrophique', ly: -96, title: 'Atrophie corticosurrénalienne', text: 'Sans ACTH, la zone fasciculée s\'atrophie : risque d\'insuffisance surrénale à l\'arrêt d\'une corticothérapie ou après exérèse d\'un adénome.' },
+        { node: 'adr', kind: 'label', show: (p, s) => s.acth > 2.5, label: 'hyperplasie bilatérale', ly: -70, title: 'Hyperplasie surrénalienne', text: 'L\'excès chronique d\'ACTH induit une hyperplasie et une hypertrophie des surrénales.' }
+      ],
       extraNodes: [
         { id: 'ecto', x: 570, y: 760, label: 'Tumeur ectopique', sub: 'ACTH non freinable', color: 'bad', show: (p) => p.ecto > 0.02, info: 'Sécrétion ectopique (paranéoplasique) d\'ACTH, par exemple par une tumeur bronchique ou pancréatique.' },
         { id: 'exo', x: 230, y: 600, label: 'Corticoïdes exogènes', w: 250, color: 'p-gold', show: (p) => p.exo > 0.02, info: 'Les glucocorticoïdes de synthèse exercent le même rétrocontrôle négatif que le cortisol.' }
@@ -170,7 +184,12 @@
     },
     hooks: {
       links: { 'hypo>pit>ghrh': 'ghrh', 'pit>liver>gh': 'gh', 'liver>bone>igf1': 'igf', 'liver>muscle>igf1': 'igf', 'liver>pit>igf1': 'igf', 'liver>hypo>igf1': 'igf' },
-      cap: { pit: 'pit', liver: 'liver' }, tumor: { pit: 'autoPit' },
+      cap: { pit: 'pit', liver: 'liver' },
+      lesions: [
+        { node: 'pit', kind: 'mass', tone: 'sky', dy: -4, show: (p) => p.autoPit > 0.02, size: (p) => clamp(0.6 + 0.12 * p.autoPit, 0.6, 1.3), label: 'adénome somatotrope', ly: 52, title: 'Adénome somatotrope', text: 'Souvent un macroadénome au diagnostic (extension vers le sinus caverneux ou le chiasma).' },
+        { node: 'pit', kind: 'mass', tone: 'grey', dy: -4, show: (p) => p.pit < 0.5, label: 'lésion hypophysaire', ly: 52, title: 'Insuffisance somatotrope', text: 'Atteinte hypophysaire (tumeur, chirurgie, radiothérapie). Le test de référence est l\'hypoglycémie insulinique.' },
+        { node: 'liver', kind: 'label', show: (p) => p.liver < 0.6, label: 'production d\'IGF-1 diminuée', ly: -72, title: 'Résistance à la GH', text: 'Dénutrition ou insuffisance hépatique : l\'IGF-1 baisse malgré une GH élevée (complément).' }
+      ],
       levels: [{ label: 'GH', mol: 'gh', v: 'gh', max: 4 }, { label: 'IGF-1', mol: 'igf1', v: 'igf', max: 3 }]
     }
   };
@@ -212,7 +231,13 @@
     },
     hooks: {
       links: { 'pit>breast>prl': 'prl', 'pit>gnrh>prl': 'prl', 'hypo>pit>dopa': 'inh' },
-      tumor: { pit: 'autoPit' },
+      scale: { pit: (p) => 1 + 0.25 * p.preg },
+      lesions: [
+        { node: 'pit', kind: 'nodule', tone: 'magenta', dx: 30, dy: -26, show: (p) => p.autoPit > 0.02 && p.autoPit < 15, label: 'microadénome', title: 'Microadénome à prolactine', text: 'Adénome < 10 mm : prolactine modérément élevée.' },
+        { node: 'pit', kind: 'mass', tone: 'magenta', dy: -20, show: (p) => p.autoPit >= 15, size: () => 1.3, label: 'macroadénome → chiasma', ly: 64, title: 'Macroadénome à prolactine', text: 'Adénome ≥ 10 mm : prolactine > 200 ng/mL ; extension suprasellaire avec risque de compression du chiasma optique.' },
+        { node: 'hypo', kind: 'mass', tone: 'grey', dx: 120, dy: 30, show: (p) => p.stalk < 0.6, size: () => 0.9, label: 'tumeur comprimant la tige', ly: 46, title: 'Compression de la tige pituitaire', text: 'Une tumeur hypothalamo-hypophysaire non lactotrope bloque le passage de la dopamine : hyperprolactinémie de déconnexion (< 200 ng/mL).' },
+        { node: 'pit', kind: 'label', show: (p) => p.preg > 0.3, label: 'hyperplasie lactotrope', ly: -74, title: 'Hypophyse de la grossesse', text: 'Les œstrogènes induisent une hyperplasie des cellules lactotropes (complément).' }
+      ],
       levels: [{ label: 'Prolactine', mol: 'prl', v: 'prl', max: 10 }]
     }
   };
@@ -255,6 +280,13 @@
     hooks: {
       links: { 'hypo>post>adh': 'adh', 'post>kidney>adh': 'adh', 'post>vessel>adh': 'adh', 'kidney>vessel>water': 'eff' },
       cap: { kidney: 'kidney', hypo: 'hypo' },
+      lesions: [
+        { node: 'hypo', kind: 'mass', tone: 'grey', dx: 50, dy: 46, size: () => 0.8, show: (p) => p.hypo < 0.5, label: 'lésion de la tige', ly: 42, title: 'Lésion hypothalamo-tigellaire', text: 'Le polycopié cite : hypophysite, craniopharyngiome, gliome du chiasma, méningiome, pathologie infiltrative, métastase. Un adénome hypophysaire n\'en donne pas, sauf apoplexie ou chirurgie.' },
+        { node: 'kidney', kind: 'cross', show: (p) => p.kidney < 0.5, label: 'récepteur V2 inactif', title: 'Diabète insipide néphrogénique', text: 'Le rein ne répond pas à l\'ADH (complément : origine génétique, lithium, hypercalcémie, hypokaliémie).' }
+      ],
+      extraNodes: [{ id: 'ectoadh', x: 960, y: 850, label: 'Tumeur ou médicament', w: 270, color: 'bad', show: (p) => p.siadh > 0.02, info: 'SIADH : de nombreux médicaments, ou une tumeur responsable d\'un syndrome paranéoplasique.' }],
+      extraLinks: [{ from: 'ectoadh', to: 'kidney', kind: 'stim', mol: 'adh', bend: -200, v: 'siadhRate', label: '' }],
+      rates: { siadhRate: (s, p) => p.siadh / 2 },
       levels: [{ label: 'ADH', mol: 'adh', v: 'adh', max: 6 }]
     }
   };
@@ -290,7 +322,9 @@
     },
     hooks: {
       links: { 'med>heart>adre': 'cat', 'med>vessel>nora': 'cat', 'med>liver>adre': 'cat' },
-      tumor: { med: 'pheo' },
+      lesions: [
+        { node: 'med', kind: 'mass', tone: 'brown', dx: -6, dy: -28, show: (p) => p.pheo > 0.02, size: (p) => clamp(0.6 + 0.08 * p.pheo, 0.6, 1.2), label: 'phéochromocytome', ly: -42, title: 'Phéochromocytome', text: 'Tumeur des cellules chromaffines de la médullosurrénale, sécrétant les catécholamines par paroxysmes.' }
+      ],
       levels: [{ label: 'Catécholamines', mol: 'adre', v: 'cat', max: 6 }]
     }
   };
@@ -339,6 +373,12 @@
       links: { 'hypo>pit>gnrh': null, 'pit>ovary>lh': 'lh', 'pit>ovary>fsh': 'fsh', 'ovary>uterus>e2': 'e2', 'ovary>uterus>prog': 'prog', 'ovary>breast>e2': 'e2', 'ovary>pit>e2': 'e2', 'ovary>hypo>e2': 'e2' },
       dropMod: true,
       cap: { ovary: 'ovary', hypo: 'hypo' },
+      scale: { ovary: (p) => 0.7 + 0.3 * Math.min(1, p.ovary), uterus: (p, s) => 0.8 + 0.2 * Math.min(1, s.e2) },
+      lesions: [
+        { node: 'ovary', kind: 'label', show: (p) => p.ovary < 0.3, label: 'ovaire sans follicules', ly: -84, title: 'Épuisement folliculaire', text: 'Ménopause ou insuffisance ovarienne prématurée (avant 40 ans) : plus de follicules, donc plus d\'estradiol ni d\'inhibine.' },
+        { node: 'hypo', kind: 'label', show: (p) => p.hypo < 0.5, label: 'GnRH freinée', ly: -76, title: 'Aménorrhée hypothalamique', text: 'Anorexie mentale, activité physique intense, stress : baisse de la leptine et de la pulsatilité de la GnRH.' },
+        { node: 'pit', kind: 'nodule', tone: 'magenta', dx: 30, dy: -26, show: (p) => p.prl > 0.3, label: 'prolactinome', title: 'Adénome à prolactine', text: 'La prolactine en excès inhibe la pulsatilité de la GnRH.' }
+      ],
       levels: [{ label: 'LH', mol: 'lh', v: 'lh', max: 3 }, { label: 'FSH', mol: 'fsh', v: 'fsh', max: 3 }, { label: 'Estradiol', mol: 'e2', v: 'e2', max: 1.6 }, { label: 'Progestérone', mol: 'prog', v: 'prog', max: 1.6 }]
     }
   };
@@ -384,6 +424,12 @@
     hooks: {
       links: { 'pit>testis>lh': 'lh', 'pit>testis>fsh': 'fsh', 'testis>muscle>testo': 't', 'testis>bone>testo': 't', 'testis>brain>testo': 't', 'testis>pit>testo': 't', 'testis>hypo>testo': 't', 'testis>pit>inhib': 'inh' },
       cap: { testis: 'leydig', hypo: 'hypo' },
+      scale: { testis: (p, s) => clamp(0.55 + 0.45 * Math.min(1, p.sertoli) * (p.exoT > 0.05 ? 0.75 : 1) * (p.hypo < 0.5 ? 0.75 : 1), 0.45, 1) },
+      lesions: [
+        { node: 'testis', kind: 'label', show: (p) => p.sertoli < 0.5, label: 'petits testicules fermes', ly: -84, title: 'Syndrome de Klinefelter', text: 'Caryotype 47,XXY : hyalinisation des tubes séminifères, azoospermie, petits testicules (complément).' },
+        { node: 'testis', kind: 'label', show: (p) => p.exoT > 0.05, label: 'atrophie testiculaire', ly: -84, title: 'Atrophie sous androgènes', text: 'Sans LH ni FSH, les testicules s\'atrophient et la spermatogenèse s\'arrête.' },
+        { node: 'hypo', kind: 'label', show: (p) => p.hypo < 0.5, label: 'défaut de GnRH (± anosmie)', ly: -76, title: 'Syndrome de Kallmann', text: 'Défaut de migration des neurones à GnRH, souvent associé à une anosmie (complément).' }
+      ],
       extraNodes: [{ id: 'exo', x: 920, y: 760, label: 'Testostérone exogène', w: 260, color: 'p-blue', show: (p) => p.exoT > 0.02, info: 'Les androgènes exogènes freinent LH et FSH.' }],
       extraLinks: [{ from: 'exo', to: 'pit', kind: 'inhib', mol: 'testo', v: 'exoRate', label: '' }],
       rates: { exoRate: (s, p) => p.exoT },
@@ -433,7 +479,12 @@
     hooks: {
       links: { 'para>kidney>pth': 'pth', 'para>bone>pth': 'pth', 'kidney>gut>calcitriol': 'd', 'bone>ca>ca': 'pth' },
       dropMod: true,
-      cap: { para: 'para' }, tumor: { para: 'autoPara' },
+      cap: { para: 'para' },
+      lesions: [
+        { node: 'para', kind: 'nodule', tone: 'brown', dx: 38, dy: 30, size: (p) => clamp(0.8 + 0.12 * p.autoPara, 0.8, 1.5), show: (p) => p.autoPara > 0.02, label: 'adénome parathyroïdien', ly: 34, title: 'Adénome parathyroïdien', text: 'Tumeur unique, ovalaire, encapsulée, brun orangé ; les autres glandes sont freinées.' },
+        { node: 'para', kind: 'cross', show: (p) => p.para < 0.5, label: 'glandes lésées (chirurgie)', ly: 34, title: 'Hypoparathyroïdie', text: 'Le plus souvent après chirurgie cervicale (thyroïdectomie) : glandes retirées ou dévascularisées.' },
+        { node: 'para', kind: 'label', show: (p, s) => p.vitD < 0.5 && s.pth > 1.5, label: 'hyperplasie des 4 glandes', ly: -76, title: 'Hyperparathyroïdie secondaire', text: 'La carence en vitamine D stimule les quatre glandes, qui grossissent.' }
+      ],
       extraNodes: [{ id: 'tumor', x: 1360, y: 760, label: 'Tumeur (PTHrP)', w: 220, color: 'bad', show: (p) => p.pthrp > 0.02, info: 'La PTHrP mime les effets de la PTH sur l\'os et le rein (complément).' }],
       extraLinks: [{ from: 'tumor', to: 'bone', kind: 'stim', color: 'bad', label: 'PTHrP' }],
       liveNode: { ca: (s) => f2(s.ca) + ' mmol/L' },
@@ -481,7 +532,12 @@
     },
     hooks: {
       links: { 'jga>liver>renin': 'renin', 'liver>lung>angio': 'renin', 'lung>adr>angio': 'renin', 'adr>tub>aldo': 'aldo', 'tub>vol>nai': 'aldo' },
-      cap: { adr: 'adr' }, tumor: { adr: 'conn' },
+      cap: { adr: 'adr' },
+      lesions: [
+        { node: 'adr', kind: 'nodule', tone: 'yellow', dx: -34, dy: -30, show: (p) => p.conn > 0.02, ly: -26, label: 'adénome de Conn', title: 'Adénome de Conn', text: 'Sécrétion unilatérale d\'aldostérone (1/3 des cas) ; sinon hyperplasie bilatérale (2/3). Le cathétérisme des veines surrénales distingue les deux.' },
+        { node: 'jga', kind: 'stenosis', dx: 30, dy: -46, show: (p) => p.sten > 0.05, label: 'sténose de l\'artère rénale', ly: -24, title: 'Hypoperfusion rénale', text: 'La baisse de perfusion stimule la rénine : hyperaldostéronisme secondaire.' },
+        { node: 'adr', kind: 'infiltrate', dy: -10, show: (p) => p.adr < 0.5, label: 'destruction surrénalienne', title: 'Insuffisance surrénale périphérique', text: 'Déficit en aldostérone et en cortisol.' }
+      ],
       levels: [{ label: 'Rénine', mol: 'renin', v: 'renin', max: 4 }, { label: 'Aldostérone', mol: 'aldo', v: 'aldo', max: 4 }]
     }
   };
@@ -534,7 +590,13 @@
     hooks: {
       links: { 'islet>liver>insulin': 'ins', 'islet>muscle>insulin': 'ins', 'islet>fat>insulin': 'ins', 'islet>liver>glucagon': 'glu', 'liver>keto>ketone': 'ket', 'fat>liver>ffa': 'ket' },
       dropMod: ['islet>liver>insulin', 'islet>muscle>insulin', 'islet>fat>insulin', 'islet>liver>glucagon', 'liver>keto>ketone', 'fat>liver>ffa'],
-      cap: { islet: 'beta' }, tumor: { islet: 'tumor' },
+      cap: { islet: 'beta' },
+      scale: { fat: (p) => (p.sens < 0.6 ? 1.3 : 1) },
+      lesions: [
+        { node: 'islet', kind: 'infiltrate', dx: 6, dy: -24, show: (p) => p.beta < 0.5, label: 'insulite auto-immune', ly: -40, title: 'Diabète de type 1', text: 'Destruction auto-immune des cellules β (infiltrat lymphocytaire des îlots).' },
+        { node: 'islet', kind: 'nodule', tone: 'blue', dx: -36, dy: 10, show: (p) => p.tumor > 0.02, label: 'insulinome', title: 'Insulinome', text: 'Tumeur endocrine pancréatique sécrétant l\'insuline de façon autonome.' },
+        { node: 'fat', kind: 'label', show: (p) => p.sens < 0.6, label: 'adiposité viscérale', ly: -84, title: 'Insulinorésistance', text: 'Diabète de type 2 : insulinorésistance (foie, muscle, tissu adipeux) et défaut de sécrétion.' }
+      ],
       liveNode: { glc: (s) => f2(s.g) + ' g/L' },
       clockLabel: (s) => f2(s.g) + ' g/L',
       levels: [{ label: 'Glycémie', mol: 'glucose', fn: (s) => s.g - 0.3, max: 2 }, { label: 'Insuline', mol: 'insulin', v: 'ins', max: 4 }, { label: 'Glucagon', mol: 'glucagon', v: 'glu', max: 3 }]
@@ -580,6 +642,9 @@
       links: { 'cap>hep>ldl': 'ldl', 'hep>hmg>chol': 'rec', 'liver>cap>vldl': 'tgRate' },
       rates: { tgRate: (s, p) => p.tg },
       cap: { hep: 'ldlr' },
+      lesions: [
+        { node: 'hep', kind: 'label', show: (p) => p.ldlr < 0.7, label: 'récepteurs des LDL déficients', ly: -84, title: 'Hypercholestérolémie familiale', text: 'Mutation (le plus souvent du gène du récepteur des LDL) : moins de récepteurs, LDL-c élevé ; xanthomes tendineux, arc cornéen.' }
+      ],
       levels: [{ label: 'LDL-c', mol: 'ldl', v: 'ldl', max: 5 }]
     }
   };
