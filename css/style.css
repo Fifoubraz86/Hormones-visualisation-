@@ -611,3 +611,13 @@ path.m-bond.mcs { stroke: var(--mc); opacity: 1; stroke-width: 1.3; }
 .o-axon { fill: none; stroke: var(--o-hypo); stroke-width: 5; stroke-linecap: round; }
 .o-cell { fill: var(--cell); stroke: var(--cell-line); }
 .o-cell-n { fill: var(--nucleus); stroke: var(--nucleus-line); }
+
+/* Tracés protéiques réels (carbones α) */
+.m-trace { fill: none; stroke: var(--mc); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; }
+.m-trace.thin { stroke-width: 0.9; }
+.m-trace.c1 { stroke: color-mix(in srgb, var(--mc) 50%, var(--fg)); }
+.m-trace.c2 { stroke: color-mix(in srgb, var(--mc) 75%, var(--bg)); }
+.m-trace.c3 { stroke: color-mix(in srgb, var(--mc) 40%, var(--fg)); }
+line.m-db { stroke: var(--mc); stroke-width: 0.9; }
+.tip-s { font: 11px var(--font-data); color: var(--faint); }
+.m-trace-g .m-ss { stroke-width: 0.7; }

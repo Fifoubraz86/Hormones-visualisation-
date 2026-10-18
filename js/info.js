@@ -111,15 +111,15 @@
   HV.INFO = I;
 
   /* ---------- Infobulle ---------- */
-  let tip, tipT, tipK, tipD, tipL, liveFn = null, hideTimer = 0;
+  let tip, tipT, tipK, tipD, tipL, tipS, liveFn = null, hideTimer = 0;
   HV.initTips = function (container) {
     tip = document.createElement('div');
     tip.className = 'tip';
     tip.hidden = true;
     tip.setAttribute('role', 'tooltip');
-    tip.innerHTML = '<p class="tip-t"></p><p class="tip-k"></p><p class="tip-d"></p><p class="tip-l"></p>';
+    tip.innerHTML = '<p class="tip-t"></p><p class="tip-k"></p><p class="tip-d"></p><p class="tip-l"></p><p class="tip-s"></p>';
     container.appendChild(tip);
-    [tipT, tipK, tipD, tipL] = tip.querySelectorAll('p');
+    [tipT, tipK, tipD, tipL, tipS] = tip.querySelectorAll('p');
   };
   HV.showTip = function (key, x, y, sticky) {
     const f = I[key];
@@ -127,6 +127,8 @@
     tipT.textContent = f.t;
     tipK.textContent = f.k || '';
     tipD.textContent = f.d || '';
+    tipS.textContent = f.src || '';
+    tipS.hidden = !f.src;
     liveFn = f.live || null;
     tipL.hidden = !liveFn;
     if (liveFn) tipL.textContent = liveFn();

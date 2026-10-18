@@ -8,7 +8,10 @@
   const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const svg = $('stage');
-  HV.buildAxisDefs(HV.buildDefs(svg));
+  const defs = HV.buildDefs(svg);
+  HV.buildAxisDefs(defs);
+  HV.applyTraces(defs);
+  HV.applySmallSources();
   const root = HV.el('g', { class: 'world' }, svg);
   HV.initTips(svg.parentNode);
 

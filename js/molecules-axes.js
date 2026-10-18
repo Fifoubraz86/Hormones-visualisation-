@@ -20,64 +20,80 @@
     const hexV = (cx, cy, r) => [-90, -30, 30, 90, 150, 210].map((a) => [cx + r * Math.cos((a * Math.PI) / 180), cy + r * Math.sin((a * Math.PI) / 180)]);
 
     /* ---------- Stéroïdes : cycles A, B, C (hexagones) et D (pentagone) ---------- */
+    // Substituant oxygéné : cétone (=O, double liaison) ou hydroxyle (-OH, H figuré).
+    function oxy(g, p, ang, kind) {
+      const t = (ang * Math.PI) / 180, ux = Math.cos(t), uy = Math.sin(t);
+      const e = [p[0] + ux * 2, p[1] + uy * 2];
+      if (kind === 'k') {
+        const nx = -uy * 0.5, ny = ux * 0.5;
+        bond(g, p[0] + nx, p[1] + ny, e[0] + nx, e[1] + ny);
+        bond(g, p[0] - nx, p[1] - ny, e[0] - nx, e[1] - ny);
+      } else bond(g, p[0], p[1], e[0], e[1]);
+      atom(g, e[0] + ux * 0.6, e[1] + uy * 0.6, 1.2, 'm-O');
+      if (kind === 'h') atom(g, e[0] + ux * 1.9, e[1] + uy * 1.9, 0.6, 'm-H');
+    }
+    const methyl = (g, p, ang) => {
+      const t = (ang * Math.PI) / 180;
+      bond(g, p[0], p[1], p[0] + Math.cos(t) * 2, p[1] + Math.sin(t) * 2);
+    };
+    // Double liaison dans un cycle : trait intérieur parallèle à l'arête (a, b) du cycle de centre c.
+    const ringDb = (g, c, a, b) => {
+      const k = 0.72;
+      const q = (pt) => [c[0] + (pt[0] - c[0]) * k, c[1] + (pt[1] - c[1]) * k];
+      const qa = q(a), qb = q(b);
+      bond(g, qa[0] + (qb[0] - qa[0]) * 0.15, qa[1] + (qb[1] - qa[1]) * 0.15, qb[0] - (qb[0] - qa[0]) * 0.15, qb[1] - (qb[1] - qa[1]) * 0.15, 'm-db');
+    };
+
+    /* ---------- Stéroïdes : noyau cyclopenta[a]phénanthrène, cycles A, B, C et D ----------
+       Numérotation : C3 (cycle A), C10/C19 (jonction A/B), C11 (cycle C), C13/C18 (jonction C/D), C17 (cycle D). */
     function steroid(id, color, v) {
-      const g = root(id, color, 0.82);
+      const g = root(id, color, 0.8);
       const r = 3.2, s = r * R3;
-      const A = [-s, 1.5 * r], B = [0, 1.5 * r], C = [s / 2, 0], Dc = [s / 2 + s / 2 + 2.2, 0];
-      const ringsHex = v.seco ? [C] : [A, B, C];
-      ringsHex.forEach((c, i) => el('path', { d: polyD(hexV(c[0], c[1], r)), class: 'm-ring mc' + (v.aromA && c === A ? ' arom' : '') }, g));
-      if (v.aromA) el('circle', { cx: A[0], cy: A[1], r: r * 0.55, class: 'm-arom' }, g);
-      // Cycle D fusionné sur l'arête droite de C
+      const A = [-s, 1.5 * r], B = [0, 1.5 * r], C = [s / 2, 0];
+      const hA = hexV(A[0], A[1], r), hB = hexV(B[0], B[1], r), hC = hexV(C[0], C[1], r);
       const Rp = r / (2 * Math.sin(Math.PI / 5));
       const pc = [C[0] + s / 2 + r / (2 * Math.tan(Math.PI / 5)), C[1]];
       const pent = [144, 216, 288, 0, 72].map((a) => [pc[0] + Rp * Math.cos((a * Math.PI) / 180), pc[1] + Rp * Math.sin((a * Math.PI) / 180)]);
+      const c17 = pent[3];
+      (v.seco ? [hC] : [hA, hB, hC]).forEach((h) => el('path', { d: polyD(h), class: 'm-ring mc' }, g));
       el('path', { d: polyD(pent), class: 'm-ring mc' }, g);
-      const tip = pent[3];
-      if (v.seco) {
-        // Calcitriol : cycle B ouvert, triène vers un cycle A isolé
-        const a2 = [C[0] - s - 3, C[1] + 6];
-        el('path', { d: `M ${C[0] - s / 2},${C[1] + r / 2} L ${C[0] - s / 2 - 2.5},${C[1] + 2.5} L ${a2[0] + s / 2 + 1},${a2[1] - 2}`, class: 'm-bond mcs' }, g);
-        el('path', { d: polyD(hexV(a2[0], a2[1], r)), class: 'm-ring mc' }, g);
-        atom(g, a2[0] - s / 2 - 1.4, a2[1] + 1, 1.2, 'm-O');
-        atom(g, a2[0], a2[1] + r + 1.6, 1.2, 'm-O');
-      }
-      const left = A;
+      if (v.aromA) el('circle', { cx: A[0], cy: A[1], r: r * 0.55, class: 'm-arom' }, g);
+      if (v.d4) ringDb(g, A, hA[3], hA[2]);   // Δ4 : C4=C5
+      if (v.d5) ringDb(g, B, hB[4], hB[3]);   // Δ5 : C5=C6
       if (!v.seco) {
-        const c3 = [left[0] - s / 2, left[1] + r / 2];
-        bond(g, c3[0], c3[1], c3[0] - 1.8, c3[1] + 1);
-        atom(g, c3[0] - 2.4, c3[1] + 1.3, 1.25, 'm-O'); // 3-céto ou 3-OH
+        oxy(g, hA[4], 160, v.c3);             // C3 : 3-céto ou 3-OH
+        if (!v.aromA) methyl(g, hA[1], -90);  // C19
       }
-      if (v.o11) {
-        const c11 = hexV(C[0], C[1], r)[5];
-        bond(g, c11[0], c11[1], c11[0] - 1.6, c11[1] - 1.6);
-        atom(g, c11[0] - 2.1, c11[1] - 2.1, 1.15, 'm-O');
-      }
-      if (v.cho) {
-        const c18 = hexV(C[0], C[1], r)[1];
-        bond(g, c18[0], c18[1], c18[0] + 0.5, c18[1] - 2.6);
-        atom(g, c18[0] + 0.6, c18[1] - 3.3, 1.15, 'm-O');
-      }
+      if (v.cho) oxy(g, hC[1], -80, 'k');     // C18 aldéhyde (aldostérone)
+      else methyl(g, hC[1], -90);             // C18
+      if (v.o11) oxy(g, hC[5], -140, v.o11);  // 11β-OH
       if (v.chain) {
-        el('path', { d: `M ${tip[0]},${tip[1]} L ${tip[0] + 2.4},${tip[1] - 1.6} L ${tip[0] + 4.8},${tip[1]}`, class: 'm-bond mcs' }, g);
-        atom(g, tip[0] + 2.4, tip[1] - 4, 1.15, 'm-O');
-        bond(g, tip[0] + 2.4, tip[1] - 1.6, tip[0] + 2.4, tip[1] - 3.3);
-        if (v.chain === 'oh') atom(g, tip[0] + 5.8, tip[1] + 0.6, 1.15, 'm-O');
-        if (v.o17) atom(g, tip[0] - 0.4, tip[1] + 2.6, 1.1, 'm-O');
-      } else if (v.o17) {
-        bond(g, tip[0], tip[1], tip[0] + 1.9, tip[1]);
-        atom(g, tip[0] + 2.6, tip[1], 1.25, 'm-O');
-      }
+        // Chaîne latérale en C17 : C20 (cétone) et C21 (CH3 ou CH2OH)
+        const c20 = [c17[0] + 2.4, c17[1] - 1.4], c21 = [c17[0] + 4.8, c17[1]];
+        el('path', { d: `M ${c17[0]},${c17[1]} L ${c20[0]},${c20[1]} L ${c21[0]},${c21[1]}`, class: 'm-bond mcs' }, g);
+        oxy(g, c20, -90, 'k');
+        if (v.chain === 'oh') oxy(g, c21, 20, 'h');
+        if (v.o17) oxy(g, c17, 100, v.o17);  // 17α-OH
+      } else if (v.o17) oxy(g, c17, 0, v.o17);
       if (v.seco) {
-        el('path', { d: `M ${tip[0]},${tip[1]} L ${tip[0] + 2.4},${tip[1] - 1.6} L ${tip[0] + 4.8},${tip[1]} L ${tip[0] + 7.2},${tip[1] - 1.6}`, class: 'm-bond mcs' }, g);
-        atom(g, tip[0] + 7.8, tip[1] - 2.2, 1.15, 'm-O');
+        // Calcitriol : cycle B ouvert (sécostéroïde), triène, cycle A isolé avec 1α-OH et 3β-OH, chaîne avec 25-OH
+        const a2 = [C[0] - s - 3, C[1] + 6];
+        const h2 = hexV(a2[0], a2[1], r);
+        el('path', { d: `M ${hC[4][0]},${hC[4][1]} L ${hC[4][0] - 2.5},${hC[4][1] + 1.2} L ${h2[1][0]},${h2[1][1]}`, class: 'm-bond mcs' }, g);
+        el('path', { d: polyD(h2), class: 'm-ring mc' }, g);
+        bond(g, h2[2][0], h2[2][1], h2[2][0] + 1.6, h2[2][1] + 1.6, 'm-db');
+        oxy(g, h2[4], 170, 'h');
+        oxy(g, h2[3], 100, 'h');
+        el('path', { d: `M ${c17[0]},${c17[1]} L ${c17[0] + 2.4},${c17[1] - 1.6} L ${c17[0] + 4.8},${c17[1]} L ${c17[0] + 7.2},${c17[1] - 1.6}`, class: 'm-bond mcs' }, g);
+        oxy(g, [c17[0] + 7.2, c17[1] - 1.6], -40, 'h');
       }
     }
-    steroid('cortisol', 'p-gold', { o11: true, chain: 'oh', o17: true });
-    steroid('aldo', 'p-teal', { o11: true, cho: true, chain: 'oh' });
-    steroid('testo', 'p-blue', { o17: true });
-    steroid('e2', 'p-rose', { aromA: true, o17: true });
-    steroid('prog', 'p-violet', { chain: 'me' });
-    steroid('dhea', 'p-sky', { o17: true });
+    steroid('cortisol', 'p-gold', { c3: 'k', d4: true, o11: 'h', chain: 'oh', o17: 'h' });
+    steroid('aldo', 'p-teal', { c3: 'k', d4: true, o11: 'h', cho: true, chain: 'oh' });
+    steroid('testo', 'p-blue', { c3: 'k', d4: true, o17: 'h' });
+    steroid('e2', 'p-rose', { c3: 'h', aromA: true, o17: 'h' });
+    steroid('prog', 'p-violet', { c3: 'k', d4: true, chain: 'me' });
+    steroid('dhea', 'p-sky', { c3: 'h', d5: true, o17: 'k' });
     steroid('calcitriol', 'p-amber', { seco: true });
 
     /* ---------- Peptides : chaîne de résidus, pont disulfure éventuel ---------- */
@@ -178,11 +194,14 @@
     catechol('adre', 'p-red', true, true);
 
     /* ---------- Petites molécules et ions ---------- */
-    g = root('glucose', 'p-lime', 0.85); // pyranose
+    g = root('glucose', 'p-lime', 0.85); // β-D-glucopyranose : O cyclique, 4 OH, CH2OH
     const gr = hexV(0, 0, 4.5);
     el('path', { d: polyD(gr), class: 'm-ring mc' }, g);
     atom(g, gr[0][0], gr[0][1], 1.3, 'm-O');
-    [1, 2, 3, 4].forEach((i) => { const p = gr[i + 1]; bond(g, p[0], p[1], p[0] * 1.45, p[1] * 1.45); atom(g, p[0] * 1.6, p[1] * 1.6, 1.05, 'm-O'); });
+    [1, 2, 3, 4].forEach((i) => { const p = gr[i]; const a = Math.atan2(p[1], p[0]) * 180 / Math.PI; oxy(g, p, a, 'h'); });
+    const c6 = gr[5];
+    bond(g, c6[0], c6[1], c6[0] - 1.8, c6[1] - 2.4);
+    oxy(g, [c6[0] - 1.8, c6[1] - 2.4], -110, 'h');
     const ion = (id, color, label, r) => {
       const gg = root(id, color);
       el('circle', { r, class: 'm-ion' }, gg);
