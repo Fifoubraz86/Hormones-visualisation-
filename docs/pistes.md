@@ -70,6 +70,7 @@ Ceux déjà animés sont listés dans `tests-dynamiques.md`. Il resterait :
 - ★ **Mode « prédisez »** : avant d'animer un scénario, l'élève indique le sens de variation de chaque hormone, puis l'atlas corrige.
 - ★ **Cas cliniques guidés** : motif de consultation → examen → bilan → test dynamique → diagnostic, avec score.
 - QCM par axe, fiches de révision imprimables, mode présentation pour l'enseignant.
+- ★ **Éditeur vidéo téléchargeable** (demandé) : choisir le module, le scénario, la durée, le cadrage (avec ou sans panneau), le pas à pas, la vitesse des hormones et le thème, puis télécharger un MP4 à insérer dans PowerPoint. Base existante : `tools/enregistrer-video.js`.
 - Version anglaise, accessibilité (lecteur d'écran, contrastes), fonctionnement hors ligne.
 - Relecture par des endocrinologues, avec la date et la version des références.
 
