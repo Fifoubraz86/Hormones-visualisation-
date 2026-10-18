@@ -76,7 +76,7 @@
       interpret(v, sim, st) {
         const u8 = v[4], ud = v[5], na = sim.lab('na');
         const loss = (st.acc / 70) * 100;
-        const extra = ` Natrémie finale ${n0(na)} mmol/L ; perte de poids ≈ ${loss.toFixed(1).replace('.', ',')} %.`;
+        const extra = ` Natrémie finale ${n0(na)} mmol/L ; perte de poids ≈ ${loss.toFixed(1).replace('.', ',')} %.` + (loss > 3 || na > 148 ? ' En pratique, l\'épreuve est interrompue avant ce stade (perte de poids > 3 à 5 % ou natrémie qui dépasse la normale ; complément).' : '');
         if (u8 >= 600) {
           if (HV.scenes.adh.sim.p.siadh > 0.02) return { tone: 'warn', text: 'Les urines restent concentrées et la natrémie remonte : la restriction corrige l\'hyponatrémie, argument pour un SIADH (épreuve diagnostique et thérapeutique).' + extra };
           return { tone: 'good', text: `Osmolalité urinaire à ${n0(u8)} mosmol/kg à 8 h : concentration normale, pas de diabète insipide.` + extra };

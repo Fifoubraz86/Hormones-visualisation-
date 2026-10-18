@@ -79,7 +79,7 @@
       const troph = clamp(pw(Math.max(acth, 0.01), 0.5), 0.25, 1.6);
       // Réponse surrénalienne saturable ; le Synacthène (ACTH 1-24) s'ajoute à l'ACTH endogène.
       const drive = Math.max(acth, 0) + p.syn;
-      const cort = clamp((p.adr * s.troph * 2.2 * drive) / (drive + 1.2) + p.autoAdr, 0, 12);
+      const cort = clamp((p.adr * s.troph * 2.8 * drive) / (drive + 1.8) + 0.03 * p.adr + p.autoAdr, 0, 12);
       return { crh, acth, cort, reg, troph };
     },
     labs: [
@@ -163,7 +163,7 @@
     init: { ghrh: 1, gh: 1, igf: 1, reg: 1 },
     targets(p, s) {
       const ghrh = clamp(p.hypo * ex(-1 * (s.igf - 1)), 0, 6);
-      const reg = clamp(p.pit * pw(s.ghrh, 0.8) * ex(-1.5 * (s.igf - 1)) * ex(-2.3 * p.load), 0, 10); // l'hyperglycémie freine la GH normale
+      const reg = clamp(p.pit * pw(s.ghrh, 0.8) * ex(-1.5 * (s.igf - 1)) * ex(-3 * p.load), 0, 10); // l'hyperglycémie freine la GH normale
       const gh = reg + p.autoPit;
       const igf = clamp(p.liver * pw(gh, 0.6), 0, 6);
       return { ghrh, gh, igf, reg };
@@ -262,11 +262,11 @@
     init: { na: 140, adh: 1, eff: 1 },
     tau: { na: 3 },
     targets(p, s) {
-      const adh = clamp(p.hypo * ex((s.na - 140) / 3), 0, 12) + p.siadh;
+      const adh = p.hypo * clamp(ex((s.na - 140) / 3), 0, 12) + p.siadh; // la réserve en ADH plafonne la réponse
       const a2 = adh + 5 * p.ddavp; // desmopressine : agoniste V2
       const eff = clamp((p.kidney * a2) / (a2 + 0.5) * 1.5, 0, 1.5);
       // Rétention d'eau libre → baisse de la natrémie ; perte d'eau compensée par la soif, sauf en restriction hydrique.
-      const na = 140 + 3 * p.restrict + (eff >= 1 ? -40 * (eff - 1) * (1 - p.restrict) : (7 + 18 * p.restrict) * (1 - eff));
+      const na = 140 + 3 * p.restrict + (eff >= 1 ? -40 * (eff - 1) * (1 - p.restrict) : (7 + 10 * p.restrict) * (1 - eff));
       return { adh, eff, na };
     },
     labs: [
@@ -281,7 +281,7 @@
     ],
     scenarios: [
       { id: 'eu', name: 'Équilibre hydrique normal', note: 'Natrémie stable, urines concentrées selon les besoins.', p: {} },
-      { id: 'dic', name: 'Diabète insipide central', note: 'Défaut d\'ADH : polyurie > 3 L, urines diluées < 200 mosmol/kg, natrémie un peu haute.', p: { hypo: 0.03 } },
+      { id: 'dic', name: 'Diabète insipide central', note: 'Défaut d\'ADH : polyurie > 3 L, urines diluées < 200 mosmol/kg, natrémie un peu haute.', p: { hypo: 0.01 } },
       { id: 'din', name: 'Diabète insipide néphrogénique', note: 'Résistance rénale à l\'ADH (complément) : même tableau, ADH élevée.', p: { kidney: 0.05 } },
       { id: 'siadh', name: 'SIADH', note: 'Rétention d\'eau sans œdème, hyponatrémie souvent < 120 mmol/L, urines inappropriément concentrées.', p: { siadh: 5 } }
     ],
