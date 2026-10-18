@@ -822,3 +822,18 @@ line.m-db { stroke: var(--mc); stroke-width: 0.9; }
 .gran { fill: color-mix(in srgb, var(--p-blue2) 30%, transparent); stroke: var(--p-blue2); stroke-width: 1.5; }
 .gran-c { fill: var(--p-blue2); }
 .gran.docked { stroke-width: 3; }
+/* Iconographie du polycopié */
+.fig-thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; margin: 6px 0 10px; }
+.fig-thumb { display: flex; flex-direction: column; gap: 3px; padding: 4px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel-2); cursor: zoom-in; color: var(--muted); font: 500 11px var(--font-data); }
+.fig-thumb:hover { border-color: var(--accent); color: var(--accent); }
+.fig-thumb img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 6px; background: #fff; }
+.sheet.wide { width: min(820px, calc(100% - 20px)); }
+.fig-big { display: block; width: 100%; height: auto; max-height: 68vh; object-fit: contain; background: #fff; border-radius: 10px; margin: 8px 0; }
+.fig-nav { display: flex; justify-content: space-between; align-items: center; gap: 8px; font: 12px var(--font-data); color: var(--muted); }
+.fig-nav button { border: 1px solid var(--line); background: var(--panel-2); color: var(--fg); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+.fig-nav button:disabled { opacity: 0.4; cursor: default; }
+.fig-badge { cursor: zoom-in; }
+.fig-badge circle:first-child { fill: var(--panel); stroke: var(--accent); stroke-width: 2.5; }
+.fig-badge:hover circle:first-child { fill: color-mix(in srgb, var(--accent) 22%, var(--panel)); }
+.fig-badge-i { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; }
+.fig-badge-n { font: 600 14px var(--font-data); fill: var(--accent); }

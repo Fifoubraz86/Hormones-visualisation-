@@ -331,6 +331,14 @@
         }
 
         if (ax.draw) ax.draw(a, nodes);
+        /* ---- Iconographie du polycopié posée sur les organes ---- */
+        const spots = (HV.FIG_SPOTS || {})[ax.id] || {};
+        Object.keys(spots).forEach((id) => {
+          const n = nodes[id];
+          if (!n) return;
+          const r = n.rx ? n.rx : n.r || 60;
+          HV.figBadge(a, n.x + (n.rx ? r - 6 : r * 0.72), n.y - (n.ry ? n.ry + 4 : r * 0.72), spots[id]);
+        });
 
         /* ---- Notes libres ---- */
         (ax.notes || []).forEach((nt) => a.text(nt.x, nt.y, nt.text, 'note' + (nt.cls ? ' ' + nt.cls : ''), { anchor: nt.anchor || 'start', lh: 1.3 }));

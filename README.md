@@ -42,6 +42,10 @@ Les axes hypophysaires partagent une coupe sagittale cerveau – hypothalamus �
 
 La densité et la vitesse des particules suivent le taux sécrété : une hormone en excès défile vite et serrée, une hormone effondrée se raréfie et ralentit. Le panneau propose un curseur « Vitesse des hormones » (0,25× à 3×), une case « Accentuer » qui renforce le lien entre vitesse et taux, et une vitesse du temps simulé à partir de 0,25×.
 
+## Iconographie du polycopié
+
+Les 71 figures du polycopié du CEEDMM (2e édition 2023, parties 1 et 2) sont dans `assets/poly/`, extraites des PDF et réduites à 1 100 px. Elles sont reproduites avec l'accord du Collège et décrites dans `js/poly-figs.js` (légende, partie, page, scènes, crédit). On les retrouve à trois endroits : en vignettes dans le panneau de chaque scène, dans les fiches organes, et en pastilles posées sur les organes des schémas. Un clic ouvre la figure en grand avec sa source.
+
 ## Îlot de Langerhans
 
 L'îlot est un zoom de la régulation glycémique. On y voit l'architecture de l'îlot (cellules β, α, δ, PP, ε, capillaires, acini exocrines) et la cellule β : GLUT2, glucokinase, ATP, canal K-ATP, potentiel de membrane, canal calcique, granules, incrétines. Tout est animé par le modèle glycémique (scénarios DT1, DT2, insulinome, HGPO) et dispose d'un pas à pas en 8 étapes.

@@ -112,17 +112,65 @@
     if (S.imaging && S.imaging.length) h('p', 'sheet-src', 'Planches schématiques originales, pour l\'enseignement : elles illustrent les signes recherchés et ne remplacent pas des images réelles.', body);
     if (S.figs && S.figs.length) {
       h('h3', null, 'Iconographie du polycopié CEEDMM', body);
+      const imgs = [].concat(...S.figs.map((f) => HV.polyFigsRef(f.n)));
+      if (imgs.length) HV.figThumbs(body, imgs);
       const ul = h('ul', 'sheet-figs', null, body);
-      S.figs.forEach((f) => h('li', null, `Figure ${f.n} : ${f.t} (partie ${f.part}, page ${f.page} du PDF)`, ul));
+      S.figs.filter((f) => !HV.polyFigsRef(f.n).length).forEach((f) => h('li', null, `Figure ${f.n} : ${f.t} (partie ${f.part}, page ${f.page} du PDF)`, ul));
     }
     links(body, S.links);
   }
+
+  /* Vignettes d'iconographie : un clic ouvre la figure en grand, avec navigation dans la série. */
+  HV.figThumbs = function (parent, list) {
+    const wrap = h('div', 'fig-thumbs', null, parent);
+    list.forEach((f, i) => {
+      const b = h('button', 'fig-thumb', null, wrap);
+      b.type = 'button';
+      b.title = `Figure ${f.n} : ${f.t}`;
+      const im = h('img', null, null, b);
+      im.src = f.src;
+      im.alt = `Figure ${f.n} du polycopié : ${f.t}`;
+      im.loading = 'lazy';
+      h('span', null, 'Fig. ' + f.n, b);
+      b.addEventListener('click', () => HV.openFigure(list, i));
+    });
+    return wrap;
+  };
+  HV.openFigure = function (list, i) {
+    if (!host) return;
+    HV.hideTip && HV.hideTip();
+    const f = list[i];
+    const body = host.querySelector('.sheet-body');
+    body.textContent = '';
+    h('p', 'sheet-eyebrow', 'Iconographie du polycopié · figure ' + f.n, body);
+    h('h2', null, f.t, body);
+    const im = h('img', 'fig-big', null, body);
+    im.src = f.src;
+    im.alt = `Figure ${f.n} du polycopié : ${f.t}`;
+    h('p', 'sheet-src', HV.polySource(f), body);
+    if (list.length > 1) {
+      const nav = h('div', 'fig-nav', null, body);
+      const pv = h('button', null, '← Figure précédente', nav);
+      h('span', null, `${i + 1} / ${list.length}`, nav);
+      const nx = h('button', null, 'Figure suivante →', nav);
+      pv.type = nx.type = 'button';
+      pv.disabled = i === 0;
+      nx.disabled = i === list.length - 1;
+      pv.addEventListener('click', () => HV.openFigure(list, i - 1));
+      nx.addEventListener('click', () => HV.openFigure(list, i + 1));
+    }
+    host.hidden = false;
+    host.classList.add('wide');
+    body.scrollTop = 0;
+    host.querySelector('.sheet-close').focus({ preventScroll: true });
+  };
 
   HV.openSheet = function (ref) {
     if (!ref || !host) return;
     HV.hideTip && HV.hideTip();
     const body = host.querySelector('.sheet-body');
     body.textContent = '';
+    host.classList.remove('wide');
     if (ref.type === 'mol') molSheet(body, ref.key);
     else organSheet(body, ref.key);
     host.hidden = false;

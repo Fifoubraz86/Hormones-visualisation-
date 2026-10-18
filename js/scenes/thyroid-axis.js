@@ -214,6 +214,11 @@
         }
       });
 
+      /* --- Iconographie du polycopié --- */
+      HV.figBadge(a, 800, 560, ['1', '4', '5', '6', '7A', '7B', '7C', '7D', '9A', '9B']);
+      HV.figBadge(a, 770, 200, ['2', '17']);
+      HV.figBadge(a, 610, 560, ['8']);
+
       /* --- Pas à pas --- */
       HV.spotlight(HV.scenes.thyro, a, [
         { t: 'L\'hypothalamus sécrète la TRH', d: 'Les neurones du noyau paraventriculaire fabriquent la TRH, un tripeptide, et la libèrent dans les capillaires de l\'éminence médiane. Zoomez sur l\'hypothalamus pour voir le neurone à TRH.', spot: [[700, 252, 92]] },

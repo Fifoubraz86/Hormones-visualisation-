@@ -146,7 +146,9 @@
         // Un élément de la scène courante affiche sa fiche ; ailleurs, le clic fait entrer dans la scène.
         // Dans la scène courante, un clic ouvre la fiche (molécule, organe) ; Maj + clic l'ouvre aussi sur un élément zoomable.
         const sheet = HV.resolveSheet(drag.target);
-        if (sheet && (sc === current || e.shiftKey)) HV.openSheet(sheet);
+        const fg = drag.target && drag.target.closest && drag.target.closest('[data-figs]');
+        if (fg && sc === current) HV.openFigure(HV.polyFigsRef ? fg.getAttribute('data-figs').split(',').map(HV.polyFig).filter(Boolean) : [], 0);
+        else if (sheet && (sc === current || e.shiftKey)) HV.openSheet(sheet);
         else if (inf && sc === current) HV.showTip(inf.getAttribute('data-info'), e.clientX, e.clientY, e.pointerType !== 'mouse');
         else if (sc && (sc !== current || !tween)) flyTo(sc);
       } else scheduleDetect();
@@ -159,7 +161,7 @@
     const sheet = HV.resolveSheet(e.target);
     const z = e.target.closest('[data-zoom]');
     const zooms = z && HV.scenes[z.getAttribute('data-zoom')] !== current;
-    const hint = sheet ? (zooms ? 'Clic : zoomer · Maj + clic : fiche détaillée' : 'Clic : fiche détaillée') : zooms ? 'Clic : zoomer' : '';
+    const hint = inf.closest('[data-figs]') ? 'Clic : ouvrir les figures' : sheet ? (zooms ? 'Clic : zoomer · Maj + clic : fiche détaillée' : 'Clic : fiche détaillée') : zooms ? 'Clic : zoomer' : '';
     HV.showTip(inf.getAttribute('data-info'), e.clientX, e.clientY, false, hint);
   }
   svg.addEventListener('pointerleave', () => HV.hideTip());
@@ -313,6 +315,13 @@
         wrap.appendChild(b);
       });
       shWrap.appendChild(wrap);
+    }
+    const figWrap = $('sceneFigs');
+    figWrap.textContent = '';
+    const figs = HV.polyFigsFor(sc.id);
+    if (figs.length) {
+      figWrap.appendChild(Object.assign(document.createElement('p'), { className: 'explore-h', textContent: `Iconographie du polycopié (${figs.length})` }));
+      HV.figThumbs(figWrap, figs);
     }
     const ti = TOUR.indexOf(sc.id);
     $('tourPos').textContent = ti >= 0 ? ti + 1 + ' / ' + TOUR.length : 'hors parcours';
