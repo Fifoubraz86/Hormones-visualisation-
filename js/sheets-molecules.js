@@ -41,7 +41,7 @@
       ['Demi-vie', '≈ 7 jours'],
       ['Récepteur', 'Prohormone : faible affinité pour TR, convertie en T3 par D1 et D2'],
       ['Dosage', 'T4 libre 12–22 pmol/L'],
-      ['Pharmacologie', 'Lévothyroxine, ≈ 1,6 µg/kg/j en substitution complète']
+      ['Pharmacologie', 'Lévothyroxine, 1 à 1,5 µg/kg/j (item 243)']
     ], links: [pc(5819)] },
     t3: { cls: 'Iodothyronine (hormone active)', rows: [
       ['Structure', '3,5,3′-triiodothyronine'],

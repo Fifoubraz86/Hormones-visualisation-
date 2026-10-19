@@ -11,6 +11,11 @@
  *   thyrotoxicose, la TSH reste basse plusieurs semaines alors que la T4L est normalisée (complément).
  * - TRAb : décroissent sous ATS (vite chez les patients qui entreront en rémission), remontent à
  *   l'arrêt chez ceux qui rechutent (complément).
+ * - Autonomie nodulaire (par.auto : adénome toxique, GMNT) : synthèse indépendante de la TSH, bloquée
+ *   par les ATS mais sans rémission (item 242, SFE p. 17-18).
+ * - Thyroïdite (par.lysis : De Quervain, post-partum) : libération du stock par lyse (thyrotoxicose que
+ *   les ATS ne corrigent pas), synthèse détruite puis récupérée en 2 à 3 mois, ou pas (item 242-243).
+ * - hCG (par.hcg) : stimulation du récepteur de la TSH au 1er trimestre, pic vers 10 SA (item 242, SFE p. 13).
  */
 (function () {
   'use strict';
@@ -39,7 +44,7 @@
 
   // Paramètres par défaut d'un patient ; chaque cas en surcharge une partie.
   const BASE = {
-    weight: 70, r: 1, trab: 0, kTr: 0.32, trabFloor: 0.3, trabTau: 120, relapse: false, trabRelapse: 0,
+    weight: 70, r: 1, auto: 0, lysis: null, hcg: null, trab: 0, kTr: 0.32, trabFloor: 0.3, trabTau: 120, relapse: false, trabRelapse: 0,
     ec50: 9, pit: 1, abs: 1, pnn: 3.5, need: null, hr0: 72
   };
 
@@ -54,22 +59,33 @@
     return pt;
   }
 
-  function need(pt) { return pt.par.need ? pt.par.need(pt.day) : 1; }
+  // Pendant la mise à l'équilibre (frozen), les fonctions du temps sont évaluées à J0.
+  function need(pt, day) { return pt.par.need ? pt.par.need(day) : 1; }
 
   function stepDay(pt, frozen) {
     const p = pt.par, s = pt.st, rx = pt.rx;
     const eq = atsEq(rx);
     const B = eq > 0 ? Math.min(0.97, eq / (eq + p.ec50)) : 0;
     const ptu = rx.ats === 'ptu' ? Math.min(1, rx.atsDose / 300) : 0;
-    const lt4In = (rx.lt4 * p.abs * (rx.lt4Abs ?? 1)) / (1.6 * p.weight) / need(pt);
+    const day = frozen ? 0 : pt.day;
+    const lt4In = (rx.lt4 * p.abs * (rx.lt4Abs ?? 1)) / (1.6 * p.weight) / need(pt, day);
+    const hcg = p.hcg ? p.hcg(day) : 0;
+    let rEff = p.r, kLys = 0;
+    if (p.lysis) {
+      const t = day - p.lysis.day0;
+      if (t >= 0) { kLys = p.lysis.k; rEff = p.r * p.lysis.final * (1 - Math.exp(-t / p.lysis.rec)); }
+    }
     const H = 4;
     for (let k = 0; k < H; k++) {
       const h = 1 / H;
       const bio = 0.45 + 0.55 * Math.min(1, p.pit);
       const tshF = Math.min(4, Math.pow(Math.max(0, s.TSH * bio) / 1.5, 0.3));
-      const stim = tshF + p.kTr * s.TRAb;
-      const syn = p.r * stim * (1 - B);
-      const rel = KR * stim * s.G;
+      const stim = tshF + p.kTr * s.TRAb + hcg;
+      const syn = (rEff * stim + p.auto) * (1 - B);
+      // Lyse : les follicules détruits libèrent leur contenu (réservoir s.L), indépendamment de la TSH.
+      const relL = kLys * (s.L || 0);
+      if (relL) s.L -= relL * h;
+      const rel = KR * (stim + p.auto) * s.G + relL;
       s.G = Math.max(0, s.G + (syn - rel) * h);
       const kel = (LN2 / 7) * Math.pow(Math.max(0.3, s.T3), 0.35);
       s.T4 += (rel + lt4In - s.T4) * (1 - Math.exp(-kel * h));
@@ -84,7 +100,8 @@
       const rTau = fb > 1.35 ? 12 : fb < 0.85 ? 20 : 45;
       s.R += (rT - s.R) * (1 - Math.exp(-h / rTau));
       // La cellule thyréotrope s'adapte lentement : la TSH met 6 à 8 semaines à se stabiliser (complément).
-      s.TSH += (tshEq * s.R * s.R - s.TSH) * (1 - Math.exp(-h / 7));
+      const tshT = tshEq * s.R * s.R;
+      s.TSH += (tshT - s.TSH) * (1 - Math.exp(-h / (tshT < s.TSH ? 3 : 7)));
       if (!frozen) {
         let tT, tau;
         if (eq > 0 || pt.flags.surgery) { tT = p.trabFloor; tau = p.trabTau / LN2; }
@@ -151,5 +168,5 @@
     return out;
   }
 
-  S.model = { ATS, BB, LT4_DOSES, atsEq, create, advance, setRx, measure, clinic, symptoms, clamp };
+  S.model = { ATS, BB, LT4_DOSES, atsEq, create, advance, setRx, measure, clinic, symptoms, clamp, record };
 })();

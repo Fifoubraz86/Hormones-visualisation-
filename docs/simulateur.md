@@ -1,12 +1,37 @@
 # Patient virtuel : règles et sources
 
-Le simulateur a deux modes : thérapeutique libre (par défaut) et cas commentés. Le mode « cas commentés » (`simulateur.html`) suit la convention de l'atlas : la sémiologie vient du *Polycopié de sémiologie endocrinienne* du CEEDMM et porte la mention « polycopié » ; la conduite thérapeutique, absente d'un polycopié de sémiologie, porte la mention « complément ». Elle reprend le consensus de la Société française d'endocrinologie sur la maladie de Basedow (2016), les recommandations usuelles sur la lévothyroxine et les RCP. **Ces règles sont à faire relire par un endocrinologue avant usage en enseignement.**
+Le simulateur a deux modes : thérapeutique libre (par défaut) et cas commentés.
+
+## Sources
+
+| Mention | Source |
+| --- | --- |
+| « polycopié p. X » | *Polycopié de sémiologie endocrinienne* du CEEDMM, chapitre thyroïde |
+| « item 241/242/243 · SFE p. X » | Référentiel EDN SFE/CEEDMM de l'item (export 2021–2022), page du chapitre ; « SFE-N », « SFE-C » : chapitres nodules et cancers de l'item 241 |
+| « item 243 · LiSA p. X » | Fiche LiSA de l'item (export du 05/11/2025) |
+| « complément » | Ce qui ne figure dans aucune de ces sources |
+
+Les rangs affichés (A, B) sont ceux des grilles d'objectifs des items 241, 242 et 243, tels que résumés dans la mémoire du dossier « Rédaction d'examen ». Un objectif sans rang n'est pas classé dans la grille (par exemple la dose de lévothyroxine pendant la grossesse ou le seuil de traitement d'une forme fruste, qui figurent dans le texte SFE mais pas dans la grille). Le digest ne contient aucun objectif de rang C. **Les règles restent à faire relire par un endocrinologue avant usage en enseignement.**
+
+### Principales corrections apportées d'après les items 242 et 243
+
+- Lévothyroxine : **1 à 1,5 µg/kg/j** (25–75 µg/j si forme fruste) au lieu de 1,6 µg/kg/j ; objectif de TSH **0,5–2,5 mUI/L** ; contrôle 6 à 8 semaines après la dose cible, puis à 6 mois, puis annuel.
+- Sujet âgé ou coronarien : paliers de 12,5–25 µg **toutes les 1 à 2 semaines** jusqu'à la dose cible (et non toutes les 6 à 8 semaines) ; TSH tolérée à 4–10 si coronaropathie non contrôlée ; ECG hebdomadaire si coronaropathie grave.
+- Insuffisance thyréotrope : T4L **15 à 21 jours** après chaque changement, à jeun avant la prise ; cible entre le milieu et le tiers supérieur de la normale.
+- Forme fruste : **TSH > 10 et/ou anti-TPO → traiter** ; TSH < 10 sans anti-TPO → TSH à 6 mois puis annuelle. Le cas « TSH à 7,2 » a désormais des anti-TPO négatifs.
+- Grossesse : + 25 à 50 % dès le diagnostic, TSH mensuelle, cible 0,5–2,5 ; traiter dès TSH ≥ 3.
+- ATS : doses d'attaque par molécule (carbimazole 20–40, thiamazole 15–30, PTU 200–400 mg/j) ; **NFS de référence puis tous les 10 jours pendant 2 mois** (nouveau conseil à cocher) ; T4L à 3–4 semaines puis TSH tous les 3 mois ; PNN < 0,8 G/L : arrêt, < 0,5 G/L : hospitalisation ; PTU préféré pendant la grossesse (carbimazole tératogène entre 6 et 10 SA).
+- Traitement radical : thyroïdectomie après euthyroïdie (sinon crise aiguë thyrotoxique) ; iode 131 contre-indiqué pendant la grossesse, contraception 6 mois, aggrave l'orbitopathie.
 
 ## Mode thérapeutique (`js/simu/sandbox.js`)
 
 Pas de correction : un patient, une ordonnance libre, des bilans à la date choisie.
 
-- **Calage du patient** sur la valeur de départ saisie, par dichotomie sur le modèle à l'équilibre : fonction thyroïdienne résiduelle pour la TSH initiale (Hashimoto), taux de TRAb pour la T4L initiale (Basedow), réserve hypophysaire pour la T4L initiale (centrale). Thyroïdectomie : patient euthyroïdien à J0, plus aucun tissu ni stock thyroïdien.
+- **Situations** : hypothyroïdie primaire (Hashimoto, y compris forme fruste), thyroïdectomie totale, insuffisance thyréotrope, maladie de Basedow, nodule toxique ou goitre multinodulaire toxique, thyroïdite subaiguë de De Quervain ou du post-partum, thyrotoxicose gestationnelle transitoire.
+- **Calage du patient** sur la valeur de départ saisie, par dichotomie sur le modèle à l'équilibre : fonction thyroïdienne résiduelle pour la TSH initiale (Hashimoto), taux de TRAb (Basedow), autonomie nodulaire (nodule toxique), réservoir de lyse (thyroïdite, patient vu 7 jours après le début), amplitude de la stimulation par l'hCG (gestationnelle, pic à 10 SA), réserve hypophysaire (insuffisance thyréotrope). Thyroïdectomie : patient euthyroïdien à J0, plus aucun tissu ni stock thyroïdien.
+- **Gestes radicaux** (Basedow, nodule toxique) : thyroïdectomie totale, lobectomie (adénome toxique), iode 131 (effet en 1 à 3 mois ; hypothyroïdie définitive fréquente dans le Basedow, rare après un adénome toxique ; élévation des TRAb ; refusé pendant la grossesse). Une thyroïdectomie en pleine hyperthyroïdie (T4L > 30 pmol/L) déclenche une crise aiguë thyrotoxique.
+- **Examens qualitatifs** : anti-TPO, CRP, échographie et scintigraphie, dont le résultat dépend de la situation et de l'état du patient (hyperfixation diffuse, nodule hyperfixant extinctif, « damier », scintigraphie blanche, contre-indication pendant la grossesse…).
+- **Thyroïdite** : la lyse vide un réservoir propre (hormones des follicules détruits) ; les ATS, qui bloquent la synthèse, n'agissent pas ; la synthèse détruite récupère en 2 à 3 mois (De Quervain) ou en 3 mois et plus (post-partum, avec hypothyroïdie persistante dans 30 % des tirages). AINS ou corticoïdes : soulagent la douleur et accélèrent la baisse de la CRP.
 - **Lévothyroxine** : dose moyenne hebdomadaire (schéma alterné possible), rapportée à la dose substitutive complète de 1,6 µg/kg/j. Conditions de prise : à jeun 100 %, au petit-déjeuner 80 %, sous IPP 85 %, avec fer ou calcium 60 % (ordres de grandeur, complément).
 - **Grossesse** : besoins multipliés progressivement jusqu'à 1,4 entre 4 et 16 SA, retour à 1 à l'accouchement (40 SA).
 - **Basedow** : évolution des TRAb favorable (demi-vie ≈ 100 jours, rémission à l'arrêt) ou défavorable (TRAb persistants, rechute à l'arrêt), choisie ou tirée au sort.
@@ -25,27 +50,27 @@ Pas de correction : un patient, une ordonnance libre, des bilans à la date choi
 | `js/simu/sandbox.js` | Mode thérapeutique libre. |
 | `js/simu/main.js` | Choix du mode (onglets). |
 
-## Règles appliquées (complément)
+## Règles appliquées par le moteur de correction (cas commentés)
 
-**Maladie de Basedow**
-- NFS et bilan hépatique de référence avant l'ATS ; information sur l'agranulocytose (fièvre ou angine → NFS en urgence et arrêt) ; contraception chez la femme en âge de procréer ; arrêt du tabac et avis ophtalmologique en cas d'orbitopathie (tabac : polycopié p. 31).
-- Attaque : carbimazole 20–30 mg/j (30–40 mg/j si T4L > 2 fois la normale) ; < 15 mg/j insuffisant, > 60 mg/j excessif. PTU hors grossesse : réservé (hépatotoxicité).
-- Bêtabloquant si FC ≥ 90/min ; propranolol contre-indiqué chez l'asthmatique ; à arrêter une fois l'euthyroïdie obtenue.
-- Premier contrôle à 3–4 semaines, puis toutes les 4–6 semaines pendant l'adaptation, toutes les 6–12 semaines en entretien. T4L (± T3L) indispensable les premiers mois : la TSH reste freinée ; augmenter la dose sur une TSH basse avec T4L et T3L normales est une erreur.
-- T4L normale → réduction par paliers (un tiers à la moitié) jusqu'à 5–10 mg/j ; hypothyroïdie iatrogène (T4L basse ou TSH > 4) → réduction nette ou ajout de lévothyroxine (« bloquer-substituer »).
-- Cure de 12 à 18 mois ; arrêt avant 12 mois = erreur ; TRAb à doser avant l'arrêt (positifs : risque de rechute élevé).
-- Agranulocytose : contre-indication définitive à tous les ATS ; traitement radical. Orbitopathie active chez un fumeur : thyroïdectomie plutôt qu'iode 131.
-- Grossesse : PTU au 1er trimestre (carbimazole et thiamazole : embryopathie), plus faible dose efficace, T4L dans le haut de la normale, contrôle toutes les 2–4 semaines, TRAb au 2e–3e trimestre. Iode 131 contre-indiqué.
+Chaque remarque affichée cite sa source ; le détail est dans `js/simu/rules.js`.
 
-**Lévothyroxine**
-- Adulte sans cardiopathie : dose substitutive ≈ 1,6 µg/kg/j d'emblée ou rapidement (0,6 à 1,15 fois cette dose acceptée). Sujet âgé coronarien : 12,5–25 µg/j, paliers de 12,5–25 µg ; un palier > 25 µg déclenche un angor dans le cas dédié.
-- Prise à jeun, à distance du fer, du calcium et des IPP.
-- TSH 6–8 semaines après chaque changement (polycopié : toute TSH anormale se contrôle à 6–8 semaines) ; puis tous les 6–12 mois une fois l'équilibre confirmé. Cibles : 0,4–4 mUI/L ; 0,5–6 chez le coronarien âgé ; < 2,5 pendant la grossesse.
-- T3L inutile (polycopié p. 22), anti-TPO à ne pas redoser (p. 23), scintigraphie inutile.
-- Grossesse : +25 à 30 % dès la confirmation, TSH toutes les 4 semaines jusqu'à mi-grossesse, retour à la dose antérieure après l'accouchement.
-- Hypothyroïdie centrale : axe corticotrope évalué avant la lévothyroxine, hydrocortisone d'abord en cas d'insuffisance corticotrope (sinon insuffisance surrénale aiguë dans le cas dédié), suivi sur la T4L (cible 14–22 pmol/L), TSH non interprétable.
-- Hypothyroïdie infraclinique (TSH < 10, T4L normale, peu de symptômes) : contrôle à 6–8 semaines avec T4L et anti-TPO (polycopié), pas de traitement systématique, TSH tous les 6–12 mois.
+**Maladie de Basedow** (item 242)
+- Avant l'ATS : NFS et bilan hépatique de référence ; information sur l'agranulocytose (fièvre ou angine → NFS en urgence) ; NFS tous les 10 jours pendant 2 mois ; contraception ; arrêt du tabac et avis ophtalmologique si orbitopathie (sous 48 h si signes de gravité).
+- Attaque : carbimazole 20–40, thiamazole 15–30, PTU 200–400 mg/j (grossesse : dose minimale). PTU hors grossesse : non (thiouraciles hépatotoxiques). Propranolol si FC ≥ 90/min, contre-indiqué chez l'asthmatique (complément).
+- T4L à 3–4 semaines (TSH seule = erreur au début), puis toutes les 4–6 semaines pendant l'adaptation (complément), TSH tous les 3 mois en entretien. Augmenter la dose sur une TSH basse avec T4L et T3L normales = erreur.
+- T4L normale → réduction par paliers jusqu'à 5–10 mg/j (complément) ; hypothyroïdie iatrogène (T4L basse ou TSH > 4) → réduction ou « block and replace ».
+- Cure de 12 à 18 mois ; TRAb en fin de cure ; rechute → chirurgie, iode 131 ou ATS faible dose au long cours.
+- Agranulocytose : contre-indication définitive à tous les ATS. Thyroïdectomie après euthyroïdie ; iode 131 contre-indiqué pendant la grossesse et à éviter en cas d'orbitopathie.
+- Grossesse : PTU (carbimazole tératogène entre 6 et 10 SA), T4L à la limite supérieure de la normale, contrôle toutes les 2–4 semaines, TRAb à doser.
+
+**Lévothyroxine** (item 243)
+- 1 à 1,5 µg/kg/j (1 à 1,6 accepté ; 1,6 à 1,8 discutable) ; forme fruste 25–75 µg/j ; sujet âgé ou coronarien : 12,5–25 µg/j puis paliers de 12,5–25 µg toutes les 1 à 2 semaines jusqu'à ≈ 1 µg/kg/j, puis TSH à 6–8 semaines.
+- Suivi sur la TSH seule (T3L inutile, polycopié p. 22 ; anti-TPO à ne pas redoser, p. 23 ; pas de scintigraphie) : 6–8 semaines après la dose cible, puis 6 mois, puis annuel. Objectif 0,5–2,5 mUI/L (0,4–4 accepté) ; jusqu'à 10 chez le sujet très âgé ou coronarien.
+- Besoins augmentés : chercher une malabsorption (fer, calcium, IPP…) avant d'augmenter la dose.
+- Grossesse : + 25 à 50 % dès le diagnostic, TSH mensuelle, cible 0,5–2,5 ; retour à la dose antérieure après l'accouchement (complément).
+- Insuffisance thyréotrope : axe corticotrope évalué avant la lévothyroxine (complément) ; suivi sur la T4L à 15–21 jours, cible 16–22 pmol/L ; jamais sur la TSH.
+- Forme fruste : confirmer (un seul dosage ne suffit pas) ; traiter si TSH > 10 et/ou anti-TPO ; sinon TSH à 6 mois puis annuelle.
 
 ## Limites du modèle
 
-Cinétiques et valeurs illustratives, normes indicatives (T4L 12–22 pmol/L, T3L 3,1–6,8 pmol/L, TRAb < 1,8 UI/L selon la trousse). Pas de variabilité interindividuelle au-delà des paramètres de chaque cas ; bruit analytique de ± 4 %. La rechute après arrêt est modélisée (paramètre `relapse`) mais aucun cas ne l'utilise encore.
+Cinétiques et valeurs illustratives, normes indicatives (T4L 12–22 pmol/L, T3L 3,1–6,8 pmol/L, TRAb < 1,8 UI/L selon la trousse). Pas de variabilité interindividuelle au-delà des paramètres de chaque cas ; bruit analytique de ± 4 %. La rechute après arrêt est modélisée (paramètre `relapse`) et utilisée en mode thérapeutique (évolution défavorable des TRAb). Le modèle ne simule ni l'angor (sauf l'événement du cas dédié), ni l'agranulocytose (sauf l'événement du cas dédié), ni l'orbitopathie.

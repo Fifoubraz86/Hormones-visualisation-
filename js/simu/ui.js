@@ -117,7 +117,7 @@
       } else if (k === 'nfs') {
         const extra = st.nfs ? st.nfs + ' ; ' : '';
         value = (m.pnn < 1.5 ? '' : extra) + 'PNN ' + fmt(m.pnn, 2) + ' G/L'; ref = 'PNN 1,5–7'; flag = m.pnn < 0.5 ? 'agranulocytose' : m.pnn < 1.5 ? 'bas' : ''; v.labs.pnn = m.pnn;
-      } else if (k === 'tpo') { value = val('tpo', 'négatifs'); if (/positif|élevés/.test(value)) g.tpoKnown = true; }
+      } else if (k === 'tpo') { value = val('tpo', 'négatifs'); g.tpoDone = true; if (/positif|élevés/.test(value)) g.tpoKnown = true; }
       else if (k === 'cortisol') { value = val('cortisol', '430 nmol/L à 8 h (normal)'); g.cortisolKnown = true; }
       else if (k === 'hcg') value = val('hcg', cs.patient.sex === 'M' ? 'non pertinentes' : 'négatifs');
       else if (k === 'irm') value = val('irm', 'hypophyse normale');
@@ -372,7 +372,7 @@
       const tg = RU.target(g);
       const central = cs.kind === 'central';
       const ref = central ? v.labs.t4 : v.labs.tsh;
-      const inT = ref != null && (central ? ref >= 14 && ref <= 22 : ref >= tg.lo && ref <= tg.hi);
+      const inT = ref != null && (central ? ref >= 16 && ref <= 22 : ref >= tg.lo && ref <= tg.hi);
       const same = d.lt4 === pt.rx.lt4 && M.atsEq(d) === M.atsEq(pt.rx);
       g.stableCount = inT && same ? g.stableCount + 1 : 0;
     }
@@ -454,7 +454,7 @@
     log.forEach((p) => {
       if (central) { if (p.t4 < 12) hypo++; else if (p.t4 > 22) hyper++; else inT++; return; }
       if (p.t4 > 22 || p.t3 > 6.8 || p.tsh < 0.1) hyper++;
-      else if (p.tsh > 4.5 || p.t4 < 12) hypo++;
+      else if (p.tsh > (cs.flags.elderly ? 10 : 4.5) || p.t4 < 12) hypo++;
       else inT++;
     });
     const pc = (n) => (log.length ? Math.round((100 * n) / log.length) : 0) + ' %';
@@ -470,7 +470,7 @@
           log.length && cs.kind !== 'subclin' ? h('p', { class: 'sv-muted' }, 'Après la 6e semaine : ' + pc(inT) + ' du temps dans la cible, ' + pc(hyper) + ' en excès d\'hormones (ou TSH freinée), ' + pc(hypo) + ' en défaut.') : null
         ])
       ]),
-      h('div', { class: 'sv-card' }, [h('h3', null, 'À retenir'), h('ul', { class: 'sv-keys' }, cs.keyPoints.map((k) => h('li', null, [k.t, h('span', { class: 'sv-src' }, ' · ' + k.src)])))]),
+      h('div', { class: 'sv-card' }, [h('h3', null, 'À retenir'), h('ul', { class: 'sv-keys sv-refs' }, cs.keyPoints.map((k) => h('li', null, [k.rang ? h('span', { class: 'sv-rang sv-rang-' + k.rang }, 'Rang ' + k.rang) : null, (k.rang ? ' ' : '') + k.t, h('span', { class: 'sv-src' }, ' · ' + k.src)])))]),
       h('div', { class: 'sv-card' }, [h('h3', null, 'Vos décisions, consultation par consultation')].concat(g.visits.map((v) => h('details', { class: 'sv-journal' }, [
         h('summary', null, weekLabel(v.day) + ' · ' + (v.type === 'initial' ? 'première consultation' : v.type === 'event' ? (v.event.title || 'événement').toLowerCase() : 'suivi') + ' · ' + (v.rxText || '')),
         v.results.length ? resultsTable(v.results) : null,

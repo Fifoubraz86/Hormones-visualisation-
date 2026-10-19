@@ -76,11 +76,11 @@
         why: 'TSH effondrée, T4L et T3L élevées, TRAb positifs, goitre diffus vasculaire avec souffle et signes oculaires : maladie de Basedow (polycopié p. 26, 28, 31).', src: POLY
       },
       keyPoints: [
-        { t: 'Le diagnostic repose sur la TSH effondrée, les hormones libres élevées et les TRAb positifs ; la scintigraphie n\'est utile que si les TRAb sont négatifs ou le goitre nodulaire.', src: POLY },
-        { t: 'Avant l\'ATS : NFS et bilan hépatique de référence, information sur l\'agranulocytose (fièvre, angine → NFS en urgence et arrêt).', src: CPL },
-        { t: 'Attaque : carbimazole 20 à 40 mg/j ; premier contrôle de la T4L (± T3L) à 3–4 semaines. La TSH reste freinée des semaines : ne pas s\'y fier au début.', src: CPL },
-        { t: 'Dès l\'euthyroïdie, on diminue par paliers jusqu\'à 5–10 mg/j (ou on ajoute la lévothyroxine : « bloquer-substituer »). Sinon, hypothyroïdie iatrogène.', src: CPL },
-        { t: 'Cure de 12 à 18 mois ; des TRAb négatifs à la fin annoncent une rémission probable.', src: CPL }
+        { t: 'Thyrotoxicose : TSH effondrée, T4L élevée (T3L si T4L normale). Diagnostic de Basedow : orbitopathie, sinon TRAb élevés ; scintigraphie seulement si TRAb bas ou indisponibles.', src: 'item 242 · SFE p. 5, 8-9', rang: 'A' },
+        { t: 'Moyens : repos, propranolol, contraception ; ATS (carbimazole 20–40, thiamazole 15–30, PTU 200–400 mg/j), délai d\'action 10–15 jours, titration ou « block and replace ».', src: 'item 242 · SFE p. 15', rang: 'B' },
+        { t: 'Surveillance : T4L à 3–4 semaines (la TSH reste basse longtemps), puis TSH tous les 3 mois ; NFS de référence puis tous les 10 jours pendant 2 mois ; NFS en urgence si fièvre ou angine.', src: 'item 242 · SFE p. 16', rang: 'B' },
+        { t: 'Cure de 12 à 18 mois. Le titre initial des TRAb n\'a pas de valeur pronostique ; un titre élevé en fin de traitement prédit la rechute (40 à 50 %).', src: 'item 242 · SFE p. 8-9, 17', rang: 'B' },
+        { t: 'Rechute : chirurgie (goitre volumineux, grossesse proche, orbitopathie modérée à sévère), iode 131 ou ATS faible dose au long cours.', src: 'item 242 · SFE p. 17-18', rang: 'B' }
       ]
     },
     /* ------------------------------------------------------------------ */
@@ -137,10 +137,10 @@
         }
       ],
       keyPoints: [
-        { t: 'Orbitopathie : liée à l\'auto-immunité (récepteurs de la TSH orbitaires), aggravée par le tabac ; signes de gravité : baisse d\'acuité, de la vision des couleurs (neuropathie optique).', src: POLY },
-        { t: 'Sous ATS, fièvre ou angine = NFS en urgence et arrêt. L\'agranulocytose (PNN < 0,5 G/L) contre-indique définitivement tous les ATS.', src: CPL },
-        { t: 'Traitement radical : thyroïdectomie totale, préférée à l\'iode 131 en cas d\'orbitopathie active (l\'iode peut l\'aggraver, surtout chez le fumeur).', src: CPL },
-        { t: 'Après thyroïdectomie totale : lévothyroxine à dose substitutive (≈ 1,6 µg/kg/j), calcémie (hypoparathyroïdie), TSH à 6–8 semaines.', src: CPL }
+        { t: 'Orbitopathie (≈ 50 %, fumeurs ++) indépendante du degré de thyrotoxicose. Gravité : inocclusion palpébrale, paralysie musculaire, neuropathie optique compressive → avis ophtalmologique en urgence sous 48 h.', src: 'item 242 · SFE p. 7-8', rang: 'B' },
+        { t: 'Agranulocytose (0,2 à 0,5 %) : PNN < 0,5 G/L → hospitalisation en milieu protégé, antibiothérapie large, arrêt définitif ; elle contre-indique tous les ATS.', src: 'item 242 · SFE p. 16', rang: 'B' },
+        { t: 'Orbitopathie : arrêt du tabac, euthyroïdie sans passage en hypothyroïdie ; l\'iode 131 peut l\'aggraver et élever les TRAb : préférer la chirurgie.', src: 'item 242 · SFE p. 17-20', rang: 'B' },
+        { t: 'Thyroïdectomie totale : complications (hématome suffocant, hypoparathyroïdie, paralysie récurrentielle) ; lévothyroxine à vie, TSH à 6–8 semaines.', src: 'item 241 · SFE-C p. 4-5 ; item 243 · SFE p. 11', rang: '' }
       ]
     },
     /* ------------------------------------------------------------------ */
@@ -183,10 +183,10 @@
         why: 'Signes antérieurs à la grossesse, goitre vasculaire, signes oculaires et TRAb positifs : maladie de Basedow. La thyrotoxicose gestationnelle transitoire se voit au 1er trimestre avec des vomissements incoercibles, TRAb négatifs (polycopié p. 27).', src: POLY
       },
       keyPoints: [
-        { t: 'Hyperthyroïdie au 1er trimestre : les TRAb distinguent la maladie de Basedow de la thyrotoxicose gestationnelle transitoire (hCG, vomissements).', src: POLY },
-        { t: 'Hyperthyroïdie maternelle : fausse couche, pré-éclampsie, retard de croissance, prématurité.', src: POLY },
-        { t: 'PTU au 1er trimestre (le carbimazole est tératogène), à la plus faible dose efficace, T4L visée dans le haut de la normale : les ATS traversent le placenta.', src: CPL },
-        { t: 'Contrôle toutes les 2 à 4 semaines ; la maladie s\'atténue souvent au 2e et 3e trimestre (doses réduites, parfois arrêtées). TRAb au 2e–3e trimestre : risque fœtal et néonatal.', src: CPL }
+        { t: 'Thyrotoxicose gestationnelle transitoire : 2 % des grossesses, pic d\'hCG vers 10 SA, ± hyperemesis, TRAb négatifs ; régresse spontanément, traitement symptomatique.', src: 'item 242 · SFE p. 13, 20', rang: '' },
+        { t: 'Basedow et grossesse : TRAb transplacentaires (hyperthyroïdie fœtale ou néonatale), à doser même après traitement radical ; les ATS exposent à un goitre ou une hypothyroïdie fœtale.', src: 'item 242 · SFE p. 14', rang: '' },
+        { t: 'PTU préféré (carbimazole tératogène entre 6 et 10 SA), à la dose minimale, T4L à la limite supérieure de la normale ; thyroïde fœtale fonctionnelle vers 20 SA ; rebond post-partum ; allaitement possible sur avis spécialisé.', src: 'item 242 · SFE p. 20', rang: 'B' },
+        { t: 'Iode 131 contre-indiqué pendant la grossesse (β-hCG avant tout traitement).', src: 'item 242 · SFE p. 17', rang: 'B' }
       ],
       endAt: (g) => g.case.pregWeek(g.pt.day) >= 34 ? 'Grossesse arrivée à 34 SA : le suivi se poursuit avec l\'équipe obstétricale et la surveillance du nouveau-né.' : null
     },
@@ -238,17 +238,17 @@
         { id: 'fer', silent: true, when: (g) => g.pt.day >= 120 && g.pt.rx.lt4 > 0, effect: (g) => { g.pt.par.abs = 0.6; g.interactionActive = true; } }
       ],
       keyPoints: [
-        { t: 'Hypothyroïdie primaire : TSH élevée, T4L basse ; les anti-TPO élevés font retenir la maladie de Hashimoto. T3L et scintigraphie inutiles.', src: POLY },
-        { t: 'Sans cardiopathie, dose substitutive ≈ 1,6 µg/kg/j d\'emblée ou rapidement atteinte, à jeun, à distance du fer, du calcium et des IPP.', src: CPL },
-        { t: 'TSH 6 à 8 semaines après chaque changement de dose (demi-vie de la T4 ≈ 7 jours) ; paliers de 12,5 à 25 µg.', src: CPL },
-        { t: 'TSH qui remonte chez un patient équilibré : observance, horaire de prise, interactions (fer, calcium, IPP), grossesse, avant d\'augmenter la dose.', src: CPL }
+        { t: 'Hypothyroïdie primaire : TSH élevée ; T4L normale = forme fruste (TSH 4–10), T4L basse = forme patente (TSH > 10). Hashimoto : anti-TPO (sinon anti-Tg), goitre ferme irrégulier, pas de scintigraphie.', src: 'item 243 · SFE p. 2-3, 7-8', rang: 'A' },
+        { t: 'Lévothyroxine 1 à 1,5 µg/kg/j ; suivi sur la TSH seule, contrôle 6 à 8 semaines après la dose cible, puis à 6 mois, puis annuel ; objectif 0,5–2,5 mUI/L.', src: 'item 243 · SFE p. 11-12', rang: 'A' },
+        { t: 'Besoins augmentés : malabsorption (fer, calcium, IPP, magnésium, maladie cœliaque, H. pylori, gastrite atrophique, chirurgie bariatrique), œstrogènes (↑ TBG).', src: 'item 243 · SFE p. 12-13', rang: '' },
+        { t: 'Biologie non spécifique : anémie, LDL ↑, CPK ↑, hyponatrémie ; Hashimoto s\'intègre souvent dans une polyendocrinopathie auto-immune (vitiligo, DT1, Biermer).', src: 'item 243 · SFE p. 6-8', rang: 'B' }
       ]
     },
     /* ------------------------------------------------------------------ */
     {
       id: 'age', kind: 'lt4', level: 'Intermédiaire',
       title: 'Hypothyroïdie chez un coronarien de 78 ans',
-      tagline: 'Commencer bas, monter lentement : la lévothyroxine peut démasquer un angor.',
+      tagline: 'Commencer à 12,5–25 µg, monter par paliers toutes les 1 à 2 semaines : la lévothyroxine peut démasquer un angor.',
       patient: { name: 'M. Georges L.', sex: 'M', age: 78, job: 'agriculteur retraité' },
       motif: 'M. L. est ralenti depuis un an selon sa fille : il somnole, a froid, a pris du poids. Il a eu un infarctus il y a 6 ans (stent). Un bilan a été fait par son médecin.',
       courrier: { text: 'Bilan du médecin traitant : « TSH 41 mUI/L, T4L 6,9 pmol/L. Anti-TPO positifs. »', labs: { tsh: 41, t4: 6.9 } },
@@ -295,17 +295,17 @@
         }
       ],
       keyPoints: [
-        { t: 'Sujet âgé ou coronarien : lévothyroxine 12,5 à 25 µg/j, puis paliers de 12,5 à 25 µg toutes les 6 à 8 semaines.', src: CPL },
-        { t: 'Toute aggravation d\'un angor sous lévothyroxine : réduire la dose, avis cardiologique.', src: CPL },
-        { t: 'Cible de TSH plus tolérante chez le sujet très âgé ; éviter surtout le surdosage (fibrillation atriale, ostéoporose).', src: CPL },
-        { t: 'Anti-TPO déjà positifs : ne pas les redoser (polycopié p. 23).', src: POLY }
+        { t: 'Sujet âgé ou coronarien : lévothyroxine 12,5–25 µg/j, paliers de 12,5–25 µg toutes les 1 à 2 semaines ; consulter en cas de douleur thoracique ; ECG hebdomadaire si coronaropathie grave ; traiter d\'abord la coronaropathie.', src: 'item 243 · SFE p. 11-12 ; LiSA p. 4', rang: 'A' },
+        { t: 'Objectif de TSH 0,5–2,5 mUI/L ; chez le sujet très âgé ou coronarien non contrôlé, une TSH de 4 à 10 est acceptée. Éviter le surdosage (os, cœur).', src: 'item 243 · SFE p. 11-12', rang: 'A' },
+        { t: 'La coronaropathie peut être démasquée par le traitement ; chez le sujet âgé, l\'hypothyroïdie donne dépression, confusion, voire démence.', src: 'item 243 · SFE p. 5', rang: 'B' },
+        { t: 'Anti-TPO déjà positifs : ne pas les redoser.', src: 'polycopié p. 23', rang: '' }
       ]
     },
     /* ------------------------------------------------------------------ */
     {
       id: 'infraclinique', kind: 'subclin', level: 'Débutant',
       title: 'TSH à 7,2 de découverte fortuite',
-      tagline: 'Hypothyroïdie infraclinique : confirmer, chercher les anti-TPO, ne pas traiter par réflexe.',
+      tagline: 'Hypothyroïdie fruste : confirmer, doser les anti-TPO, traiter seulement si TSH > 10 ou anti-TPO positifs.',
       patient: { name: 'Mme Thérèse V.', sex: 'F', age: 58, job: 'pharmacienne' },
       motif: 'Mme V. vient pour un résultat : TSH à 7,2 mUI/L sur un bilan de routine. Elle se sent bien, juste « un peu fatiguée comme tout le monde ».',
       courrier: { text: 'Bilan de routine : « TSH 7,2 mUI/L. »', labs: { tsh: 7.2 } },
@@ -319,7 +319,7 @@
       ],
       exam: examHypo([['Pression artérielle', '124/78 mmHg'], ['Thyroïde', 'non palpable']]),
       tests0: {},
-      static: { tpo: 'positifs (180 UI/mL ; N < 34)', hepat: 'normal', ecg: 'rythme sinusal à 68/min', echo: 'thyroïde de taille normale, discrètement hypoéchogène', scinti: 'inutile' },
+      static: { tpo: 'négatifs (< 34 UI/mL)', hepat: 'normal', ecg: 'rythme sinusal à 68/min', echo: 'thyroïde de taille normale, discrètement hypoéchogène', scinti: 'inutile' },
       dx: {
         options: [
           { id: 'sub', label: 'Hypothyroïdie infraclinique à confirmer' },
@@ -328,13 +328,14 @@
           { id: 'eu', label: 'Bilan normal' }
         ],
         correct: 'sub',
-        why: 'TSH modérément élevée (4–10 mUI/L) chez une patiente peu symptomatique : hypothyroïdie infraclinique possible, à confirmer sur un 2e dosage à 6–8 semaines avec T4L et anti-TPO (polycopié).', src: POLY
+        why: 'TSH modérément élevée (4–10 mUI/L) chez une patiente peu symptomatique : hypothyroïdie fruste possible ; un seul dosage modérément élevé ne suffit pas, à confirmer à 6–8 semaines avec T4L et anti-TPO.', src: 'item 243 · SFE p. 3 ; polycopié'
       },
       noTestsStep: true,
       keyPoints: [
-        { t: 'Une TSH modérément élevée (4–10 mUI/L) se contrôle à 6–8 semaines avant toute décision.', src: POLY },
-        { t: 'T4L normale = hypothyroïdie infraclinique ; anti-TPO positifs = origine auto-immune, risque d\'évolution vers l\'hypothyroïdie avérée.', src: POLY },
-        { t: 'Pas de traitement systématique si TSH < 10 mUI/L, peu de symptômes et pas de projet de grossesse ; TSH tous les 6 à 12 mois.', src: CPL }
+        { t: 'Un seul dosage modérément élevé ne suffit pas pour traiter : la TSH augmente avec l\'âge et l\'obésité. Contrôle à 6–8 semaines avec T4L.', src: 'item 243 · SFE p. 3 ; polycopié', rang: 'B' },
+        { t: 'Forme fruste : TSH > 10 et/ou anti-TPO → traiter (lévothyroxine 25–75 µg/j) ; TSH < 10 sans anti-TPO → TSH à 6 mois puis annuelle ; cas intermédiaires (symptômes, hypercholestérolémie) à discuter.', src: 'item 243 · SFE p. 11-12', rang: '' },
+        { t: 'Grossesse : traiter dès une TSH ≥ 3 mUI/L, cible 0,5–2,5.', src: 'item 243 · SFE p. 12', rang: '' },
+        { t: 'Dépistage ciblé, non systématique : femme de plus de 60 ans avec antécédents thyroïdiens, anticorps, chirurgie ou irradiation cervicale, amiodarone, lithium, interféron.', src: 'item 243 · SFE p. 13', rang: '' }
       ],
       endAt: (g) => (g.visits.length >= 2 ? 'Surveillance mise en place.' : null)
     },
@@ -342,7 +343,7 @@
     {
       id: 'grossesse-lt4', kind: 'lt4', level: 'Intermédiaire',
       title: 'Sous lévothyroxine, test de grossesse positif',
-      tagline: 'Augmenter la dose dès le début de la grossesse, viser une TSH < 2,5, revenir à la dose antérieure après l\'accouchement.',
+      tagline: 'Augmenter la dose de 25 à 50 % dès le diagnostic de grossesse, TSH mensuelle, cible 0,5–2,5.',
       patient: { name: 'Mme Karima H.', sex: 'F', age: 31, job: 'ingénieure' },
       motif: 'Mme H., traitée depuis 3 ans pour une maladie de Hashimoto par lévothyroxine 75 µg/j (dernière TSH à 1,8 mUI/L), appelle : son test de grossesse est positif, elle est à 5 semaines d\'aménorrhée.',
       atcd: ['Maladie de Hashimoto (anti-TPO positifs) depuis 3 ans', 'Lévothyroxine 75 µg/j', 'Première grossesse'],
@@ -363,10 +364,10 @@
         { id: 'accouchement', when: (g) => g.case.pregWeek(g.pt.day) >= 40, title: 'Accouchement', text: (g) => 'J' + g.pt.day + ' : Mme H. a accouché à terme d\'un garçon en bonne santé. Elle vous appelle de la maternité : quelle dose de lévothyroxine maintenant ?', choices: null }
       ],
       keyPoints: [
-        { t: 'Dès la grossesse confirmée : augmenter la lévothyroxine de 25 à 30 % (par exemple 2 comprimés de plus par semaine, ou + 25 µg/j).', src: CPL },
-        { t: 'TSH toutes les 4 semaines jusqu\'à mi-grossesse ; cible < 2,5 mUI/L au 1er trimestre.', src: CPL },
-        { t: 'Grossesse : situation à risque d\'apports iodés insuffisants (polycopié p. 10).', src: POLY },
-        { t: 'Après l\'accouchement : retour à la dose antérieure, TSH à 6 semaines.', src: CPL }
+        { t: 'Hypothyroïdienne connue : augmenter la lévothyroxine de 25 à 50 % dès le diagnostic de grossesse, TSH mensuelle, cible 0,5–2,5 mUI/L.', src: 'item 243 · SFE p. 12', rang: '' },
+        { t: 'Au 1er trimestre, le fœtus dépend des hormones maternelles : même une hypothyroïdie fruste expose à des troubles neuro-intellectuels ; risques maternels : HTA, prééclampsie, fausse couche, hémorragie du post-partum.', src: 'item 243 · SFE p. 6', rang: 'B' },
+        { t: 'TSH physiologiquement basse au 1er trimestre (hCG) : ne pas conclure à une insuffisance thyréotrope.', src: 'item 243 · SFE p. 6', rang: '' },
+        { t: 'Après l\'accouchement : retour à la dose antérieure, TSH à 6 semaines.', src: 'complément', rang: '' }
       ],
       endAt: (g) => (g.ppDone && g.visits.length && g.pt.day - 245 >= 35 ? 'Post-partum : la patiente a retrouvé sa dose habituelle.' : null)
     },
@@ -424,10 +425,10 @@
         }
       ],
       keyPoints: [
-        { t: 'T4L basse et TSH normale ou basse : hypothyroïdie centrale ; la TSH est inadaptée (polycopié).', src: POLY },
-        { t: 'Avant la lévothyroxine, évaluer l\'axe corticotrope : l\'hydrocortisone précède la lévothyroxine en cas d\'insuffisance corticotrope.', src: CPL },
-        { t: 'Suivi sur la T4L, visée dans la moitié supérieure de la normale ; la TSH n\'est pas interprétable.', src: CPL },
-        { t: 'Bilan de l\'hypophyse : IRM, autres axes, champ visuel.', src: POLY }
+        { t: 'Insuffisance thyréotrope : T4L basse avec TSH normale ou basse, inadaptée, voire légèrement élevée (< 10–12 mUI/L, TSH inactive). Une TSH normale n\'élimine pas le diagnostic.', src: 'item 243 · SFE p. 2-3', rang: 'A' },
+        { t: 'Suivi sur la T4L (15 à 21 jours après chaque changement, à jeun avant la prise), cible entre le milieu et le tiers supérieur de la normale ; jamais sur la TSH.', src: 'item 243 · SFE p. 11-12', rang: 'A' },
+        { t: 'Causes : adénome hypophysaire, craniopharyngiome, chirurgie ou radiothérapie, apoplexie, Sheehan, hypophysite, anti-CTLA4… IRM systématique.', src: 'item 243 · SFE p. 10-11', rang: 'B' },
+        { t: 'Évaluer l\'axe corticotrope avant la lévothyroxine ; hydrocortisone d\'abord en cas d\'insuffisance corticotrope.', src: 'complément', rang: '' }
       ]
     }
   ];
