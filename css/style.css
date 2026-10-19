@@ -137,6 +137,8 @@ button { font: inherit; color: inherit; }
 .crumbs button:hover { color: var(--fg); background: var(--panel-2); }
 .crumbs button[aria-current="page"] { color: var(--fg); font-weight: 600; }
 .crumbs .sep { color: var(--faint); font-size: 13px; }
+.sim-link { margin-left: auto; color: var(--accent); font-size: 13px; font-weight: 500; text-decoration: none; white-space: nowrap; }
+.sim-link:hover { text-decoration: underline; }
 
 /* ---------- Scène ---------- */
 .stage { grid-area: stage; position: relative; min-height: 0; overflow: hidden; background: var(--bg); }

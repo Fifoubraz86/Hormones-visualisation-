@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Patient virtuel thyroïde</title>
+<meta name="description" content="Simulateur didactique : un patient virtuel consulte pour une hyperthyroïdie ou une hypothyroïdie ; l'étudiant prescrit le bilan, initie puis adapte les antithyroïdiens de synthèse ou la lévothyroxine, et chaque décision est corrigée.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Spectral:ital,wght@0,500;0,600;1,500&display=swap">
+<link rel="stylesheet" href="css/simulateur.css">
+</head>
+<body>
+<header class="sv-top">
+  <div class="sv-brand">
+    <span class="sv-name">Patient virtuel</span>
+    <span class="sv-sub">initier et adapter les traitements thyroïdiens</span>
+  </div>
+  <nav class="sv-nav">
+    <span class="sv-status" id="svStatus" hidden></span>
+    <button type="button" class="sv-link" id="svHome" hidden>← Autres patients</button>
+    <a class="sv-link" href="index.html">Atlas endocrinien</a>
+  </nav>
+</header>
+
+<main class="sv-main" id="svMain"></main>
+
+<div class="sv-tip" id="svTip" role="tooltip" hidden></div>
+
+<script src="js/simu/model.js"></script>
+<script src="js/simu/rules.js"></script>
+<script src="js/simu/cases.js"></script>
+<script src="js/simu/chart.js"></script>
+<script src="js/simu/ui.js"></script>
+</body>
+</html>

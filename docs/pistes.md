@@ -68,7 +68,7 @@ Ceux déjà animés sont listés dans `tests-dynamiques.md`. Il resterait :
 ## 6. Pédagogie
 
 - ★ **Mode « prédisez »** : avant d'animer un scénario, l'élève indique le sens de variation de chaque hormone, puis l'atlas corrige.
-- ★ **Cas cliniques guidés** : motif de consultation → examen → bilan → test dynamique → diagnostic, avec score.
+- ★ **Cas cliniques guidés** : motif de consultation → examen → bilan → test dynamique → diagnostic, avec score. ✅ Fait pour la thyroïde, avec le traitement : `simulateur.html` (voir `simulateur.md`). À étendre aux autres axes.
 - QCM par axe, fiches de révision imprimables, mode présentation pour l'enseignant.
 - ★ **Éditeur vidéo téléchargeable** (demandé) : choisir le module, le scénario, la durée, le cadrage (avec ou sans panneau), le pas à pas, la vitesse des hormones et le thème, puis télécharger un MP4 à insérer dans PowerPoint. Base existante : `tools/enregistrer-video.js`.
 - Version anglaise, accessibilité (lecteur d'écran, contrastes), fonctionnement hors ligne.

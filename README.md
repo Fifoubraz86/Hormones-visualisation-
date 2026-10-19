@@ -19,6 +19,12 @@ python3 -m http.server 8000
 
 Le site fonctionne aussi tel quel sur GitHub Pages.
 
+## Patient virtuel (simulateur thérapeutique)
+
+`simulateur.html` (lien « Patient virtuel » en haut de l'atlas) met l'étudiant face à un patient qui consulte pour une dysthyroïdie. Il interroge, examine, prescrit le bilan, pose le diagnostic, puis initie et adapte le traitement de consultation en consultation : antithyroïdien de synthèse (carbimazole, thiamazole, PTU), bêtabloquant, lévothyroxine, hydrocortisone, conseils, délai et contenu du prochain bilan. Le temps avance jusqu'au contrôle choisi ; le patient évolue selon un modèle pharmacologique simplifié (stock thyroïdien vidé en quelques semaines sous ATS, demi-vie de la T4 de 7 jours, TSH qui reste freinée après une thyrotoxicose, TRAb qui décroissent sous traitement). Chaque décision est corrigée, avec sa source, et un débriefing donne une note sur 20, la courbe réelle et les messages clés.
+
+Huit cas pour l'axe thyréotrope : maladie de Basedow typique (titration jusqu'à la fin de cure), Basedow avec orbitopathie chez un fumeur (agranulocytose puis thyroïdectomie), Basedow au 1er trimestre de grossesse, maladie de Hashimoto (avec une interaction médicamenteuse), hypothyroïdie du coronarien âgé, hypothyroïdie infraclinique, femme traitée qui débute une grossesse, hypothyroïdie centrale. Le détail des règles et des sources est dans [`docs/simulateur.md`](docs/simulateur.md). Code : `js/simu/` et `css/simulateur.css`.
+
 ## Navigation
 
 | Action | Effet |

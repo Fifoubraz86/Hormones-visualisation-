@@ -1,8 +1,8 @@
 """Assemble index.html, ses feuilles de style et ses scripts en une seule page (publication en artefact).
-Usage : python3 tools/bundle.py sortie.html — les images assets/poly/*.jpg sont publiées à côté."""
+Usage : python3 tools/bundle.py sortie.html [page.html] — page par défaut : index.html ; les images assets/poly/*.jpg sont publiées à côté."""
 import re, sys, pathlib
 root = pathlib.Path(__file__).resolve().parent.parent
-html = (root / 'index.html').read_text(encoding='utf-8')
+html = (root / (sys.argv[2] if len(sys.argv) > 2 else 'index.html')).read_text(encoding='utf-8')
 head = html[html.index('<title>'):html.index('</head>')]
 body = html[html.index('<body>') + 6:html.index('</body>')]
 head = re.sub(r'<meta name="description"[^>]*>\n?', '', head)
