@@ -87,6 +87,14 @@ Même principe que la thyroïde : on crée le patient, on prescrit librement, on
 | Réserve insulinique < 10 % sans insuline | cétose (LADA) |
 | Âge ≥ 75 ans et glycémie moyenne > 3,8 g/L | coma hyperosmolaire |
 
+**Patient déjà traité.** Section « Traitement en cours » à la création (et exemples : metformine seule, bithérapie, trithérapie orale, metformine + aGLP1 + iSGLT2, insuline basale + metformine) : l'HbA1c saisie est celle obtenue sous ce traitement, la réserve insulinique est calée en conséquence, le poids saisi est le poids actuel, et l'aGLP1 est considéré comme déjà titré.
+
+**Metformine.** Effet × 1,75 sur l'action de l'insuline à 2 g/j (≈ −1,3 point depuis 8,5 %), × 1,9 à 3 g/j (≈ −1,5) ; indépendant du poids. Case « introduction progressive » (cochée par défaut) : + 500 mg par semaine jusqu'à la dose prescrite, sans intolérance (sauf 8 % de malchance en mode patient réel). Dose pleine d'emblée : diarrhée puis arrêt par le patient à J18, signalé par un bandeau et un dessin.
+
+**Règles hygiéno-diététiques.** Mode de vie de départ : activité (min/sem), boissons sucrées (verres de 25 cL/j), grignotage, motivation (atteinte des objectifs : 30, 55 ou 80 % ; × 1,25 avec un suivi diététique ; cachée et variable en mode patient réel). Prescription : objectif d'activité, arrêt des boissons sucrées, objectif de perte de poids (%), suivi diététique. Effets (complément) : sensibilité à l'insuline + 15 % à 150 min/sem d'activité, + 20 % à 300 ; sensibilité ∝ (poids initial / poids)^4,5 ; chaque verre de soda quotidien ajoute ≈ 0,035 g/L de glycémie moyenne ; perte de poids hygiéno-diététique plafonnée à 12 %. Ordres de grandeur à 6 mois (DT2 obèse, HbA1c 8,5, sédentaire, 4 sodas/j) : −7 % de poids chez un patient motivé ≈ −0,5 point ; toutes les mesures avec suivi diététique ≈ −1,1 (motivation moyenne) à −1,8 point (forte). La carte « Marge de progression » compare la situation aux repères de l'item 253 (≥ 150 min/sem d'activité, perte de 5 à 10 % en 6 à 12 mois, 1 à 2 kg/mois) et simule l'HbA1c à 6 mois sans changement, avec la motivation du patient, et avec 100 % des objectifs tenus.
+
+**Humour noir.** Chaque événement s'accompagne d'un dessin légendé (coma hypoglycémique, toilettes de la metformine, seau de l'aGLP1, haleine de pomme de l'acidocétose, raisin sec du coma hyperosmolaire, citron de l'acidose lactique, pancréas en feu, œil injecté, cœur brisé, fantôme de l'agranulocytose, trophée si la cible est atteinte sans hypoglycémie). Décès possibles : deuxième hypoglycémie sévère en moins de 4 mois sans allègement du traitement chez un patient de 70 ans ou plus ou avec un DFG < 45 ; acidose lactique après 75 ans ou récidivante ; coma hyperosmolaire après 85 ans ou glycémie > 4,5 g/L ; thyroïde : deuxième choc septique sur agranulocytose, reprise de la lévothyroxine par un palier de plus de 25 µg après un syndrome coronarien aigu. Le décès affiche un cimetière avec épitaphe ; « Ressusciter » annule la dernière ordonnance.
+
 Examens : HbA1c, glycémie à jeun, carnet d'autosurveillance (glycémies et hypoglycémies depuis le dernier bilan), créatinine (DFG), albuminurie, peptide C, anti-GAD, cétonémie, lipase, fond d'œil. Encarts « Facteurs prédictifs de réponse » (complément) et « Référentiel (item 247) » avec les rangs de la grille.
 
 ## Fichiers
@@ -101,6 +109,7 @@ Examens : HbA1c, glycémie à jeun, carnet d'autosurveillance (glycémies et hyp
 | `js/simu/sandbox.js` | Mode thérapeutique libre. |
 | `js/simu/dt2-model.js` | Modèle du diabète de type 2. |
 | `js/simu/dt2.js` | Mode thérapeutique du diabète de type 2 (patient, ordonnance, événements, graphique, référentiel). |
+| `js/simu/toons.js` | Dessins des événements (SVG). |
 | `js/simu/adverse.js` | Événements indésirables du mode thérapeutique : coronaropathie sous lévothyroxine, effets des ATS. |
 | `js/simu/main.js` | Choix du mode (onglets). |
 

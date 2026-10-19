@@ -90,12 +90,14 @@
     if (ae.agranulo && exposed && !ae.agranulo.sepsis && d - ae.agranulo.day >= 3) {
       ae.agranulo.sepsis = true;
       M.setRx(pt, { ats: 'none', atsDose: 0 });
-      return { text: 'J' + d + ' : l\'ATS a été poursuivi malgré l\'agranulocytose : choc septique, admission en réanimation. L\'équipe arrête l\'ATS (antibiothérapie à large spectre).', tests: ['nfs'], stopAts: true };
+      if (ae.sepsisBefore) return { death: true, toon: 'death', text: 'J' + d + ' : deuxième choc septique sur agranulocytose (l\'ATS avait été repris malgré la contre-indication) ; décès en réanimation.', epitaphe: [(G.cfg.sex === 'F' ? 'Ci-gît Mme ' : 'Ci-gît M. ') + 'Basedow', 'PNN : 0,1 G/L', 'Les ATS, c\'était tous', '(agranulocytose)'], tests: ['nfs'] };
+      ae.sepsisBefore = true;
+      return { toon: 'agranulo', text: 'J' + d + ' : l\'ATS a été poursuivi malgré l\'agranulocytose : choc septique, admission en réanimation. L\'équipe arrête l\'ATS (antibiothérapie à large spectre).', tests: ['nfs'], stopAts: true };
     }
     if (ae.liver && exposed && !ae.liver.severe && d - ae.liver.day >= 14) {
       ae.liver.severe = true;
       M.setRx(pt, { ats: 'none', atsDose: 0 });
-      return { text: 'J' + d + ' : l\'ATS a été poursuivi malgré l\'hépatite : aggravation (' + (ae.liver.type === 'cyto' ? 'hépatite sévère, TP 42 %' : 'ictère franc, prurit invalidant') + '), hospitalisation en hépatologie ; l\'ATS est arrêté.', tests: ['hepat'], stopAts: true };
+      return { toon: 'hepat', text: 'J' + d + ' : l\'ATS a été poursuivi malgré l\'hépatite : aggravation (' + (ae.liver.type === 'cyto' ? 'hépatite sévère, TP 42 %' : 'ictère franc, prurit invalidant') + '), hospitalisation en hépatologie ; l\'ATS est arrêté.', tests: ['hepat'], stopAts: true };
     }
     // Effets programmés
     for (const e of ae.plan) {
@@ -105,7 +107,7 @@
       const mol = pt.rx.ats, molName = M.ATS[mol].short;
       if (e.type === 'rash') {
         ae.rash = { mol, until: null };
-        return { text: 'J' + d + ' : appel ' + (G.cfg.sex === 'F' ? 'de la patiente' : 'du patient') + ' : éruption urticarienne prurigineuse du tronc et des membres depuis deux jours, sans fièvre, sans atteinte muqueuse, sous ' + molName + '.', tests: [] };
+        return { toon: 'rash', text: 'J' + d + ' : appel ' + (G.cfg.sex === 'F' ? 'de la patiente' : 'du patient') + ' : éruption urticarienne prurigineuse du tronc et des membres depuis deux jours, sans fièvre, sans atteinte muqueuse, sous ' + molName + '.', tests: [] };
       }
       if (e.type === 'arthr') { ae.arthr = true; continue; }
       if (e.type === 'neutro') { ae.neutro = true; continue; }
@@ -113,17 +115,21 @@
         ae.agranulo = { day: d, stop: null, sepsis: false };
         ae.everAgranulo = true;
         pt.par.pnn = 0.15; pt.st.pnn = 0.3;
-        return { text: 'J' + d + ' : fièvre à 39,5 °C et angine érythémato-pultacée depuis la veille, sous ' + molName + '. NFS en urgence.', tests: ['nfs'] };
+        return { toon: 'agranulo', text: 'J' + d + ' : fièvre à 39,5 °C et angine érythémato-pultacée depuis la veille, sous ' + molName + '. NFS en urgence.', tests: ['nfs'] };
       }
       if (e.type === 'hepat') {
         const type = mol === 'ptu' ? 'cyto' : 'chol';
         ae.liver = { type, day: d, start: d - 7, stop: null, severe: false };
-        return { text: 'J' + d + ' : ' + (type === 'chol' ? 'ictère cutanéo-muqueux, prurit, urines foncées' : 'asthénie intense, nausées, douleur de l\'hypochondre droit') + ', sous ' + molName + '. Bilan hépatique en urgence.', tests: ['hepat'] };
+        return { toon: 'hepat', text: 'J' + d + ' : ' + (type === 'chol' ? 'ictère cutanéo-muqueux, prurit, urines foncées' : 'asthénie intense, nausées, douleur de l\'hypochondre droit') + ', sous ' + molName + '. Bilan hépatique en urgence.', tests: ['hepat'] };
       }
     }
     // Coronaropathie sous lévothyroxine
     const cd = ae.cardio;
-    if (cd.on && pt.log.length > 8 && d - cd.last > 21) {
+    // Après un syndrome coronarien aigu, reprise de la lévothyroxine par un palier de plus de 25 µg : récidive fatale.
+    if (cd.scaBefore && cd.scaDay != null && d - cd.scaDay <= 90 && pt.flags.lastChange >= cd.scaDay && pt.rx.lt4 > 0 && d - pt.flags.lastChange === 6 && pt.rx.lt4 - (pt.flags.prevLt4 || 0) > 25) {
+      return { death: true, toon: 'death', text: 'J' + d + ' : reprise de la lévothyroxine à ' + pt.rx.lt4 + ' µg/j quelques jours après le syndrome coronarien aigu : récidive, mort subite.', epitaphe: [(G.cfg.sex === 'F' ? 'Ci-gît Mme ' : 'Ci-gît M. ') + 'Coronaire', 'TSH en voie de normalisation', '« 100 µg d\'emblée,', 'ça ira plus vite »'] };
+    }
+    if (cd.on && pt.log.length > 8 && d - cd.last > 7) {
       const L = pt.log;
       const rise = (L[L.length - 1].t3 - L[L.length - 8].t3) / 5;
       const t3 = pt.st.T3;
@@ -131,11 +137,13 @@
       if (rise >= cd.thrS) {
         cd.last = d; cd.lastType = 'sca';
         M.setRx(pt, { lt4: 0, lt4Text: '' });
-        return { text: 'J' + d + ' : douleur thoracique de repos, prolongée : syndrome coronarien aigu, hospitalisation en cardiologie et coronarographie. L\'équipe de cardiologie suspend la lévothyroxine, à reprendre à faible dose. La lévothyroxine a démasqué la coronaropathie' + (cd.latent ? ' (non connue jusque-là)' : '') + '.', tests: ['ecg'], stopLt4: true };
+        if (cd.scaBefore) return { death: true, toon: 'death', text: 'J' + d + ' : deuxième syndrome coronarien aigu après une nouvelle remontée brutale de la lévothyroxine ; mort subite.', epitaphe: [(G.cfg.sex === 'F' ? 'Ci-gît Mme ' : 'Ci-gît M. ') + 'Coronaire', 'TSH enfin normale', '« 100 µg d\'emblée,', 'ça ira plus vite »'] };
+        cd.scaBefore = true; cd.scaDay = d;
+        return { toon: 'sca', text: 'J' + d + ' : douleur thoracique de repos, prolongée : syndrome coronarien aigu, hospitalisation en cardiologie et coronarographie. L\'équipe de cardiologie suspend la lévothyroxine, à reprendre à faible dose. La lévothyroxine a démasqué la coronaropathie' + (cd.latent ? ' (non connue jusque-là)' : '') + '.', tests: ['ecg'], stopLt4: true };
       }
       if (rise >= cd.thrA || (t3 > 1.35 && !cd.latent)) {
         cd.last = d; cd.lastType = 'angor';
-        return { text: 'J' + d + ' : ' + who + ' décrit une douleur thoracique constrictive à l\'effort, cédant au repos en quelques minutes, apparue depuis ' + (t3 > 1.35 ? 'le surdosage en lévothyroxine' : 'l\'augmentation de la lévothyroxine') + (cd.latent ? ' ; aucun antécédent coronarien connu' : '') + '.', tests: ['ecg'] };
+        return { toon: 'angor', text: 'J' + d + ' : ' + who + ' décrit une douleur thoracique constrictive à l\'effort, cédant au repos en quelques minutes, apparue depuis ' + (t3 > 1.35 ? 'le surdosage en lévothyroxine' : 'l\'augmentation de la lévothyroxine') + (cd.latent ? ' ; aucun antécédent coronarien connu' : '') + '.', tests: ['ecg'] };
       }
     }
     return null;

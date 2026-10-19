@@ -270,8 +270,8 @@
       else labs[k] = m[k];
     });
     const c = M.clinic(pt);
-    const entry = { day: pt.day, labs, qual, hr: c.hr, weight: c.weight, symptoms: extraSymptoms().concat(AE.symptoms(G), M.symptoms(pt)), rx: rxLabel(pt.rx), note, event: G.event || null };
-    G.event = null;
+    const entry = { day: pt.day, labs, qual, hr: c.hr, weight: c.weight, symptoms: extraSymptoms().concat(AE.symptoms(G), M.symptoms(pt)), rx: rxLabel(pt.rx), note, event: G.event || null, toon: G.eventToon || null, epitaphe: G.epitaphe || null };
+    G.event = null; G.eventToon = null; G.epitaphe = null;
     G.history.push(entry);
     G.visits.push({ day: pt.day, labs });
   }
@@ -302,6 +302,7 @@
     const pt = G.pt, c = G.cfg;
     const t4 = 16 * pt.st.T4;
     if (g === 'thyroidectomie') {
+      if (t4 > 30) G.eventToon = 'crise';
       if (t4 > 30) G.event = 'Thyroïdectomie réalisée en pleine hyperthyroïdie : crise aiguë thyrotoxique postopératoire (fièvre, déshydratation, tachycardie, agitation), prise en charge en réanimation. L\'euthyroïdie préalable par ATS l\'aurait évitée.';
       pt.par.r = 0; pt.par.auto = 0; pt.par.lysis = null; pt.par.hcg = null; pt.st.G = 0;
       pt.flags.surgeryDone = true; pt.flags.surgery = true; G.rai = null;
@@ -355,9 +356,11 @@
     let note = 'Bilan à ' + (d.unit === 'sem' ? d.wait + ' semaine' + (d.wait > 1 ? 's' : '') : days + ' jour' + (days > 1 ? 's' : ''));
     let tests = d.tests;
     if (interrupt) {
-      note = 'Consultation non programmée (bilan prévu annulé)';
+      note = interrupt.death ? 'Décès' : 'Consultation non programmée (bilan prévu annulé)';
+      G.eventToon = interrupt.toon || null;
+      if (interrupt.death) { G.dead = interrupt; G.epitaphe = interrupt.epitaphe; }
       G.event = (G.event ? G.event + ' ' : '') + interrupt.text;
-      tests = new Set(interrupt.tests.concat(SITUATIONS[c.sit].hyper ? ['t4'] : ['tsh']));
+      tests = new Set((interrupt.tests || []).concat(SITUATIONS[c.sit].hyper ? ['t4'] : ['tsh']));
       if (interrupt.stopAts) { d.ats = 'none'; d.atsDose = 0; }
       if (interrupt.stopLt4) { d.lt4 = 0; d.alt = false; }
     }
@@ -374,7 +377,29 @@
     const s = G.undo.pop();
     if (!s) return;
     restore(s);
+    G.dead = null;
     render();
+  }
+
+  const TOON_CAPTION = {
+    agranulo: 'Où sont passés les polynucléaires ?',
+    hepat: 'Le teint s\'est un peu jauni.',
+    rash: 'Ça gratte. Beaucoup.',
+    sca: 'Il fallait monter par paliers.',
+    angor: 'L\'escalier est devenu l\'Everest.',
+    crise: 'Opéré en pleine thyrotoxicose : la réanimation a chaud.',
+    death: 'Fin de la consultation.'
+  };
+  function deathCard() {
+    return h('div', { class: 'sv-card sv-dead' }, [
+      h('h3', null, 'Le patient est décédé'),
+      h('p', null, G.dead.text),
+      h('p', { class: 'sv-muted' }, 'Pas de panique, c\'est un simulateur. Revenez avant la dernière ordonnance et changez d\'avis.'),
+      h('div', { class: 'sv-actions' }, [
+        h('button', { type: 'button', class: 'sv-primary', onclick: undo }, '↶ Ressusciter (annuler la dernière ordonnance)'),
+        h('button', { type: 'button', class: 'sv-secondary', onclick: setup }, 'Nouveau patient')
+      ])
+    ]);
   }
 
   function flash(t) { const el = main.querySelector('.sv-alert'); if (el) { el.textContent = t; el.hidden = false; } }
@@ -386,7 +411,7 @@
     statusEl.textContent = (c.sex === 'F' ? 'Patiente' : 'Patient') + ' · ' + dayLabel(pt.day);
     main.textContent = '';
     main.className = 'sv-main sv-game sv-sandbox';
-    const left = h('aside', { class: 'sv-dossier' }, [patientCard(), rxCard()]);
+    const left = h('aside', { class: 'sv-dossier' }, [patientCard(), G.dead ? deathCard() : rxCard()]);
     const right = h('section', { class: 'sv-consult' }, [latestCard(), chartCard(), historyCard(), refCard(), revealCard()]);
     main.append(left, right);
     const box = right.querySelector('.sv-chartbox');
@@ -484,6 +509,7 @@
     return h('div', { class: 'sv-card sv-latest' }, [
       h('div', { class: 'sv-latest-head' }, [h('p', { class: 'sv-eyebrow' }, e.note || 'Bilan'), h('h1', null, dayLabel(e.day))]),
       e.event ? h('p', { class: 'sv-event' }, e.event) : null,
+      e.toon ? S.toon(e.toon, { epitaphe: e.epitaphe, titre: TOON_CAPTION[e.toon] }) : null,
       rows.length ? h('table', { class: 'sv-res sv-big' }, [
         h('thead', null, h('tr', null, [h('th', null, 'Dosage'), h('th', null, 'Résultat'), h('th', null, 'Référence')])),
         h('tbody', null, rows.map(([k, name, unit, ref]) => { const td = labCells(e.labs)[['tsh', 't4', 't3', 'trab', 'pnn'].indexOf(k)]; td.append(' ' + unit); return h('tr', null, [h('td', null, name), td, h('td', { class: 'sv-ref' }, ref)]); }))

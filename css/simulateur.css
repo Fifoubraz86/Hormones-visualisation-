@@ -256,3 +256,28 @@ select { background: var(--panel-2); border: 1px solid var(--line-2); border-rad
   .sv-res .sv-ref { white-space: normal; }
   .sv-big td, .sv-big td:nth-child(2) { font-size: 14.5px; }
 }
+
+/* Dessins d'humour noir */
+.sv-toon { margin: 0; align-self: flex-start; width: 100%; max-width: 380px; background: #eef2f7; border: 1px solid var(--line); border-radius: 12px; padding: 8px; }
+/* Les dessins gardent le même aspect dans les deux thèmes : papier clair, encre sombre. */
+.sv-toon svg { display: block; width: 100%; height: auto; }
+.sv-toon figcaption { font: italic 500 14px var(--font-display); color: #3c4658; text-align: center; padding: 4px 6px 2px; }
+.sv-toon-death { max-width: 460px; }
+.tn-o { stroke: #1d2433; stroke-width: 2; stroke-linejoin: round; }
+.tn-l { stroke: #1d2433; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.tn-w { stroke-width: 3.5; }
+.tn-k { fill: #1d2433; }
+.tn-ground { fill: #d5dce6; }
+.tn-small { font: 500 11px var(--font-body); fill: #1d2433; }
+.tn-big { font: 20px var(--font-body); fill: #ffc83a; }
+.tn-night, .tn-nightfill { fill: #1b2340; }
+.tn-rip { font: 700 15px var(--font-display); fill: #2d2f36; text-anchor: middle; }
+.tn-epi { font: 500 7.4px var(--font-body); fill: #2d2f36; text-anchor: middle; }
+.tn-cross { stroke: #c8ccd8; }
+.sv-toon-death .tn-o { stroke: #2d2f36; }
+.tn-blink { animation: tnBlink 0.8s steps(2) infinite; }
+@keyframes tnBlink { 50% { fill: #5aa0ff; } }
+@media (prefers-reduced-motion: reduce) { .tn-blink { animation: none; } }
+.sv-dead { border-color: var(--bad); }
+.sv-banner { border-left: 3px solid var(--warn); padding: 6px 10px; background: color-mix(in srgb, var(--warn) 12%, var(--panel)); border-radius: 0 8px 8px 0; font-size: 14px; font-weight: 500; }
+.sv-margin dt { font-weight: 600; color: var(--fg); }

@@ -45,7 +45,24 @@
   const ALB = { normo: { label: 'Normale', rate: 0.8 }, micro: { label: 'Microalbuminurie (30–300 mg/24 h)', rate: 2.5 }, macro: { label: 'Protéinurie (> 300 mg/24 h)', rate: 5 } };
   const RETINO = { none: 'Pas de rétinopathie', min: 'RDNP minime ou modérée', severe: 'RDNP sévère (préproliférante)', prolif: 'Rétinopathie proliférante' };
 
-  const RX0 = { met: 0, su: 0, dpp4: 0, glp: 'none', glpDose: 0, sglt2: 'none', acarb: 0, basal: 0, rapid: 0, mhd: false };
+  // Mesures hygiéno-diététiques : objectif d'activité (min/sem, 0 = inchangée), arrêt des boissons sucrées,
+  // objectif de perte de poids (%), suivi diététique. Atteinte des objectifs = motivation du patient.
+  const RX0 = { met: 0, su: 0, dpp4: 0, glp: 'none', glpDose: 0, sglt2: 'none', acarb: 0, basal: 0, rapid: 0, act: 0, sodaStop: false, wtGoal: 0, diet: false };
+  const MOTIV = { faible: 0.3, moyenne: 0.55, forte: 0.8 };
+  const SNACK = { aucun: 0, modere: 0.015, important: 0.03 };
+  // Effet de l'activité physique sur la sensibilité à l'insuline (complément) : + 15 % à 150 min/sem, + 20 % à 300.
+  const fAct = (a) => 1 + 0.15 * Math.min(1, a / 150) + 0.05 * Math.min(1, Math.max(0, a - 150) / 150);
+  // Atteinte réelle des objectifs hygiéno-diététiques (meilleure avec un suivi diététique).
+  function lifeAch(pt) { return Math.min(1, pt.par.lifeAch * (pt.rx.diet ? 1.25 : 1)); }
+  function actNow(pt) { const p = pt.par, a = pt.rx.act; return a > p.act0 ? p.act0 + (a - p.act0) * lifeAch(pt) : p.act0; }
+  function sodaNow(pt) { return pt.rx.sodaStop ? pt.par.soda0 * (1 - lifeAch(pt)) : pt.par.soda0; }
+  // Metformine : dose effectivement atteinte (introduction progressive : + 500 mg par semaine).
+  function metDose(pt) {
+    const r = pt.metRamp;
+    if (!r) return pt.rx.met;
+    const days = Math.ceil(Math.abs(r.to - r.from) / 500) * 7;
+    return r.from + (r.to - r.from) * Math.min(1, (pt.day - r.start) / Math.max(1, days));
+  }
 
   const mgOf = (IA) => (IA >= 1 ? Math.max(0.55, 0.95 - 0.3 * (IA - 1)) : 0.95 + 0.45 * Math.pow(1 / Math.max(IA, 0.02) - 1, 0.6));
   const a1cOf = (mg) => (mg * 100 + 46.7) / 28.7;
@@ -62,15 +79,15 @@
   function effects(pt, MG) {
     const p = pt.par, s = pt.st, rx = pt.rx, take = pt.take;
     const a = p.adh;
-    const met = take.met ? rx.met * a : 0, su = take.su ? rx.su * a : 0;
+    const met = take.met ? metDose(pt) * a : 0, su = take.su ? rx.su * a : 0;
     const gd = clamp((MG - 0.8) / 0.6, 0.15, 1); // effet glucodépendant des incrétines
     // Réserve insulinique faible (peptide C bas) : insulinosécréteurs et incrétines peu efficaces.
     const br = p.suBoost > 1 ? 1 : clamp(beta(pt) / 0.3, 0.3, 1);
     return {
-      eMet: 0.55 * Math.pow(Math.min(met, 3000) / 2000, 0.7) * p.metResp,
+      eMet: 0.75 * Math.pow(Math.min(met, 3000) / 2000, 0.7) * p.metResp,
       eSu: 0.7 * Math.pow(Math.min(su, 120) / 120, 0.6) * (p.suBoost || 1) * br,
       eDpp: (rx.dpp4 > 0 ? 0.28 * Math.min(1, rx.dpp4 * a / 100) * p.incr : 0) * gd * br,
-      eGlp: (take.glp ? 0.95 * glpFrac(rx) * a * p.incr * p.glpResp : 0) * gd * br,
+      eGlp: (take.glp ? 0.7 * glpFrac(rx) * a * p.incr * p.glpResp : 0) * gd * br,
       sglt: rx.sglt2 !== 'none' ? (rx.sglt2 === 'empa25' ? 0.27 : 0.25) * clamp((s.dfg - 25) / 45, 0, 1) * a : 0,
       acarb: rx.acarb > 0 ? 0.12 * Math.min(1, rx.acarb / 300) * a : 0,
       iex: (rx.basal + rx.rapid) * a / (0.5 * pt.par.weight0)
@@ -83,13 +100,14 @@
     const p = pt.par, s = pt.st;
     if (p.gck) return 1.3 - 0.05 * Math.min(1, effects(pt, MG).iex * 3);
     const e = effects(pt, MG);
-    const si = p.Si0 * Math.pow(p.weight0 / s.W, 2.5) * (pt.rx.mhd && p.adhLife > 0.5 ? 1.06 : 1);
+    const si = p.Si0 * Math.pow(p.weight0 / s.W, 4.5) * fAct(actNow(pt)) / fAct(p.act0);
     const gtox = 1 / (1 + 0.18 * Math.max(0, MG - 1.8));
     const Bf = beta(pt) * gtox * (1 + e.eSu + e.eDpp + e.eGlp);
     const IA = (Bf + e.iex) * si * (1 + e.eMet);
     let m = mgOf(IA);
     if (m > 1) m = 1 + (m - 1) * (1 - e.sglt) * (1 - e.acarb);
-    return m;
+    // Boissons sucrées : charge glucidique directe (≈ 0,035 g/L de glycémie moyenne par verre quotidien, complément).
+    return m + 0.035 * sodaNow(pt);
   }
 
   function create(c) {
@@ -103,13 +121,15 @@
       adh: c.adh === 'bonne' ? 1 : c.adh === 'moyenne' ? 0.75 : real ? rnd(0.6, 1) : 1,
       adhLife: real ? rnd(0.2, 1) : 0.6, giSens: real ? rnd(0, 1) : 0.5,
       albRate: ALB[c.alb].rate, retino: c.retino, hfail: c.hfail, cvd: c.cvd, panc: c.panc, mtc: c.mtc,
-      mycoHist: c.myco, irregular: c.irregular, lowcarb: c.lowcarb, sbp0: c.sbp
+      mycoHist: c.myco, irregular: c.irregular, lowcarb: c.lowcarb, sbp0: c.sbp,
+      act0: c.act0 || 0, soda0: c.soda0 || 0, snack0: c.snack0 || 'aucun',
+      lifeAch: real ? clamp(MOTIV[c.motiv || 'moyenne'] + rnd(-0.25, 0.2), 0.05, 1) : MOTIV[c.motiv || 'moyenne']
     };
     par.Si0 = prof.bmiDep ? prof.si * clamp(Math.pow(25 / bmi, 0.9), 0.35, 1.15) : prof.si;
     // À HbA1c égale, un diabète plus ancien a moins de réserve insulinique (complément).
     if (!prof.gck) par.Si0 *= 1 + 0.025 * Math.min(c.duration || 0, 20);
     const st = { MG: 1, A: c.a1c, W: c.weight, dfg: c.dfg, sbp: c.sbp, hypo: 0, hypoSev: 0, hypoAcc: 0, sevAcc: 0 };
-    const pt = { par, st, day: 0, rx: Object.assign({}, RX0), take: { met: true, su: true, glp: true }, log: [], flags: {} };
+    const pt = { par, st, day: 0, rx: Object.assign({}, RX0, c.rx0 || {}), take: { met: true, su: true, glp: true }, log: [], flags: {}, metRamp: null };
     // Réserve insulinique calée sur l'HbA1c initiale, sans traitement.
     if (par.gck) par.B0 = 0.9;
     else {
@@ -124,6 +144,8 @@
     }
     let m = 1.5; for (let k = 0; k < 60; k++) m = targetMG(pt, m);
     st.MG = m; st.A = a1cOf(m);
+    // Traitement déjà en cours : le poids saisi est le poids actuel, sous ce traitement.
+    if (c.rx0) { const wt = weightTarget(pt); par.weight0 = c.weight * c.weight / wt; }
     record(pt);
     return pt;
   }
@@ -131,7 +153,9 @@
   function weightTarget(pt) {
     const p = pt.par, s = pt.st, rx = pt.rx, e = effects(pt, s.MG);
     let d = 0;
-    if (rx.mhd) d -= 0.05 * p.adhLife;
+    const ach = lifeAch(pt);
+    let life = (rx.wtGoal / 100) * ach + SNACK[p.snack0] * (rx.diet ? ach : 0) + (rx.sodaStop ? 0.006 * p.soda0 * ach : 0) + (rx.act > p.act0 ? 0.01 * Math.min(1, (actNow(pt) - p.act0) / 150) : 0);
+    d -= Math.min(life, 0.12); // perte de poids hygiéno-diététique plafonnée à 12 % (complément : Look AHEAD ≈ 9 % à 1 an)
     if (rx.met && pt.take.met) d -= 0.01;
     if (rx.su && pt.take.su) d += 0.025 * Math.min(1, rx.su / 120);
     d += 0.04 * Math.min(1, e.iex);
@@ -191,5 +215,5 @@
     };
   }
 
-  S.dt2 = { PROFILES, ETHNIC, GLP1, SGLT2, ALB, RETINO, RX0, create, advance, measure, effects, glpFrac, beta, a1cOf, clamp };
+  S.dt2 = { PROFILES, ETHNIC, GLP1, SGLT2, ALB, RETINO, RX0, MOTIV, SNACK, metDose, lifeAch, actNow, sodaNow, create, advance, measure, effects, glpFrac, beta, a1cOf, clamp };
 })();
