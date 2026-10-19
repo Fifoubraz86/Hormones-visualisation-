@@ -39,7 +39,7 @@ p { margin: 0; }
 
 /* ---------- Barre du haut ---------- */
 .sv-top {
-  position: sticky; top: 0; z-index: 5;
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
   display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 6px 18px;
   padding: 12px max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px));
   background: var(--bg-2); border-bottom: 1px solid var(--line);

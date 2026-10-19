@@ -260,6 +260,7 @@
       h('div', { class: 'sv-radios', role: 'radiogroup' }, dx.options.map((o) => h('label', { class: 'sv-radio' + (!active && o.id === dx.correct ? ' right' : '') + (!active && v.dx === o.id && o.id !== dx.correct ? ' wrong' : '') }, [
         h('input', { type: 'radio', name: 'dx', value: o.id, checked: v.dx === o.id, disabled: !active, onchange: () => { v.dx = o.id; } }), ' ' + o.label
       ]))),
+      active ? h('p', { class: 'sv-alert', hidden: true }) : null,
       active ? h('div', { class: 'sv-actions' }, h('button', { type: 'button', class: 'sv-primary', onclick: () => {
         if (!v.dx) { alertMsg('Choisissez un diagnostic.'); return; }
         const ok = v.dx === dx.correct;
@@ -269,7 +270,7 @@
     ], { active });
   }
 
-  function alertMsg(t) { const el = main.querySelector('.sv-alert'); if (el) { el.textContent = t; el.hidden = false; } else window.alert(t); }
+  function alertMsg(t) { const el = main.querySelector('.sv-step.active .sv-alert'); if (el) { el.textContent = t; el.hidden = false; } }
 
   /* ---------- Suivi ---------- */
   function followSteps(v) {
@@ -482,7 +483,14 @@
     ];
   }
 
-  homeBtn.addEventListener('click', () => { if (!g || g.ended || window.confirm('Quitter ce patient ? La partie en cours sera perdue.')) home(); });
+  // Quitter une partie en cours : second clic pour confirmer (les boîtes de dialogue du navigateur peuvent être bloquées).
+  let quitArmed = 0;
+  homeBtn.addEventListener('click', () => {
+    if (!g || g.ended || Date.now() - quitArmed < 4000) { quitArmed = 0; homeBtn.textContent = '← Autres patients'; home(); return; }
+    quitArmed = Date.now();
+    homeBtn.textContent = 'Partie perdue : cliquez encore pour quitter';
+    setTimeout(() => { if (quitArmed && Date.now() - quitArmed >= 4000) { quitArmed = 0; homeBtn.textContent = '← Autres patients'; } }, 4100);
+  });
   let rt = 0;
   window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { const box = document.querySelector('.sv-chartbox'); if (box && g) S.chart.render(box, g, { truth: !!g.ended }); }, 150); });
   home();
