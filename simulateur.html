@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Patient virtuel thyroïde</title>
-<meta name="description" content="Simulateur thérapeutique : on crée un patient (hypothyroïdie, thyroïdectomie, maladie de Basedow, hypothyroïdie centrale), on prescrit librement lévothyroxine ou antithyroïdiens, et le modèle donne la TSH et la T4L à la date du bilan choisi.">
+<title>Patient virtuel</title>
+<meta name="description" content="Simulateur thérapeutique : on crée un patient (thyroïde ou diabète de type 2), on prescrit librement, et le modèle donne le bilan à la date choisie.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Spectral:ital,wght@0,500;0,600;1,500&display=swap">
@@ -14,12 +14,13 @@
 <header class="sv-top">
   <div class="sv-brand">
     <span class="sv-name">Patient virtuel</span>
-    <span class="sv-sub">initier et adapter les traitements thyroïdiens</span>
+    <span class="sv-sub">initier et adapter les traitements</span>
   </div>
   <nav class="sv-nav">
     <div class="sv-tabs" role="tablist" aria-label="Mode">
-      <button type="button" class="sv-tab" id="svTabSand" role="tab">Mode thérapeutique</button>
-      <button type="button" class="sv-tab" id="svTabCases" role="tab">Cas commentés</button>
+      <button type="button" class="sv-tab" id="svTabSand" role="tab">Thyroïde</button>
+      <button type="button" class="sv-tab" id="svTabDt2" role="tab">Diabète de type 2</button>
+      <button type="button" class="sv-tab" id="svTabCases" role="tab">Cas commentés (thyroïde)</button>
     </div>
     <span class="sv-status" id="svStatus" hidden></span>
     <button type="button" class="sv-link" id="svHome" hidden>← Autres patients</button>
@@ -38,6 +39,8 @@
 <script src="js/simu/ui.js"></script>
 <script src="js/simu/adverse.js"></script>
 <script src="js/simu/sandbox.js"></script>
+<script src="js/simu/dt2-model.js"></script>
+<script src="js/simu/dt2.js"></script>
 <script src="js/simu/main.js"></script>
 </body>
 </html>

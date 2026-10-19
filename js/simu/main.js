@@ -1,16 +1,13 @@
-/* Choix du mode : thérapeutique libre (par défaut) ou cas commentés (#cas). */
+/* Choix du mode : thyroïde (par défaut), diabète de type 2 (#dt2) ou cas commentés de thyroïde (#cas). */
 (function () {
   'use strict';
   const S = window.HV.simu;
-  const tabS = document.getElementById('svTabSand');
-  const tabC = document.getElementById('svTabCases');
+  const tabs = { sand: document.getElementById('svTabSand'), dt2: document.getElementById('svTabDt2'), cases: document.getElementById('svTabCases') };
   function show(mode) {
-    tabS.setAttribute('aria-selected', String(mode === 'sand'));
-    tabC.setAttribute('aria-selected', String(mode === 'cases'));
+    for (const k in tabs) tabs[k].setAttribute('aria-selected', String(k === mode));
     document.getElementById('svHome').hidden = true;
-    if (mode === 'cases') S.casesUI.home(); else S.sandbox.setup();
+    if (mode === 'cases') S.casesUI.home(); else if (mode === 'dt2') S.dt2ui.setup(); else S.sandbox.setup();
   }
-  tabS.addEventListener('click', () => show('sand'));
-  tabC.addEventListener('click', () => show('cases'));
-  show(location.hash === '#cas' ? 'cases' : 'sand');
+  for (const k in tabs) tabs[k].addEventListener('click', () => show(k));
+  show(location.hash === '#cas' ? 'cases' : location.hash === '#dt2' ? 'dt2' : 'sand');
 })();

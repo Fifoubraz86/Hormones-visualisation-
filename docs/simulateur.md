@@ -1,6 +1,6 @@
 # Patient virtuel : règles et sources
 
-Le simulateur a deux modes : thérapeutique libre (par défaut) et cas commentés.
+Le simulateur a trois onglets : thyroïde (mode thérapeutique libre, par défaut), diabète de type 2 (mode thérapeutique libre) et cas commentés de thyroïde.
 
 ## Sources
 
@@ -65,6 +65,30 @@ Surdosage (T3 > 1,35 fois la normale) chez un coronarien connu : angor. Sans cor
 
 La thyrotoxicose elle-même abaisse un peu les polynucléaires et élève les transaminases (item 242, SFE p. 5-6) : d'où l'intérêt de la NFS et du bilan hépatique de référence. Nouveaux examens : bilan hépatique, ECG.
 
+## Diabète de type 2 (`js/simu/dt2-model.js`, `js/simu/dt2.js`)
+
+Même principe que la thyroïde : on crée le patient, on prescrit librement, on choisit la date du bilan ; aucune correction. Onglet « Diabète de type 2 » ou `simulateur.html#dt2`.
+
+**Modèle.** Action de l'insuline IA = (réserve insulinique B × effets des sulfamides et des incrétines + insuline injectée) × sensibilité Si × effet de la metformine ; glycémie moyenne = 0,95 + 0,45 × (1/IA − 1)^0,6 g/L ; iSGLT2 et acarbose retirent une part de l'excès de glucose (iSGLT2 proportionnellement au DFG) ; HbA1c par la formule ADAG, constante de temps 40 jours. B est calée sur l'HbA1c initiale et décline chaque année (échec secondaire) ; Si dépend du profil, de l'IMC et du poids (perte de poids = meilleure sensibilité) ; une hyperglycémie forte freine la sécrétion (glucotoxicité réversible). Ordres de grandeur à partir d'une HbA1c de 8,5 % chez un DT2 obèse : metformine 2 g/j ≈ −1 point, gliclazide LM 120 mg ≈ −1,2, sitagliptine en association ≈ −0,5, sémaglutide 1 mg ≈ −1,3 et −7 kg, dapagliflozine ≈ −0,9 (−0,3 à DFG 38), insuline basale ≈ 0,4 U/kg pour atteindre la cible.
+
+**Facteurs prédictifs de réponse saisis à la création** (complément, littérature) : profil (DT2 insulinorésistant, insulinopénique, du sujet âgé, LADA, MODY HNF1A, MODY GCK), IMC, HbA1c initiale, ancienneté du diabète (moins de réserve insulinique à HbA1c égale), DFG et albuminurie, origine (Asie de l'Est : incrétines × 1,4), observance, rétinopathie, insuffisance cardiaque, maladie cardiovasculaire, antécédent de pancréatite ou de CMT familial, mycoses récidivantes, repas irréguliers, régime cétogène. Patient réel : réponses individuelles cachées (metformine, aGLP1, perte de poids, sensibilité digestive, observance, déclin β).
+
+**Événements** (seuils et délais : complément ; principes : item 247, LiSA p. 7-8, 10-12) :
+
+| Situation | Conséquence simulée |
+| --- | --- |
+| Sulfamide ou insuline avec glycémie basse ; âge ≥ 75 ans, DFG < 45, repas irréguliers | hypoglycémies notées au carnet ; hypoglycémie sévère (consultation non programmée ; glucagon contre-indiqué sous sulfamide) |
+| Metformine augmentée trop vite (ex. 2 g d'emblée) | diarrhée, puis arrêt par le patient à J+18 si la dose n'est pas réduite |
+| Metformine avec DFG < 30 pendant plus d'un mois | acidose lactique, réanimation |
+| aGLP1 : palier sauté ou montée plus rapide que 4 semaines (1 semaine pour le liraglutide) | nausées ; deux paliers d'avance : vomissements, insuffisance rénale fonctionnelle, arrêt de l'injection |
+| iSGLT2 | baisse initiale du DFG de 3 mL/min ; mycose génitale (antécédent) ; acidocétose euglycémique si insulinopénie (réserve < 20 %, LADA) ou régime cétogène, relais par insuline basale |
+| Incrétine et antécédent de pancréatite | pancréatite aiguë (lipase 12 N) |
+| Rétinopathie sévère ou proliférante et HbA1c baissant de ≥ 1,5 point en moins de 3 mois | hémorragie intravitréenne |
+| Réserve insulinique < 10 % sans insuline | cétose (LADA) |
+| Âge ≥ 75 ans et glycémie moyenne > 3,8 g/L | coma hyperosmolaire |
+
+Examens : HbA1c, glycémie à jeun, carnet d'autosurveillance (glycémies et hypoglycémies depuis le dernier bilan), créatinine (DFG), albuminurie, peptide C, anti-GAD, cétonémie, lipase, fond d'œil. Encarts « Facteurs prédictifs de réponse » (complément) et « Référentiel (item 247) » avec les rangs de la grille.
+
 ## Fichiers
 
 | Fichier | Rôle |
@@ -75,6 +99,8 @@ La thyrotoxicose elle-même abaisse un peu les polynucléaires et élève les tr
 | `js/simu/chart.js` | Petits multiples : T4L, TSH (log), ATS, lévothyroxine. Courbe réelle révélée au débriefing. |
 | `js/simu/ui.js` | Cas commentés : déroulé des consultations et débriefing. |
 | `js/simu/sandbox.js` | Mode thérapeutique libre. |
+| `js/simu/dt2-model.js` | Modèle du diabète de type 2. |
+| `js/simu/dt2.js` | Mode thérapeutique du diabète de type 2 (patient, ordonnance, événements, graphique, référentiel). |
 | `js/simu/adverse.js` | Événements indésirables du mode thérapeutique : coronaropathie sous lévothyroxine, effets des ATS. |
 | `js/simu/main.js` | Choix du mode (onglets). |
 
