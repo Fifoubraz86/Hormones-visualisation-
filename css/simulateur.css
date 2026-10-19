@@ -255,6 +255,7 @@ select { background: var(--panel-2); border: 1px solid var(--line-2); border-rad
 @media (max-width: 520px) {
   .sv-res .sv-ref { white-space: normal; }
   .sv-big td, .sv-big td:nth-child(2) { font-size: 14.5px; }
+  .sv-big { table-layout: fixed; } .sv-big td, .sv-big th { overflow-wrap: anywhere; padding-left: 4px; padding-right: 4px; }
 }
 
 /* Dessins d'humour noir */
@@ -281,3 +282,11 @@ select { background: var(--panel-2); border: 1px solid var(--line-2); border-rad
 .sv-dead { border-color: var(--bad); }
 .sv-banner { border-left: 3px solid var(--warn); padding: 6px 10px; background: color-mix(in srgb, var(--warn) 12%, var(--panel)); border-radius: 0 8px 8px 0; font-size: 14px; font-weight: 500; }
 .sv-margin dt { font-weight: 600; color: var(--fg); }
+
+/* Référentiel d'effets (DT2) */
+.sv-reftab { font-size: 13px; }
+.sv-reftab td:nth-child(2) { font-family: inherit; font-size: 13px; }
+.sv-reftab td.sv-mv { font-family: var(--font-data); white-space: nowrap; text-align: right; }
+.sv-reftab td.sv-mv.hi { color: var(--bad); font-weight: 600; }
+.sv-reftab a.sv-src { color: inherit; text-decoration: underline dotted; }
+@media (max-width: 520px) { .sv-reftab td:first-child { min-width: 8em; } }

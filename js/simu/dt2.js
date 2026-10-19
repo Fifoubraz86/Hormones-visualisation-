@@ -415,7 +415,7 @@
     main.textContent = '';
     main.className = 'sv-main sv-game sv-sandbox';
     const left = h('aside', { class: 'sv-dossier' }, [patientCard(), G.dead ? deathCard() : rxCard()]);
-    const right = h('section', { class: 'sv-consult' }, [latestCard(), chartCard(), marginCard(), historyCard(), factorsCard(), refCard(), revealCard()]);
+    const right = h('section', { class: 'sv-consult' }, [latestCard(), chartCard(), marginCard(), historyCard(), factorsCard(), refCard(), effectsCard(), revealCard()]);
     main.append(left, right);
     const box = right.querySelector('.sv-chartbox');
     if (box) requestAnimationFrame(() => chart(box));
@@ -555,7 +555,7 @@
     const drugs = [['met', 'Metformine', (p) => p.met > 0], ['su', 'Sulfamide', (p) => p.su > 0], ['glp', 'aGLP1', (p) => p.glp > 0], ['ins', 'Insuline', (p) => p.ins > 0]].filter(([, , f]) => log.some(f));
     const lanes = [
       { k: 'a1c', t: 'HbA1c (%)', lo: 4, hi: 7, min: 5, max: Math.max(10, ...log.map((p) => p.a1c)) + 0.5, band: [4, 7], color: 'var(--t3)', truth: (p) => p.a1c },
-      { k: 'fpg', t: 'Glycémie à jeun (g/L)', min: 0.4, max: Math.max(2.5, ...log.map((p) => p.mg)) + 0.2, band: [0.7, 1.1], color: 'var(--t4)', truth: (p) => p.mg * 0.9 },
+      { k: 'fpg', t: 'Glycémie à jeun (g/L)', min: 0.4, max: Math.max(2.5, ...log.map((p) => p.mg)) + 0.2, band: [0.7, 1.1], color: 'var(--t4)', truth: (p) => p.fpg },
       { k: 'w', t: 'Poids (kg)', min: Math.min(...log.map((p) => p.w)) - 3, max: Math.max(...log.map((p) => p.w)) + 3, color: 'var(--tsh)', truth: (p) => p.w, all: true }
     ];
     const LH = 78, GAP = 30, top0 = 8;
@@ -640,6 +640,34 @@
       { t: 'Obésité : perte progressive de 5 à 10 % du poids sur 6 à 12 mois ; pas de régime restrictif standard ; activité physique ≥ 2 h 30/semaine.', src: 'item 253 · LiSA p. 5-6 ; SFE p. 16-19', rang: 'A' }
     ];
     return h('details', { class: 'sv-card sv-det' }, [h('summary', null, 'Référentiel (item 247)'), h('ul', { class: 'sv-keys sv-refs' }, R.map((k) => h('li', null, [rangBadge(k.rang), ' ' + k.t, h('span', { class: 'sv-src' }, ' · ' + k.src)]))), h('p', { class: 'sv-note' }, 'Fiche LiSA de l\'item 247 (le chapitre SFE correspondant n\'était pas disponible dans le dossier) ; rangs de la grille d\'objectifs.')]);
+  }
+
+  // Référentiel d'effets publiés, rejoués à la demande par le modèle (js/simu/dt2-ref.js).
+  function effectsCard() {
+    const REF = S.dt2ref || [];
+    const unit = { dW: ' kg', slope: ' %/pt', abs: ' %' };
+    const fmtV = (t, v) => (v > 0 && t.metric !== 'abs' ? '+' : '') + fmt(v, 2) + (unit[t.metric] || ' %');
+    const cells = [];
+    const rows = REF.map((r) => {
+      const c = h('td', { class: 'sv-mv' }, r.calib ? '…' : '—');
+      if (r.calib) cells.push([r, c]);
+      return h('tr', null, [
+        h('td', null, [h('b', null, r.cls), ' · ' + r.situation]),
+        h('td', null, [r.effet + ' ', h('a', { href: r.url, target: '_blank', rel: 'noopener', class: 'sv-src' }, r.source), r.verif === 'secondaire' ? h('span', { class: 'sv-src' }, ' (chiffre de seconde main)') : null]),
+        c
+      ]);
+    });
+    let done = false;
+    const det = h('details', { class: 'sv-card sv-det', ontoggle: () => {
+      if (!det.open || done) return;
+      done = true;
+      cells.forEach(([r, c]) => { const v = D.replay(r.calib).v, ok = Math.abs(v - r.calib.target) <= r.calib.tol; c.textContent = fmtV(r.calib, v); c.title = 'repère ' + fmtV(r.calib, r.calib.target) + ' ± ' + r.calib.tol; c.className = 'sv-mv' + (ok ? '' : ' hi'); });
+    } }, [
+      h('summary', null, 'Référentiel d\'effets (littérature)'),
+      h('p', { class: 'sv-note' }, 'Effets publiés de chaque traitement et de chaque situation, et ce que le modèle produit quand il rejoue l\'essai (patient théorique, observance bonne, différence avec un bras témoin sans changement sauf mention). Ces repères ont servi à caler le modèle (node tools/calib-dt2.js).'),
+      h('div', { class: 'sv-scroll' }, h('table', { class: 'sv-res sv-reftab' }, [h('thead', null, h('tr', null, [h('th', null, 'Traitement · situation'), h('th', null, 'Effet publié'), h('th', null, 'Modèle')])), h('tbody', null, rows)]))
+    ]);
+    return det;
   }
 
   function revealCard() {

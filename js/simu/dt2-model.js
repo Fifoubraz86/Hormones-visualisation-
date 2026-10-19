@@ -5,7 +5,7 @@
  * + insuline injectée) × sensibilité Si × effet de la metformine. Normale : IA = 1, glycémie moyenne
  * ≈ 0,95 g/L. Glycémie moyenne d'équilibre = 0,95 + 0,45 × (1/IA − 1)^0,6 ; les iSGLT2 retirent une
  * part de l'excès de glucose proportionnelle au DFG ; l'HbA1c suit la glycémie moyenne (formule ADAG)
- * avec une constante de temps d'environ 30 jours : elle ne se juge qu'à 3 mois.
+ * avec une constante de temps d'environ 40 jours : elle ne se juge qu'à 3 mois.
  *
  * Facteurs prédictifs de réponse modélisés (complément, d'après la littérature) :
  * - HbA1c initiale : la baisse absolue est d'autant plus grande que l'HbA1c de départ est haute ;
@@ -25,21 +25,42 @@
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const rnd = (a, b) => a + Math.random() * (b - a);
 
+  // Paramètres calés sur le référentiel js/simu/dt2-ref.js (identifiants entre crochets) ; vérification :
+  // node tools/calib-dt2.js.
+  const P = {
+    met: 0.5,       // effet maximal de la metformine à 2 g [met-mono, met-500, met-2000]
+    metIns: 1.0,    // atténuation de la metformine sous insuline titrée [met-ins]
+    metCo: 0.4,     // effets moins qu'additifs en association orale [met-addon]
+    su: 0.85,       // effet des sulfamides, quasi plateau dès la dose faible [su-mono, su-dose]
+    suExp: 0.15,
+    dpp: 0.31,      // [dpp4]
+    sglt25: 0.19, sglt10: 0.14, // [empa25-g2, empa10-g2] ; atténuation rénale [empa25-g3]
+    acarb: 0.2,     // [acarb]
+    insK: 1.2,      // U/kg/j d'insuline injectée équivalant à la sécrétion normale [basal-t2t]
+    wExp: 1.5,        // sensibilité à l'insuline ∝ (poids initial / poids)^wExp [lookahead]
+    wlB: 14, wlDur: 6, // récupération de la fonction β après perte de poids si diabète récent [direct]
+    coLife: 0.6,
+    gtox: 0.4,      // glucotoxicité : levée d'autant plus marquée que l'HbA1c initiale est haute [base-a1c]
+    glpW: 0.035     // perte de poids sous aGLP1 à dose pleine (fraction du poids) [sema-1-w]
+  };
+
   const PROFILES = {
     sird: { label: 'DT2 insulinorésistant (obésité abdominale)', si: 0.55, rate: 0.03, bmiDep: true },
     sidd: { label: 'DT2 insulinopénique (sujet mince, HbA1c élevée)', si: 0.85, rate: 0.08, bmiDep: true },
     mard: { label: 'DT2 modéré du sujet âgé', si: 0.75, rate: 0.02, bmiDep: true },
     lada: { label: 'LADA (diabète auto-immun lent, anti-GAD positifs)', si: 0.9, rate: 0.5, gad: true },
-    hnf1a: { label: 'MODY 3 (HNF1A)', si: 0.95, rate: 0.02, suBoost: 5 },
+    hnf1a: { label: 'MODY 3 (HNF1A)', si: 0.95, rate: 0.02, suBoost: 2.5 },
     gck: { label: 'MODY 2 (glucokinase)', si: 1, rate: 0, gck: true }
   };
-  const ETHNIC = { eur: { label: 'Europe', incr: 1 }, asie: { label: 'Asie de l\'Est', incr: 1.4 }, afr: { label: 'Afrique subsaharienne', incr: 1 }, magh: { label: 'Maghreb', incr: 1 } };
+  const ETHNIC = { eur: { label: 'Europe', incr: 1 }, asie: { label: 'Asie de l\'Est', incr: 1.8 }, afr: { label: 'Afrique subsaharienne', incr: 1 }, magh: { label: 'Maghreb', incr: 1 } };
   // aGLP1 : fraction de l'effet maximal par palier (complément).
   const GLP1 = {
     none: { name: 'Aucun', doses: [] },
-    sema: { name: 'Sémaglutide (Ozempic®), hebdomadaire', unit: 'mg/sem', doses: [0.25, 0.5, 1, 2], frac: [0.15, 0.5, 0.85, 1], step: 28 },
-    dula: { name: 'Dulaglutide (Trulicity®), hebdomadaire', unit: 'mg/sem', doses: [0.75, 1.5, 3, 4.5], frac: [0.45, 0.65, 0.8, 0.9], step: 28 },
-    lira: { name: 'Liraglutide (Victoza®), quotidien', unit: 'mg/j', doses: [0.6, 1.2, 1.8], frac: [0.25, 0.6, 0.75], step: 7 }
+    // SUSTAIN 1 : 0,5 mg ≈ 90 % de l'effet de 1 mg [sema-05] ; dulaglutide 4,5 mg ≈ sémaglutide 1 mg
+    // (comparaison indirecte), 0,75 mg ≈ 1,5 mg (AWARD-3) ; LEAD-3 : 1,2 mg ≈ 75 % de 1,8 mg [lira-12].
+    sema: { name: 'Sémaglutide (Ozempic®), hebdomadaire', unit: 'mg/sem', doses: [0.25, 0.5, 1, 2], frac: [0.2, 0.8, 0.9, 1], step: 28, k: 1 },
+    dula: { name: 'Dulaglutide (Trulicity®), hebdomadaire', unit: 'mg/sem', doses: [0.75, 1.5, 3, 4.5], frac: [0.65, 0.77, 0.82, 0.88], step: 28, k: 1 },
+    lira: { name: 'Liraglutide (Victoza®), quotidien', unit: 'mg/j', doses: [0.6, 1.2, 1.8], frac: [0.3, 0.6, 0.8], step: 7, k: 0.62 }
   };
   const SGLT2 = { none: 'Aucun', dapa10: 'Dapagliflozine 10 mg', empa10: 'Empagliflozine 10 mg', empa25: 'Empagliflozine 25 mg' };
   const ALB = { normo: { label: 'Normale', rate: 0.8 }, micro: { label: 'Microalbuminurie (30–300 mg/24 h)', rate: 2.5 }, macro: { label: 'Protéinurie (> 300 mg/24 h)', rate: 5 } };
@@ -50,8 +71,9 @@
   const RX0 = { met: 0, su: 0, dpp4: 0, glp: 'none', glpDose: 0, sglt2: 'none', acarb: 0, basal: 0, rapid: 0, act: 0, sodaStop: false, wtGoal: 0, diet: false };
   const MOTIV = { faible: 0.3, moyenne: 0.55, forte: 0.8 };
   const SNACK = { aucun: 0, modere: 0.015, important: 0.03 };
-  // Effet de l'activité physique sur la sensibilité à l'insuline (complément) : + 15 % à 150 min/sem, + 20 % à 300.
-  const fAct = (a) => 1 + 0.15 * Math.min(1, a / 150) + 0.05 * Math.min(1, Math.max(0, a - 150) / 150);
+  // Effet de l'activité physique sur la sensibilité à l'insuline : effet seuil vers 150 min/sem
+  // (Umpierre 2011 : − 0,89 % au-delà, − 0,36 % en deçà) [ex-150, ex-90].
+  const fAct = (a) => 1 + 0.3 * Math.pow(Math.min(1, a / 150), 1.5) + 0.08 * Math.min(1, Math.max(0, a - 150) / 150);
   // Atteinte réelle des objectifs hygiéno-diététiques (meilleure avec un suivi diététique).
   function lifeAch(pt) { return Math.min(1, pt.par.lifeAch * (pt.rx.diet ? 1.25 : 1)); }
   function actNow(pt) { const p = pt.par, a = pt.rx.act; return a > p.act0 ? p.act0 + (a - p.act0) * lifeAch(pt) : p.act0; }
@@ -72,7 +94,7 @@
     if (!G || !G.doses.length) return 0;
     const i = G.doses.indexOf(rx.glpDose);
     const f = i >= 0 ? G.frac[i] : 0;
-    return f * (rx.glp === 'sema' ? 1 : rx.glp === 'dula' ? 0.85 : 0.8);
+    return f * G.k;
   }
 
   // Effets des traitements à un instant donné (doses effectivement prises).
@@ -82,26 +104,37 @@
     const met = take.met ? metDose(pt) * a : 0, su = take.su ? rx.su * a : 0;
     const gd = clamp((MG - 0.8) / 0.6, 0.15, 1); // effet glucodépendant des incrétines
     // Réserve insulinique faible (peptide C bas) : insulinosécréteurs et incrétines peu efficaces.
-    const br = p.suBoost > 1 ? 1 : clamp(beta(pt) / 0.3, 0.3, 1);
+    const br = p.suBoost > 1 ? 1 : clamp(beta(pt) / 0.15, 0.5, 1);
+    const iex = (rx.basal + rx.rapid) * a / (P.insK * pt.par.weight0);
+    const eSu = su > 0 ? P.su * Math.pow(Math.min(su, 120) / 120, P.suExp) * (p.suBoost || 1) * br : 0;
+    const eDpp = (rx.dpp4 > 0 ? P.dpp * Math.min(1, rx.dpp4 * a / 100) * p.incr : 0) * gd * br;
+    const eGlp = (take.glp ? 0.7 * glpFrac(rx) * a * p.incr * p.glpResp : 0) * gd * br;
     return {
-      eMet: 0.75 * Math.pow(Math.min(met, 3000) / 2000, 0.7) * p.metResp,
-      eSu: 0.7 * Math.pow(Math.min(su, 120) / 120, 0.6) * (p.suBoost || 1) * br,
-      eDpp: (rx.dpp4 > 0 ? 0.28 * Math.min(1, rx.dpp4 * a / 100) * p.incr : 0) * gd * br,
-      eGlp: (take.glp ? 0.7 * glpFrac(rx) * a * p.incr * p.glpResp : 0) * gd * br,
-      sglt: rx.sglt2 !== 'none' ? (rx.sglt2 === 'empa25' ? 0.27 : 0.25) * clamp((s.dfg - 25) / 45, 0, 1) * a : 0,
-      acarb: rx.acarb > 0 ? 0.12 * Math.min(1, rx.acarb / 300) * a : 0,
-      iex: (rx.basal + rx.rapid) * a / (0.5 * pt.par.weight0)
+      eSu, eDpp, eGlp,
+      eMet: P.met * Math.pow(Math.min(met, 3000) / 2000, 0.7) * p.metResp / (1 + P.metIns * Math.min(1.5, iex) + P.metCo * (eSu + eDpp + eGlp)),
+      sglt: rx.sglt2 !== 'none' ? (rx.sglt2 === 'empa25' ? P.sglt25 : P.sglt10) * clamp((s.dfg - 20) / 40, 0, 1) * a : 0,
+      acarb: rx.acarb > 0 ? P.acarb * Math.min(1, rx.acarb / 300) * a : 0,
+      iex
     };
   }
 
-  function beta(pt) { return pt.par.B0 * Math.exp(-pt.par.rate * pt.day / 365); }
+  // Réserve insulinique : déclin avec le temps ; une perte de poids importante dans un diabète récent
+  // la restaure en partie (DiRECT : rémission d'autant plus fréquente que la perte est grande) [direct].
+  function beta(pt) {
+    const p = pt.par, loss = pt.st ? Math.max(0, (p.weight0 - pt.st.W) / p.weight0) : 0;
+    const rec = 1 + P.wlB * loss * Math.max(0, 1 - (p.dur || 0) / P.wlDur);
+    return p.B0 * Math.exp(-p.rate * pt.day / 365) * rec;
+  }
 
   function targetMG(pt, MG) {
     const p = pt.par, s = pt.st;
     if (p.gck) return 1.3 - 0.05 * Math.min(1, effects(pt, MG).iex * 3);
     const e = effects(pt, MG);
-    const si = p.Si0 * Math.pow(p.weight0 / s.W, 4.5) * fAct(actNow(pt)) / fAct(p.act0);
-    const gtox = 1 / (1 + 0.18 * Math.max(0, MG - 1.8));
+    // Perte de poids et activité : gains de sensibilité moins qu'additifs (Umpierre : conseils d'activité
+    // + régime ≈ − 0,6 %, proche de Look AHEAD) [lookahead].
+    const gW = Math.pow(p.weight0 / s.W, P.wExp) - 1, gA = fAct(actNow(pt)) / fAct(p.act0) - 1;
+    const si = p.Si0 * (1 + gW + gA - P.coLife * Math.max(0, Math.min(gW, gA)));
+    const gtox = 1 / (1 + P.gtox * Math.max(0, MG - 1.8));
     const Bf = beta(pt) * gtox * (1 + e.eSu + e.eDpp + e.eGlp);
     const IA = (Bf + e.iex) * si * (1 + e.eMet);
     let m = mgOf(IA);
@@ -122,7 +155,7 @@
       adhLife: real ? rnd(0.2, 1) : 0.6, giSens: real ? rnd(0, 1) : 0.5,
       albRate: ALB[c.alb].rate, retino: c.retino, hfail: c.hfail, cvd: c.cvd, panc: c.panc, mtc: c.mtc,
       mycoHist: c.myco, irregular: c.irregular, lowcarb: c.lowcarb, sbp0: c.sbp,
-      act0: c.act0 || 0, soda0: c.soda0 || 0, snack0: c.snack0 || 'aucun',
+      dur: c.duration || 0, act0: c.act0 || 0, soda0: c.soda0 || 0, snack0: c.snack0 || 'aucun',
       lifeAch: real ? clamp(MOTIV[c.motiv || 'moyenne'] + rnd(-0.25, 0.2), 0.05, 1) : MOTIV[c.motiv || 'moyenne']
     };
     par.Si0 = prof.bmiDep ? prof.si * clamp(Math.pow(25 / bmi, 0.9), 0.35, 1.15) : prof.si;
@@ -157,9 +190,9 @@
     let life = (rx.wtGoal / 100) * ach + SNACK[p.snack0] * (rx.diet ? ach : 0) + (rx.sodaStop ? 0.006 * p.soda0 * ach : 0) + (rx.act > p.act0 ? 0.01 * Math.min(1, (actNow(pt) - p.act0) / 150) : 0);
     d -= Math.min(life, 0.12); // perte de poids hygiéno-diététique plafonnée à 12 % (complément : Look AHEAD ≈ 9 % à 1 an)
     if (rx.met && pt.take.met) d -= 0.01;
-    if (rx.su && pt.take.su) d += 0.025 * Math.min(1, rx.su / 120);
+    if (rx.su && pt.take.su) d += 0.025 * Math.min(1, rx.su / 120) * (e.iex > 0 ? 0.5 : 1); // moindre sous insuline
     d += 0.04 * Math.min(1, e.iex);
-    if (rx.glp !== 'none' && pt.take.glp) d -= (0.03 + 0.06 * glpFrac(rx)) * p.wResp * p.adh;
+    if (rx.glp !== 'none' && pt.take.glp) d -= (0.005 + P.glpW * glpFrac(rx)) * p.wResp * p.adh;
     if (rx.sglt2 !== 'none') d -= 0.025;
     if (s.MG > 2.6) d -= 0.03 * (s.MG - 2.6); // catabolisme de l'hyperglycémie majeure
     return p.weight0 * (1 + d);
@@ -175,7 +208,7 @@
     s.sbp += (p.sbp0 - (pt.rx.sglt2 !== 'none' ? 4 : 0) - (pt.rx.glp !== 'none' ? 3 : 0) - 1 * (p.weight0 - s.W) - s.sbp) * (1 - Math.exp(-1 / 20));
     // Hypoglycémies : insulinosécréteurs et insuline, d'autant plus que la glycémie moyenne est basse.
     const e = effects(pt, s.MG);
-    const expo = 0.05 * e.eSu * (p.suBoost > 1 ? 2 : 1) * (s.dfg < 45 ? 1.8 : 1) + 0.07 * e.iex;
+    const expo = 0.05 * e.eSu * (p.suBoost > 1 ? 2 : 1) * (s.dfg < 45 ? 1.8 : 1) + 0.17 * e.iex;
     const risk = (p.age >= 75 ? 2 : 1) * (p.irregular ? 2 : 1);
     const lam = expo * risk * Math.exp(-(s.MG - 1.15) / 0.17);
     const sevFrac = 0.04 * (p.age >= 75 ? 2.5 : 1) * (s.dfg < 45 ? 2 : 1);
@@ -186,7 +219,7 @@
 
   function record(pt) {
     const s = pt.st;
-    pt.log.push({ day: pt.day, a1c: s.A, mg: s.MG, w: s.W, dfg: s.dfg, met: pt.rx.met, su: pt.rx.su, ins: pt.rx.basal + pt.rx.rapid, glp: glpFrac(pt.rx) });
+    pt.log.push({ day: pt.day, a1c: s.A, mg: s.MG, fpg: fpgOf(pt), w: s.W, dfg: s.dfg, met: pt.rx.met, su: pt.rx.su, ins: pt.rx.basal + pt.rx.rapid, glp: glpFrac(pt.rx) });
   }
 
   function advance(pt, days, onDay, rng) {
@@ -200,20 +233,56 @@
 
   // Mesures (bruit analytique ± 3 %).
   function noise() { return 1 + (Math.random() - 0.5) * 0.06; }
+  // Glycémie à jeun : l'insuline basale abaisse surtout la glycémie à jeun ; titrée à 1,00–1,15 g/L,
+  // elle laisse une HbA1c proche de 7 % (Treat-to-Target) [basal-t2t].
+  function fpgOf(pt) {
+    const s = pt.st, p = pt.par;
+    const basalShare = pt.rx.basal * p.adh / (P.insK * p.weight0);
+    return Math.max(0.5, s.MG * 0.9 + 0.04 - 0.5 * Math.min(1, 2 * basalShare));
+  }
   function measure(pt) {
     const s = pt.st, rx = pt.rx, p = pt.par;
     const e = effects(pt, s.MG);
-    const basalShare = rx.basal * p.adh / (0.5 * p.weight0);
-    const fpg = Math.max(0.5, s.MG * 0.9 - 0.12 * Math.min(1, basalShare) + 0.04);
+    const fpg = fpgOf(pt);
     const ppg = s.MG * 1.28 - 0.25 * Math.min(1, rx.rapid * p.adh / (0.3 * p.weight0)) - 0.12 * glpFrac(rx);
     const B = beta(pt);
     return {
       a1c: s.A * (1 + (Math.random() - 0.5) * 0.03), fpg: fpg * noise(), ppg: Math.max(fpg, ppg) * noise(), mg: s.MG,
       dfg: s.dfg * noise(), w: s.W, bmi: s.W / Math.pow(p.height / 100, 2),
-      cpep: p.gck ? 2.2 : clamp(3.2 * B / Math.sqrt(p.Si0) * (1 / (1 + 0.18 * Math.max(0, s.MG - 1.8))), 0.05, 6) * noise(),
+      cpep: p.gck ? 2.2 : clamp(3.2 * B / Math.sqrt(p.Si0) * (1 / (1 + P.gtox * Math.max(0, s.MG - 1.8))), 0.05, 6) * noise(),
       sbp: s.sbp, eff: e
     };
   }
 
-  S.dt2 = { PROFILES, ETHNIC, GLP1, SGLT2, ALB, RETINO, RX0, MOTIV, SNACK, metDose, lifeAch, actNow, sodaNow, create, advance, measure, effects, glpFrac, beta, a1cOf, clamp };
+  // Rejoue un essai du référentiel (js/simu/dt2-ref.js) : bras traité contre bras témoin sans
+  // changement, patient théorique, observance bonne. Renvoie la valeur de la métrique demandée.
+  const TRIAL_PT = { profile: 'sird', sex: 'M', age: 57, weight: 95, height: 172, a1c: 8.5, duration: 5, ethnic: 'eur', adh: 'bonne', alb: 'normo', retino: 'none', dfg: 90, sbp: 135, variab: 'theo', motiv: 'moyenne' };
+  function trialArm(cfg, rx, days, opt) {
+    const pt = create(Object.assign({}, TRIAL_PT, cfg));
+    const w0 = pt.st.W, a0 = pt.st.A;
+    Object.assign(pt.rx, rx || {});
+    for (let d = 0; d < days; d++) {
+      if (opt && opt.titrate && d > 0 && d % 3 === 0) {
+        const f = fpgOf(pt);
+        if (f > opt.titrate) pt.rx.basal += 2; else if (f < 0.8) pt.rx.basal = Math.max(0, pt.rx.basal - 2);
+      }
+      advance(pt, 1);
+    }
+    return { a1c: pt.st.A, dA: pt.st.A - a0, dW: pt.st.W - w0, basal: pt.rx.basal };
+  }
+  function trialEffect(t, cfg, rx) {
+    const ctl = trialArm(cfg || t.cfg, {}, t.days), trt = trialArm(cfg || t.cfg, rx || t.rx, t.days, t.opt);
+    return { dA: trt.a1c - ctl.a1c, raw: trt.dA, abs: trt.a1c, dW: trt.dW - ctl.dW, basal: trt.basal };
+  }
+  function replay(t) {
+    if (t.metric === 'slope') {
+      const [lo, hi] = t.a1cs.map((a) => trialEffect(t, Object.assign({}, t.cfg, { a1c: a })));
+      return Object.assign({}, hi, { v: (hi.dA - lo.dA) / (t.a1cs[1] - t.a1cs[0]) });
+    }
+    if (t.metric === 'diff') { const a = trialEffect(t), b = trialEffect(t, null, t.rx2); return Object.assign({}, a, { v: a.dA - b.dA }); }
+    const e = trialEffect(t);
+    return Object.assign(e, { v: e[t.metric || 'dA'] });
+  }
+
+  S.dt2 = { P, fpgOf, replay, PROFILES, ETHNIC, GLP1, SGLT2, ALB, RETINO, RX0, MOTIV, SNACK, metDose, lifeAch, actNow, sodaNow, create, advance, measure, effects, glpFrac, beta, a1cOf, clamp };
 })();
