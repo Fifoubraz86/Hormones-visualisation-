@@ -38,6 +38,33 @@ Pas de correction : un patient, une ordonnance libre, des bilans à la date choi
 - **Patient réel** : absorption de la LT4 (80–115 %), sensibilité aux ATS (× 0,6 à 1,6) et cinétique des TRAb tirées au sort et cachées ; dans la thyroïdite, la fonction résiduelle continue de baisser (≈ 10 % par an).
 - Bruit analytique de ± 4 % sur chaque dosage. « Annuler la dernière étape » restaure l'état exact avant la prescription.
 
+## Événements indésirables (`js/simu/adverse.js`, mode thérapeutique)
+
+Ils surviennent sans correction : le temps s'arrête au jour de l'événement (consultation non programmée, bilan prévu annulé), avec les examens faits en urgence. L'interne décide de la suite.
+
+**Coronaropathie sous lévothyroxine** (hypothyroïdie primaire, thyroïdectomie, insuffisance thyréotrope ; case « coronaropathie connue », ou coronaropathie latente à partir de 75 ans). Le risque dépend de la vitesse de remontée de la T3 sur 7 jours (normalisée) :
+
+| Schéma (coronarien de 80 ans, 70 kg, TSH 60) | Hausse de T3 par semaine | Événement |
+| --- | --- | --- |
+| 12,5–25 µg puis + 12,5–25 µg toutes les 1–2 semaines | 0,03–0,07 | aucun |
+| 50 µg d'emblée | ≈ 0,085 | aucun (limite) |
+| palier de 50 µg, ou 75 µg d'emblée | 0,10–0,14 | angor d'effort (seuil 0,09) |
+| 100 µg d'emblée | ≈ 0,19 | syndrome coronarien aigu (seuil 0,16) ; la cardiologie suspend la lévothyroxine |
+
+Surdosage (T3 > 1,35 fois la normale) chez un coronarien connu : angor. Sans coronaropathie connue, après 75 ans : seuils × 1,6. Patient réel : seuils × 0,75 à 1,3, cachés. Ces seuils sont un choix de modélisation (complément) ; le principe vient de l'item 243 (SFE p. 5, 11-12 : la coronaropathie peut être démasquée par le traitement).
+
+**Antithyroïdiens de synthèse** (Basedow, nodule toxique ; réglage à la création du patient) : fréquences du référentiel (éruption 6 %, arthralgies 2 %, neutropénie modérée 3 %, agranulocytose 0,35 % ×1,5 si ≥ 30 mg/j de carbimazole, hépatite 0,3 % sous imidazolés et 0,5 % sous PTU), mode entraînement (un effet tiré au sort parmi agranulocytose, hépatite, urticaire, neutropénie) ou effet imposé.
+
+| Effet | Délai (complément) | Présentation | Si l'ATS est poursuivi | À l'arrêt |
+| --- | --- | --- | --- | --- |
+| Agranulocytose | J21–J70 | fièvre, angine ; PNN ≈ 0,3 G/L | choc septique à J+3, réanimation, arrêt imposé | PNN normalisés en 2–3 semaines ; toute reprise d'un ATS, même d'une autre molécule, la reproduit en 5 jours |
+| Hépatite | J14–J56 | cholestatique sous imidazolés (ictère, PAL, bilirubine) ; cytolytique sous PTU (ALAT ≈ 10–20 N) | aggravation à J+14, hospitalisation, arrêt imposé | normalisation en 4 à 8 semaines |
+| Urticaire | J7–J21 | éruption prurigineuse sans fièvre | persiste | disparaît 7 jours après l'arrêt ou le changement de molécule |
+| Neutropénie modérée | J14–J42 | PNN ≈ 1,2 G/L à la NFS, asymptomatique | persiste | se corrige |
+| Arthralgies | J14–J42 | signalées au bilan suivant | persistent | disparaissent |
+
+La thyrotoxicose elle-même abaisse un peu les polynucléaires et élève les transaminases (item 242, SFE p. 5-6) : d'où l'intérêt de la NFS et du bilan hépatique de référence. Nouveaux examens : bilan hépatique, ECG.
+
 ## Fichiers
 
 | Fichier | Rôle |
@@ -48,6 +75,7 @@ Pas de correction : un patient, une ordonnance libre, des bilans à la date choi
 | `js/simu/chart.js` | Petits multiples : T4L, TSH (log), ATS, lévothyroxine. Courbe réelle révélée au débriefing. |
 | `js/simu/ui.js` | Cas commentés : déroulé des consultations et débriefing. |
 | `js/simu/sandbox.js` | Mode thérapeutique libre. |
+| `js/simu/adverse.js` | Événements indésirables du mode thérapeutique : coronaropathie sous lévothyroxine, effets des ATS. |
 | `js/simu/main.js` | Choix du mode (onglets). |
 
 ## Règles appliquées par le moteur de correction (cas commentés)
@@ -73,4 +101,4 @@ Chaque remarque affichée cite sa source ; le détail est dans `js/simu/rules.js
 
 ## Limites du modèle
 
-Cinétiques et valeurs illustratives, normes indicatives (T4L 12–22 pmol/L, T3L 3,1–6,8 pmol/L, TRAb < 1,8 UI/L selon la trousse). Pas de variabilité interindividuelle au-delà des paramètres de chaque cas ; bruit analytique de ± 4 %. La rechute après arrêt est modélisée (paramètre `relapse`) et utilisée en mode thérapeutique (évolution défavorable des TRAb). Le modèle ne simule ni l'angor (sauf l'événement du cas dédié), ni l'agranulocytose (sauf l'événement du cas dédié), ni l'orbitopathie.
+Cinétiques et valeurs illustratives, normes indicatives (T4L 12–22 pmol/L, T3L 3,1–6,8 pmol/L, TRAb < 1,8 UI/L selon la trousse). Pas de variabilité interindividuelle au-delà des paramètres de chaque cas ; bruit analytique de ± 4 %. La rechute après arrêt est modélisée (paramètre `relapse`) et utilisée en mode thérapeutique (évolution défavorable des TRAb). Le modèle ne simule pas l'orbitopathie ; l'angor et les effets des ATS sont des événements déclenchés par des seuils et des tirages (voir plus haut), pas une physiologie fine.

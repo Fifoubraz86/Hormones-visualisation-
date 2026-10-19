@@ -40,8 +40,9 @@
   const PROPRA = [0, 40, 80, 120, 160];
   const GESTES = { none: 'Aucun', thyroidectomie: 'Thyroïdectomie totale', lobectomie: 'Lobectomie (nodule toxique)', iode: 'Iode 131' };
   const NUM_TESTS = [['tsh', 'TSH'], ['t4', 'T4L'], ['t3', 'T3L'], ['trab', 'TRAb'], ['nfs', 'NFS']];
-  const QUAL_TESTS = [['tpo', 'Anti-TPO'], ['crp', 'CRP'], ['echo', 'Échographie'], ['scinti', 'Scintigraphie']];
-  const QUAL_LABEL = { tpo: 'Anti-TPO', crp: 'CRP', echo: 'Échographie thyroïdienne', scinti: 'Scintigraphie thyroïdienne' };
+  const QUAL_TESTS = [['tpo', 'Anti-TPO'], ['crp', 'CRP'], ['hepat', 'Bilan hépatique'], ['ecg', 'ECG'], ['echo', 'Échographie'], ['scinti', 'Scintigraphie']];
+  const QUAL_LABEL = { tpo: 'Anti-TPO', crp: 'CRP', hepat: 'Bilan hépatique', ecg: 'ECG', echo: 'Échographie thyroïdienne', scinti: 'Scintigraphie thyroïdienne' };
+  const AE = S.adverse;
   const PRESETS = [
     { label: 'Hashimoto, TSH 40, 75 kg', cfg: { sit: 'hashi', sex: 'F', age: 46, weight: 75, start: 40 } },
     { label: 'Hypothyroïdie fruste, TSH 7', cfg: { sit: 'hashi', sex: 'F', age: 58, weight: 64, start: 7 } },
@@ -51,13 +52,15 @@
     { label: 'Insuffisance thyréotrope, T4L 8', cfg: { sit: 'central', sex: 'M', age: 45, weight: 80, start: 8 } },
     { label: 'Basedow, T4L 45', cfg: { sit: 'basedow', sex: 'F', age: 32, weight: 60, start: 45 } },
     { label: 'Basedow sévère, T4L 70', cfg: { sit: 'basedow', sex: 'M', age: 55, weight: 80, start: 70 } },
+    { label: 'Basedow : effet indésirable surprise', cfg: { sit: 'basedow', sex: 'F', age: 36, weight: 58, start: 42, ae: 'entrainement' } },
+    { label: 'Basedow : agranulocytose', cfg: { sit: 'basedow', sex: 'M', age: 48, weight: 76, start: 50, ae: 'agranulo' } },
     { label: 'Adénome toxique, 72 ans', cfg: { sit: 'nodule', sex: 'F', age: 72, weight: 62, start: 30, nodType: 'adenome' } },
     { label: 'GMNT après scanner injecté', cfg: { sit: 'nodule', sex: 'M', age: 78, weight: 74, start: 34, nodType: 'gmnt' } },
     { label: 'De Quervain, T4L 40', cfg: { sit: 'thyroidite', sex: 'F', age: 42, weight: 65, start: 40, thyrType: 'quervain' } },
     { label: 'Thyroïdite du post-partum', cfg: { sit: 'thyroidite', sex: 'F', age: 30, weight: 66, start: 28, thyrType: 'postpartum' } },
     { label: 'Thyrotoxicose gestationnelle', cfg: { sit: 'gesta', sex: 'F', age: 27, weight: 58, start: 26 } }
   ];
-  const BASE_CFG = { coronary: false, preg: 0, trabEvol: 'hasard', nodType: 'adenome', thyrType: 'quervain', ppEvol: 'hasard' };
+  const BASE_CFG = { coronary: false, preg: 0, trabEvol: 'hasard', nodType: 'adenome', thyrType: 'quervain', ppEvol: 'hasard', ae: 'realiste' };
 
   let cfg = Object.assign({ sit: 'hashi', sex: 'F', age: 46, weight: 75, start: 40, variab: 'moyen' }, BASE_CFG);
   let G = null;
@@ -187,7 +190,8 @@
           pregOK ? field('Grossesse', sel('cfPreg', cfg.preg, [0, 5, 6, 8, 10, 12, 16, 20].map((w) => [w, w ? 'Enceinte de ' + w + ' SA' : 'Non']), (v) => { cfg.preg = +v; }), 'cfPreg') : null,
           field('Variabilité', sel('cfVar', cfg.variab, [['moyen', 'Patient moyen (reproductible)'], ['reel', 'Patient réel (paramètres cachés)']], (v) => { cfg.variab = v; }), 'cfVar')
         ]),
-        cfg.sit === 'hashi' ? h('label', { class: 'sv-check' }, [h('input', { type: 'checkbox', id: 'cfCor', checked: cfg.coronary, onchange: (e) => { cfg.coronary = e.target.checked; } }), ' Coronaropathie connue (le modèle ne simule pas l\'angor)']) : null,
+        cfg.sit === 'basedow' || cfg.sit === 'nodule' ? h('div', { class: 'sv-form' }, field('Effets indésirables des ATS', sel('cfAe', cfg.ae, AE.MODES, (v) => { cfg.ae = v; }), 'cfAe')) : null,
+        cfg.sit === 'hashi' || cfg.sit === 'thyro' || cfg.sit === 'central' ? h('label', { class: 'sv-check' }, [h('input', { type: 'checkbox', id: 'cfCor', checked: cfg.coronary, onchange: (e) => { cfg.coronary = e.target.checked; } }), ' Coronaropathie connue : une remontée trop rapide de la lévothyroxine déclenche un angor, voire un syndrome coronarien aigu (à partir de 75 ans, coronaropathie latente possible même sans antécédent)']) : null,
         h('div', { class: 'sv-actions' }, h('button', { type: 'button', class: 'sv-primary', onclick: begin }, 'Voir le patient →'))
       ]),
       h('p', { class: 'sv-disc' }, 'Modèle pédagogique simplifié, calé sur des ordres de grandeur usuels (demi-vie de la T4 ≈ 7 jours, effet des ATS en 10 à 15 jours, T4L normalisée en 3 à 6 semaines) ; il ne remplace ni le jugement clinique ni les recommandations. Normes indicatives. Repères : items EDN 241 à 243, référentiel SFE/CEEDMM et fiches LiSA.')
@@ -207,6 +211,7 @@
       visits: [], current: null, history: [], undo: [], truth: false,
       draft: { lt4: 0, alt: false, altDays: 1, altDose: 0, intake: 'jeun', ats: 'none', atsDose: 0, propra: 0, hc: false, ains: false, geste: 'none', wait: hyper ? 4 : cfg.sit === 'central' ? 3 : 6, unit: 'sem', tests: new Set(hyper ? ['t4', 't3'] : cfg.sit === 'central' ? ['t4'] : ['tsh']) }
     };
+    AE.init(G);
     const first = new Set(hyper ? ['tsh', 't4', 't3'] : ['tsh', 't4']);
     doLabs(first, 'Bilan initial');
     render();
@@ -226,6 +231,8 @@
       if (c.sit === 'thyroidite' && c.thyrType === 'quervain' && tLys != null) return fmt(5 + 110 * Math.exp(-tLys / (G.ainsSince != null ? 8 : 16)), 0) + ' mg/L (N < 5)';
       return '< 5 mg/L';
     }
+    if (k === 'hepat') return AE.hepat(G);
+    if (k === 'ecg') return AE.ecg(G);
     if (k === 'echo') {
       if (f.surgeryDone) return 'loge de thyroïdectomie, pas de reliquat';
       return { hashi: 'glande hypoéchogène et hétérogène', central: 'thyroïde normale', basedow: 'glande hypoéchogène, hypervascularisée au Doppler', gesta: 'thyroïde normale, non hypervascularisée', thyroidite: c.thyrType === 'quervain' ? 'plages hypoéchogènes mal limitées, glande douloureuse au passage de la sonde' : 'glande hypoéchogène, peu vascularisée' }[c.sit] || (c.nodType === 'gmnt' ? 'goitre multinodulaire, nodules de 8 à 30 mm' : f.lobectomy ? 'lobe restant sans nodule' : 'nodule unique, solide, de 28 mm');
@@ -258,12 +265,12 @@
     const labs = {}, qual = [];
     tests.forEach((k) => {
       if (k === 'trab') labs.trab = pt.par.trab > 0 ? m.trab : 0.5;
-      else if (k === 'nfs') labs.pnn = m.pnn;
+      else if (k === 'nfs') labs.pnn = AE.pnn(G, m.pnn);
       else if (QUAL_LABEL[k]) qual.push([QUAL_LABEL[k], qualitative(k)]);
       else labs[k] = m[k];
     });
     const c = M.clinic(pt);
-    const entry = { day: pt.day, labs, qual, hr: c.hr, weight: c.weight, symptoms: extraSymptoms().concat(M.symptoms(pt)), rx: rxLabel(pt.rx), note, event: G.event || null };
+    const entry = { day: pt.day, labs, qual, hr: c.hr, weight: c.weight, symptoms: extraSymptoms().concat(AE.symptoms(G), M.symptoms(pt)), rx: rxLabel(pt.rx), note, event: G.event || null };
     G.event = null;
     G.history.push(entry);
     G.visits.push({ day: pt.day, labs });
@@ -282,12 +289,12 @@
 
   function snapshot() {
     const pt = G.pt;
-    return { st: Object.assign({}, pt.st), day: pt.day, rx: Object.assign({}, pt.rx), flags: Object.assign({}, pt.flags), par: Object.assign({}, pt.par), logLen: pt.log.length, hist: G.history.length, vis: G.visits.length, ainsSince: G.ainsSince, rai: G.rai ? Object.assign({}, G.rai) : null };
+    return { st: Object.assign({}, pt.st), day: pt.day, rx: Object.assign({}, pt.rx), flags: Object.assign({}, pt.flags), par: Object.assign({}, pt.par), logLen: pt.log.length, hist: G.history.length, vis: G.visits.length, ainsSince: G.ainsSince, rai: G.rai ? Object.assign({}, G.rai) : null, ae: JSON.stringify(G.ae) };
   }
   function restore(s) {
     const pt = G.pt;
     pt.st = s.st; pt.day = s.day; pt.rx = s.rx; pt.flags = s.flags; pt.par = s.par;
-    pt.log.length = s.logLen; G.history.length = s.hist; G.visits.length = s.vis; G.ainsSince = s.ainsSince; G.rai = s.rai;
+    pt.log.length = s.logLen; G.history.length = s.hist; G.visits.length = s.vis; G.ainsSince = s.ainsSince; G.rai = s.rai; G.ae = JSON.parse(s.ae);
   }
 
   // Gestes radicaux, réalisés le jour de la prescription (item 242, SFE p. 17-18 ; item 241, SFE-N p. 9).
@@ -323,11 +330,14 @@
     if (d.intake !== 'jeun' && lt4 > 0) rx.lt4Text += ', ' + INTAKE[d.intake].label.toLowerCase();
     if (d.ains && G.ainsSince == null) G.ainsSince = pt.day;
     if (!d.ains) G.ainsSince = null;
+    const prevEq = M.atsEq(pt.rx);
     M.setRx(pt, rx);
+    AE.onPrescribe(G, prevEq);
     let geste = '';
     if (d.geste !== 'none') { doGeste(d.geste); geste = GESTES[d.geste].toLowerCase() + ' à J' + pt.day; d.geste = 'none'; }
     G.history.push({ day: pt.day, prescription: true, rx: rxLabel(pt.rx) });
     const r0 = G.hidden.r;
+    let interrupt = null;
     M.advance(pt, days, () => {
       // Patient réel : la thyroïdite de Hashimoto continue de détruire la glande (≈ 10 % par an, complément).
       if (c.variab === 'reel' && c.sit === 'hashi' && !pt.flags.surgeryDone) pt.par.r = r0 * Math.exp(-pt.day / 3500);
@@ -337,13 +347,24 @@
         if (G.rai.a0 > 0) { pt.par.auto = G.rai.a0 * e; pt.par.r = G.rai.r0 * (0.85 + 0.15 * e); }
         else pt.par.r = G.rai.r0 * (G.rai.floor + (1 - G.rai.floor) * e);
       }
+      // Effets indésirables et coronaropathie : un événement interrompt le temps (consultation non programmée).
+      const ev = AE.daily(G);
+      if (ev) { interrupt = ev; return false; }
       return true;
     });
     let note = 'Bilan à ' + (d.unit === 'sem' ? d.wait + ' semaine' + (d.wait > 1 ? 's' : '') : days + ' jour' + (days > 1 ? 's' : ''));
+    let tests = d.tests;
+    if (interrupt) {
+      note = 'Consultation non programmée (bilan prévu annulé)';
+      G.event = (G.event ? G.event + ' ' : '') + interrupt.text;
+      tests = new Set(interrupt.tests.concat(SITUATIONS[c.sit].hyper ? ['t4'] : ['tsh']));
+      if (interrupt.stopAts) { d.ats = 'none'; d.atsDose = 0; }
+      if (interrupt.stopLt4) { d.lt4 = 0; d.alt = false; }
+    }
     if (geste) note += ' · ' + geste;
     if (c.preg > 0) { const sa = c.preg + pt.day / 7; note += sa >= 40 ? ' · post-partum (accouchement à 40 SA)' : ' · ' + fmt(sa, 0) + ' SA'; }
     if (c.sit === 'gesta') note += ' · ' + fmt(8 + pt.day / 7, 0) + ' SA';
-    doLabs(d.tests, note);
+    doLabs(tests, note);
     render();
     const res = main.querySelector('.sv-latest');
     if (res && window.innerWidth < 860) res.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -502,6 +523,7 @@
     { t: 'Étiologies les plus fréquentes : maladie de Basedow > goitre multinodulaire toxique > adénome toxique.', src: I(242, '6'), rang: 'A' },
     { t: 'Biologie non spécifique : baisse du cholestérol et des triglycérides, hyperglycémie, enzymes hépatiques ↑, leuconeutropénie. Bilan de référence avant ATS.', src: I(242, '5-6'), rang: 'B' },
     { t: 'Moyens : repos, propranolol (non cardiosélectif), contraception ; ATS : carbimazole 20–40, thiamazole 15–30, PTU 200–400 mg/j, délai d\'action 10–15 jours.', src: I(242, '15'), rang: 'B' },
+    { t: 'Effets indésirables des ATS : fréquents (5–15 %) : éruption, arthralgies, neutropénie transitoire, alopécie, perturbations hépatiques mineures ; graves : agranulocytose (0,2–0,5 %, contre-indique tous les ATS), hypoplasie médullaire, hépatite (cytolytique avec les thiouraciles, cholestatique avec les imidazolés), vascularite à ANCA, pancréatite.', src: I(242, '15-16'), rang: 'B' },
     { t: 'Surveillance des ATS : T4L à 3–4 semaines (la TSH reste basse longtemps), puis TSH tous les 3 mois ; NFS de référence puis tous les 10 jours pendant 2 mois ; NFS en urgence si fièvre ou angine. PNN < 0,8 G/L : arrêt ; < 0,5 G/L : hospitalisation, arrêt définitif.', src: I(242, '16'), rang: 'B' },
     { t: 'Urgences : crise aiguë thyrotoxique (surtout après thyroïdectomie non préparée), cardiothyréose du sujet âgé, orbitopathie maligne, forme cachectisante.', src: I(242, '6, 15, 19'), rang: 'A' }
   ];
@@ -581,6 +603,7 @@
     if (x.hcg != null) items.push('Stimulation par l\'hCG : pic vers 10 SA, disparition au 2e trimestre ; TRAb négatifs.');
     if (x.pit != null) items.push('Réserve thyréotrope : ' + Math.round(x.pit * 100) + ' %.');
     if (c.sit === 'thyro') items.push('Aucun tissu thyroïdien résiduel : toute la T4 vient du comprimé.');
+    AE.reveal(G).forEach((t) => items.push(t));
     if (G.rai) items.push('Iode 131 à J' + G.rai.day + (G.rai.a0 > 0 ? ' : le nodule s\'éteint, le parenchyme reprend.' : ' : fonction résiduelle finale ≈ ' + Math.round(G.rai.floor * 100) + ' %.'));
     return h('details', { class: 'sv-card sv-det' }, [h('summary', null, 'Révéler le patient'), h('ul', { class: 'sv-keys' }, items.map((t) => h('li', null, t)))]);
   }
