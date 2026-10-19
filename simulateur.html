@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Patient virtuel thyroïde</title>
-<meta name="description" content="Simulateur didactique : un patient virtuel consulte pour une hyperthyroïdie ou une hypothyroïdie ; l'étudiant prescrit le bilan, initie puis adapte les antithyroïdiens de synthèse ou la lévothyroxine, et chaque décision est corrigée.">
+<meta name="description" content="Simulateur thérapeutique : on crée un patient (hypothyroïdie, thyroïdectomie, maladie de Basedow, hypothyroïdie centrale), on prescrit librement lévothyroxine ou antithyroïdiens, et le modèle donne la TSH et la T4L à la date du bilan choisi.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Spectral:ital,wght@0,500;0,600;1,500&display=swap">
@@ -17,6 +17,10 @@
     <span class="sv-sub">initier et adapter les traitements thyroïdiens</span>
   </div>
   <nav class="sv-nav">
+    <div class="sv-tabs" role="tablist" aria-label="Mode">
+      <button type="button" class="sv-tab" id="svTabSand" role="tab">Mode thérapeutique</button>
+      <button type="button" class="sv-tab" id="svTabCases" role="tab">Cas commentés</button>
+    </div>
     <span class="sv-status" id="svStatus" hidden></span>
     <button type="button" class="sv-link" id="svHome" hidden>← Autres patients</button>
     <a class="sv-link" href="index.html">Atlas endocrinien</a>
@@ -32,5 +36,7 @@
 <script src="js/simu/cases.js"></script>
 <script src="js/simu/chart.js"></script>
 <script src="js/simu/ui.js"></script>
+<script src="js/simu/sandbox.js"></script>
+<script src="js/simu/main.js"></script>
 </body>
 </html>

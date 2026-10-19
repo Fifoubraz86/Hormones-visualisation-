@@ -493,5 +493,5 @@
   });
   let rt = 0;
   window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { const box = document.querySelector('.sv-chartbox'); if (box && g) S.chart.render(box, g, { truth: !!g.ended }); }, 150); });
-  home();
+  S.casesUI = { home };
 })();

@@ -197,3 +197,49 @@ select { background: var(--panel-2); border: 1px solid var(--line-2); border-rad
   .sv-exam { grid-template-columns: 1fr; gap: 0; }
   .sv-exam dd { margin-bottom: 6px; }
 }
+
+/* ---------- Onglets ---------- */
+.sv-tabs { display: flex; gap: 2px; padding: 2px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); }
+.sv-tab { border: 0; background: none; border-radius: 7px; padding: 4px 10px; font-size: 13px; cursor: pointer; color: var(--muted); }
+.sv-tab[aria-selected="true"] { background: var(--panel-2); color: var(--fg); font-weight: 600; }
+
+/* ---------- Mode thérapeutique ---------- */
+.sv-setup { max-width: 900px; }
+.sv-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.sv-chip { border: 1px solid var(--line-2); background: var(--panel-2); border-radius: 999px; padding: 4px 11px; font-size: 13px; cursor: pointer; }
+.sv-chip:hover { border-color: var(--accent); color: var(--accent); }
+.sv-chipcheck { display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--line-2); border-radius: 999px; padding: 3px 10px; font-size: 13.5px; cursor: pointer; }
+.sv-chipcheck:has(input:checked) { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.sv-chipcheck input { accent-color: var(--accent); margin: 0; }
+.sv-num { width: 6.5em; background: var(--panel-2); border: 1px solid var(--line-2); border-radius: 8px; padding: 6px 8px; font-variant-numeric: tabular-nums; }
+.sv-numwrap { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.sv-inline { align-items: center; }
+.sv-alt { font-size: 14px; color: var(--muted); }
+.sv-ordo { gap: 12px; }
+.sv-more { align-self: flex-start; font-size: 13px; }
+.sv-sandbox .sv-dossier { gap: 12px; }
+.sv-latest-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.sv-big td { font-size: 15.5px; padding: 7px 6px; }
+.sv-big td:nth-child(2) { font-size: 16px; }
+.sv-v { font-family: var(--font-data); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sv-v.hi, .sv-v.lo { font-weight: 600; color: var(--warn); }
+.sv-arrow { font-weight: 600; }
+.sv-na { color: var(--faint); }
+.sv-clin { font-size: 14px; }
+.sv-card-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.sv-small { font-size: 13px; color: var(--muted); }
+.sv-scroll { overflow-x: auto; }
+.sv-hist-t { font-size: 13px; }
+.sv-hist-t td, .sv-hist-t th { white-space: nowrap; }
+.sv-hist-t td:nth-child(2) { white-space: normal; min-width: 180px; font-family: var(--font-body); font-size: 13px; }
+.sv-nowrap { white-space: nowrap; }
+.sv-det summary { cursor: pointer; font: 600 13px var(--font-body); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.sv-det[open] summary { margin-bottom: 4px; }
+.sv-secondary:disabled { opacity: 0.45; cursor: default; }
+@media (max-width: 860px) {
+  .sv-sandbox .sv-dossier, .sv-sandbox .sv-consult { display: contents; }
+  .sv-sandbox > * > .sv-card { order: 4; }
+  .sv-sandbox > * > .sv-latest { order: 1; }
+  .sv-sandbox > * > .sv-ordo { order: 2; }
+  .sv-sandbox > * > .sv-id { order: 3; }
+}

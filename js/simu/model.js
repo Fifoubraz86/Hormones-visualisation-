@@ -61,7 +61,7 @@
     const eq = atsEq(rx);
     const B = eq > 0 ? Math.min(0.97, eq / (eq + p.ec50)) : 0;
     const ptu = rx.ats === 'ptu' ? Math.min(1, rx.atsDose / 300) : 0;
-    const lt4In = (rx.lt4 * p.abs) / (1.6 * p.weight) / need(pt);
+    const lt4In = (rx.lt4 * p.abs * (rx.lt4Abs ?? 1)) / (1.6 * p.weight) / need(pt);
     const H = 4;
     for (let k = 0; k < H; k++) {
       const h = 1 / H;
@@ -80,10 +80,11 @@
       const raw = 1.5 * p.pit * Math.pow(Math.max(fb, 0.05), -6.6);
       const cap = 120 * p.pit * p.pit;
       const tshEq = (raw * cap) / (raw + cap);
-      const rT = fb > 1.15 ? 0.03 : 1;
-      const rTau = fb > 1.15 ? 12 : fb < 0.85 ? 20 : 45;
+      const rT = fb > 1.35 ? 0.03 : 1;
+      const rTau = fb > 1.35 ? 12 : fb < 0.85 ? 20 : 45;
       s.R += (rT - s.R) * (1 - Math.exp(-h / rTau));
-      s.TSH += (tshEq * s.R * s.R - s.TSH) * (1 - Math.exp(-h / 0.5));
+      // La cellule thyréotrope s'adapte lentement : la TSH met 6 à 8 semaines à se stabiliser (complément).
+      s.TSH += (tshEq * s.R * s.R - s.TSH) * (1 - Math.exp(-h / 7));
       if (!frozen) {
         let tT, tau;
         if (eq > 0 || pt.flags.surgery) { tT = p.trabFloor; tau = p.trabTau / LN2; }

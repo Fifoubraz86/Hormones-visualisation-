@@ -21,9 +21,13 @@ Le site fonctionne aussi tel quel sur GitHub Pages.
 
 ## Patient virtuel (simulateur thérapeutique)
 
-`simulateur.html` (lien « Patient virtuel » en haut de l'atlas) met l'étudiant face à un patient qui consulte pour une dysthyroïdie. Il interroge, examine, prescrit le bilan, pose le diagnostic, puis initie et adapte le traitement de consultation en consultation : antithyroïdien de synthèse (carbimazole, thiamazole, PTU), bêtabloquant, lévothyroxine, hydrocortisone, conseils, délai et contenu du prochain bilan. Le temps avance jusqu'au contrôle choisi ; le patient évolue selon un modèle pharmacologique simplifié (stock thyroïdien vidé en quelques semaines sous ATS, demi-vie de la T4 de 7 jours, TSH qui reste freinée après une thyrotoxicose, TRAb qui décroissent sous traitement). Chaque décision est corrigée, avec sa source, et un débriefing donne une note sur 20, la courbe réelle et les messages clés.
+`simulateur.html` (lien « Patient virtuel » en haut de l'atlas) sert à apprendre à initier et adapter un traitement thyroïdien.
 
-Huit cas pour l'axe thyréotrope : maladie de Basedow typique (titration jusqu'à la fin de cure), Basedow avec orbitopathie chez un fumeur (agranulocytose puis thyroïdectomie), Basedow au 1er trimestre de grossesse, maladie de Hashimoto (avec une interaction médicamenteuse), hypothyroïdie du coronarien âgé, hypothyroïdie infraclinique, femme traitée qui débute une grossesse, hypothyroïdie centrale. Le détail des règles et des sources est dans [`docs/simulateur.md`](docs/simulateur.md). Code : `js/simu/` et `css/simulateur.css`.
+**Mode thérapeutique** (par défaut). On crée un patient : hypothyroïdie primaire (Hashimoto), thyroïdectomie totale, maladie de Basedow ou hypothyroïdie centrale, avec sexe, âge, poids, valeur de départ (TSH ou T4L) et, au besoin, une grossesse. On rédige l'ordonnance librement : lévothyroxine (dosages du commerce, schéma alterné sur la semaine, conditions de prise), carbimazole, thiamazole ou PTU en mg/j, propranolol, hydrocortisone. On choisit la date du bilan et les dosages (TSH, T4L, T3L, TRAb, NFS) : le modèle donne les résultats à cette date, avec la fréquence cardiaque, le poids et les plaintes du patient. Aucune correction : l'interne juge et ajuste. Exemple : Hashimoto, TSH 40 mUI/L, 75 kg, lévothyroxine 50 µg/j → TSH ≈ 8–9 mUI/L à 6 semaines ; 100 µg/j → TSH ≈ 1,5. On peut annuler une étape pour essayer une autre dose, afficher la courbe réelle entre les bilans et, en mode « patient réel », révéler l'absorption et la sensibilité cachées.
+
+**Cas commentés** (onglet secondaire, ou `simulateur.html#cas`). Huit cas guidés dont chaque décision est corrigée.
+
+Le modèle (`js/simu/model.js`) calcule l'état du patient jour par jour : stock intrathyroïdien vidé en quelques semaines sous ATS, demi-vie de la T4 de 7 jours, TSH qui met 6 à 8 semaines à se stabiliser et reste freinée après une thyrotoxicose, TRAb qui décroissent sous traitement. Règles et sources : [`docs/simulateur.md`](docs/simulateur.md).
 
 ## Navigation
 

@@ -1,6 +1,17 @@
 # Patient virtuel : règles et sources
 
-Le simulateur (`simulateur.html`) suit la convention de l'atlas : la sémiologie vient du *Polycopié de sémiologie endocrinienne* du CEEDMM et porte la mention « polycopié » ; la conduite thérapeutique, absente d'un polycopié de sémiologie, porte la mention « complément ». Elle reprend le consensus de la Société française d'endocrinologie sur la maladie de Basedow (2016), les recommandations usuelles sur la lévothyroxine et les RCP. **Ces règles sont à faire relire par un endocrinologue avant usage en enseignement.**
+Le simulateur a deux modes : thérapeutique libre (par défaut) et cas commentés. Le mode « cas commentés » (`simulateur.html`) suit la convention de l'atlas : la sémiologie vient du *Polycopié de sémiologie endocrinienne* du CEEDMM et porte la mention « polycopié » ; la conduite thérapeutique, absente d'un polycopié de sémiologie, porte la mention « complément ». Elle reprend le consensus de la Société française d'endocrinologie sur la maladie de Basedow (2016), les recommandations usuelles sur la lévothyroxine et les RCP. **Ces règles sont à faire relire par un endocrinologue avant usage en enseignement.**
+
+## Mode thérapeutique (`js/simu/sandbox.js`)
+
+Pas de correction : un patient, une ordonnance libre, des bilans à la date choisie.
+
+- **Calage du patient** sur la valeur de départ saisie, par dichotomie sur le modèle à l'équilibre : fonction thyroïdienne résiduelle pour la TSH initiale (Hashimoto), taux de TRAb pour la T4L initiale (Basedow), réserve hypophysaire pour la T4L initiale (centrale). Thyroïdectomie : patient euthyroïdien à J0, plus aucun tissu ni stock thyroïdien.
+- **Lévothyroxine** : dose moyenne hebdomadaire (schéma alterné possible), rapportée à la dose substitutive complète de 1,6 µg/kg/j. Conditions de prise : à jeun 100 %, au petit-déjeuner 80 %, sous IPP 85 %, avec fer ou calcium 60 % (ordres de grandeur, complément).
+- **Grossesse** : besoins multipliés progressivement jusqu'à 1,4 entre 4 et 16 SA, retour à 1 à l'accouchement (40 SA).
+- **Basedow** : évolution des TRAb favorable (demi-vie ≈ 100 jours, rémission à l'arrêt) ou défavorable (TRAb persistants, rechute à l'arrêt), choisie ou tirée au sort.
+- **Patient réel** : absorption de la LT4 (80–115 %), sensibilité aux ATS (× 0,6 à 1,6) et cinétique des TRAb tirées au sort et cachées ; dans la thyroïdite, la fonction résiduelle continue de baisser (≈ 10 % par an).
+- Bruit analytique de ± 4 % sur chaque dosage. « Annuler la dernière étape » restaure l'état exact avant la prescription.
 
 ## Fichiers
 
@@ -10,7 +21,9 @@ Le simulateur (`simulateur.html`) suit la convention de l'atlas : la sémiologie
 | `js/simu/rules.js` | Moteur de correction : examens, molécule, dose, bêtabloquant, conseils, délai du contrôle, contenu du bilan suivant. Une remarque « discutable » coûte 1 point, une « erreur » 2 (certaines fautes graves davantage). |
 | `js/simu/cases.js` | Les huit cas : patient, interrogatoire, examen, grille des examens initiaux, diagnostic, événements intercurrents, messages clés. |
 | `js/simu/chart.js` | Petits multiples : T4L, TSH (log), ATS, lévothyroxine. Courbe réelle révélée au débriefing. |
-| `js/simu/ui.js` | Déroulé des consultations et débriefing. |
+| `js/simu/ui.js` | Cas commentés : déroulé des consultations et débriefing. |
+| `js/simu/sandbox.js` | Mode thérapeutique libre. |
+| `js/simu/main.js` | Choix du mode (onglets). |
 
 ## Règles appliquées (complément)
 
