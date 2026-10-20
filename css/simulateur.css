@@ -345,3 +345,9 @@ select { background: var(--panel-2); border: 1px solid var(--line-2); border-rad
   .agp-top { grid-template-columns: 1fr; }
   .agp-days { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
+
+/* Cas guidé DT2 */
+.sv-cases-h { margin-top: 8px; }
+.sv-dcase { max-width: 980px; }
+.sv-stmts { display: grid; gap: 6px; border: 1px solid var(--line); }
+.sv-stmts legend { font: 600 13px var(--font-body); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); padding: 0 6px; }

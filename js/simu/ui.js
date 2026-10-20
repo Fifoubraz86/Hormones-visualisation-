@@ -52,7 +52,7 @@
         h('div', { class: 'sv-axes', role: 'group', 'aria-label': 'Axe' }, [
           h('span', { class: 'sv-axis on' }, 'Axe thyréotrope'),
           h('span', { class: 'sv-axis', title: 'À venir' }, 'Axe corticotrope · bientôt'),
-          h('span', { class: 'sv-axis', title: 'À venir' }, 'Glycémie · bientôt')
+          h('span', { class: 'sv-axis on' }, 'Diabète de type 2')
         ])
       ]),
       h('section', { class: 'sv-cases' }, S.CASES.map((cs) => h('button', { type: 'button', class: 'sv-case', onclick: () => start(cs) }, [
@@ -61,6 +61,13 @@
         h('span', { class: 'sv-case-p' }, cs.patient.name + ', ' + cs.patient.age + ' ans'),
         h('span', { class: 'sv-case-d' }, cs.tagline)
       ]))),
+      S.dt2case ? h('h3', { class: 'sv-cases-h' }, 'Diabète de type 2') : null,
+      S.dt2case ? h('section', { class: 'sv-cases' }, [h('button', { type: 'button', class: 'sv-case', onclick: () => S.dt2case.start() }, [
+        h('span', { class: 'sv-case-top' }, [h('span', { class: 'sv-tag' }, 'Insulinothérapie'), h('span', { class: 'sv-level' }, 'Interne')]),
+        h('span', { class: 'sv-case-t' }, S.dt2case.title),
+        h('span', { class: 'sv-case-p' }, S.dt2case.patient),
+        h('span', { class: 'sv-case-d' }, S.dt2case.tagline)
+      ])]) : null,
       h('p', { class: 'sv-disc' }, 'Modèle pédagogique simplifié : cinétiques et valeurs sont illustratives. Sémiologie d\'après le Polycopié de sémiologie endocrinienne du CEEDMM ; conduite thérapeutique marquée « complément » (consensus SFE 2016 sur la maladie de Basedow, recommandations usuelles sur la lévothyroxine, RCP). Ne remplace pas un avis médical.')
     );
     window.scrollTo(0, 0);
