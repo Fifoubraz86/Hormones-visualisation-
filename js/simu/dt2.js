@@ -389,7 +389,7 @@
       else if (k === 'creat') labs.dfg = m.dfg;
       else if (k === 'carnet') { if (G.asg !== '0' || G.cgm) carnet = carnetRows(); else q.push(['Carnet glycémique', 'pas d\'autosurveillance glycémique prescrite']); }
       else if (k === 'agp') {
-        if (G.cgm && G.glyDays.length) { const days = G.glyDays.slice(-14); agp = { st: Y.agpStats(Y.cgm(days), days.length), days }; }
+        if (G.cgm && G.glyDays.some((dp) => dp.d > (G.cgmStart == null ? -99 : G.cgmStart))) { const days = G.glyDays.slice(-14).filter((dp) => dp.d > (G.cgmStart == null ? -99 : G.cgmStart)); agp = { st: Y.agpStats(Y.cgm(days), days.length), days }; }
         else q.push(['Rapport AGP', 'pas de capteur de glucose prescrit']);
       }
       else q.push([TESTS.find((t) => t[0] === k)[1], qual(k, m)]);
@@ -448,13 +448,13 @@
   function snapshot() {
     const pt = G.pt;
     return JSON.stringify({ metRamp: pt.metRamp, st: pt.st, day: pt.day, rx: pt.rx, take: pt.take, par: Object.assign({}, pt.par), logLen: pt.log.length, hist: G.history.length, vis: G.visits.length, ev: G.ev, lastHypo: G.lastHypo,
-      gly: G.glyDays, titrState: G.titrState, titrLog: G.titrLog.length, starts: G.starts, titr: G.titr, cgm: G.cgm, cgmAcq: !!G.cgmAcquired, asg: G.asg, goal: G.goal, lastH: G.lastH, lastS: G.lastS });
+      gly: G.glyDays, titrState: G.titrState, titrLog: G.titrLog.length, starts: G.starts, titr: G.titr, cgm: G.cgm, cgmStart: G.cgmStart, cgmAcq: !!G.cgmAcquired, asg: G.asg, goal: G.goal, lastH: G.lastH, lastS: G.lastS });
   }
   function restore(js) {
     const s = JSON.parse(js), pt = G.pt;
     pt.st = s.st; pt.day = s.day; pt.rx = s.rx; pt.take = s.take; pt.metRamp = s.metRamp; Object.assign(pt.par, s.par);
     pt.log.length = s.logLen; G.history.length = s.hist; G.visits.length = s.vis; G.ev = s.ev; G.lastHypo = s.lastHypo;
-    G.glyDays = s.gly; G.titrState = s.titrState; G.titrLog.length = s.titrLog; G.starts = s.starts; G.titr = s.titr; G.cgm = s.cgm; G.cgmAcquired = s.cgmAcq; G.asg = s.asg; G.goal = s.goal; G.lastH = s.lastH; G.lastS = s.lastS;
+    G.glyDays = s.gly; G.titrState = s.titrState; G.titrLog.length = s.titrLog; G.starts = s.starts; G.titr = s.titr; G.cgm = s.cgm; G.cgmStart = s.cgmStart; G.cgmAcquired = s.cgmAcq; G.asg = s.asg; G.goal = s.goal; G.lastH = s.lastH; G.lastS = s.lastS;
     Object.assign(G.draft, pt.rx, { rapidM: pt.rx.rapidM.slice(), titr: JSON.parse(JSON.stringify(G.titr)), cgm: G.cgm, asg: G.asg, goal: G.goal });
   }
 
@@ -488,6 +488,7 @@
     const prev = Object.assign({}, pt.rx, { rapidM: pt.rx.rapidM.slice() });
     const metBefore = D.metDose(pt);
     Object.assign(pt.rx, { met: d.met, su: d.su, dpp4: d.dpp4, glp: d.glp, glpDose: d.glp === 'none' ? 0 : d.glpDose, sglt2: d.sglt2, acarb: d.acarb, basal: d.basal, basalType: d.basalType, rapidM: d.rapidM.slice(), rapid: d.rapid, act: d.act, sodaStop: d.sodaStop, wtGoal: d.wtGoal, diet: d.diet });
+    if (d.cgm && !G.cgm) G.cgmStart = pt.day; // le capteur n'enregistre qu'à partir de sa pose
     G.titr = JSON.parse(JSON.stringify(d.titr)); G.cgm = d.cgm; G.asg = d.asg; G.goal = d.goal;
     if (d.cgm) G.cgmAcquired = true;
     if (d.ppr && G.ev.ppr == null) G.ev.ppr = pt.day;
@@ -508,7 +509,7 @@
     let tests = d.tests;
     if (interrupt) {
       note = interrupt.death ? 'Décès' : 'Consultation non programmée (bilan prévu annulé)';
-      tests = new Set((interrupt.tests || []).concat(['fpg'], G.asg ? ['carnet'] : []));
+      tests = new Set((interrupt.tests || []).concat(['fpg'], G.asg !== '0' || G.cgm ? ['carnet'] : []));
       G.ev.eventToon = interrupt.toon || null;
       G.ev.caption = interrupt.caption || null;
       if (interrupt.death) { G.dead = interrupt; G.ev.epitaphe = interrupt.epitaphe; }
@@ -517,6 +518,8 @@
       if (interrupt.stop === 'sglt2') { d.sglt2 = 'none'; d.basal = pt.rx.basal; }
       if (interrupt.stop === 'incr') { d.glp = 'none'; d.glpDose = 0; d.dpp4 = 0; }
     }
+    // Sous capteur, le rapport AGP des 14 derniers jours est joint à chaque bilan.
+    if (G.cgm) tests = new Set([...tests, 'agp']);
     doLabs(tests, note, interrupt && interrupt.text);
     render();
     const res = main.querySelector('.sv-latest');
@@ -637,7 +640,7 @@
       h('p', { class: 'sv-note' }, 'Protocole du service : pas de 1 U sous 10 U, de 2 U au-delà ; baisse dès l\'injection suivante si hypoglycémie ou glycémie < ' + fmt(O.rev[0], 2) + ' g/L ; basale jugée sur le réveil, bolus sur la glycémie avant le repas suivant.'),
       h('h4', null, 'Surveillance glycémique'),
       h('label', { class: 'sv-check' }, [h('input', { type: 'checkbox', id: 'dtCgm', checked: d.cgm, onchange: (e) => { d.cgm = e.target.checked; d.asg = d.cgm ? '0' : (d.basal + d.rapidM.reduce((a, x) => a + x, 0) > 0 ? (d.rapidM.some((x) => x > 0) ? '4' : '1') : d.su > 0 ? 'w4' : '0'); re(); } }), ' Capteur de glucose (mesure en continu, rapport AGP)' + (G.cgmAcquired ? ' · indication acquise' : '')]),
-      d.cgm ? h('p', { class: 'sv-note', id: 'dtSurvCgm' }, 'Surveillance par le capteur : l\'autosurveillance capillaire est arrêtée (bandelettes réservées aux doutes : symptômes discordants, capteur défaillant).')
+      d.cgm ? h('p', { class: 'sv-note', id: 'dtSurvCgm' }, 'Surveillance par le capteur : l\'autosurveillance capillaire est arrêtée (bandelettes réservées aux doutes : symptômes discordants, capteur défaillant). Le rapport AGP des 14 derniers jours est joint à chaque bilan.')
         : h('div', { class: 'sv-form' }, [sel('dtAsg', 'Autosurveillance capillaire', d.asg, [['0', 'Aucune']].concat(Object.entries(Y.ASG).map(([k, v]) => [k, v.label])), (v) => { d.asg = v; })]),
       h('p', { class: 'sv-note' }, 'Lecteur et bandelettes : seulement sous traitement hypoglycémiant ; hors insuline, 200 bandelettes par an (HAS). Capteur : sous insuline à 3 injections/j ou plus sans condition, ou en moins de 3 injections (basale seule comprise) avec HbA1c > 8 % (LPPR) ; une fois posée, l\'indication reste acquise même si l\'HbA1c repasse sous 8 %.'),
       retNeed ? h('label', { class: 'sv-check' }, [h('input', { type: 'checkbox', id: 'dtPpr', checked: d.ppr, onchange: (e) => { d.ppr = e.target.checked; } }), ' Adresser en urgence en ophtalmologie : photocoagulation panrétinienne']) : null
@@ -699,8 +702,8 @@
       e.q.length ? h('dl', { class: 'sv-exam sv-qual' }, e.q.flatMap(([k, v]) => [h('dt', null, k), h('dd', null, v)])) : null,
       h('p', { class: 'sv-clin' }, 'Poids ' + fmt(e.w, 1) + ' kg (IMC ' + fmt(e.bmi, 1) + ') · PA ' + e.sbp + ' mmHg · ' + (e.symptoms.length ? e.symptoms.join(' ; ') : 'pas de plainte particulière') + '.'),
       e.titr ? h('p', { class: 'sv-titr' }, '↻ ' + e.titr) : null,
-      e.carnet ? carnetBlock(e) : null,
       e.agp ? agpBlock(e) : null,
+      e.carnet ? carnetBlock(e) : null,
       h('p', { class: 'sv-note' }, 'Traitement prescrit jusqu\'à ce bilan : ' + e.rx + '.')
     ]);
   }

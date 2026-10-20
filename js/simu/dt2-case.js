@@ -115,6 +115,21 @@
     return h('div', { class: 'sv-card sv-gly' }, [h('h4', null, title), note ? h('p', { class: 'sv-note' }, note) : null, Y.carnetTable(rs, sim.titr, h), h('p', { class: 'sv-note' }, 'Cases : vert dans l\'objectif, orange au-dessus, bleu en dessous, rouge < 0,70 g/L (objectifs du protocole : réveil et avant les repas ' + fmt(Y.objOf(sim.titr).rev[0], 2) + '–' + fmt(Y.objOf(sim.titr).rev[1], 2) + ' g/L, coucher ' + fmt(Y.objOf(sim.titr).coucher[0], 2) + '–' + fmt(Y.objOf(sim.titr).coucher[1], 2) + ' g/L).')]);
   }
 
+  // Rapport AGP des 14 derniers jours, si le patient a un capteur ; lecture guidée et interprétation repliées.
+  function agpCard(sim, title) {
+    if (!sim.cgm) return null;
+    const days = sim.days.slice(-14).filter((dp) => dp.d >= 1);
+    if (days.length < 7) return null;
+    const st = Y.agpStats(Y.cgm(days), days.length), tg = Y.cgmTargets(false);
+    const read = Y.interpretAGP(st, tg, { basalUkg: sim.pt.rx.basal / sim.pt.st.W });
+    return h('div', { class: 'sv-card sv-gly' }, [
+      h('h4', null, (title || 'Rapport AGP') + ' · capteur, ' + days.length + ' jours'),
+      h('p', { class: 'sv-note' }, 'Cibles SFD 2025 (tableau II), cas général : TIR > 70 %, < 0,70 g/L < 4 %, < 0,54 g/L < 1 %, > 1,80 g/L < 25 %.'),
+      Y.agpReport(st, days, tg, h),
+      h('details', { class: 'sv-det sv-how' }, [h('summary', null, 'Proposition d\'interprétation (après votre lecture)'), h('dl', { class: 'sv-exam sv-qual' }, read.flatMap(([k, v]) => [h('dt', null, k), h('dd', null, v)]))])
+    ]);
+  }
+
   function render() {
     if (g.step === 1) return step1();
     if (g.step === 2) return step2();
@@ -234,6 +249,7 @@
         h('p', null, sim.titr.who === 'ide' ? '« Le cabinet infirmier n\'a pu commencer les passages qu\'hier : M. L. a fait ' + g.ans1.used + ' U tous les soirs sans changer la dose. »' : '« M. L. n\'a pas osé toucher à la dose, il avait peur de faire un malaise. Il a fait ' + g.ans1.used + ' U tous les soirs. »'),
         h('p', { class: 'sv-muted' }, 'Pas de malaise signalé ' + (nHypo(rs) ? '(sauf celui noté au carnet)' : '') + '. Il vous transmet son carnet.')
       ]),
+      agpCard(sim, 'Rapport AGP depuis l\'initiation'),
       carnetCard(sim, sim.asg, sim.cgm, 'Carnet depuis l\'initiation', sim.cgm ? 'Valeurs relevées sur le capteur.' : 'Autosurveillance : ' + Y.ASG[sim.asg].label + '.'),
       statementsBlock('s2_', g.st2),
       h('div', { class: 'sv-card sv-ordo' }, [
@@ -288,8 +304,7 @@
       { t: 'La dose de basale dépasse 0,5 U/kg/j.', f: () => ukg > 0.5 },
       { t: 'Il faut continuer à augmenter la basale.', f: () => revM > O.rev[1], why: 'la basale se titre sur le réveil ; au-delà, elle corrige à tort la journée', src: 'SFD 2025, avis 19' }
     ];
-    let agp = null;
-    if (sim.cgm) { const days = sim.days.slice(-14); const st = Y.agpStats(Y.cgm(days), 14); const tg = Y.cgmTargets(false); agp = h('div', { class: 'sv-card sv-gly' }, [h('h4', null, 'Rapport AGP (capteur, 14 jours)'), Y.agpReport(st, days, tg, h)]); }
+    const agp = agpCard(sim);
     const titrN = sim.titrLog.length;
     frame('M3 : consultation de suivi', 'Cas guidé · diabète de type 2 · consultation, J90', [
       lastFeedback(),
@@ -298,8 +313,8 @@
         h('p', null, 'Basale actuelle : ' + pt.rx.basal + ' U/j (' + fmt(ukg, 2) + ' U/kg), après ' + titrN + ' adaptation' + (titrN > 1 ? 's' : '') + ' selon le protocole. ' + (pt.st.hypo ? 'Malaises depuis le début : ' + pt.st.hypo + '.' : 'Aucun malaise.')),
         h('p', { class: 'sv-muted' }, 'Il accepte maintenant « une injection de plus par semaine si ça évite d\'augmenter encore l\'insuline ».')
       ]),
-      carnetCard(sim, sim.asg === '1' ? '2' : sim.asg, sim.cgm, 'Carnet des 14 derniers jours', sim.cgm ? 'Valeurs relevées sur le capteur.' : 'Pour cette consultation, il a mesuré aussi un autre moment de la journée.'),
       agp,
+      carnetCard(sim, sim.asg === '1' ? '2' : sim.asg, sim.cgm, 'Carnet des 14 derniers jours', sim.cgm ? 'Valeurs relevées sur le capteur.' : 'Pour cette consultation, il a mesuré aussi un autre moment de la journée.'),
       statementsBlock('s3_', g.st3),
       h('div', { class: 'sv-card sv-ordo' }, [
         h('h3', null, 'Votre décision (plusieurs choix possibles)'),
@@ -375,6 +390,7 @@
           h('p', { class: 'sv-muted' }, n('good') + ' points corrects, ' + n('warn') + ' discutables, ' + n('bad') + ' erreurs.')
         ])
       ]),
+      agpCard(sim, 'Rapport AGP à 9 mois'),
       carnetCard(sim, sim.asg, sim.cgm, 'Carnet des 14 derniers jours (M9)', null),
       h('div', { class: 'sv-card' }, [h('h3', null, 'À retenir'), h('ul', { class: 'sv-keys sv-refs' }, KEYS.map(([t, src]) => h('li', null, [t, h('span', { class: 'sv-src' }, ' · ' + src)])))]),
       h('div', { class: 'sv-card' }, [h('h3', null, 'Vos décisions')].concat(g.journal.map((j) => h('details', { class: 'sv-journal' }, [h('summary', null, j.title + ' · ' + j.rx), feedbackList(j.fb)])))),
