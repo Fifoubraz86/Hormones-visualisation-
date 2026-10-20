@@ -60,7 +60,9 @@
     // (comparaison indirecte), 0,75 mg ≈ 1,5 mg (AWARD-3) ; LEAD-3 : 1,2 mg ≈ 75 % de 1,8 mg [lira-12].
     sema: { name: 'Sémaglutide (Ozempic®), hebdomadaire', unit: 'mg/sem', doses: [0.25, 0.5, 1, 2], frac: [0.2, 0.8, 0.9, 1], step: 28, k: 1 },
     dula: { name: 'Dulaglutide (Trulicity®), hebdomadaire', unit: 'mg/sem', doses: [0.75, 1.5, 3, 4.5], frac: [0.65, 0.77, 0.82, 0.88], step: 28, k: 1 },
-    lira: { name: 'Liraglutide (Victoza®), quotidien', unit: 'mg/j', doses: [0.6, 1.2, 1.8], frac: [0.3, 0.6, 0.8], step: 7, k: 0.62 }
+    lira: { name: 'Liraglutide (Victoza®), quotidien', unit: 'mg/j', doses: [0.6, 1.2, 1.8], frac: [0.3, 0.6, 0.8], step: 7, k: 0.54 },
+    // AR GIP/GLP-1 (SURPASS-2 : 5/10/15 mg − 2,01/− 2,24/− 2,30 % contre − 1,86 % sous sémaglutide 1 mg) [tirz-15].
+    tirz: { name: 'Tirzépatide (Mounjaro®), hebdomadaire — AR GIP/GLP-1', unit: 'mg/sem', doses: [2.5, 5, 7.5, 10, 12.5, 15], frac: [0.3, 0.72, 0.8, 0.86, 0.9, 0.93], step: 28, k: 1.45, wk: 3.2 }
   };
   const SGLT2 = { none: 'Aucun', dapa10: 'Dapagliflozine 10 mg', empa10: 'Empagliflozine 10 mg', empa25: 'Empagliflozine 25 mg' };
   const ALB = { normo: { label: 'Normale', rate: 0.8 }, micro: { label: 'Microalbuminurie (30–300 mg/24 h)', rate: 2.5 }, macro: { label: 'Protéinurie (> 300 mg/24 h)', rate: 5 } };
@@ -68,7 +70,7 @@
 
   // Mesures hygiéno-diététiques : objectif d'activité (min/sem, 0 = inchangée), arrêt des boissons sucrées,
   // objectif de perte de poids (%), suivi diététique. Atteinte des objectifs = motivation du patient.
-  const RX0 = { met: 0, su: 0, dpp4: 0, glp: 'none', glpDose: 0, sglt2: 'none', acarb: 0, basal: 0, rapid: 0, act: 0, sodaStop: false, wtGoal: 0, diet: false };
+  const RX0 = { met: 0, su: 0, dpp4: 0, glp: 'none', glpDose: 0, sglt2: 'none', acarb: 0, basal: 0, basalType: 'g100', rapid: 0, rapidM: [0, 0, 0], act: 0, sodaStop: false, wtGoal: 0, diet: false };
   const MOTIV = { faible: 0.3, moyenne: 0.55, forte: 0.8 };
   const SNACK = { aucun: 0, modere: 0.015, important: 0.03 };
   // Effet de l'activité physique sur la sensibilité à l'insuline : effet seuil vers 150 min/sem
@@ -86,6 +88,9 @@
     return r.from + (r.to - r.from) * Math.min(1, (pt.day - r.start) / Math.max(1, days));
   }
 
+  // Metformine : effet croissant jusqu'à 2 g ; 3 g n'apporte que peu de bénéfice supplémentaire
+  // (SFD 2025, avis 8) [met-500, met-2000].
+  const metCurve = (m) => Math.pow(Math.min(m, 2000) / 2000, 0.7) + 0.12 * Math.min(1, Math.max(0, m - 2000) / 1000);
   const mgOf = (IA) => (IA >= 1 ? Math.max(0.55, 0.95 - 0.3 * (IA - 1)) : 0.95 + 0.45 * Math.pow(1 / Math.max(IA, 0.02) - 1, 0.6));
   const a1cOf = (mg) => (mg * 100 + 46.7) / 28.7;
 
@@ -108,10 +113,10 @@
     const iex = (rx.basal + rx.rapid) * a / (P.insK * pt.par.weight0);
     const eSu = su > 0 ? P.su * Math.pow(Math.min(su, 120) / 120, P.suExp) * (p.suBoost || 1) * br : 0;
     const eDpp = (rx.dpp4 > 0 ? P.dpp * Math.min(1, rx.dpp4 * a / 100) * p.incr : 0) * gd * br;
-    const eGlp = (take.glp ? 0.7 * glpFrac(rx) * a * p.incr * p.glpResp : 0) * gd * br;
+    const eGlp = (take.glp ? 0.8 * glpFrac(rx) * a * p.incr * p.glpResp : 0) * gd * br;
     return {
       eSu, eDpp, eGlp,
-      eMet: P.met * Math.pow(Math.min(met, 3000) / 2000, 0.7) * p.metResp / (1 + P.metIns * Math.min(1.5, iex) + P.metCo * (eSu + eDpp + eGlp)),
+      eMet: P.met * metCurve(met) * p.metResp / (1 + P.metIns * Math.min(1.5, iex) + P.metCo * (eSu + eDpp + eGlp)),
       sglt: rx.sglt2 !== 'none' ? (rx.sglt2 === 'empa25' ? P.sglt25 : P.sglt10) * clamp((s.dfg - 20) / 40, 0, 1) * a : 0,
       acarb: rx.acarb > 0 ? P.acarb * Math.min(1, rx.acarb / 300) * a : 0,
       iex
@@ -192,7 +197,7 @@
     if (rx.met && pt.take.met) d -= 0.01;
     if (rx.su && pt.take.su) d += 0.025 * Math.min(1, rx.su / 120) * (e.iex > 0 ? 0.5 : 1); // moindre sous insuline
     d += 0.04 * Math.min(1, e.iex);
-    if (rx.glp !== 'none' && pt.take.glp) d -= (0.005 + P.glpW * glpFrac(rx)) * p.wResp * p.adh;
+    if (rx.glp !== 'none' && pt.take.glp) d -= (0.005 + P.glpW * glpFrac(rx) * (GLP1[rx.glp].wk ? GLP1[rx.glp].wk / GLP1[rx.glp].k : 1)) * p.wResp * p.adh;
     if (rx.sglt2 !== 'none') d -= 0.025;
     if (s.MG > 2.6) d -= 0.03 * (s.MG - 2.6); // catabolisme de l'hyperglycémie majeure
     return p.weight0 * (1 + d);
@@ -208,7 +213,9 @@
     s.sbp += (p.sbp0 - (pt.rx.sglt2 !== 'none' ? 4 : 0) - (pt.rx.glp !== 'none' ? 3 : 0) - 1 * (p.weight0 - s.W) - s.sbp) * (1 - Math.exp(-1 / 20));
     // Hypoglycémies : insulinosécréteurs et insuline, d'autant plus que la glycémie moyenne est basse.
     const e = effects(pt, s.MG);
-    const expo = 0.05 * e.eSu * (p.suBoost > 1 ? 2 : 1) * (s.dfg < 45 ? 1.8 : 1) + 0.17 * e.iex;
+    // Analogues d'action très prolongée (glargine U300, dégludec) : moins d'hypoglycémies nocturnes ; NPH : plus (SFD 2025, avis 18 bis).
+    const insF = { g300: 0.7, deg: 0.7, nph: 1.4 }[pt.rx.basalType] || 1;
+    const expo = 0.05 * e.eSu * (p.suBoost > 1 ? 2 : 1) * (s.dfg < 45 ? 1.8 : 1) + 0.17 * e.iex * (pt.rx.rapid > 0 ? 1 : insF);
     const risk = (p.age >= 75 ? 2 : 1) * (p.irregular ? 2 : 1);
     const lam = expo * risk * Math.exp(-(s.MG - 1.15) / 0.17);
     const sevFrac = 0.04 * (p.age >= 75 ? 2.5 : 1) * (s.dfg < 45 ? 2 : 1);
@@ -238,7 +245,9 @@
   function fpgOf(pt) {
     const s = pt.st, p = pt.par;
     const basalShare = pt.rx.basal * p.adh / (P.insK * p.weight0);
-    return Math.max(0.5, s.MG * 0.9 + 0.04 - 0.5 * Math.min(1, 2 * basalShare));
+    // Les bolus d'insuline rapide ne couvrent pas la nuit : la glycémie à jeun se calcule sans eux.
+    const mg = pt.rx.rapid > 0 ? s.MG + Math.max(0, eqMG(pt, { rapid: 0, rapidM: [0, 0, 0] }) - eqMG(pt, {})) : s.MG;
+    return Math.max(0.5, mg * 0.9 + 0.04 - 0.5 * Math.min(1, 2 * basalShare));
   }
   function measure(pt) {
     const s = pt.st, rx = pt.rx, p = pt.par;
@@ -284,5 +293,16 @@
     return Object.assign(e, { v: e[t.metric || 'dA'] });
   }
 
-  S.dt2 = { P, fpgOf, replay, PROFILES, ETHNIC, GLP1, SGLT2, ALB, RETINO, RX0, MOTIV, SNACK, metDose, lifeAch, actNow, sodaNow, create, advance, measure, effects, glpFrac, beta, a1cOf, clamp };
+  // Glycémie moyenne d'équilibre si l'on modifiait l'ordonnance (sert à répartir l'effet des bolus
+  // dans la journée, js/simu/glyco.js).
+  function eqMG(pt, patch) {
+    const save = pt.rx;
+    pt.rx = Object.assign({}, save, patch);
+    let m = pt.st.MG;
+    for (let k = 0; k < 40; k++) m = targetMG(pt, m);
+    pt.rx = save;
+    return m;
+  }
+
+  S.dt2 = { P, fpgOf, eqMG, replay, PROFILES, ETHNIC, GLP1, SGLT2, ALB, RETINO, RX0, MOTIV, SNACK, metDose, lifeAch, actNow, sodaNow, create, advance, measure, effects, glpFrac, beta, a1cOf, clamp };
 })();

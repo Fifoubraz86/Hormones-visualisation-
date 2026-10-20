@@ -22,11 +22,15 @@ Effets publiés de chaque traitement et de chaque situation, utilisés pour cale
 | Sulfamide | Ajout à un ADO | − 1,62 %. | [Hirst JA et al. Diabetologia 2013;56:973](https://link.springer.com/article/10.1007/s00125-013-2856-6) | -1,40 % ± 0,35 | -1,31 % |
 | iDPP4 | Études à < 50 % de patients asiatiques | − 0,65 % (DMP contre placebo). | [Kim YG et al. Diabetologia 2013;56:696](https://link.springer.com/article/10.1007/s00125-012-2827-3) | -0,65 % ± 0,2 | -0,53 % |
 | iDPP4 | Études à ≥ 50 % de patients asiatiques | − 0,92 % ; l'IMC initial plus bas est corrélé à une meilleure réponse. | [Kim YG et al. Diabetologia 2013;56:696](https://link.springer.com/article/10.1007/s00125-012-2827-3) | -0,92 % ± 0,2 | -0,83 % |
-| aGLP1 | Sémaglutide 1 mg/sem, monothérapie (SUSTAIN 1, HbA1c 8,1 %) | − 1,6 % contre < 0,1 % sous placebo ; poids − 4,5 kg contre − 1,0 kg. | [Sorli C et al. Lancet Diabetes Endocrinol 2017;5:251](https://www.medwirenews.com/showcase/a-quick-guide-to-the-sustain-trials/) ² | -1,50 % ± 0,25 | -1,39 % |
+| aGLP1 | Sémaglutide 1 mg/sem, monothérapie (SUSTAIN 1, HbA1c 8,1 %) | − 1,6 % contre < 0,1 % sous placebo ; poids − 4,5 kg contre − 1,0 kg. | [Sorli C et al. Lancet Diabetes Endocrinol 2017;5:251](https://www.medwirenews.com/showcase/a-quick-guide-to-the-sustain-trials/) ² | -1,50 % ± 0,25 | -1,49 % |
 | aGLP1 | Sémaglutide 1 mg/sem : poids | − 3,5 kg de plus que le placebo à 30 semaines. | [Sorli C et al. Lancet Diabetes Endocrinol 2017;5:251](https://www.medwirenews.com/showcase/a-quick-guide-to-the-sustain-trials/) ² | -3,50 kg ± 1,5 | -3,26 kg |
-| aGLP1 | Sémaglutide 0,5 mg/sem (SUSTAIN 1) | − 1,43 % contre placebo ; poids − 3,7 kg contre − 1,0 kg. | [Sorli C et al. Lancet Diabetes Endocrinol 2017;5:251](https://cronfa.swansea.ac.uk/Record/cronfa31739) | -1,43 % ± 0,25 | -1,28 % |
-| aGLP1 | Liraglutide 1,8 mg/j, monothérapie, 52 semaines (LEAD-3, HbA1c 8,3 %) | − 1,14 % depuis l'inclusion (glimépiride 8 mg : − 0,51 %). | [Garber A et al. Lancet 2009;373:473](https://pmc.ncbi.nlm.nih.gov/articles/PMC3084519) | -1,14 % ± 0,3 | -1,14 % |
-| aGLP1 | Liraglutide 1,2 mg/j (LEAD-3) | − 0,84 % depuis l'inclusion. | [Garber A et al. Lancet 2009;373:473](https://pmc.ncbi.nlm.nih.gov/articles/PMC3084519) | -0,84 % ± 0,3 | -0,93 % |
+| aGLP1 | Sémaglutide 0,5 mg/sem (SUSTAIN 1) | − 1,43 % contre placebo ; poids − 3,7 kg contre − 1,0 kg. | [Sorli C et al. Lancet Diabetes Endocrinol 2017;5:251](https://cronfa.swansea.ac.uk/Record/cronfa31739) | -1,43 % ± 0,25 | -1,38 % |
+| aGLP1 | Liraglutide 1,8 mg/j, monothérapie, 52 semaines (LEAD-3, HbA1c 8,3 %) | − 1,14 % depuis l'inclusion (glimépiride 8 mg : − 0,51 %). | [Garber A et al. Lancet 2009;373:473](https://pmc.ncbi.nlm.nih.gov/articles/PMC3084519) | -1,14 % ± 0,3 | -1,10 % |
+| aGLP1 | Liraglutide 1,2 mg/j (LEAD-3) | − 0,84 % depuis l'inclusion. | [Garber A et al. Lancet 2009;373:473](https://pmc.ncbi.nlm.nih.gov/articles/PMC3084519) | -0,84 % ± 0,3 | -0,90 % |
+| AR GIP/GLP-1 | Tirzépatide 15 mg/sem en ajout à la metformine, 40 semaines (SURPASS-2, HbA1c 8,3 %) | − 2,30 % depuis l'inclusion (5 mg − 2,01 ; 10 mg − 2,24 ; sémaglutide 1 mg − 1,86) ; poids − 11,2 kg (sémaglutide − 5,7 kg). | [Frías JP et al. N Engl J Med 2021;385:503](https://acc.org/latest-in-cardiology/clinical-trials/2021/06/27/19/02/surpass-2) ² | -2,30 % ± 0,3 | -2,11 % |
+| AR GIP/GLP-1 | Tirzépatide 5 mg/sem (SURPASS-2) | − 2,01 % depuis l'inclusion ; poids − 7,6 kg. | [Frías JP et al. N Engl J Med 2021;385:503](https://acc.org/latest-in-cardiology/clinical-trials/2021/06/27/19/02/surpass-2) ² | -2,01 % ± 0,3 | -1,87 % |
+| AR GIP/GLP-1 | Tirzépatide 15 mg/sem : poids (SURPASS-2) | − 11,2 kg à 40 semaines. | [Frías JP et al. N Engl J Med 2021;385:503](https://acc.org/latest-in-cardiology/clinical-trials/2021/06/27/19/02/surpass-2) ² | -10,50 kg ± 2,5 | -10,12 kg |
+| aGLP1 | Sémaglutide 1 mg/sem en ajout à la metformine (bras comparateur de SURPASS-2) | − 1,86 % depuis l'inclusion ; poids − 5,7 kg. Plus que dans SUSTAIN 1 (− 1,6 % en monothérapie) : le modèle, calé sur SUSTAIN 1, reste en deçà. | [Frías JP et al. N Engl J Med 2021;385:503](https://acc.org/latest-in-cardiology/clinical-trials/2021/06/27/19/02/surpass-2) ² | -1,86 % ± 0,4 | -1,47 % |
 | aGLP1 | Comparaison de classes (453 essais) | Sémaglutide SC : plus forte baisse d'HbA1c et de poids ; puis sémaglutide oral, exénatide, liraglutide, iSGLT2 pour le poids. | [Tsapas A et al. Ann Intern Med 2020;173:278](https://doi.org/10.7326/M20-0864) | — | — |
 | iSGLT2 | Empagliflozine 25 mg, DFG 60–90 (EMPA-REG RENAL), en ajout | − 0,68 % contre placebo à 24 semaines (10 mg : − 0,52 %). | [Barnett AH et al. Lancet Diabetes Endocrinol 2014;2:369](https://pubmed.ncbi.nlm.nih.gov/24795251/) | -0,68 % ± 0,2 | -0,70 % |
 | iSGLT2 | Empagliflozine 10 mg, DFG 60–90 | − 0,52 % contre placebo. | [Barnett AH et al. Lancet Diabetes Endocrinol 2014;2:369](https://pubmed.ncbi.nlm.nih.gov/24795251/) | -0,52 % ± 0,2 | -0,57 % |
@@ -42,12 +46,13 @@ Effets publiés de chaque traitement et de chaque situation, utilisés pour cale
 
 | Paramètre (`P` dans `dt2-model.js`) | Valeur | Repères |
 | --- | --- | --- |
-| Effet maximal de la metformine (2 g) | 0,5 | met-mono, met-500, met-2000 |
+| Effet maximal de la metformine (2 g) ; au-delà, + 12 % seulement à 3 g (SFD 2025, avis 8) | 0,5 | met-mono, met-500, met-2000 |
 | Atténuation de la metformine sous insuline titrée ; en association orale | 1,0 ; 0,4 | met-ins, met-addon |
 | Sulfamide : effet et exposant de dose (plateau dès la dose faible) | 0,85 ; 0,15 | su-mono, su-dose |
 | iDPP4 ; facteur incrétines Asie de l'Est | 0,31 ; × 1,8 | dpp4, dpp4-asie |
 | aGLP1 : fraction de l'effet par palier | sémaglutide 0,2/0,8/0,9/1 ; dulaglutide 0,65/0,77/0,82/0,88 ; liraglutide 0,3/0,6/0,8 (× 0,62) | sema-05, sema-1, lira-12, lira-18 |
-| Perte de poids sous aGLP1 à dose pleine | 3,5 % | sema-1-w |
+| Perte de poids sous aGLP1 à dose pleine | 3,5 % (tirzépatide × 3,2) | sema-1-w, tirz-15-w |
+| Tirzépatide : fraction par palier (2,5 → 15 mg) | 0,3/0,72/0,8/0,86/0,9/0,93 (× 1,45) | tirz-5, tirz-15 |
 | iSGLT2 : part de l'excès glycémique retirée ; atténuation rénale | empagliflozine 25 mg 0,19, 10 mg et dapagliflozine 0,14 ; nulle à DFG 20, pleine à 60 | empa25-g2, empa10-g2, empa25-g3 |
 | Acarbose 300 mg | 0,2 | acarb |
 | Insuline équivalant à la sécrétion normale | 1,2 U/kg/j | basal-t2t |
@@ -61,5 +66,6 @@ Effets publiés de chaque traitement et de chaque situation, utilisés pour cale
 ## Limites
 
 - Les essais diffèrent par leur population, leur durée et leurs traitements de fond ; le patient théorique n'en reproduit qu'une moyenne. Les tolérances (± 0,2 à 0,35 point) traduisent ces différences.
+- SURPASS-2 donne au sémaglutide 1 mg un effet plus grand (− 1,86 %) que SUSTAIN 1 : le modèle, calé sur SUSTAIN 1, reste en deçà (− 1,47 %, tolérance élargie à 0,4).
 - Repères en tension : Look AHEAD et DiRECT tirent le poids de la perte pondérale en sens inverse (le modèle surestime un peu Look AHEAD et sous-estime un peu DiRECT) ; le sulfamide ajouté à l'insuline reste en deçà de la méta-analyse (− 0,2 contre − 0,46).
 - Non modélisés finement : différences entre molécules d'une même classe hors doses listées, effets cardiovasculaires et rénaux propres (iSGLT2, aGLP1), durabilité à long terme (ADOPT), hypoglycémies au-delà d'un ordre de grandeur (sulfamides : RR 2,41, Hirst 2013).

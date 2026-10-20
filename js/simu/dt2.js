@@ -10,7 +10,9 @@
  * - metformine sous DFG < 30 : acidose lactique ; pancréatite (antécédent) sous incrétines ;
  * - aggravation d'une rétinopathie sévère si l'HbA1c baisse trop vite ; cétose du LADA sans insuline ;
  *   coma hyperosmolaire du sujet âgé très déséquilibré.
- * Référentiel : item EDN 247 (fiche LiSA, rangs de la grille SFE/CEEDMM) et item 253.
+ * Référentiel : item EDN 247 (fiche LiSA, rangs de la grille SFE/CEEDMM), item 253, et prise de position SFD 2025
+ * (js/simu/sfd.js) : cible individualisée, lecture de l'ordonnance, initiation de l'insuline. Carnet glycémique,
+ * capteur et rapport AGP, titration de l'insuline entre les consultations : js/simu/glyco.js.
  */
 (function () {
   'use strict';
@@ -26,17 +28,21 @@
   const SU = [0, 30, 60, 90, 120];
   const DPP4 = [0, 25, 50, 100];
   const ACARB = [0, 150, 300];
-  const TESTS = [['a1c', 'HbA1c'], ['fpg', 'Glycémie à jeun'], ['profil', 'Carnet d\'autosurveillance'], ['creat', 'Créatinine (DFG)'], ['alb', 'Albuminurie'], ['cpep', 'Peptide C'], ['gad', 'Anti-GAD'], ['cetone', 'Cétonémie'], ['lipase', 'Lipase'], ['fo', 'Fond d\'œil']];
+  const Y = S.glyco, SFD = S.sfd;
+  const TESTS = [['a1c', 'HbA1c'], ['fpg', 'Glycémie à jeun'], ['carnet', 'Carnet glycémique'], ['agp', 'Rapport AGP (capteur)'], ['creat', 'Créatinine (DFG)'], ['alb', 'Albuminurie'], ['cpep', 'Peptide C'], ['gad', 'Anti-GAD'], ['cetone', 'Cétonémie'], ['lipase', 'Lipase'], ['fo', 'Fond d\'œil']];
   const PRESETS = [
     { label: 'Metformine seule, HbA1c 7,8', cfg: { profile: 'sird', sex: 'F', age: 58, weight: 88, height: 163, a1c: 7.8, duration: 4, rx0: { met: 2000 } } },
     { label: 'Metformine + gliclazide, HbA1c 8,4', cfg: { profile: 'sird', sex: 'M', age: 63, weight: 92, height: 174, a1c: 8.4, duration: 8, rx0: { met: 2000, su: 60 } } },
     { label: 'Trithérapie orale, HbA1c 9,2', cfg: { profile: 'sird', sex: 'M', age: 61, weight: 101, height: 176, a1c: 9.2, duration: 12, rx0: { met: 2000, su: 120, dpp4: 100 } } },
     { label: 'Metformine + sémaglutide + empagliflozine, HbA1c 8,1', cfg: { profile: 'sird', sex: 'F', age: 59, weight: 96, height: 165, a1c: 8.1, duration: 10, rx0: { met: 2000, glp: 'sema', glpDose: 1, sglt2: 'empa10' } } },
     { label: 'Insuline basale + metformine, HbA1c 8,8', cfg: { profile: 'sird', sex: 'M', age: 66, weight: 104, height: 178, a1c: 8.8, duration: 15, rx0: { met: 2000, basal: 24 } } },
+    { label: 'Insuline à initier : trithérapie en échec, HbA1c 9,4', cfg: { profile: 'sird', sex: 'M', age: 62, weight: 95, height: 175, a1c: 9.4, duration: 14, rx0: { met: 2000, su: 120, dpp4: 100 } } },
+    { label: 'Basale à 0,7 U/kg, HbA1c 8,6', cfg: { profile: 'sird', sex: 'F', age: 64, weight: 100, height: 165, a1c: 8.6, duration: 16, rx0: { met: 2000, basal: 70 } } },
+    { label: 'Sujet âgé fragile, 79 ans, sous gliclazide', cfg: { profile: 'mard', sex: 'F', age: 79, weight: 66, height: 160, a1c: 7.4, duration: 18, dfg: 52, geria: 'fragile', rx0: { met: 1000, su: 60 } } },
     { label: 'Sédentaire, 1 L de soda par jour', cfg: { profile: 'sird', sex: 'M', age: 44, weight: 112, height: 178, a1c: 8.2, duration: 1, act0: 0, soda0: 4, snack0: 'important', motiv: 'forte' } },
     { label: 'DT2 obèse, HbA1c 8,5', cfg: { profile: 'sird', sex: 'M', age: 56, weight: 98, height: 172, a1c: 8.5, duration: 1 } },
     { label: 'DT2 mince, HbA1c 10', cfg: { profile: 'sidd', sex: 'M', age: 52, weight: 64, height: 175, a1c: 10, duration: 6 } },
-    { label: 'Sujet âgé, 82 ans, DFG 38', cfg: { profile: 'mard', sex: 'F', age: 82, weight: 62, height: 158, a1c: 8, duration: 15, dfg: 38, irregular: true } },
+    { label: 'Sujet âgé, 82 ans, DFG 38', cfg: { profile: 'mard', sex: 'F', age: 82, weight: 62, height: 158, a1c: 8, duration: 15, dfg: 38, irregular: true, geria: 'fragile' } },
     { label: 'DT2 et insuffisance cardiaque', cfg: { profile: 'sird', sex: 'M', age: 67, weight: 90, height: 175, a1c: 8.2, duration: 10, hfail: true, cvd: true, dfg: 55, alb: 'micro' } },
     { label: 'Rétinopathie proliférante, HbA1c 11', cfg: { profile: 'sird', sex: 'F', age: 49, weight: 85, height: 162, a1c: 11, duration: 12, retino: 'prolif' } },
     { label: 'Origine asiatique, IMC 24', cfg: { profile: 'mard', sex: 'F', age: 60, weight: 60, height: 158, a1c: 8, duration: 3, ethnic: 'asie' } },
@@ -45,7 +51,7 @@
     { label: 'MODY 2 (GCK), 30 ans', cfg: { profile: 'gck', sex: 'M', age: 30, weight: 72, height: 180, a1c: 6.4, duration: 5 } },
     { label: 'Observance moyenne', cfg: { profile: 'sird', sex: 'M', age: 48, weight: 104, height: 178, a1c: 9, duration: 4, adh: 'moyenne' } }
   ];
-  const BASE = { profile: 'sird', sex: 'M', age: 56, weight: 98, height: 172, a1c: 8.5, duration: 1, dfg: 85, alb: 'normo', ethnic: 'eur', sbp: 142, retino: 'none', hfail: false, cvd: false, panc: false, mtc: false, myco: false, irregular: false, lowcarb: false, adh: 'bonne', variab: 'moyen', rx0: null, act0: 30, soda0: 1, snack0: 'modere', motiv: 'moyenne' };
+  const BASE = { profile: 'sird', sex: 'M', age: 56, weight: 98, height: 172, a1c: 8.5, duration: 1, dfg: 85, alb: 'normo', ethnic: 'eur', sbp: 142, retino: 'none', hfail: false, cvd: false, hcvr: false, masld: false, severe: false, driver: false, geria: 'bonne', panc: false, mtc: false, myco: false, irregular: false, lowcarb: false, adh: 'bonne', variab: 'moyen', rx0: null, act0: 30, soda0: 1, snack0: 'modere', motiv: 'moyenne' };
   let cfg = Object.assign({}, BASE);
   let G = null;
 
@@ -74,6 +80,7 @@
     lactic: 'Metformine et DFG < 30 : la citronnade.',
     panc: 'Le pancréas, lui, n\'avait pas oublié.',
     retino: 'Trop vite, trop bien : l\'œil n\'a pas suivi.',
+    retinoNat: 'Le laser, c\'était pour avant.',
     trophy: 'Bravo. Notez la date.'
   };
   const rangBadge = (r) => (r ? h('span', { class: 'sv-rang sv-rang-' + r }, 'Rang ' + r) : null);
@@ -102,7 +109,7 @@
         h('div', { class: 'sv-form' }, [
           field('Profil', sel('dtProf', cfg.profile, Object.entries(D.PROFILES).map(([k, v]) => [k, v.label]), (v) => { cfg.profile = v; setup(); }), 'dtProf'),
           field('Sexe', sel('dtSex', cfg.sex, [['F', 'Femme'], ['M', 'Homme']], (v) => { cfg.sex = v; }), 'dtSex'),
-          field('Âge (ans)', num('dtAge', cfg.age, 1, 15, 100, (v) => { cfg.age = v; }), 'dtAge'),
+          field('Âge (ans)', h('input', { type: 'number', id: 'dtAge', value: cfg.age, step: 1, min: 15, max: 100, inputmode: 'decimal', class: 'sv-num', oninput: (e) => { cfg.age = parseFloat(e.target.value); }, onchange: () => setup() }), 'dtAge'),
           field('Poids (kg)', num('dtW', cfg.weight, 1, 35, 250, (v) => { cfg.weight = v; }), 'dtW'),
           field('Taille (cm)', num('dtH', cfg.height, 1, 130, 210, (v) => { cfg.height = v; }), 'dtH'),
           field('HbA1c initiale (%)', num('dtA1c', cfg.a1c, 0.1, 6, 15, (v) => { cfg.a1c = v; }), 'dtA1c'),
@@ -112,6 +119,7 @@
           field('PA systolique (mmHg)', num('dtSbp', cfg.sbp, 1, 90, 200, (v) => { cfg.sbp = v; }), 'dtSbp'),
           field('Origine', sel('dtEth', cfg.ethnic, Object.entries(D.ETHNIC).map(([k, v]) => [k, v.label]), (v) => { cfg.ethnic = v; }), 'dtEth'),
           field('Rétinopathie', sel('dtRet', cfg.retino, Object.entries(D.RETINO), (v) => { cfg.retino = v; }), 'dtRet'),
+          cfg.age >= 75 ? field('Statut gériatrique (≥ 75 ans)', sel('dtGer', cfg.geria, [['bonne', 'En bonne santé, autonome'], ['fragile', 'Fragile'], ['dependant', 'Dépendant(e), santé très altérée']], (v) => { cfg.geria = v; }), 'dtGer') : null,
           field('Observance', sel('dtAdh', cfg.adh, [['bonne', 'Bonne'], ['moyenne', 'Moyenne (oublis fréquents)'], ['cachee', 'Inconnue (cachée)']], (v) => { cfg.adh = v; }), 'dtAdh'),
           field('Variabilité', sel('dtVar', cfg.variab, [['moyen', 'Patient moyen (reproductible)'], ['reel', 'Patient réel (réponses cachées)']], (v) => { cfg.variab = v; }), 'dtVar')
         ]),
@@ -119,6 +127,10 @@
         h('div', { class: 'sv-advice' }, [
           chk('dtHf', 'hfail', 'Insuffisance cardiaque'),
           chk('dtCvd', 'cvd', 'Maladie cardiovasculaire avérée (coronaropathie, AVC, AOMI)'),
+          chk('dtHcvr', 'hcvr', 'Risque cardiovasculaire élevé ou très élevé, sans maladie avérée'),
+          chk('dtMasld', 'masld', 'Stéatose hépatique métabolique (MASLD/MASH)'),
+          chk('dtSev', 'severe', 'Espérance de vie < 5 ans ou comorbidité sévère'),
+          chk('dtDrv', 'driver', 'Conduite professionnelle ou métier à risque'),
           chk('dtPanc', 'panc', 'Antécédent de pancréatite'),
           chk('dtMtc', 'mtc', 'Antécédent familial de cancer médullaire de la thyroïde ou de NEM2'),
           chk('dtMyco', 'myco', 'Mycoses génitales récidivantes'),
@@ -152,7 +164,7 @@
         })()),
         h('div', { class: 'sv-actions' }, h('button', { type: 'button', class: 'sv-primary', onclick: begin }, 'Voir le patient →'))
       ]),
-      h('p', { class: 'sv-disc' }, 'Modèle pédagogique simplifié : effets et délais illustratifs (HbA1c jugée à 3 mois, demi-vie de l\'HbA1c ≈ 1 mois) ; ne remplace ni le jugement clinique ni les recommandations. Repères : item EDN 247 (fiche LiSA) ; facteurs prédictifs de réponse : complément.')
+      h('p', { class: 'sv-disc' }, 'Modèle pédagogique simplifié : effets et délais illustratifs (HbA1c jugée à 3 mois, demi-vie de l\'HbA1c ≈ 1 mois) ; ne remplace ni le jugement clinique ni les recommandations. Repères : prise de position SFD 2025 sur les traitements de l\'hyperglycémie, item EDN 247 (fiche LiSA), protocole d\'adaptation des doses d\'insuline du service ; effets des traitements : référentiel de la littérature.')
     );
     window.scrollTo(0, 0);
   }
@@ -162,11 +174,22 @@
     const c = Object.assign({}, cfg);
     if (c.profile === 'gck') c.a1c = Math.min(c.a1c, 7);
     const pt = D.create(Object.assign({}, c, { adh: c.adh === 'cachee' ? (c.variab === 'reel' ? 'cachee' : 'bonne') : c.adh }));
+    const r0 = Object.assign({}, D.RX0, c.rx0 || {});
+    r0.rapidM = (r0.rapidM || [0, 0, 0]).slice(); r0.rapid = r0.rapidM.reduce((a, x) => a + x, 0);
+    Object.assign(pt.rx, { rapidM: r0.rapidM.slice(), rapid: r0.rapid, basalType: r0.basalType });
+    const onIns = r0.basal > 0 || r0.rapid > 0;
     G = {
-      cfg: c, pt, history: [], visits: [], undo: [], truth: false, lastHypo: 0,
-      ev: { metGI: null, glpGI: null, myco: null, sglt2Start: null, keto: false, panc: false, retinoDone: false, lactic: false, ketosis: -999, hyperosm: false, a1cHist: [], lastGlpChange: -999, sevSeen: 0, notes: [] },
-      draft: Object.assign({}, D.RX0, c.rx0 || {}, { metProg: true, wait: 12, unit: 'sem', tests: new Set(['a1c', 'fpg']) })
+      cfg: c, pt, history: [], visits: [], undo: [], truth: false, lastHypo: 0, lastSev: 0,
+      seed: Math.floor(Math.random() * 1e9), glyDays: [], titrState: { above: {} }, titrLog: [], starts: {},
+      titr: { who: onIns ? 'patient' : 'none', prof: c.age >= 75 && c.geria !== 'bonne' ? (c.geria === 'dependant' ? 'dep' : 'fra') : 'std', delai: 3, sfd10: false },
+      cgm: false, asg: onIns ? 2 : r0.su > 0 ? 1 : 0,
+      ev: { metGI: null, glpGI: null, myco: null, sglt2Start: null, keto: false, panc: false, retinoDone: false, lactic: false, ketosis: -999, hyperosm: false, a1cHist: [], lastGlpChange: -999, sevSeen: 0, notes: [], ppr: null },
+      draft: Object.assign({}, r0, { metProg: true, wait: 12, unit: 'sem', tests: new Set(['a1c', 'fpg']), ppr: false })
     };
+    G.draft.titr = Object.assign({}, G.titr); G.draft.cgm = G.cgm; G.draft.asg = G.asg;
+    // Quatorze jours de glycémies avant la première consultation (carnet, capteur).
+    for (let k = 14; k > 0; k--) { pt.day = -k; recordDay(); }
+    pt.day = 0;
     doLabs(new Set(['a1c', 'fpg', 'creat']), 'Bilan initial');
     render();
   }
@@ -178,7 +201,8 @@
     const jump = rx.met - prev.met;
     if (rx.met < prev.met || rx.met <= 1000) { if (ev.metGI) { ev.metGI = null; } pt.take.met = true; }
     if (rx.met !== prev.met) pt.metRamp = prog && jump > 0 ? { from: pt.take.met ? metBefore : 0, to: rx.met, start: pt.day } : null;
-    if (jump > 0 && prog) { pt.take.met = true; if (real && Math.random() < 0.08 * p.giSens) ev.metGI = { day: pt.day + 10, stopDay: pt.day + 40, fired: false }; }
+    // Environ 15 % d'intolérants malgré une introduction progressive (SFD 2025, avis 6).
+    if (jump > 0 && prog) { pt.take.met = true; if (real && Math.random() < 0.3 * p.giSens) ev.metGI = { day: pt.day + 10, stopDay: pt.day + 40, fired: false }; }
     else if (jump > 0) {
       const prob = p.giSens * jump / 2000;
       const hit = real ? Math.random() < prob : p.giSens + jump / 3000 >= 1;
@@ -207,6 +231,41 @@
     if (rx.sglt2 === 'none') ev.sglt2Start = null;
   }
 
+  /* ---------- Glycémies du jour, titration ---------- */
+  // Une journée de glycémies (carnet, capteur) ; avec titrate, le patient ou l'IDE adapte les doses
+  // d'insuline selon le protocole prescrit.
+  function recordDay(titrate) {
+    const pt = G.pt;
+    const newHypo = pt.st.hypo - (G.lastH == null ? pt.st.hypo : G.lastH), newSev = pt.st.hypoSev - (G.lastS == null ? pt.st.hypoSev : G.lastS);
+    const dp = Y.makeDay(pt, D, { seed: (G.seed + pt.day * 7919) >>> 0, irregular: G.cfg.irregular || G.cfg.adh === 'moyenne', newHypo, newSev });
+    pt.st.hypo += dp.native;
+    G.lastH = pt.st.hypo; G.lastS = pt.st.hypoSev;
+    const rdg = Y.readings(dp);
+    dp.rdg = rdg;
+    if (titrate && G.titr.who !== 'none' && (pt.rx.basal > 0 || pt.rx.rapid > 0)) {
+      const follow = G.cfg.variab !== 'reel' || G.titr.who === 'ide' || Math.random() < 0.85;
+      const before = { b: pt.rx.basal, m: pt.rx.rapidM.slice() };
+      const log = Y.titrate(pt.rx, rdg, G.titr, G.titrState, follow);
+      if (log.length) G.titrLog.push({ day: pt.day, log, before });
+    }
+    dp.basalAfter = pt.rx.basal;
+    G.glyDays.push(dp);
+    if (G.glyDays.length > 28) G.glyDays.shift();
+    return dp;
+  }
+
+  // Lignes du carnet : mesures faites selon la fréquence d'autosurveillance prescrite.
+  function carnetRows() {
+    const days = G.glyDays.slice(-14), asg = G.asg;
+    return days.map((dp) => {
+      const set = asg ? Y.ASG[asg].set(dp.d) : [];
+      const v = {};
+      set.forEach((k) => { v[k] = dp.rdg[k]; });
+      const rem = dp.rdg.hypos.map((hy) => 'malaise à ' + Math.floor(hy.t) + ' h ' + String(Math.round((hy.t % 1) * 60)).padStart(2, '0') + ' : ' + fmt(hy.g, 2) + ' g/L' + (hy.sev ? ' (tierce personne)' : ', resucrage'));
+      return { d: dp.d, basal: dp.basal, u: dp.rapid, v, hypos: dp.rdg.hypos, rem };
+    });
+  }
+
   // Épitaphes d'humour noir.
   function epitaph(cause) {
     const pt = G.pt, c = G.cfg;
@@ -232,7 +291,7 @@
       const again = ev.lastSev != null && d - ev.lastSev < 120 && (rx.su || rx.basal || rx.rapid);
       ev.lastSev = d;
       if (again && fragile) return { death: true, toon: 'death', text: 'J' + d + ' : deuxième hypoglycémie sévère en moins de 4 mois, cette fois la nuit, seul' + (G.cfg.sex === 'F' ? 'e' : '') + '. Retrouvé' + (G.cfg.sex === 'F' ? 'e' : '') + ' au matin. Le traitement hypoglycémiant n\'avait pas été allégé.', epitaphe: epitaph('hypo') };
-      return { toon: 'hypoSevere', text: 'J' + d + ' : hypoglycémie sévère (glycémie capillaire 0,38 g/L), troubles de conscience, prise en charge par ' + (rx.su ? 'le SAMU : glucosé 30 % IV (glucagon contre-indiqué sous sulfamide)' : 'l\'entourage : glucagon') + '.', tests: ['profil'] };
+      return { toon: 'hypoSevere', text: 'J' + d + ' : hypoglycémie sévère (glycémie capillaire 0,38 g/L), troubles de conscience, prise en charge par ' + (rx.su ? 'le SAMU : glucosé 30 % IV (glucagon contre-indiqué sous sulfamide)' : 'l\'entourage : glucagon') + '.', tests: ['carnet'] };
     }
     // Metformine : intolérance digestive
     if (ev.metGI && !ev.metGI.fired && d >= ev.metGI.day) { ev.metGI.fired = true; G.ev.notes.push('diarrhée, ballonnements depuis l\'augmentation de la metformine'); }
@@ -275,12 +334,21 @@
         return { toon: 'panc', text: 'J' + d + ' : douleur épigastrique transfixiante, vomissements ; lipase à 12 N : pancréatite aiguë chez un patient aux antécédents de pancréatite, sous incrétine. Hospitalisation ; incrétine arrêtée.', tests: ['lipase'], stop: 'incr' };
       }
     }
-    // Rétinopathie sévère : baisse trop rapide de l'HbA1c
+    // Rétinopathie sévère ou proliférante : aggravation précoce si l'HbA1c baisse vite (≥ 2 points en
+    // 3 mois ; ≥ 1,5 point sous aGLP1, tirzépatide ou insuline, comme dans SUSTAIN-6 où elle touchait
+    // surtout les rétinopathies connues avec une forte baisse précoce ; ≥ 3,5 points après photocoagulation). Sans laser, la rétinopathie proliférante saigne aussi d'elle-même (patient réel).
+    // SFD 2025, avis 6 bis et 8 bis : fond d'œil rapide, objectifs gradués, complication non spécifique.
     if ((p.retino === 'severe' || p.retino === 'prolif') && !ev.retinoDone) {
-      const old = ev.a1cHist.find((x) => d - x[0] <= 91);
-      if (old && d >= 35 && old[1] - s.A >= 1.5) {
+      const win = ev.a1cHist.filter((x) => d - x[0] <= 91);
+      const top = win.reduce((m, x) => (x[1] > m[1] ? x : m), [d, s.A]);
+      const drop = top[1] - s.A;
+      const strong = rx.glp !== 'none' || rx.basal + rx.rapid > 0;
+      const thr = ev.ppr != null ? 3.5 : strong ? 1.5 : 2;
+      const nat = p.retino === 'prolif' && ev.ppr == null && G.cfg.variab === 'reel' && Math.random() < 0.0003;
+      if ((d >= 42 && drop >= thr) || nat) {
         ev.retinoDone = true;
-        return { toon: 'retino', text: 'J' + d + ' : baisse brutale de l\'acuité visuelle de l\'œil droit : hémorragie intravitréenne sur rétinopathie ' + (p.retino === 'prolif' ? 'proliférante' : 'préproliférante') + ', aggravée par la baisse rapide de l\'HbA1c (' + fmt(old[1], 1) + ' → ' + fmt(s.A, 1) + ' % en ' + Math.round((d - old[0]) / 7) + ' semaines).', tests: ['fo'] };
+        const why = nat ? 'rétinopathie proliférante non traitée par laser' : 'aggravée par la baisse rapide de l\'HbA1c (' + fmt(top[1], 1) + ' → ' + fmt(s.A, 1) + ' % en ' + Math.max(1, Math.round((d - top[0]) / 7)) + ' semaines' + (rx.glp === 'sema' || rx.glp === 'tirz' ? ', sous ' + D.GLP1[rx.glp].name.split(' (')[0].toLowerCase() : rx.basal + rx.rapid > 0 ? ', sous insuline' : '') + ')' + (ev.ppr == null ? ', sans photocoagulation préalable' : '');
+        return { toon: nat ? 'retino' : 'retino', text: 'J' + d + ' : baisse brutale de l\'acuité visuelle de l\'œil droit : hémorragie intravitréenne sur rétinopathie ' + (p.retino === 'prolif' ? 'proliférante' : 'préproliférante') + ', ' + why + '. Vitrectomie à discuter, panphotocoagulation en urgence.', tests: ['fo'], caption: nat ? 'retinoNat' : 'retino' };
       }
     }
     // Cétose (LADA, insulinopénie) sans insuline
@@ -300,10 +368,6 @@
   /* ---------- Bilans ---------- */
   function qual(k, m) {
     const pt = G.pt, p = pt.par, ev = G.ev;
-    if (k === 'profil') {
-      const n = pt.st.hypo - G.lastHypo;
-      return 'à jeun ' + fmt(m.fpg, 2) + ' g/L · 2 h après le déjeuner ' + fmt(m.ppg, 2) + ' g/L · hypoglycémies < 0,70 g/L notées : ' + n;
-    }
     if (k === 'alb') return D.ALB[G.cfg.alb].label.split(' (')[0].toLowerCase() + (pt.rx.sglt2 !== 'none' ? ', en baisse' : '');
     if (k === 'cpep') return fmt(m.cpep, 1) + ' ng/mL (N 0,9–4)';
     if (k === 'gad') return p.gad ? 'positifs (85 UI/mL)' : 'négatifs';
@@ -317,19 +381,36 @@
     const pt = G.pt;
     const m = D.measure(pt);
     const labs = {}, q = [];
+    let carnet = null, agp = null;
     tests.forEach((k) => {
       if (k === 'a1c') labs.a1c = m.a1c;
-      else if (k === 'fpg') labs.fpg = m.fpg;
+      else if (k === 'fpg') labs.fpg = G.glyDays.length ? G.glyDays[G.glyDays.length - 1].rdg.rev : m.fpg;
       else if (k === 'creat') labs.dfg = m.dfg;
+      else if (k === 'carnet') { if (G.asg) carnet = carnetRows(); else q.push(['Carnet glycémique', 'pas d\'autosurveillance glycémique prescrite']); }
+      else if (k === 'agp') {
+        if (G.cgm && G.glyDays.length) { const days = G.glyDays.slice(-14); agp = { st: Y.agpStats(Y.cgm(days), days.length), days }; }
+        else q.push(['Rapport AGP', 'pas de capteur de glucose prescrit']);
+      }
       else q.push([TESTS.find((t) => t[0] === k)[1], qual(k, m)]);
     });
+    // Titration faite entre les deux consultations.
+    const tl = G.titrLog.filter((x) => x.day >= (G.visitStart == null ? 0 : G.visitStart));
+    let titr = null;
+    if (tl.length) {
+      const first = tl[0].before, rx = pt.rx, parts = [];
+      if (first.b !== rx.basal) parts.push('basale ' + first.b + ' → ' + rx.basal + ' U');
+      rx.rapidM.forEach((u, i) => { if (first.m[i] !== u) parts.push('bolus du ' + ['petit-déjeuner', 'déjeuner', 'dîner'][i] + ' ' + first.m[i] + ' → ' + u + ' U'); });
+      const down = tl.reduce((a, x) => a + x.log.filter((l) => l.to < l.from).length, 0), up = tl.reduce((a, x) => a + x.log.filter((l) => l.to > l.from).length, 0);
+      titr = (G.titr.who === 'ide' ? 'L\'IDE' : G.cfg.sex === 'F' ? 'La patiente' : 'Le patient') + ' a appliqué le protocole : ' + (parts.join(', ') || 'doses revenues à leur point de départ') + ' (' + up + ' hausse' + (up > 1 ? 's' : '') + ', ' + down + ' baisse' + (down > 1 ? 's' : '') + ').';
+    }
     const sy = symptoms(m);
     const nHypo = pt.st.hypo - G.lastHypo;
     let toon = G.ev.eventToon || G.ev.toonNext || (nHypo >= 3 ? 'hypo' : null);
-    const target = pt.par.age >= 75 || pt.st.dfg < 30 ? 8 : 7;
+    const T = SFD.target(G.cfg, pt.rx, pt.st.dfg);
+    const target = T.max;
     if (!toon && labs.a1c != null && labs.a1c < target && nHypo === 0 && !G.ev.trophy && G.history.length && G.history[0].labs.a1c >= target) { toon = 'trophy'; G.ev.trophy = true; }
-    G.history.push({ day: pt.day, labs, q, w: m.w, bmi: m.bmi, sbp: Math.round(m.sbp), symptoms: sy, rx: rxLabel(pt.rx), note, event: event || null, toon, banner: G.ev.banner || null, epitaphe: G.ev.epitaphe || null });
-    G.ev.eventToon = null; G.ev.toonNext = null; G.ev.banner = null; G.ev.epitaphe = null;
+    G.history.push({ day: pt.day, labs, q, w: m.w, bmi: m.bmi, sbp: Math.round(m.sbp), symptoms: sy, rx: rxLabel(pt.rx), note, event: event || null, toon, caption: G.ev.caption || toon, banner: G.ev.banner || null, epitaphe: G.ev.epitaphe || null, carnet, agp, titr, T, a1cTrue: pt.st.A, ukg: pt.rx.basal / pt.st.W });
+    G.ev.eventToon = null; G.ev.toonNext = null; G.ev.banner = null; G.ev.epitaphe = null; G.ev.caption = null;
     G.visits.push({ day: pt.day, labs });
     G.lastHypo = pt.st.hypo;
     G.ev.notes = [];
@@ -356,43 +437,63 @@
     if (rx.glp !== 'none') o.push(D.GLP1[rx.glp].name.split(' (')[0].toLowerCase() + ' ' + fmt(rx.glpDose, rx.glpDose % 1 ? 2 : 0).replace(/,?0+$/, '') + ' ' + D.GLP1[rx.glp].unit);
     if (rx.sglt2 !== 'none') o.push(D.SGLT2[rx.sglt2].toLowerCase());
     if (rx.acarb) o.push('acarbose ' + rx.acarb + ' mg/j');
-    if (rx.basal) o.push('insuline basale ' + rx.basal + ' U/j');
-    if (rx.rapid) o.push('insuline rapide ' + rx.rapid + ' U/j');
+    if (rx.basal) o.push('insuline basale (' + ({ g100: 'glargine U100', g300: 'glargine U300', deg: 'dégludec', nph: 'NPH' }[rx.basalType] || 'glargine') + ') ' + rx.basal + ' U/j');
+    if (rx.rapid) o.push('analogue rapide ' + (rx.rapidM || [0, rx.rapid, 0]).map((x) => x || 0).join('/') + ' U (petit-déj./déj./dîner)');
     return o.length ? o.join(' + ') : 'aucun traitement';
   }
 
   function snapshot() {
     const pt = G.pt;
-    return JSON.stringify({ metRamp: pt.metRamp, st: pt.st, day: pt.day, rx: pt.rx, take: pt.take, par: Object.assign({}, pt.par), logLen: pt.log.length, hist: G.history.length, vis: G.visits.length, ev: G.ev, lastHypo: G.lastHypo });
+    return JSON.stringify({ metRamp: pt.metRamp, st: pt.st, day: pt.day, rx: pt.rx, take: pt.take, par: Object.assign({}, pt.par), logLen: pt.log.length, hist: G.history.length, vis: G.visits.length, ev: G.ev, lastHypo: G.lastHypo,
+      gly: G.glyDays, titrState: G.titrState, titrLog: G.titrLog.length, starts: G.starts, titr: G.titr, cgm: G.cgm, asg: G.asg, lastH: G.lastH, lastS: G.lastS });
   }
   function restore(js) {
     const s = JSON.parse(js), pt = G.pt;
     pt.st = s.st; pt.day = s.day; pt.rx = s.rx; pt.take = s.take; pt.metRamp = s.metRamp; Object.assign(pt.par, s.par);
     pt.log.length = s.logLen; G.history.length = s.hist; G.visits.length = s.vis; G.ev = s.ev; G.lastHypo = s.lastHypo;
+    G.glyDays = s.gly; G.titrState = s.titrState; G.titrLog.length = s.titrLog; G.starts = s.starts; G.titr = s.titr; G.cgm = s.cgm; G.asg = s.asg; G.lastH = s.lastH; G.lastS = s.lastS;
+    Object.assign(G.draft, pt.rx, { rapidM: pt.rx.rapidM.slice(), titr: Object.assign({}, G.titr), cgm: G.cgm, asg: G.asg });
   }
+
+  function lastA1c() { const v = [...G.visits].reverse().find((x) => x.labs.a1c != null); return v ? v.labs.a1c : G.pt.st.A; }
 
   function submit() {
     const d = G.draft, pt = G.pt;
     const days = Math.round(d.unit === 'sem' ? d.wait * 7 : d.wait);
     const alert = main.querySelector('.sv-alert');
-    if (!(days >= 1 && days <= 1095)) { alert.textContent = 'Délai entre 1 jour et 3 ans.'; alert.hidden = false; return; }
-    if (!d.tests.size) { alert.textContent = 'Cochez au moins un examen.'; alert.hidden = false; return; }
+    const say = (t) => { alert.textContent = ''; (Array.isArray(t) ? t : [t]).forEach((x) => alert.append(h('span', { class: 'sv-alert-l' }, x))); alert.hidden = false; };
+    if (!(days >= 1 && days <= 1095)) { say('Délai entre 1 jour et 3 ans.'); return; }
+    if (!d.tests.size) { say('Cochez au moins un examen.'); return; }
+    d.rapid = d.rapidM.reduce((a, x) => a + x, 0);
+    // Initiation de l'insuline : règle de bonne pratique, refus si non respectée (SFD 2025, avis 18).
+    const block = SFD.insulinInit(pt.rx, d, pt.st.W);
+    if (block.length) { say(block); return; }
     G.undo.push(snapshot());
-    const prev = Object.assign({}, pt.rx);
+    const prev = Object.assign({}, pt.rx, { rapidM: pt.rx.rapidM.slice() });
     const metBefore = D.metDose(pt);
-    Object.assign(pt.rx, { met: d.met, su: d.su, dpp4: d.dpp4, glp: d.glp, glpDose: d.glp === 'none' ? 0 : d.glpDose, sglt2: d.sglt2, acarb: d.acarb, basal: d.basal, rapid: d.rapid, act: d.act, sodaStop: d.sodaStop, wtGoal: d.wtGoal, diet: d.diet });
+    Object.assign(pt.rx, { met: d.met, su: d.su, dpp4: d.dpp4, glp: d.glp, glpDose: d.glp === 'none' ? 0 : d.glpDose, sglt2: d.sglt2, acarb: d.acarb, basal: d.basal, basalType: d.basalType, rapidM: d.rapidM.slice(), rapid: d.rapid, act: d.act, sodaStop: d.sodaStop, wtGoal: d.wtGoal, diet: d.diet });
+    G.titr = Object.assign({}, d.titr); G.cgm = d.cgm; G.asg = d.asg;
+    if (d.ppr && G.ev.ppr == null) G.ev.ppr = pt.day;
+    // Début des traitements, pour les règles d'arrêt (SFD 2025, avis 5).
+    const on = { su: (r) => r.su > 0, dpp4: (r) => r.dpp4 > 0, sglt2: (r) => r.sglt2 !== 'none', glp: (r) => r.glp !== 'none' };
+    Object.entries(on).forEach(([k, f]) => { if (f(pt.rx) && !f(prev)) G.starts[k] = { day: pt.day, a1c: lastA1c(), w: pt.st.W }; else if (!f(pt.rx)) delete G.starts[k]; });
+    if (!(prev.basal > 0) && pt.rx.basal > 0) G.titrState = { above: {} };
     pt.par.dfg0Eff = Math.max(pt.par.dfg0Eff || 0, pt.st.dfg);
     onPrescribe(prev, metBefore, d.metProg);
     G.history.push({ day: pt.day, prescription: true, rx: rxLabel(pt.rx) });
+    G.visitStart = pt.day;
     let interrupt = null;
     const rng = G.cfg.variab === 'reel' ? Math.random : null;
-    D.advance(pt, days, () => { const e = daily(); if (e) { interrupt = e; return false; } return true; }, rng);
+    D.advance(pt, days, () => { recordDay(true); const e = daily(); if (e) { interrupt = e; return false; } return true; }, rng);
+    // Doses atteintes par la titration : point de départ de la prochaine ordonnance.
+    d.basal = pt.rx.basal; d.rapidM = pt.rx.rapidM.slice(); d.rapid = pt.rx.rapid;
     let note = 'Bilan à ' + (d.unit === 'sem' ? d.wait + ' semaine' + (d.wait > 1 ? 's' : '') : days + ' jour' + (days > 1 ? 's' : ''));
     let tests = d.tests;
     if (interrupt) {
       note = interrupt.death ? 'Décès' : 'Consultation non programmée (bilan prévu annulé)';
-      tests = new Set((interrupt.tests || []).concat(['fpg']));
+      tests = new Set((interrupt.tests || []).concat(['fpg'], G.asg ? ['carnet'] : []));
       G.ev.eventToon = interrupt.toon || null;
+      G.ev.caption = interrupt.caption || null;
       if (interrupt.death) { G.dead = interrupt; G.ev.epitaphe = interrupt.epitaphe; }
       G.lastEvent = interrupt.text.includes('acidocétose') ? 'keto' : null;
       if (interrupt.stop === 'met') d.met = 0;
@@ -415,7 +516,7 @@
     main.textContent = '';
     main.className = 'sv-main sv-game sv-sandbox';
     const left = h('aside', { class: 'sv-dossier' }, [patientCard(), G.dead ? deathCard() : rxCard()]);
-    const right = h('section', { class: 'sv-consult' }, [latestCard(), chartCard(), marginCard(), historyCard(), factorsCard(), refCard(), effectsCard(), revealCard()]);
+    const right = h('section', { class: 'sv-consult' }, [latestCard(), sfdCard(), chartCard(), marginCard(), historyCard(), factorsCard(), refCard(), effectsCard(), revealCard()]);
     main.append(left, right);
     const box = right.querySelector('.sv-chartbox');
     if (box) requestAnimationFrame(() => chart(box));
@@ -424,7 +525,7 @@
   function patientCard() {
     const c = G.cfg, pt = G.pt;
     const bmi = c.weight / Math.pow(c.height / 100, 2);
-    const co = [c.hfail && 'insuffisance cardiaque', c.cvd && 'maladie CV avérée', c.panc && 'ATCD de pancréatite', c.mtc && 'ATCD familial de CMT', c.myco && 'mycoses récidivantes', c.irregular && 'repas irréguliers', c.lowcarb && 'régime cétogène', c.retino !== 'none' && D.RETINO[c.retino].toLowerCase()].filter(Boolean);
+    const co = [c.hfail && 'insuffisance cardiaque', c.cvd && 'maladie CV avérée', c.panc && 'ATCD de pancréatite', c.mtc && 'ATCD familial de CMT', c.myco && 'mycoses récidivantes', c.irregular && 'repas irréguliers', c.lowcarb && 'régime cétogène', c.retino !== 'none' && D.RETINO[c.retino].toLowerCase() + (G.ev.ppr != null ? ' (photocoagulée à J' + G.ev.ppr + ')' : ''), c.hcvr && 'risque CV élevé', c.masld && 'MASLD', c.severe && 'espérance de vie < 5 ans ou comorbidité sévère', c.driver && 'conduite professionnelle', c.age >= 75 && { bonne: 'âgé(e) en bonne santé', fragile: 'âgé(e) fragile', dependant: 'âgé(e) dépendant(e)' }[c.geria]].filter(Boolean);
     return h('div', { class: 'sv-card sv-id' }, [
       h('p', { class: 'sv-eyebrow' }, 'Patient simulé'),
       h('h2', null, (c.sex === 'F' ? 'Femme' : 'Homme') + ', ' + c.age + ' ans, ' + fmt(c.weight, 0) + ' kg, IMC ' + fmt(bmi, 1)),
@@ -464,10 +565,8 @@
         ])]),
         sel('dtSglt', 'iSGLT2', d.sglt2, Object.entries(D.SGLT2), (v) => { d.sglt2 = v; }),
         sel('dtAcarb', 'Acarbose', d.acarb, ACARB.map((x) => [x, x ? x + ' mg/j' : 'Aucune']), (v) => { d.acarb = +v; }),
-        num('dtBasal', 'Insuline basale (glargine)', d.basal, (v) => { d.basal = v; }),
-        num('dtRapid', 'Insuline rapide (total des repas)', d.rapid, (v) => { d.rapid = v; })
       ]),
-      d.basal || d.rapid ? h('p', { class: 'sv-note' }, 'Insuline : ' + fmt((d.basal + d.rapid) / G.cfg.weight, 2) + ' U/kg/j.') : null,
+      insulinBlock(d, re),
       h('h3', null, 'Prochain bilan'),
       h('div', { class: 'sv-inline' }, ['dans',
         h('input', { type: 'number', id: 'dtWait', class: 'sv-num', value: d.wait, min: 1, max: d.unit === 'sem' ? 156 : 1095, step: 1, inputmode: 'numeric', 'aria-label': 'Délai', oninput: (e) => { d.wait = parseFloat(e.target.value) || 0; } }),
@@ -476,6 +575,45 @@
       h('div', { class: 'sv-chips' }, TESTS.map(([k, t]) => h('label', { class: 'sv-chipcheck' }, [h('input', { type: 'checkbox', id: 'dtT' + k, checked: d.tests.has(k), onchange: (e) => { e.target.checked ? d.tests.add(k) : d.tests.delete(k); } }), ' ' + t]))),
       h('p', { class: 'sv-alert', hidden: true }),
       h('div', { class: 'sv-actions' }, h('button', { type: 'button', class: 'sv-primary', onclick: submit }, 'Prescrire et voir le bilan →'))
+    ]);
+  }
+
+  // Insulinothérapie : basale, bolus par repas, protocole d'adaptation des doses, surveillance.
+  function insulinBlock(d, re) {
+    const pt = G.pt, W = pt.st.W;
+    const sel = (id, label, val, opts, on) => h('div', { class: 'sv-field' }, [h('label', { for: id }, label), h('select', { id, onchange: (e) => { on(e.target.value); } }, opts.map(([k, t]) => h('option', { value: k, selected: String(val) === String(k) }, t)))]);
+    const unit = (id, val, on, label) => h('span', { class: 'sv-numwrap' }, [h('input', { type: 'number', id, class: 'sv-num sv-num-s', value: val, min: 0, max: 300, step: 1, inputmode: 'numeric', 'aria-label': label, oninput: (e) => { on(Math.max(0, Math.round(parseFloat(e.target.value) || 0))); } }), ' U']);
+    const tot = () => d.basal + d.rapidM.reduce((a, x) => a + x, 0);
+    const note = h('p', { class: 'sv-note', id: 'dtInsNote' });
+    const upd = () => { note.textContent = tot() ? 'Insuline : ' + fmt(tot() / W, 2) + ' U/kg/j (basale ' + fmt(d.basal / W, 2) + ').' : ''; };
+    upd();
+    const lo = Math.max(6, Math.round(0.1 * W)), hi = Math.max(10, Math.round(0.2 * W));
+    const t = d.titr;
+    const O = Y.PROTO[t.prof];
+    const retNeed = (G.cfg.retino === 'severe' || G.cfg.retino === 'prolif') && G.ev.ppr == null;
+    return h('div', { class: 'sv-ins' }, [
+      h('h4', null, 'Insulinothérapie'),
+      pt.rx.basal > 0 ? null : h('p', { class: 'sv-muted' }, 'Initiation : une injection d\'analogue lent, 6 à 10 U/j ou 0,1 à 0,2 U/kg/j, soit ' + lo + ' à ' + hi + ' U ici, puis titration (SFD 2025, avis 18). Une dose de départ plus forte est refusée.'),
+      h('div', { class: 'sv-form' }, [
+        h('div', { class: 'sv-field' }, [h('label', { for: 'dtBasal' }, 'Insuline basale (1 injection/j)'), h('div', { class: 'sv-inline' }, [unit('dtBasal', d.basal, (v) => { d.basal = v; upd(); }, 'Dose de basale'),
+          h('select', { id: 'dtBasalType', 'aria-label': 'Insuline basale', onchange: (e) => { d.basalType = e.target.value; } }, [['g100', 'Glargine U100'], ['g300', 'Glargine U300'], ['deg', 'Dégludec'], ['nph', 'NPH']].map(([k, v]) => h('option', { value: k, selected: d.basalType === k }, v)))])]),
+        h('div', { class: 'sv-field' }, [h('label', null, 'Analogue rapide aux repas (petit-déj. / déj. / dîner)'), h('div', { class: 'sv-inline' }, [0, 1, 2].map((m) => unit('dtBolus' + m, d.rapidM[m], (v) => { d.rapidM[m] = v; upd(); }, 'Bolus ' + Y.MEALS[m])))])
+      ]),
+      note,
+      h('h4', null, 'Adaptation des doses entre les consultations'),
+      h('div', { class: 'sv-form' }, [
+        sel('dtTitrWho', 'Qui adapte ?', t.who, [['none', 'Personne (doses fixes)'], ['patient', 'Le patient (protocole écrit, éducation)'], ['ide', 'Un(e) IDE à domicile']], (v) => { t.who = v; }),
+        sel('dtTitrProf', 'Objectifs du protocole', t.prof, Object.entries(Y.PROTO).map(([k, v]) => [k, v.label + ' (réveil ' + fmt(v.rev[0], 2) + '–' + fmt(v.rev[1], 2) + ')']), (v) => { t.prof = v; re(); }),
+        sel('dtTitrDel', 'Augmenter après', t.delai, [[2, '2 jours de suite au-dessus de l\'objectif'], [3, '3 jours de suite (SFD : tous les 3 jours)']], (v) => { t.delai = +v; })
+      ]),
+      h('label', { class: 'sv-check sv-small' }, [h('input', { type: 'checkbox', id: 'dtTitr10', checked: t.sfd10, onchange: (e) => { t.sfd10 = e.target.checked; } }), ' Au-delà de 40 U, pas de 10 % (SFD 2025) au lieu de 2 U']),
+      h('p', { class: 'sv-note' }, 'Protocole du service : pas de 1 U sous 10 U, de 2 U au-delà ; baisse dès l\'injection suivante si hypoglycémie ou glycémie < ' + fmt(O.rev[0], 2) + ' g/L ; basale jugée sur le réveil, bolus sur la glycémie avant le repas suivant.'),
+      h('h4', null, 'Surveillance glycémique'),
+      h('div', { class: 'sv-form' }, [
+        sel('dtAsg', 'Autosurveillance capillaire', d.asg, [[0, 'Aucune']].concat(Object.entries(Y.ASG).map(([k, v]) => [k, v.label])), (v) => { d.asg = +v; })
+      ]),
+      h('label', { class: 'sv-check' }, [h('input', { type: 'checkbox', id: 'dtCgm', checked: d.cgm, onchange: (e) => { d.cgm = e.target.checked; } }), ' Capteur de glucose (mesure en continu, rapport AGP)']),
+      retNeed ? h('label', { class: 'sv-check' }, [h('input', { type: 'checkbox', id: 'dtPpr', checked: d.ppr, onchange: (e) => { d.ppr = e.target.checked; } }), ' Adresser en urgence en ophtalmologie : photocoagulation panrétinienne']) : null
     ]);
   }
 
@@ -521,18 +659,77 @@
   function latestCard() {
     const e = [...G.history].reverse().find((x) => !x.prescription);
     const rows = [];
-    if (e.labs.a1c != null) rows.push(['HbA1c', fmt(e.labs.a1c, 1) + ' %', '< 7 % (individualisée)', e.labs.a1c > 7]);
+    const T = e.T;
+    if (e.labs.a1c != null) rows.push(['HbA1c', fmt(e.labs.a1c, 1) + ' %', 'cible ≤ ' + fmt(T.max, 1) + ' %' + (T.floor ? ', > ' + fmt(T.floor, 1) + ' %' : '') + ' (SFD 2025)', e.labs.a1c > T.max || (T.floor && e.labs.a1c < T.floor)]);
     if (e.labs.fpg != null) rows.push(['Glycémie à jeun', g2(e.labs.fpg), '0,70–1,10 g/L', e.labs.fpg > 1.26 || e.labs.fpg < 0.7]);
     if (e.labs.dfg != null) rows.push(['DFG (CKD-EPI)', fmt(e.labs.dfg, 0) + ' mL/min/1,73 m²', '> 60', e.labs.dfg < 60]);
     return h('div', { class: 'sv-card sv-latest' }, [
       h('div', { class: 'sv-latest-head' }, [h('p', { class: 'sv-eyebrow' }, e.note || 'Bilan'), h('h1', null, dayLabel(e.day))]),
       e.event ? h('p', { class: 'sv-event' }, e.event) : null,
       e.banner ? h('p', { class: 'sv-banner' }, '⚠ ' + e.banner) : null,
-      e.toon ? S.toon(e.toon, { epitaphe: e.epitaphe, titre: TOON_CAPTION[e.toon] }) : null,
+      e.toon ? S.toon(e.toon, { epitaphe: e.epitaphe, titre: TOON_CAPTION[e.caption || e.toon] }) : null,
       rows.length ? h('table', { class: 'sv-res sv-big' }, [h('thead', null, h('tr', null, [h('th', null, 'Examen'), h('th', null, 'Résultat'), h('th', null, 'Référence')])), h('tbody', null, rows.map(([a, b, c2, flag]) => h('tr', null, [h('td', null, a), h('td', { class: 'sv-v' + (flag ? ' hi' : '') }, b), h('td', { class: 'sv-ref' }, c2)])))]) : null,
       e.q.length ? h('dl', { class: 'sv-exam sv-qual' }, e.q.flatMap(([k, v]) => [h('dt', null, k), h('dd', null, v)])) : null,
       h('p', { class: 'sv-clin' }, 'Poids ' + fmt(e.w, 1) + ' kg (IMC ' + fmt(e.bmi, 1) + ') · PA ' + e.sbp + ' mmHg · ' + (e.symptoms.length ? e.symptoms.join(' ; ') : 'pas de plainte particulière') + '.'),
+      e.titr ? h('p', { class: 'sv-titr' }, '↻ ' + e.titr) : null,
+      e.carnet ? carnetBlock(e) : null,
+      e.agp ? agpBlock(e) : null,
       h('p', { class: 'sv-note' }, 'Traitement prescrit jusqu\'à ce bilan : ' + e.rx + '.')
+    ]);
+  }
+
+  // Carnet glycémique et sa lecture guidée (protocole du service, SFD 2025).
+  function carnetBlock(e) {
+    const prot = G.titr;
+    const O = Y.PROTO[prot.prof];
+    const read = Y.interpretCarnet(e.carnet, prot, { basal: G.pt.rx.basal, basalUkg: e.ukg, a1c: e.labs.a1c });
+    return h('div', { class: 'sv-gly' }, [
+      h('h4', null, 'Carnet glycémique · ' + e.carnet.length + ' derniers jours'),
+      h('p', { class: 'sv-note' }, 'Autosurveillance : ' + Y.ASG[G.asg].label + '. Couleurs selon les objectifs « ' + O.label.toLowerCase() + ' » du protocole : réveil et avant les repas ' + fmt(O.rev[0], 2) + '–' + fmt(O.rev[1], 2) + ' g/L, coucher ' + fmt(O.coucher[0], 2) + '–' + fmt(O.coucher[1], 2) + ' g/L ; rouge : < 0,70 g/L.'),
+      Y.carnetTable(e.carnet, prot, h),
+      h('details', { class: 'sv-det sv-how' }, [h('summary', null, 'Comment lire un carnet'), h('ol', { class: 'sv-keys' }, [
+        h('li', null, 'Les hypoglycémies d\'abord : à quelle heure, après quelle dose ? Hypoglycémie nocturne ou réveil sous l\'objectif : baisser la basale ; avant le repas suivant ou 2 à 4 h après un repas : baisser le bolus de ce repas (dès l\'injection suivante).'),
+        h('li', null, 'Le réveil juge l\'insuline basale (du soir ou du coucher) : au-dessus de l\'objectif ' + prot.delai + ' jours de suite → + 1 U (dose < 10 U) ou + 2 U (≥ 10 U).'),
+        h('li', null, 'Le bolus d\'un repas se juge sur la glycémie avant le repas suivant (petit-déjeuner → avant midi, déjeuner → avant le soir, dîner → coucher).'),
+        h('li', null, 'Réveil dans l\'objectif mais journée haute, ou basale > 0,5 U/kg avec un coucher bien plus haut que le réveil : la basale ne suffit plus ou corrige à tort la journée ; aGLP1 ou tirzépatide de préférence, sinon bolus (SFD 2025, avis 19).'),
+        h('li', null, 'Confronter à l\'HbA1c : un carnet trop beau pour l\'HbA1c signe des mesures rares ou choisies.')
+      ])]),
+      h('details', { class: 'sv-det sv-how' }, [h('summary', null, 'Proposition d\'interprétation'), h('ul', { class: 'sv-keys' }, read.map((t) => h('li', null, t)))])
+    ]);
+  }
+
+  function agpBlock(e) {
+    const tg = Y.cgmTargets(SFD.cgmFragile(G.cfg));
+    const read = Y.interpretAGP(e.agp.st, tg, { a1c: e.labs.a1c, basalUkg: e.ukg });
+    return h('div', { class: 'sv-gly' }, [
+      h('h4', null, 'Rapport AGP · capteur de glucose, ' + e.agp.st.days + ' jours'),
+      h('p', { class: 'sv-note' }, 'Cibles SFD 2025 (tableau II), ' + tg.label + '.'),
+      Y.agpReport(e.agp.st, e.agp.days, tg, h),
+      h('details', { class: 'sv-det sv-how' }, [h('summary', null, 'Comment lire un rapport AGP'), h('ol', { class: 'sv-keys' }, [
+        h('li', null, 'Qualité des données : au moins 14 jours et 70 % de temps de capteur actif.'),
+        h('li', null, 'Les hypoglycémies d\'abord (temps < 0,70 et < 0,54 g/L) : on les corrige avant d\'intensifier.'),
+        h('li', null, 'Le temps dans la cible (TIR 0,70–1,80 g/L) et au-dessus : + 10 points de TIR ≈ − 0,8 % d\'HbA1c.'),
+        h('li', null, 'GMI (glucose moyen converti en HbA1c) à confronter à l\'HbA1c ; variabilité (CV) ≤ 36 %.'),
+        h('li', null, 'La courbe : médiane plate dans la zone verte, bandes étroites ; repérer les heures à problème (nuit, réveil, après quel repas), puis les profils quotidiens pour les causes (repas, activité, oublis).')
+      ]), h('p', { class: 'sv-note' }, 'Czupryniak L et al. Diabetes Ther 2022;13:811 ; cibles : Battelino T et al. Diabetes Care 2019, reprises par la SFD 2025.')]),
+      h('details', { class: 'sv-det sv-how' }, [h('summary', null, 'Proposition d\'interprétation'), h('dl', { class: 'sv-exam sv-qual' }, read.flatMap(([k, v]) => [h('dt', null, k), h('dd', null, v)]))])
+    ]);
+  }
+
+  // Lecture de l'ordonnance en cours au regard de la prise de position SFD 2025 (sans blocage, sauf
+  // l'initiation de l'insuline, contrôlée à la prescription).
+  function sfdCard() {
+    const pt = G.pt, e = [...G.history].reverse().find((x) => !x.prescription);
+    const nSev = pt.st.hypoSev;
+    const A = SFD.advise({ c: G.cfg, rx: pt.rx, dfg: pt.st.dfg, a1c: e.labs.a1c != null ? e.labs.a1c : lastA1c(), W: pt.st.W, hypos: pt.st.hypo, sevHypo: nSev > 0, starts: G.starts, day: pt.day, ppr: G.ev.ppr != null, cgm: G.cgm, titr: G.titr, fpg: G.glyDays.length ? Y.ASG[1].set(0) && G.glyDays.slice(-7).reduce((x, dp) => x + dp.rdg.rev, 0) / Math.min(7, G.glyDays.length) : null });
+    const n = A.items.filter((x) => x.lvl === 'stop' || x.lvl === 'warn').length;
+    const icon = { stop: '⛔', warn: '⚠', tip: '→', ok: '✓' };
+    return h('details', { class: 'sv-card sv-det sv-sfd' }, [
+      h('summary', null, 'Lecture SFD 2025 de l\'ordonnance en cours' + (n ? ' · ' + n + ' point' + (n > 1 ? 's' : '') + ' à revoir' : '')),
+      h('p', { class: 'sv-q' }, 'Cible d\'HbA1c : ≤ ' + fmt(A.target.max, 1) + ' %' + (A.target.floor ? ', en restant au-dessus de ' + fmt(A.target.floor, 1) + ' %' : '') + (A.target.low ? ' (voire ≤ 6,5 %)' : '') + '.'),
+      h('p', { class: 'sv-note' }, A.target.why.join(' ; ') + ' (' + A.target.src + ').'),
+      h('ul', { class: 'sv-sfd-l' }, A.items.map((x) => h('li', { class: 'sv-sfd-' + x.lvl }, [h('span', { class: 'sv-sfd-i', 'aria-hidden': 'true' }, icon[x.lvl]), ' ' + x.t + ' ', x.src ? h('span', { class: 'sv-src' }, '(SFD 2025, ' + x.src + ')') : null]))),
+      h('p', { class: 'sv-note' }, 'Darmon P et al. Prise de position de la SFD sur les stratégies d\'utilisation des traitements de l\'hyperglycémie dans le DT2 – 2025. Med Mal Metab 2025;19:630-662. Ouvrez cette lecture après avoir décidé : elle ne bloque rien, sauf l\'initiation de l\'insuline hors recommandations.')
     ]);
   }
 
@@ -540,7 +737,7 @@
     return h('div', { class: 'sv-card' }, [
       h('div', { class: 'sv-card-head' }, [h('h3', null, 'Évolution'), h('label', { class: 'sv-check sv-small' }, [h('input', { type: 'checkbox', id: 'dtTruth', checked: G.truth, onchange: (e) => { G.truth = e.target.checked; render(); } }), ' Afficher la courbe réelle (entre les bilans)'])]),
       h('div', { class: 'sv-chartbox' }),
-      h('p', { class: 'sv-note' }, 'Points : examens réalisés. Bande verte : HbA1c < 7 % ; glycémie à jeun 0,70–1,10 g/L.')
+      h('p', { class: 'sv-note' }, 'Points : examens réalisés. Bande verte : cible d\'HbA1c individualisée (SFD 2025) ; glycémie à jeun 0,70–1,10 g/L.')
     ]);
   }
 
@@ -554,7 +751,7 @@
     const x = (d) => L + ((W - L - R) * d) / last;
     const drugs = [['met', 'Metformine', (p) => p.met > 0], ['su', 'Sulfamide', (p) => p.su > 0], ['glp', 'aGLP1', (p) => p.glp > 0], ['ins', 'Insuline', (p) => p.ins > 0]].filter(([, , f]) => log.some(f));
     const lanes = [
-      { k: 'a1c', t: 'HbA1c (%)', lo: 4, hi: 7, min: 5, max: Math.max(10, ...log.map((p) => p.a1c)) + 0.5, band: [4, 7], color: 'var(--t3)', truth: (p) => p.a1c },
+      { k: 'a1c', t: 'HbA1c (%)', min: 5, max: Math.max(10, ...log.map((p) => p.a1c)) + 0.5, band: [SFD.target(G.cfg, pt.rx, pt.st.dfg).floor || 4, SFD.target(G.cfg, pt.rx, pt.st.dfg).max], color: 'var(--t3)', truth: (p) => p.a1c },
       { k: 'fpg', t: 'Glycémie à jeun (g/L)', min: 0.4, max: Math.max(2.5, ...log.map((p) => p.mg)) + 0.2, band: [0.7, 1.1], color: 'var(--t4)', truth: (p) => p.fpg },
       { k: 'w', t: 'Poids (kg)', min: Math.min(...log.map((p) => p.w)) - 3, max: Math.max(...log.map((p) => p.w)) + 3, color: 'var(--tsh)', truth: (p) => p.w, all: true }
     ];
@@ -639,7 +836,11 @@
       { t: 'Avis diabétologique si HbA1c > 10 %, schéma intensif, complication, plaie du pied.', src: 'item 247 · LiSA p. 14', rang: 'B' },
       { t: 'Obésité : perte progressive de 5 à 10 % du poids sur 6 à 12 mois ; pas de régime restrictif standard ; activité physique ≥ 2 h 30/semaine.', src: 'item 253 · LiSA p. 5-6 ; SFE p. 16-19', rang: 'A' }
     ];
-    return h('details', { class: 'sv-card sv-det' }, [h('summary', null, 'Référentiel (item 247)'), h('ul', { class: 'sv-keys sv-refs' }, R.map((k) => h('li', null, [rangBadge(k.rang), ' ' + k.t, h('span', { class: 'sv-src' }, ' · ' + k.src)]))), h('p', { class: 'sv-note' }, 'Fiche LiSA de l\'item 247 (le chapitre SFE correspondant n\'était pas disponible dans le dossier) ; rangs de la grille d\'objectifs.')]);
+    return h('details', { class: 'sv-card sv-det' }, [h('summary', null, 'Référentiel (SFD 2025, item 247)'),
+      h('h4', null, 'Prise de position SFD 2025'),
+      h('dl', { class: 'sv-exam sv-qual' }, SFD.REF.flatMap(([k, v, src]) => [h('dt', null, k), h('dd', null, [v + ' ', h('span', { class: 'sv-src' }, '(' + src + ')')])])),
+      h('h4', null, 'Item EDN 247'),
+      h('ul', { class: 'sv-keys sv-refs' }, R.map((k) => h('li', null, [rangBadge(k.rang), ' ' + k.t, h('span', { class: 'sv-src' }, ' · ' + k.src)]))), h('p', { class: 'sv-note' }, 'Darmon P et al. Med Mal Metab 2025;19:630-662 ; fiche LiSA de l\'item 247, rangs de la grille d\'objectifs.')]);
   }
 
   // Référentiel d'effets publiés, rejoués à la demande par le modèle (js/simu/dt2-ref.js).
