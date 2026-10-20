@@ -79,14 +79,26 @@
 
   /* ---------- Une journée ---------- */
   // pt : patient du modèle ; ctx : { seed, irregular, newHypo, newSev } ; renvoie les paramètres de la journée.
+  // Écarts-types (log) de la variabilité glycémique ; calés sur les CV publiés (tools/cv-dt2.js).
+  const V = { day: 0.05, dayIns: 0.12, daySu: 0.09, fast: 0.07, fastIns: 0.08, meal: 0.28, sig: 0.45, bol: 0.25 };
   function makeDay(pt, D, ctx) {
     const r = rng(ctx.seed);
     const s = pt.st, rx = pt.rx, p = pt.par;
     const sh = shiftOf(ctx.work || p.work || 'jour', pt.day);
     const irr = ctx.irregular || sh.change ? 1 : 0;
-    const MG = s.MG;
-    const F0 = D.fpgOf(pt);
-    const F = Math.max(0.55, F0 * Math.exp(0.07 * gauss(r) * (1 + irr)));
+    // Variabilité d'un jour à l'autre (repas, activité, résorption de l'insuline) : elle croît avec l'insuline
+    // et les sulfamides, et avec la carence insulinique (CV DT2 : ≈ 18 % sous régime ou metformine, 23–26 % sans
+    // insuline en vie réelle, 28–30 % sous insuline basale ou basal-bolus ; DT1 36–38 % ; Monnier, Diabetes Care
+    // 2017 ; Dunn, Diabetes Technol Ther 2024).
+    const insU = Math.min(1, ((rx.basal || 0) + (rx.rapid || 0)) / (0.5 * p.weight0));
+    const absF = { g300: 0.7, deg: 0.7, nph: 1.4 }[rx.basalType] || 1;
+    const gvK = (p.gv || 1) * (1 + irr);
+    const sdD = (V.day + V.dayIns * insU * absF + (rx.su ? V.daySu : 0)) * gvK;
+    const dm = Math.exp(sdD * gauss(r) - sdD * sdD / 2);
+    const MG = s.MG * dm;
+    const F0 = D.fpgOf(pt) * dm;
+    const sdF = (V.fast + V.fastIns * Math.min(1, (rx.basal || 0) / (0.3 * p.weight0)) * absF) * gvK;
+    const F = Math.max(0.55, F0 * Math.exp(sdF * gauss(r) - sdF * sdF / 2));
     const dawn = rx.basal > 0 ? 0.04 : Math.min(0.15, 0.05 + 0.04 * Math.max(0, MG - 1.3));
     const glp = D.glpFrac(rx);
     const u = (rx.rapidM || [0, 0, 0]).slice();
@@ -94,21 +106,25 @@
     // Glycémie moyenne sans les bolus : les bolus n'agissent que sur leur repas et l'intervalle qui suit.
     const MG0 = sumU > 0 ? MG + Math.max(0, D.eqMG(pt, { rapid: 0 }) - D.eqMG(pt, {})) : MG;
     const wBase = [0.8, 1.1, 1.0];
-    const w = wBase.map((x) => x * Math.exp((0.22 + 0.2 * irr) * gauss(r)));
+    const w = wBase.map((x) => x * Math.exp(V.meal * gvK * gauss(r)));
     const skip = [false, irr && r() < 0.15, false];
     const tm = [7.5, 12.5, 19.5].map((x) => x + (0.25 + 0.5 * irr) * gauss(r));
     // Excursion post-prandiale (pic) : croît avec la glycémie moyenne, réduite par les incrétines.
-    const sig = 0.4 * Math.pow(Math.max(0.9, MG0), 1.25) * (1 - 0.4 * Math.min(1, glp)) * (rx.acarb ? 0.85 : 1);
+    const sig = V.sig * (p.gvSecr || 1) * Math.pow(Math.max(0.9, MG0), 1.25) * (1 - 0.4 * Math.min(1, glp)) * (rx.acarb ? 0.85 : 1);
     // Bolus : l'aire d'effet (baisse de la moyenne × 24 h) efface d'abord l'excursion de son repas, puis
     // l'élévation diurne jusqu'au repas suivant ; le reste creuse la glycémie dans les heures qui suivent
     // (bolus trop fort : hypoglycémie post-prandiale ou avant le repas suivant).
     let mealArea0 = 0;
     for (let m = 0; m < 3; m++) mealArea0 += skip[m] ? 0 : sig * w[m] * AREA_MEAL;
-    const dday = Math.max(-0.3, ((MG0 - F + dawn * MEAN_DAWN) * 24 - mealArea0) / (MEAN_DAY * 24));
+    // Calculée sur la glycémie à jeun sans l'aléa du jour : un réveil plus haut décale toute la journée, il ne
+    // creuse pas l'après-midi.
+    const dday = Math.max(-0.3, ((MG0 - F0 + dawn * MEAN_DAWN) * 24 - mealArea0) / (MEAN_DAY * 24));
     const areaB = Math.max(0, MG0 - MG) * 24;
     const cut = [0, 0, 0], segCut = [0, 0, 0], extra = [0, 0, 0];
     for (let m = 0; m < 3; m++) {
-      let b = sumU > 0 ? areaB * u[m] / sumU : 0;
+      // Effet d'un bolus d'un jour à l'autre : glucides mal estimés, résorption, activité.
+      const sb = V.bol * gvK;
+      let b = sumU > 0 ? areaB * u[m] / sumU * Math.exp(sb * gauss(r) - sb * sb / 2) : 0;
       const a = skip[m] ? 0 : sig * w[m] * AREA_MEAL;
       const r1 = Math.min(b, 0.55 * a); b -= r1; cut[m] = a > 0 ? r1 / a : 0;
       const segA = Math.max(0, dday) * SEG_AREA[m];
@@ -402,5 +418,5 @@
     ]);
   }
 
-  S.glyco = { PROTO, objOf, shiftOf, clock, ASG, MOMENTS, MEALS, HYPO, makeDay, glucose, readings, titrate, cgm, agpStats, cgmTargets, interpretAGP, interpretCarnet, carnetTable, agpReport, rng };
+  S.glyco = { V, PROTO, objOf, shiftOf, clock, ASG, MOMENTS, MEALS, HYPO, makeDay, glucose, readings, titrate, cgm, agpStats, cgmTargets, interpretAGP, interpretCarnet, carnetTable, agpReport, rng };
 })();

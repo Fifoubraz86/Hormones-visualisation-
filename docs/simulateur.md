@@ -142,6 +142,7 @@ Onglet « Cas commentés », ou `simulateur.html#cas-insuline`. M. L., 62 ans, I
 | `js/simu/dt2-case.js` | Cas guidé d'initiation de l'insuline basale, carnets à interpréter. |
 | `js/simu/dt2-ref.js` | Référentiel d'effets publiés (traitement, situation, effet, source, essai virtuel de calibration). |
 | `tools/calib-dt2.js` | Banc de calibration : `node tools/calib-dt2.js` (contrôle), `--md` (tableau du référentiel). |
+| `tools/cv-dt2.js` | Repères de variabilité glycémique (CV du capteur) par traitement : `node tools/cv-dt2.js`. |
 | `js/simu/dt2.js` | Mode thérapeutique du diabète de type 2 (patient, ordonnance, événements, graphique, référentiel). |
 | `js/simu/toons.js` | Dessins des événements (SVG). |
 | `js/simu/adverse.js` | Événements indésirables du mode thérapeutique : coronaropathie sous lévothyroxine, effets des ATS. |

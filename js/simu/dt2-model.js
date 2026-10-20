@@ -175,6 +175,8 @@
       adh: { bonne: 1, moyenne: 0.75, peur: 0.95, detresse: 0.65 }[c.adh] || (real ? rnd(0.6, 1) : 1),
       // Peur de l'hypoglycémie (collations de sécurité, doses non montées), détresse psychologique, travail posté.
       fear: c.adh === 'peur', distress: c.adh === 'detresse', work: c.work || 'jour',
+      // Variabilité glycémique propre au patient, et excursions post-prandiales plus amples si la sécrétion est faible.
+      gv: real ? rnd(0.75, 1.35) : 1, gvSecr: { sidd: 1.45, lada: 1.5, gck: 0.5 }[c.profile] || 1,
       adhLife: real ? rnd(0.2, 1) : 0.6, giSens: real ? rnd(0, 1) : 0.5,
       albRate: ALB[c.alb].rate, retino: c.retino, hfail: c.hfail, cvd: c.cvd, panc: c.panc, mtc: c.mtc,
       mycoHist: c.myco, irregular: c.irregular, lowcarb: c.lowcarb, sbp0: c.sbp,

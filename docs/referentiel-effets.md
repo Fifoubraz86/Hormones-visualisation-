@@ -76,3 +76,17 @@ Effets publiés de chaque traitement et de chaque situation, utilisés pour cale
 - Perte de poids sous sémaglutide 1 mg : SUSTAIN 1 (− 3,5 kg contre placebo) et SUSTAIN 7 (− 6,5 kg) encadrent le modèle (≈ − 5 kg).
 - Repères en tension : Look AHEAD et DiRECT tirent le poids de la perte pondérale en sens inverse (le modèle surestime un peu Look AHEAD et sous-estime un peu DiRECT) ; le sulfamide ajouté à l'insuline reste en deçà de la méta-analyse (− 0,2 contre − 0,46).
 - Non modélisés finement : différences entre molécules d'une même classe hors doses listées, effets cardiovasculaires et rénaux propres (iSGLT2, aGLP1), durabilité à long terme (ADOPT), hypoglycémies au-delà d'un ordre de grandeur (sulfamides : RR 2,41, Hirst 2013).
+
+## Variabilité glycémique (CV du capteur)
+
+Le profil de 24 h varie d'un jour à l'autre : niveau moyen du jour (repas, activité), glycémie du réveil (résorption de la basale), taille et horaire des repas, effet de chaque bolus (glucides mal estimés, résorption). Ces écarts sont plus grands sous insuline et sous sulfamide, et les excursions post-prandiales sont plus amples quand la sécrétion est faible (profil insulinopénique, LADA). En mode « patient réel », chaque patient a en plus sa propre variabilité (× 0,75 à 1,35). Vérification : `node tools/cv-dt2.js`.
+
+| Situation (capteur, 14 jours) | Modèle | Repère publié |
+| --- | --- | --- |
+| Metformine, HbA1c 7 à 8,5 % | CV 19–21 % | régime ou metformine seuls : médiane 18 % [15–24] (Monnier, Diabetes Care 2017) |
+| Metformine + sulfamide | 23 % | DT2 sans insuline en vie réelle 23–26 % (Dunn, Diabetes Technol Ther 2024) ; variabilité accrue sous sulfamide (Monnier 2017) |
+| Insuline basale, HbA1c 7 à 8 % | 28–32 % | DT2 sous insuline 28–30 % (Dunn 2024) ; CV initial 28 % [24–31] (essai Control-IQ en DT2) |
+| Basal-bolus, HbA1c 7 à 8 % | 27 % | 29 ± 7 % (Omnipod 5 en DT2) ; 28–30 % (Dunn 2024) |
+| Insulinopénique en basal-bolus | 28–29 % | sous insuline, 19 % des DT2 dépassent 36 % (Monnier 2017) ; DT1 36–38 % (Dunn 2024) |
+
+Limite : chez un patient très insulinorésistant sous plus de 2 U/kg, la glycémie de la journée dépend presque entièrement de bolus très forts. Le CV dépasse alors 36 % et les hypoglycémies deviennent fréquentes, ce qui est cohérent avec un échec du basal-bolus.
