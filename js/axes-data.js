@@ -275,7 +275,7 @@
 
   /* ===================== Axe gonadotrope masculin ===================== */
   AX.push({
-    id: 'gonadoM', card: { side: 'R', row: 1 }, color: 'p-blue', target: [806, 674],
+    id: 'gonadoM', card: { side: 'R', row: 1 }, color: 'p-blue', target: [806, 638],
     name: 'Axe gonadotrope masculin', sub: 'GnRH pulsatile · LH, FSH · testicule', clock: 'day',
     hh: { x: 280, y: 341, s: 1.8, flip: true, inset: { cx: 300, cy: 480, r: 235 } },
     clockInfo: 'Pulses de GnRH environ toutes les 90 minutes (complément), suivis de pulses de LH.',

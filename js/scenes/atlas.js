@@ -79,10 +79,29 @@
       gland(812, 484, 5, 'iod', 'glyc', null, null, 'pancreas');
       gland(768, 592, 5, 'trh', 'gonadoF', null, null, 'ovary');
       gland(832, 592, 5, 'trh', 'gonadoF', 'Ovaires', 'start', 'ovary');
-      gland(800, 674, 5, 'trh', 'gonadoM', 'Testicules', 'start', 'testis');
+      gland(800, 638, 5, 'trh', 'gonadoM', 'Testicules', 'start', 'testis');
       a.text(800, 1000 - 14, 'Silhouette schématique · positions approximatives', 'atlas-foot', { anchor: 'middle' });
       a.text(800, 1032, 'Notions transversales', 'atlas-sub', { anchor: 'middle' });
       HV.loupeCaptions(a, 'atlas');
+
+      // Grands titres posés sur chaque carte, lisibles en vue d'ensemble ; ils s'effacent quand on zoome.
+      const over = a.el('g', { class: 'atlas-titles', 'aria-hidden': 'true' });
+      g.parentNode.appendChild(over); // au-dessus des cartes (scènes enfants)
+      const wrap = (t, n) => t.replace(/-/g, '- ').split(' ').reduce((L, w) => {
+        const j = L.length && L[L.length - 1].endsWith('-') ? '' : ' ';
+        if (L.length && (L[L.length - 1] + j + w).length <= n) L[L.length - 1] += j + w; else L.push(w);
+        return L;
+      }, []);
+      HV.scenes.atlas.children.forEach((sc) => {
+        const w = HV.W * sc.scale, h = HV.H * sc.scale;
+        const ax = HV.AXES.find((x) => x.id === sc.id);
+        const lines = wrap(sc.title, w > 200 ? 17 : 14).slice(0, 3);
+        const fs = w > 200 ? 23 : 17, bh = lines.length * fs * 1.15 + 14;
+        const tg = a.el('g', { transform: `translate(${sc.x + w / 2} ${sc.y + bh / 2 + 6})`, style: `--c: var(--${ax ? ax.color : 'accent'})` }, over);
+        a.el('rect', { x: -w / 2 + 6, y: -bh / 2, width: w - 12, height: bh, rx: 10, class: 'atlas-tt-bg' }, tg);
+        a.text(0, -bh / 2 + 7 + fs * 0.9, lines, 'atlas-tt', { anchor: 'middle', lh: 1.15, attrs: { style: `font-size:${fs}px` } }, tg);
+      });
+      HV.atlasTitles = over; // opacité réglée à chaque image par app.js selon le zoom
 
     },
     update(dt, t) {}

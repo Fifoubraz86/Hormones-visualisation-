@@ -185,7 +185,7 @@
       el('ellipse', { cx: -32, cy: -6, rx: 6, ry: 4, class: 'org o-gonad', 'data-info': 'ovary' }, gg);
       el('ellipse', { cx: 32, cy: -6, rx: 6, ry: 4, class: 'org o-gonad', 'data-info': 'ovary' }, gg);
     }, 'ovary');
-    L('testis', 0, 126, 1, (gg) => {
+    L('testis', 0, 90, 1, (gg) => { // juste sous le pubis
       el('ellipse', { cx: -7, cy: 0, rx: 6, ry: 8, class: 'org o-gonad' }, gg);
       el('ellipse', { cx: 7, cy: 0, rx: 6, ry: 8, class: 'org o-gonad' }, gg);
     });

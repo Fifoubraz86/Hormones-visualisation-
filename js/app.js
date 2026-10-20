@@ -473,14 +473,20 @@
   /* ---------- Animation ---------- */
   let playing = !reduced;
   let speed = 1;
-  function togglePlay() {
-    playing = !playing;
+  // Deux boutons pilotent l'animation : celui du panneau et celui de la barre de navigation.
+  function showPlay() {
     $('btnPlay').setAttribute('aria-pressed', String(playing));
     $('btnPlay').textContent = playing ? 'Pause' : 'Lecture';
+    $('btnPause').setAttribute('aria-pressed', String(playing));
+    $('btnPause').textContent = playing ? '❚❚ Pause' : '▶ Lecture';
+  }
+  function togglePlay() {
+    playing = !playing;
+    showPlay();
   }
   $('btnPlay').addEventListener('click', togglePlay);
-  $('btnPlay').setAttribute('aria-pressed', String(playing));
-  $('btnPlay').textContent = playing ? 'Pause' : 'Lecture';
+  $('btnPause').addEventListener('click', togglePlay);
+  showPlay();
   document.querySelectorAll('[data-speed]').forEach((b) => {
     b.addEventListener('click', () => {
       speed = parseFloat(b.dataset.speed);
@@ -523,6 +529,11 @@
       if (!on || !isActive(sc)) continue;
       if (fl) for (const f of sc.flows) f.step(sdt);
       for (const fn of sc.dyn) fn(sdt);
+    }
+    // Grands titres de la vue d'ensemble : visibles de loin, effacés dès qu'on zoome sur une carte.
+    if (HV.atlasTitles) {
+      const o = clamp((cam.w / HV.W - 0.45) / 0.3, 0, 1);
+      if (o !== HV.atlasTitles._o) { HV.atlasTitles._o = o; HV.atlasTitles.style.opacity = o; HV.atlasTitles.style.display = o ? '' : 'none'; }
     }
     labTimer -= dt;
     if (labTimer <= 0) {

@@ -863,3 +863,10 @@ line.m-db { stroke: var(--mc); stroke-width: 0.9; }
 .warn-link { margin-left: auto; border: 1px solid var(--line-2); background: transparent; color: var(--muted); font: 500 12px var(--font-body); padding: 4px 10px; border-radius: 999px; cursor: pointer; white-space: nowrap; }
 .warn-link:hover { color: var(--fg); border-color: var(--warn); }
 @media (max-width: 700px) { .warn-link { display: none; } }
+
+/* Grands titres des cartes en vue d'ensemble */
+.atlas-titles { pointer-events: none; }
+.atlas-tt-bg { fill: var(--panel); fill-opacity: 0.86; stroke: var(--c); stroke-width: 2; }
+.atlas-tt { fill: var(--fg); font-family: var(--font-display); font-weight: 600; }
+.pause-btn { min-width: 92px; }
+.pause-btn[aria-pressed="false"] { border-color: var(--accent); color: var(--accent); }
