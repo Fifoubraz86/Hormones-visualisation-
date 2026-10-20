@@ -71,7 +71,7 @@
     if (cgm) {
       const nInj = (rx.basal > 0 ? 1 : 0) + (rx.rapidM || []).filter((x) => x > 0).length;
       if (!INS(rx)) out.push('Capteur de glucose : pris en charge seulement sous insuline (HAS, LPPR). Sans insuline, il n\'est pas remboursé.');
-      else if (nInj < 3 && !(a1c > 8) && !acquired) out.push('Capteur de glucose : sous insuline en moins de 3 injections par jour (basale seule comprise), remboursé seulement si l\'HbA1c est > 8 % ; dernière HbA1c ' + (a1c != null ? fmt(a1c, 1) + ' %' : 'inconnue') + '. À 3 injections par jour ou plus, sans condition d\'HbA1c.');
+      else if (nInj < 3 && !(a1c > 8) && !acquired) out.push('Capteur de glucose : sous insuline en moins de 3 injections par jour (basale seule comprise), remboursé seulement si l\'HbA1c est > 8 % ; dernière HbA1c ' + (a1c != null ? fmt(a1c, 1) + ' %' : 'inconnue') + ', et pas d\'HbA1c > 8 % sous insuline jusqu\'ici (sinon l\'indication serait acquise). À 3 injections par jour ou plus, sans condition d\'HbA1c.');
     }
     if (asg && asg !== '0' && !cgm) {
       if (!INS(rx) && !(rx.su > 0)) out.push('Autosurveillance glycémique capillaire : sans traitement hypoglycémiant (sulfamide, glinide, insuline), elle n\'est pas recommandée en routine et le lecteur et les bandelettes ne sont pas pris en charge (HAS).');

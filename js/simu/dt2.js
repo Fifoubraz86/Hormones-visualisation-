@@ -410,6 +410,8 @@
     const T = goalT();
     const target = T.max;
     if (!toon && labs.a1c != null && labs.a1c < target && nHypo === 0 && !G.ev.trophy && G.history.length && G.history[0].labs.a1c >= target) { toon = 'trophy'; G.ev.trophy = true; }
+    if (labs.a1c != null && labs.a1c > 8 && pt.rx.basal + pt.rx.rapid > 0) G.cgmAcquired = true;
+    if ((pt.rx.basal > 0 ? 1 : 0) + (pt.rx.rapidM || []).filter((x) => x > 0).length >= 3) G.cgmAcquired = true;
     G.history.push({ day: pt.day, labs, q, w: m.w, bmi: m.bmi, sbp: Math.round(m.sbp), symptoms: sy, rx: rxLabel(pt.rx), note, event: event || null, toon, caption: G.ev.caption || toon, banner: G.ev.banner || null, epitaphe: G.ev.epitaphe || null, carnet, agp, titr, T, a1cTrue: pt.st.A, ukg: pt.rx.basal / pt.st.W });
     G.ev.eventToon = null; G.ev.toonNext = null; G.ev.banner = null; G.ev.epitaphe = null; G.ev.caption = null;
     G.visits.push({ day: pt.day, labs });
@@ -474,6 +476,9 @@
     d.rapid = d.rapidM.reduce((a, x) => a + x, 0);
     // Initiation de l'insuline : règle de bonne pratique, refus si non respectée (SFD 2025, avis 18).
     if (d.cgm) d.asg = '0'; // sous capteur, la surveillance se fait sur le capteur
+    // Indication au capteur : acquise dès qu'elle a existé (insuline avec HbA1c > 8 %, ou ≥ 3 injections/j),
+    // même si le capteur n'avait pas été prescrit ce jour-là ; elle ne se perd pas quand l'HbA1c baisse.
+    if (d.basal + d.rapid > 0 && lastA1c() > 8) G.cgmAcquired = true;
     const block = SFD.insulinInit(pt.rx, d, pt.st.W).concat(SFD.monitoring(d, d.asg, d.cgm, lastA1c(), G.cgmAcquired));
     const onInsD = d.basal + d.rapid > 0;
     if (onInsD && d.titr.who !== 'none' && d.asg === '0' && !d.cgm) block.push('Titration de l\'insuline sans autosurveillance ni capteur : impossible ; il faut au moins la glycémie du réveil chaque jour.');
