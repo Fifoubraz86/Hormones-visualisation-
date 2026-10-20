@@ -182,11 +182,12 @@
       cfg: c, pt, history: [], visits: [], undo: [], truth: false, lastHypo: 0, lastSev: 0,
       seed: Math.floor(Math.random() * 1e9), glyDays: [], titrState: { above: {} }, titrLog: [], starts: {},
       titr: { who: onIns ? 'patient' : 'none', prof: c.age >= 75 && c.geria !== 'bonne' ? (c.geria === 'dependant' ? 'dep' : 'fra') : 'std', delai: 3, sfd10: false },
-      cgm: false, asg: onIns ? 2 : r0.su > 0 ? 1 : 0,
+      cgm: false, asg: onIns ? '2' : r0.su > 0 ? 'w4' : '0', goal: null,
       ev: { metGI: null, glpGI: null, myco: null, sglt2Start: null, keto: false, panc: false, retinoDone: false, lactic: false, ketosis: -999, hyperosm: false, a1cHist: [], lastGlpChange: -999, sevSeen: 0, notes: [], ppr: null },
       draft: Object.assign({}, r0, { metProg: true, wait: 12, unit: 'sem', tests: new Set(['a1c', 'fpg']), ppr: false })
     };
-    G.draft.titr = Object.assign({}, G.titr); G.draft.cgm = G.cgm; G.draft.asg = G.asg;
+    G.titr.obj = JSON.parse(JSON.stringify(Y.PROTO[G.titr.prof])); G.titr.bolusCtl = 'next';
+    G.draft.titr = JSON.parse(JSON.stringify(G.titr)); G.draft.cgm = G.cgm; G.draft.asg = G.asg; G.draft.goal = null;
     // Quatorze jours de glycémies avant la première consultation (carnet, capteur).
     for (let k = 14; k > 0; k--) { pt.day = -k; recordDay(); }
     pt.day = 0;
@@ -258,7 +259,7 @@
   function carnetRows() {
     const days = G.glyDays.slice(-14), asg = G.asg;
     return days.map((dp) => {
-      const set = asg ? Y.ASG[asg].set(dp.d) : [];
+      const set = asg !== '0' ? Y.ASG[asg].set(dp.d) : G.cgm ? ['rev', 'avDej', 'avDin', 'coucher'] : [];
       const v = {};
       set.forEach((k) => { v[k] = dp.rdg[k]; });
       const rem = dp.rdg.hypos.map((hy) => 'malaise à ' + Math.floor(hy.t) + ' h ' + String(Math.round((hy.t % 1) * 60)).padStart(2, '0') + ' : ' + fmt(hy.g, 2) + ' g/L' + (hy.sev ? ' (tierce personne)' : ', resucrage'));
@@ -386,7 +387,7 @@
       if (k === 'a1c') labs.a1c = m.a1c;
       else if (k === 'fpg') labs.fpg = G.glyDays.length ? G.glyDays[G.glyDays.length - 1].rdg.rev : m.fpg;
       else if (k === 'creat') labs.dfg = m.dfg;
-      else if (k === 'carnet') { if (G.asg) carnet = carnetRows(); else q.push(['Carnet glycémique', 'pas d\'autosurveillance glycémique prescrite']); }
+      else if (k === 'carnet') { if (G.asg !== '0' || G.cgm) carnet = carnetRows(); else q.push(['Carnet glycémique', 'pas d\'autosurveillance glycémique prescrite']); }
       else if (k === 'agp') {
         if (G.cgm && G.glyDays.length) { const days = G.glyDays.slice(-14); agp = { st: Y.agpStats(Y.cgm(days), days.length), days }; }
         else q.push(['Rapport AGP', 'pas de capteur de glucose prescrit']);
@@ -406,7 +407,7 @@
     const sy = symptoms(m);
     const nHypo = pt.st.hypo - G.lastHypo;
     let toon = G.ev.eventToon || G.ev.toonNext || (nHypo >= 3 ? 'hypo' : null);
-    const T = SFD.target(G.cfg, pt.rx, pt.st.dfg);
+    const T = goalT();
     const target = T.max;
     if (!toon && labs.a1c != null && labs.a1c < target && nHypo === 0 && !G.ev.trophy && G.history.length && G.history[0].labs.a1c >= target) { toon = 'trophy'; G.ev.trophy = true; }
     G.history.push({ day: pt.day, labs, q, w: m.w, bmi: m.bmi, sbp: Math.round(m.sbp), symptoms: sy, rx: rxLabel(pt.rx), note, event: event || null, toon, caption: G.ev.caption || toon, banner: G.ev.banner || null, epitaphe: G.ev.epitaphe || null, carnet, agp, titr, T, a1cTrue: pt.st.A, ukg: pt.rx.basal / pt.st.W });
@@ -445,14 +446,20 @@
   function snapshot() {
     const pt = G.pt;
     return JSON.stringify({ metRamp: pt.metRamp, st: pt.st, day: pt.day, rx: pt.rx, take: pt.take, par: Object.assign({}, pt.par), logLen: pt.log.length, hist: G.history.length, vis: G.visits.length, ev: G.ev, lastHypo: G.lastHypo,
-      gly: G.glyDays, titrState: G.titrState, titrLog: G.titrLog.length, starts: G.starts, titr: G.titr, cgm: G.cgm, asg: G.asg, lastH: G.lastH, lastS: G.lastS });
+      gly: G.glyDays, titrState: G.titrState, titrLog: G.titrLog.length, starts: G.starts, titr: G.titr, cgm: G.cgm, asg: G.asg, goal: G.goal, lastH: G.lastH, lastS: G.lastS });
   }
   function restore(js) {
     const s = JSON.parse(js), pt = G.pt;
     pt.st = s.st; pt.day = s.day; pt.rx = s.rx; pt.take = s.take; pt.metRamp = s.metRamp; Object.assign(pt.par, s.par);
     pt.log.length = s.logLen; G.history.length = s.hist; G.visits.length = s.vis; G.ev = s.ev; G.lastHypo = s.lastHypo;
-    G.glyDays = s.gly; G.titrState = s.titrState; G.titrLog.length = s.titrLog; G.starts = s.starts; G.titr = s.titr; G.cgm = s.cgm; G.asg = s.asg; G.lastH = s.lastH; G.lastS = s.lastS;
-    Object.assign(G.draft, pt.rx, { rapidM: pt.rx.rapidM.slice(), titr: Object.assign({}, G.titr), cgm: G.cgm, asg: G.asg });
+    G.glyDays = s.gly; G.titrState = s.titrState; G.titrLog.length = s.titrLog; G.starts = s.starts; G.titr = s.titr; G.cgm = s.cgm; G.asg = s.asg; G.goal = s.goal; G.lastH = s.lastH; G.lastS = s.lastS;
+    Object.assign(G.draft, pt.rx, { rapidM: pt.rx.rapidM.slice(), titr: JSON.parse(JSON.stringify(G.titr)), cgm: G.cgm, asg: G.asg, goal: G.goal });
+  }
+
+  // Cible d'HbA1c : celle fixée par le prescripteur, sinon la cible SFD 2025 calculée.
+  function goalT() {
+    const T = SFD.target(G.cfg, G.pt.rx, G.pt.st.dfg);
+    return G.goal != null ? Object.assign({}, T, { max: G.goal, chosen: true }) : T;
   }
 
   function lastA1c() { const v = [...G.visits].reverse().find((x) => x.labs.a1c != null); return v ? v.labs.a1c : G.pt.st.A; }
@@ -466,13 +473,16 @@
     if (!d.tests.size) { say('Cochez au moins un examen.'); return; }
     d.rapid = d.rapidM.reduce((a, x) => a + x, 0);
     // Initiation de l'insuline : règle de bonne pratique, refus si non respectée (SFD 2025, avis 18).
-    const block = SFD.insulinInit(pt.rx, d, pt.st.W);
+    const block = SFD.insulinInit(pt.rx, d, pt.st.W).concat(SFD.monitoring(d, d.asg, d.cgm, lastA1c()));
+    const onInsD = d.basal + d.rapid > 0;
+    if (onInsD && d.titr.who !== 'none' && d.asg === '0' && !d.cgm) block.push('Titration de l\'insuline sans autosurveillance ni capteur : impossible ; il faut au moins la glycémie du réveil chaque jour.');
+    if (onInsD && d.titr.who !== 'none' && d.rapid > 0 && d.titr.bolusCtl === 'pp' && d.asg !== '6' && !d.cgm) block.push('Bolus adaptés sur la glycémie post-prandiale : prescrire l\'autosurveillance 6 fois par jour (avant et 2 h après les repas) ou un capteur.');
     if (block.length) { say(block); return; }
     G.undo.push(snapshot());
     const prev = Object.assign({}, pt.rx, { rapidM: pt.rx.rapidM.slice() });
     const metBefore = D.metDose(pt);
     Object.assign(pt.rx, { met: d.met, su: d.su, dpp4: d.dpp4, glp: d.glp, glpDose: d.glp === 'none' ? 0 : d.glpDose, sglt2: d.sglt2, acarb: d.acarb, basal: d.basal, basalType: d.basalType, rapidM: d.rapidM.slice(), rapid: d.rapid, act: d.act, sodaStop: d.sodaStop, wtGoal: d.wtGoal, diet: d.diet });
-    G.titr = Object.assign({}, d.titr); G.cgm = d.cgm; G.asg = d.asg;
+    G.titr = JSON.parse(JSON.stringify(d.titr)); G.cgm = d.cgm; G.asg = d.asg; G.goal = d.goal;
     if (d.ppr && G.ev.ppr == null) G.ev.ppr = pt.day;
     // Début des traitements, pour les règles d'arrêt (SFD 2025, avis 5).
     const on = { su: (r) => r.su > 0, dpp4: (r) => r.dpp4 > 0, sglt2: (r) => r.sglt2 !== 'none', glp: (r) => r.glp !== 'none' };
@@ -567,6 +577,8 @@
         sel('dtAcarb', 'Acarbose', d.acarb, ACARB.map((x) => [x, x ? x + ' mg/j' : 'Aucune']), (v) => { d.acarb = +v; }),
       ]),
       insulinBlock(d, re),
+      h('h4', null, 'Objectif d\'HbA1c'),
+      (() => { const T = SFD.target(G.cfg, G.pt.rx, G.pt.st.dfg); return h('div', { class: 'sv-form' }, [h('div', { class: 'sv-field' }, [h('label', { for: 'dtGoal' }, 'Fixé avec le patient'), h('select', { id: 'dtGoal', onchange: (e) => { d.goal = e.target.value === '' ? null : +e.target.value; } }, [['', 'Cible SFD 2025 calculée (≤ ' + fmt(T.max, 1) + ' %)']].concat([6.5, 7, 7.5, 8, 8.5, 9].map((x) => [x, '≤ ' + fmt(x, 1) + ' %'])).map(([k, v]) => h('option', { value: k, selected: String(d.goal == null ? '' : d.goal) === String(k) }, v)))])]); })(),
       h('h3', null, 'Prochain bilan'),
       h('div', { class: 'sv-inline' }, ['dans',
         h('input', { type: 'number', id: 'dtWait', class: 'sv-num', value: d.wait, min: 1, max: d.unit === 'sem' ? 156 : 1095, step: 1, inputmode: 'numeric', 'aria-label': 'Délai', oninput: (e) => { d.wait = parseFloat(e.target.value) || 0; } }),
@@ -589,7 +601,13 @@
     upd();
     const lo = Math.max(6, Math.round(0.1 * W)), hi = Math.max(10, Math.round(0.2 * W));
     const t = d.titr;
-    const O = Y.PROTO[t.prof];
+    const O = Y.objOf(t);
+    // Objectif glycémique modifiable (min–max, g/L), comme dans le protocole d'adaptation des doses.
+    const rng = (k, label) => {
+      const o = O[k] || (O[k] = [1.2, 1.8]);
+      const inp = (i) => h('input', { type: 'number', id: 'dtObj' + k + i, class: 'sv-num sv-num-s', value: o[i], min: 0.5, max: 3, step: 0.05, inputmode: 'decimal', 'aria-label': label + (i ? ' maximum' : ' minimum'), oninput: (e) => { const v = parseFloat(String(e.target.value).replace(',', '.')); if (v > 0) { o[i] = v; if (k === 'avDej') O.avDin[i] = v; } } });
+      return h('div', { class: 'sv-field' }, [h('label', null, label + ' (g/L)'), h('div', { class: 'sv-inline' }, [inp(0), '–', inp(1)])]);
+    };
     const retNeed = (G.cfg.retino === 'severe' || G.cfg.retino === 'prolif') && G.ev.ppr == null;
     return h('div', { class: 'sv-ins' }, [
       h('h4', null, 'Insulinothérapie'),
@@ -603,15 +621,18 @@
       h('h4', null, 'Adaptation des doses entre les consultations'),
       h('div', { class: 'sv-form' }, [
         sel('dtTitrWho', 'Qui adapte ?', t.who, [['none', 'Personne (doses fixes)'], ['patient', 'Le patient (protocole écrit, éducation)'], ['ide', 'Un(e) IDE à domicile']], (v) => { t.who = v; }),
-        sel('dtTitrProf', 'Objectifs du protocole', t.prof, Object.entries(Y.PROTO).map(([k, v]) => [k, v.label + ' (réveil ' + fmt(v.rev[0], 2) + '–' + fmt(v.rev[1], 2) + ')']), (v) => { t.prof = v; re(); }),
-        sel('dtTitrDel', 'Augmenter après', t.delai, [[2, '2 jours de suite au-dessus de l\'objectif'], [3, '3 jours de suite (SFD : tous les 3 jours)']], (v) => { t.delai = +v; })
+        sel('dtTitrProf', 'Type de patient (remplit les objectifs)', t.prof, Object.entries(Y.PROTO).map(([k, v]) => [k, v.label]), (v) => { t.prof = v; t.obj = JSON.parse(JSON.stringify(Y.PROTO[v])); if (!t.obj.pp) t.obj.pp = [1.4, 2.2]; re(); }),
+        sel('dtTitrDel', 'Augmenter après', t.delai, [[2, '2 jours de suite au-dessus de l\'objectif'], [3, '3 jours de suite (SFD : tous les 3 jours)']], (v) => { t.delai = +v; }),
+        sel('dtBolusCtl', 'Adapter les bolus sur', t.bolusCtl, [['next', 'la glycémie avant le repas suivant'], ['pp', 'la glycémie 2 h après le repas']], (v) => { t.bolusCtl = v; })
       ]),
+      h('div', { class: 'sv-form' }, [rng('rev', 'Objectif au réveil'), rng('avDej', 'Avant les repas'), rng('coucher', 'Au coucher'), rng('pp', '2 h après les repas')]),
       h('label', { class: 'sv-check sv-small' }, [h('input', { type: 'checkbox', id: 'dtTitr10', checked: t.sfd10, onchange: (e) => { t.sfd10 = e.target.checked; } }), ' Au-delà de 40 U, pas de 10 % (SFD 2025) au lieu de 2 U']),
       h('p', { class: 'sv-note' }, 'Protocole du service : pas de 1 U sous 10 U, de 2 U au-delà ; baisse dès l\'injection suivante si hypoglycémie ou glycémie < ' + fmt(O.rev[0], 2) + ' g/L ; basale jugée sur le réveil, bolus sur la glycémie avant le repas suivant.'),
       h('h4', null, 'Surveillance glycémique'),
       h('div', { class: 'sv-form' }, [
-        sel('dtAsg', 'Autosurveillance capillaire', d.asg, [[0, 'Aucune']].concat(Object.entries(Y.ASG).map(([k, v]) => [k, v.label])), (v) => { d.asg = +v; })
+        sel('dtAsg', 'Autosurveillance capillaire', d.asg, [['0', 'Aucune']].concat(Object.entries(Y.ASG).map(([k, v]) => [k, v.label])), (v) => { d.asg = v; })
       ]),
+      h('p', { class: 'sv-note' }, 'Lecteur et bandelettes : seulement sous traitement hypoglycémiant ; hors insuline, 200 bandelettes par an (HAS). Capteur : sous insuline intensifiée (≥ 3 injections/j), ou non intensifiée avec HbA1c ≥ 8 % (LPPR 2023).'),
       h('label', { class: 'sv-check' }, [h('input', { type: 'checkbox', id: 'dtCgm', checked: d.cgm, onchange: (e) => { d.cgm = e.target.checked; } }), ' Capteur de glucose (mesure en continu, rapport AGP)']),
       retNeed ? h('label', { class: 'sv-check' }, [h('input', { type: 'checkbox', id: 'dtPpr', checked: d.ppr, onchange: (e) => { d.ppr = e.target.checked; } }), ' Adresser en urgence en ophtalmologie : photocoagulation panrétinienne']) : null
     ]);
@@ -660,7 +681,7 @@
     const e = [...G.history].reverse().find((x) => !x.prescription);
     const rows = [];
     const T = e.T;
-    if (e.labs.a1c != null) rows.push(['HbA1c', fmt(e.labs.a1c, 1) + ' %', 'cible ≤ ' + fmt(T.max, 1) + ' %' + (T.floor ? ', > ' + fmt(T.floor, 1) + ' %' : '') + ' (SFD 2025)', e.labs.a1c > T.max || (T.floor && e.labs.a1c < T.floor)]);
+    if (e.labs.a1c != null) rows.push(['HbA1c', fmt(e.labs.a1c, 1) + ' %', (T.chosen ? 'objectif fixé ≤ ' : 'cible ≤ ') + fmt(T.max, 1) + ' %' + (T.floor ? ', > ' + fmt(T.floor, 1) + ' %' : '') + (T.chosen ? '' : ' (SFD 2025)'), e.labs.a1c > T.max || (T.floor && e.labs.a1c < T.floor)]);
     if (e.labs.fpg != null) rows.push(['Glycémie à jeun', g2(e.labs.fpg), '0,70–1,10 g/L', e.labs.fpg > 1.26 || e.labs.fpg < 0.7]);
     if (e.labs.dfg != null) rows.push(['DFG (CKD-EPI)', fmt(e.labs.dfg, 0) + ' mL/min/1,73 m²', '> 60', e.labs.dfg < 60]);
     return h('div', { class: 'sv-card sv-latest' }, [
@@ -681,11 +702,11 @@
   // Carnet glycémique et sa lecture guidée (protocole du service, SFD 2025).
   function carnetBlock(e) {
     const prot = G.titr;
-    const O = Y.PROTO[prot.prof];
+    const O = Y.objOf(prot);
     const read = Y.interpretCarnet(e.carnet, prot, { basal: G.pt.rx.basal, basalUkg: e.ukg, a1c: e.labs.a1c });
     return h('div', { class: 'sv-gly' }, [
       h('h4', null, 'Carnet glycémique · ' + e.carnet.length + ' derniers jours'),
-      h('p', { class: 'sv-note' }, 'Autosurveillance : ' + Y.ASG[G.asg].label + '. Couleurs selon les objectifs « ' + O.label.toLowerCase() + ' » du protocole : réveil et avant les repas ' + fmt(O.rev[0], 2) + '–' + fmt(O.rev[1], 2) + ' g/L, coucher ' + fmt(O.coucher[0], 2) + '–' + fmt(O.coucher[1], 2) + ' g/L ; rouge : < 0,70 g/L.'),
+      h('p', { class: 'sv-note' }, (G.asg !== '0' ? 'Autosurveillance : ' + Y.ASG[G.asg].label : 'Valeurs relevées sur le capteur') + '. Couleurs selon les objectifs fixés : réveil ' + fmt(O.rev[0], 2) + '–' + fmt(O.rev[1], 2) + ', avant les repas ' + fmt(O.avDej[0], 2) + '–' + fmt(O.avDej[1], 2) + ', coucher ' + fmt(O.coucher[0], 2) + '–' + fmt(O.coucher[1], 2) + (O.pp ? ', 2 h après les repas ' + fmt(O.pp[0], 2) + '–' + fmt(O.pp[1], 2) : '') + ' g/L ; rouge : < 0,70 g/L.'),
       Y.carnetTable(e.carnet, prot, h),
       h('details', { class: 'sv-det sv-how' }, [h('summary', null, 'Comment lire un carnet'), h('ol', { class: 'sv-keys' }, [
         h('li', null, 'Les hypoglycémies d\'abord : à quelle heure, après quelle dose ? Hypoglycémie nocturne ou réveil sous l\'objectif : baisser la basale ; avant le repas suivant ou 2 à 4 h après un repas : baisser le bolus de ce repas (dès l\'injection suivante).'),
@@ -721,14 +742,14 @@
   function sfdCard() {
     const pt = G.pt, e = [...G.history].reverse().find((x) => !x.prescription);
     const nSev = pt.st.hypoSev;
-    const A = SFD.advise({ c: G.cfg, rx: pt.rx, dfg: pt.st.dfg, a1c: e.labs.a1c != null ? e.labs.a1c : lastA1c(), W: pt.st.W, hypos: pt.st.hypo, sevHypo: nSev > 0, starts: G.starts, day: pt.day, ppr: G.ev.ppr != null, cgm: G.cgm, titr: G.titr, fpg: G.glyDays.length ? Y.ASG[1].set(0) && G.glyDays.slice(-7).reduce((x, dp) => x + dp.rdg.rev, 0) / Math.min(7, G.glyDays.length) : null });
+    const A = SFD.advise({ c: G.cfg, rx: pt.rx, dfg: pt.st.dfg, a1c: e.labs.a1c != null ? e.labs.a1c : lastA1c(), W: pt.st.W, hypos: pt.st.hypo, sevHypo: nSev > 0, starts: G.starts, day: pt.day, ppr: G.ev.ppr != null, cgm: G.cgm, titr: G.titr, goal: G.goal, asg: G.asg, fpg: G.glyDays.length ? G.glyDays.slice(-7).reduce((x, dp) => x + dp.rdg.rev, 0) / Math.min(7, G.glyDays.length) : null });
     const n = A.items.filter((x) => x.lvl === 'stop' || x.lvl === 'warn').length;
     const icon = { stop: '⛔', warn: '⚠', tip: '→', ok: '✓' };
     return h('details', { class: 'sv-card sv-det sv-sfd' }, [
       h('summary', null, 'Lecture SFD 2025 de l\'ordonnance en cours' + (n ? ' · ' + n + ' point' + (n > 1 ? 's' : '') + ' à revoir' : '')),
       h('p', { class: 'sv-q' }, 'Cible d\'HbA1c : ≤ ' + fmt(A.target.max, 1) + ' %' + (A.target.floor ? ', en restant au-dessus de ' + fmt(A.target.floor, 1) + ' %' : '') + (A.target.low ? ' (voire ≤ 6,5 %)' : '') + '.'),
       h('p', { class: 'sv-note' }, A.target.why.join(' ; ') + ' (' + A.target.src + ').'),
-      h('ul', { class: 'sv-sfd-l' }, A.items.map((x) => h('li', { class: 'sv-sfd-' + x.lvl }, [h('span', { class: 'sv-sfd-i', 'aria-hidden': 'true' }, icon[x.lvl]), ' ' + x.t + ' ', x.src ? h('span', { class: 'sv-src' }, '(SFD 2025, ' + x.src + ')') : null]))),
+      h('ul', { class: 'sv-sfd-l' }, A.items.map((x) => h('li', { class: 'sv-sfd-' + x.lvl }, [h('span', { class: 'sv-sfd-i', 'aria-hidden': 'true' }, icon[x.lvl]), ' ' + x.t + ' ', x.src ? h('span', { class: 'sv-src' }, '(' + (x.src.startsWith('HAS') ? '' : 'SFD 2025, ') + x.src + ')') : null]))),
       h('p', { class: 'sv-note' }, 'Darmon P et al. Prise de position de la SFD sur les stratégies d\'utilisation des traitements de l\'hyperglycémie dans le DT2 – 2025. Med Mal Metab 2025;19:630-662. Ouvrez cette lecture après avoir décidé : elle ne bloque rien, sauf l\'initiation de l\'insuline hors recommandations.')
     ]);
   }
@@ -751,7 +772,7 @@
     const x = (d) => L + ((W - L - R) * d) / last;
     const drugs = [['met', 'Metformine', (p) => p.met > 0], ['su', 'Sulfamide', (p) => p.su > 0], ['glp', 'aGLP1', (p) => p.glp > 0], ['ins', 'Insuline', (p) => p.ins > 0]].filter(([, , f]) => log.some(f));
     const lanes = [
-      { k: 'a1c', t: 'HbA1c (%)', min: 5, max: Math.max(10, ...log.map((p) => p.a1c)) + 0.5, band: [SFD.target(G.cfg, pt.rx, pt.st.dfg).floor || 4, SFD.target(G.cfg, pt.rx, pt.st.dfg).max], color: 'var(--t3)', truth: (p) => p.a1c },
+      { k: 'a1c', t: 'HbA1c (%)', min: 5, max: Math.max(10, ...log.map((p) => p.a1c)) + 0.5, band: [goalT().floor || 4, goalT().max], color: 'var(--t3)', truth: (p) => p.a1c },
       { k: 'fpg', t: 'Glycémie à jeun (g/L)', min: 0.4, max: Math.max(2.5, ...log.map((p) => p.mg)) + 0.2, band: [0.7, 1.1], color: 'var(--t4)', truth: (p) => p.fpg },
       { k: 'w', t: 'Poids (kg)', min: Math.min(...log.map((p) => p.w)) - 3, max: Math.max(...log.map((p) => p.w)) + 3, color: 'var(--tsh)', truth: (p) => p.w, all: true }
     ];

@@ -30,7 +30,9 @@
   const HYPO = 0.7;
   const MOMENTS = [['rev', 'Réveil', 7.25], ['ppPdj', '2 h après le petit-déjeuner', 9.5], ['avDej', 'Avant le déjeuner', 12.25], ['ppDej', '2 h après le déjeuner', 14.5], ['avDin', 'Avant le dîner', 19.25], ['ppDin', '2 h après le dîner', 21.5], ['coucher', 'Coucher', 22.5]];
   // Mesures faites selon la fréquence d'autosurveillance prescrite (le réveil tous les jours).
+  // Hors insuline, autosurveillance limitée à 200 bandelettes par an (≈ 4 mesures par semaine).
   const ASG = {
+    w4: { label: '4 mesures par semaine (200 bandelettes par an)', perYear: 208, set: (d) => ([0, 2, 4, 6].includes(((d % 7) + 7) % 7) ? [['rev', 'ppDej', 'avDin', 'ppDin'][((Math.floor(d / 2) % 4) + 4) % 4]] : []) },
     1: { label: '1 fois par jour (réveil)', set: () => ['rev'] },
     2: { label: '2 fois par jour (réveil + un autre moment, en alternance)', set: (d) => ['rev', ['avDej', 'avDin', 'coucher'][d % 3]] },
     4: { label: '4 fois par jour (réveil, avant midi, avant soir, coucher)', set: () => ['rev', 'avDej', 'avDin', 'coucher'] },
@@ -38,7 +40,9 @@
   };
   const MEALS = ['Petit-déjeuner', 'Déjeuner', 'Dîner'];
   // Repas suivant dont la glycémie juge chaque bolus (protocole : « sur la glycémie avant le repas suivant »).
-  const BOLUS_CTRL = ['avDej', 'avDin', 'coucher'];
+  const BOLUS_CTRL = ['avDej', 'avDin', 'coucher'], BOLUS_PP = ['ppPdj', 'ppDej', 'ppDin'];
+  // Objectifs en vigueur : ceux fixés par le prescripteur, sinon ceux du profil du protocole.
+  const objOf = (prot) => prot.obj || PROTO[prot.prof] || PROTO.std;
 
   /* ---------- Hasard reproductible ---------- */
   function rng(seed) {
@@ -148,7 +152,7 @@
   /* ---------- Titration ---------- */
   // state : { above: { basal, m0, m1, m2 } } ; prot : { who, prof, delai, sfd10 } ; rdg : glycémies du jour.
   function titrate(rx, rdg, prot, state, apply) {
-    const O = PROTO[prot.prof] || PROTO.std;
+    const O = objOf(prot);
     const log = [];
     const step = (dose) => (prot.sfd10 && dose > 40 ? Math.max(2, Math.round(dose * 0.1)) : dose < 10 ? 1 : 2);
     const nightHypo = rdg.hypos.some((h) => h.t < 7.5 || h.t > 22);
@@ -164,7 +168,8 @@
     };
     ctl('basal', rx.basal, rdg.rev, O.rev, nightHypo, (v) => { rx.basal = v; });
     (rx.rapidM || []).forEach((dose, m) => {
-      const k = BOLUS_CTRL[m], obj = O[k] || O.avDej;
+      const pp = prot.bolusCtl === 'pp';
+      const k = pp ? BOLUS_PP[m] : BOLUS_CTRL[m], obj = pp ? (O.pp || [1.2, 1.8]) : (O[k] || O.avDej);
       const hypo = rdg.hypos.some((h) => h.t > ([7.5, 12.5, 19.5][m] + 1) && h.t < ([12.5, 19.5, 26][m]));
       ctl('m' + m, dose, rdg[k], obj, hypo, (v) => { rx.rapidM[m] = v; });
     });
@@ -243,15 +248,15 @@
   }
 
   function interpretCarnet(rows, prot, ctx) {
-    const O = PROTO[prot.prof] || PROTO.std;
+    const O = objOf(prot);
     const f = (x) => x.toFixed(2).replace('.', ',');
     const out = [];
     const col = (k) => rows.map((r) => r.v[k]).filter((x) => x != null);
     const nHypo = rows.reduce((a, r) => a + r.hypos.length, 0);
     const nightH = rows.reduce((a, r) => a + r.hypos.filter((h) => h.t < 7.5 || h.t > 22).length, 0);
     if (nHypo) out.push('Hypoglycémies : ' + nHypo + ' sur ' + rows.length + ' jours' + (nightH ? ', dont ' + nightH + ' la nuit (basale trop forte)' : '') + ' ; à corriger en premier (baisser la dose responsable dès l\'injection suivante).');
-    [['rev', 'Réveil'], ['avDej', 'Avant le déjeuner'], ['avDin', 'Avant le dîner'], ['coucher', 'Coucher']].forEach(([k, n]) => {
-      const v = col(k), obj = O[k];
+    [['rev', 'Réveil'], ['ppPdj', '2 h après le petit-déjeuner'], ['avDej', 'Avant le déjeuner'], ['ppDej', '2 h après le déjeuner'], ['avDin', 'Avant le dîner'], ['ppDin', '2 h après le dîner'], ['coucher', 'Coucher']].forEach(([k, n]) => {
+      const v = col(k), obj = k.startsWith('pp') ? O.pp : O[k];
       if (!v.length || !obj) return;
       const hi = v.filter((x) => x > obj[1]).length, lo = v.filter((x) => x < obj[0]).length;
       out.push(n + ' : médiane ' + f(quant(v, 0.5)) + ' g/L (objectif ' + f(obj[0]) + '–' + f(obj[1]) + ') ; ' + hi + '/' + v.length + ' au-dessus, ' + lo + '/' + v.length + ' en dessous.');
@@ -279,7 +284,7 @@
 
   // Carnet : une ligne par jour, cases colorées selon l'objectif du protocole.
   function carnetTable(rows, prot, h) {
-    const O = PROTO[prot.prof] || PROTO.std;
+    const O = objOf(prot);
     const cls = (k, v) => { if (v == null) return 'gc-na'; if (v < HYPO) return 'gc-hypo'; const o = O[k] || (k.startsWith('pp') ? O.pp : null); if (!o) return ''; return v < o[0] ? 'gc-lo' : v > o[1] ? 'gc-hi' : 'gc-ok'; };
     const anyRapid = rows.some((r) => r.u.some((x) => x > 0));
     const anyPP = rows.some((r) => r.v.ppDej != null);
@@ -344,5 +349,5 @@
     ]);
   }
 
-  S.glyco = { PROTO, ASG, MOMENTS, MEALS, HYPO, makeDay, glucose, readings, titrate, cgm, agpStats, cgmTargets, interpretAGP, interpretCarnet, carnetTable, agpReport, rng };
+  S.glyco = { PROTO, objOf, ASG, MOMENTS, MEALS, HYPO, makeDay, glucose, readings, titrate, cgm, agpStats, cgmTargets, interpretAGP, interpretCarnet, carnetTable, agpReport, rng };
 })();

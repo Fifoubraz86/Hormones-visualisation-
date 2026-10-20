@@ -59,6 +59,25 @@
     return out;
   }
 
+  // Dispositifs de surveillance (remboursement) : capteur et bandelettes. Renvoie les messages bloquants.
+  // Capteur (FreeStyle Libre 2, extension LPPR 2023) : insulinothérapie intensifiée (≥ 3 injections/j ou
+  // pompe), ou insulinothérapie non intensifiée avec HbA1c ≥ 8 %. Autosurveillance capillaire : réservée
+  // aux patients sous traitement hypoglycémiant (sulfamide, glinide, insuline) ; hors insuline, 200
+  // bandelettes et lancettes par an (HAS).
+  function monitoring(rx, asg, cgm, a1c) {
+    const out = [];
+    const nInj = (rx.basal > 0 ? 1 : 0) + (rx.rapidM || []).filter((x) => x > 0).length;
+    if (cgm) {
+      if (!INS(rx)) out.push('Capteur de glucose : pris en charge seulement sous insuline (HAS, LPPR). Sans insuline, il n\'est pas remboursé.');
+      else if (nInj < 3 && !(a1c >= 8)) out.push('Capteur de glucose sous insulinothérapie non intensifiée (' + nInj + ' injection' + (nInj > 1 ? 's' : '') + '/j) : remboursé seulement si l\'HbA1c est ≥ 8 % (dernière HbA1c ' + (a1c != null ? fmt(a1c, 1) + ' %' : 'inconnue') + ') ; sous insulinothérapie intensifiée (≥ 3 injections/j), sans condition d\'HbA1c.');
+    }
+    if (asg && asg !== '0') {
+      if (!INS(rx) && !(rx.su > 0)) out.push('Autosurveillance glycémique capillaire : sans traitement hypoglycémiant (sulfamide, glinide, insuline), elle n\'est pas recommandée en routine et le lecteur et les bandelettes ne sont pas pris en charge (HAS).');
+      else if (!INS(rx) && asg !== 'w4') out.push('Sans insuline (sulfamide seul), l\'autosurveillance est limitée à 200 bandelettes et lancettes par an, soit environ 4 mesures par semaine (HAS).');
+    }
+    return out;
+  }
+
   // Lecture de l'ordonnance : liste de { lvl: 'stop' | 'warn' | 'tip' | 'ok', t, src }.
   // st : { c (patient), rx, prevRx, dfg, a1c, W, hypos, starts: {drug: {day, a1c, w}}, day, ppr, glyNote }
   function advise(st) {
@@ -76,6 +95,8 @@
     if (cv && GLP(rx) && !CV_GLP(rx)) add('tip', 'Bénéfice CV démontré aux doses des grands essais : ' + ({ lira: 'liraglutide 1,8 mg/j', dula: 'dulaglutide ≥ 1,5 mg/sem', sema: 'sémaglutide 1 mg/sem', tirz: 'tirzépatide 15 mg/sem' }[rx.glp]) + '.', 'avis 11');
     if ((bmi >= 30 || c.masld) && !GLP(rx) && !(g === 'dependant')) add('tip', (bmi >= 30 ? 'Obésité (IMC ' + fmt(bmi, 1) + ')' : 'MASLD/MASH') + ' : envisager un aGLP1 ou le tirzépatide, quel que soit l\'HbA1c ; à défaut, un iSGLT2.', bmi >= 30 ? 'avis 14' : 'avis 15');
 
+    // Mode de vie en première intention chez tous (HAS 2024, SFD 2025 avis 4 et 8).
+    if (!(rx.act > 0) && !rx.diet && !(rx.wtGoal > 0) && !rx.sodaStop) add('tip', 'Mesures hygiéno-diététiques (activité physique, prise en charge nutritionnelle) en première intention chez tous les patients, avant et avec tout médicament.', 'HAS 2024 ; SFD 2025, avis 4 et 8');
     // Metformine (avis 8, 9, 12 bis, 20).
     if (!(rx.met > 0) && dfg >= 30 && !c.metIntol) add('tip', 'Metformine en première intention (sauf contre-indication ou intolérance digestive avérée), à doses progressives jusqu\'à la dose maximale tolérée, en 2 ou 3 prises au cours ou à la fin des repas.', 'avis 8 et 9');
     if (rx.met > 0 && dfg < 30) add('stop', 'Metformine contre-indiquée sous 30 mL/min/1,73 m² : à arrêter.', 'avis 12 bis');
@@ -159,6 +180,13 @@
     // Rétinopathie (avis 8 bis).
     if ((c.retino === 'severe' || c.retino === 'prolif') && !st.ppr) add('warn', 'Rétinopathie ' + (c.retino === 'prolif' ? 'proliférante' : 'sévère') + ' : avis ophtalmologique rapide (photocoagulation panrétinienne) ; objectifs gradués de baisse de la glycémie en attendant.', 'avis 8 bis');
 
+    // Objectif fixé par le prescripteur (HAS 2024, SFD 2025 : objectif individualisé, décidé avec le patient).
+    if (st.goal != null) {
+      if (st.goal < T.max - 0.25 && (rx.su > 0 || INS(rx))) add('warn', 'Objectif fixé à ' + fmt(st.goal, 1) + ' %, plus strict que la cible SFD (≤ ' + fmt(T.max, 1) + ' %) sous traitement hypoglycémiant : risque d\'hypoglycémie' + (T.floor ? ' ; ne pas descendre sous ' + fmt(T.floor, 1) + ' %' : '') + '.', 'avis 3');
+      else if (st.goal > T.max + 0.25) add('warn', 'Objectif fixé à ' + fmt(st.goal, 1) + ' %, moins exigeant que la cible SFD (≤ ' + fmt(T.max, 1) + ' %) : inertie thérapeutique ?', 'avis 3');
+      if (T.floor && st.goal < T.floor) add('warn', 'Objectif sous le plancher de ' + fmt(T.floor, 1) + ' % recommandé pour ce patient sous SU, glinide ou insuline.', 'avis 3 et 21');
+    }
+    if (!(rx.su > 0) && !INS(rx) && st.asg && st.asg !== '0') add('tip', 'Autosurveillance sans traitement hypoglycémiant : non recommandée en routine (HAS) ; la SFD l\'admet temporairement à visée éducative au diagnostic d\'un déséquilibre important.', 'avis 8 bis et 23');
     if (!out.length) add('ok', 'Pas d\'écart relevé avec la prise de position.', '');
     return { target: T, items: out };
   }
@@ -174,8 +202,10 @@
     ['Fonction rénale', 'Metformine ≤ 2 g (DFG 45–59), ≤ 1 g (30–44), arrêt < 30. Sitagliptine 50 mg < 45, 25 mg < 30. SU contre-indiqués < 30. iSGLT2 : effet glycémique réduit < 45 ; initiation dès 25 (dapagliflozine) ou 20 (empagliflozine 10 mg).', 'avis 12 bis'],
     ['Insuline basale', 'Une injection d\'un analogue lent, 6 à 10 U/j ou 0,1 à 0,2 U/kg/j ; glycémie au réveil 0,80–1,30 g/L ; adaptation tous les 3 jours de ± 2 U (± 10 % au-delà de 40 U). Garder la metformine, arrêter les SU. Capteur recommandé. Glargine U300 ou dégludec si risque d\'hypoglycémie nocturne.', 'avis 18, 18 bis, 18 ter'],
     ['Échec de la basale', 'HbA1c au-dessus de la cible malgré une glycémie à jeun dans la cible, ou basale > 0,5 U/kg : avis diabétologique ; ajouter un aGLP1 ou le tirzépatide (préféré), un oral (iSGLT2, iDPP4, SU) ou des bolus (basal-plus, basal-bolus) ; prémélanges moins flexibles.', 'avis 19'],
+    ['HAS 2024 (stratégie thérapeutique du patient vivant avec un DT2)', 'Mode de vie (activité physique, nutrition) en première intention chez tous ; metformine en première intention médicamenteuse ; iSGLT2 ou aGLP1 selon le profil, indépendamment de la metformine et de l\'HbA1c (maladie cardiovasculaire avérée : iSGLT2 ou aGLP1 ; insuffisance cardiaque ou maladie rénale : iSGLT2 ; obésité IMC > 30 : aGLP1) ; cible d\'HbA1c de 7 % pour la majorité, individualisée et décidée avec le patient.', 'HAS 2024'],
+    ['Surveillance : bandelettes et capteur', 'Autosurveillance capillaire réservée aux traitements hypoglycémiants (sulfamide, glinide, insuline) ; hors insuline, 200 bandelettes et lancettes par an. Capteur de glucose pris en charge sous insulinothérapie intensifiée (≥ 3 injections/j), ou non intensifiée avec HbA1c ≥ 8 % (LPPR, 2023) ; recommandé sous insuline par la SFD.', 'HAS ; LPPR ; avis 23'],
     ['Personne âgée', 'Fragile : metformine + iDPP4, puis analogue lent ; éviter SU et glinides. Dépendante : pas de SU, de glinide ni d\'aGLP1 ; iDPP4, insuline basale ; HbA1c > 7,5 % sous insuline.', 'avis 21 bis']
   ];
 
-  S.sfd = { target, cgmFragile, insulinInit, advise, REF, CV_GLP };
+  S.sfd = { target, cgmFragile, insulinInit, monitoring, advise, REF, CV_GLP };
 })();
