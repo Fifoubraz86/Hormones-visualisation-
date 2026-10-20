@@ -54,7 +54,9 @@
   /* ---------- Formes ---------- */
   const kMeal = (tau) => (tau <= 0 ? 0 : (tau * tau) * Math.exp(2 - 2 * tau)); // pic à 1 h, aire e²/4
   const kIns = (tau) => (tau <= 0 ? 0 : Math.pow(tau / 1.5, 2) * Math.exp(2 - 2 * tau / 1.5)); // pic à 1 h 30, aire 1,5 e²/4
-  const AREA_MEAL = Math.exp(2) / 4, AREA_INS = 1.5 * Math.exp(2) / 4;
+  // Action d'un analogue rapide au-delà du repas : montée en 1 h, plateau jusqu'à 3 h 30, fin vers 5 h.
+  const kBol = (tau) => (tau <= 0 ? 0 : tau < 1 ? tau : tau < 3.5 ? 1 : tau < 5 ? 1 - (tau - 3.5) / 1.5 : 0);
+  const AREA_MEAL = Math.exp(2) / 4, AREA_INS = 3.5;
   const smooth = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
   function dayShape(t) { return t < 3 ? Math.max(0, 1 - (t + 2) / 5) : t < 7.5 ? 0 : t < 12 ? smooth((t - 7.5) / 4.5) : t < 22 ? 1 : 1 - (t - 22) / 5; }
   function dawnDip(t) { return t < 3 ? 1 : t < 7 ? 1 - (t - 3) / 4 : 0; }
@@ -129,7 +131,7 @@
     let g = dp.F - dp.dawn * dawnDip(t) + dp.dday * dayShape(t) * (sg >= 0 ? 1 - dp.segCut[sg] : 1);
     for (let m = 0; m < 3; m++) {
       if (!dp.skip[m]) g += dp.sig * dp.w[m] * (1 - dp.cut[m]) * kMeal(t - dp.tm[m]);
-      if (dp.extra[m]) g -= dp.extra[m] * kIns(t - dp.tm[m]);
+      if (dp.extra[m]) g -= dp.extra[m] * kBol(t - dp.tm[m]);
       // Queue du repas de la veille au-dessus de minuit : négligée (aire < 1 %).
     }
     for (const n of dp.noise) g += n.a * Math.sin(2 * Math.PI * n.f * t + n.ph);
@@ -156,14 +158,23 @@
     const log = [];
     const step = (dose) => (prot.sfd10 && dose > 40 ? Math.max(2, Math.round(dose * 0.1)) : dose < 10 ? 1 : 2);
     const nightHypo = rdg.hypos.some((h) => h.t < 7.5 || h.t > 22);
+    // Après une baisse (hypoglycémie ou glycémie sous l'objectif), pas de hausse pendant 7 jours pour cette
+    // dose : on ne remonte pas une insuline qui vient de donner une hypoglycémie (règle de sécurité, complément).
+    state.hold = state.hold || {};
     const ctl = (name, dose, val, obj, hypo, set) => {
       if (!dose) return;
+      if (state.hold[name] > 0) state.hold[name]--;
       if ((val != null && val < obj[0]) || hypo) {
-        state.above[name] = 0;
-        if (apply) { const nd = Math.max(0, dose - step(dose)); set(nd); log.push({ name, from: dose, to: nd, why: hypo ? 'hypoglycémie' : 'sous l\'objectif' }); }
-      } else if (val != null && val > obj[1]) {
+        state.above[name] = 0; state.hold[name] = 7;
+        if (apply) { const nd = Math.max(0, dose - step(dose) * (hypo ? 2 : 1)); set(nd); log.push({ name, from: dose, to: nd, why: hypo ? 'hypoglycémie' : 'sous l\'objectif' }); }
+      } else if (val != null && val > obj[1] && !(state.hold[name] > 0)) {
         state.above[name] = (state.above[name] || 0) + 1;
-        if (state.above[name] >= prot.delai) { state.above[name] = 0; if (apply) { const nd = dose + step(dose); set(nd); log.push({ name, from: dose, to: nd, why: prot.delai + ' jours au-dessus de l\'objectif' }); } }
+        if (state.above[name] >= prot.delai) {
+          state.above[name] = 0;
+          const cap = prot.caps && prot.caps[name];
+          if (cap != null && dose + step(dose) > cap) { if (!state.capped) state.capped = {}; if (!state.capped[name]) { state.capped[name] = true; log.push({ name, from: dose, to: dose, why: 'dose maximale du protocole atteinte (' + cap + ' U) : appeler le médecin', cap: true }); } }
+          else if (apply) { const nd = dose + step(dose); set(nd); log.push({ name, from: dose, to: nd, why: prot.delai + ' jours au-dessus de l\'objectif' }); }
+        }
       } else state.above[name] = 0;
     };
     ctl('basal', rx.basal, rdg.rev, O.rev, nightHypo, (v) => { rx.basal = v; });

@@ -366,3 +366,5 @@ select { background: var(--panel-2); border: 1px solid var(--line-2); border-rad
 .sv-tr-next { margin: 4px 0 0 14px; padding: 6px 10px; border-radius: 6px; border-left: 4px solid var(--line-2); background: var(--panel); }
 .sv-tr-r1 { border-left-color: var(--good); } .sv-tr-r2 { border-left-color: var(--info); } .sv-tr-r3 { border-left-color: var(--faint); } .sv-tr-r4 { border-left-color: var(--warn); } .sv-tr-r5 { border-left-color: var(--bad); }
 .sv-tr-r1 > .sv-tr-head .sv-tr-rank { color: var(--good); } .sv-tr-r4 > .sv-tr-head .sv-tr-rank { color: var(--warn); } .sv-tr-r5 > .sv-tr-head .sv-tr-rank { color: var(--bad); }
+.sv-export { width: 100%; font: 11.5px var(--font-data); background: var(--panel-2); color: var(--fg); border: 1px solid var(--line-2); border-radius: 8px; padding: 6px; resize: vertical; }
+#dtExportBox { display: grid; gap: 6px; margin-top: 8px; }

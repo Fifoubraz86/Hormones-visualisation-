@@ -402,7 +402,8 @@
       if (first.b !== rx.basal) parts.push('basale ' + first.b + ' → ' + rx.basal + ' U');
       rx.rapidM.forEach((u, i) => { if (first.m[i] !== u) parts.push('bolus du ' + ['petit-déjeuner', 'déjeuner', 'dîner'][i] + ' ' + first.m[i] + ' → ' + u + ' U'); });
       const down = tl.reduce((a, x) => a + x.log.filter((l) => l.to < l.from).length, 0), up = tl.reduce((a, x) => a + x.log.filter((l) => l.to > l.from).length, 0);
-      titr = (G.titr.who === 'ide' ? 'L\'IDE' : G.cfg.sex === 'F' ? 'La patiente' : 'Le patient') + ' a appliqué le protocole : ' + (parts.join(', ') || 'doses revenues à leur point de départ') + ' (' + up + ' hausse' + (up > 1 ? 's' : '') + ', ' + down + ' baisse' + (down > 1 ? 's' : '') + ').';
+      const capped = tl.flatMap((x) => x.log.filter((l) => l.cap)).map((l) => ({ basal: 'basale', m0: 'bolus du petit-déjeuner', m1: 'bolus du déjeuner', m2: 'bolus du dîner' })[l.name] + ' (' + l.from + ' U)');
+      titr = (G.titr.who === 'ide' ? 'L\'IDE' : G.cfg.sex === 'F' ? 'La patiente' : 'Le patient') + ' a appliqué le protocole : ' + (parts.join(', ') || 'doses revenues à leur point de départ') + ' (' + up + ' hausse' + (up > 1 ? 's' : '') + ', ' + down + ' baisse' + (down > 1 ? 's' : '') + ').' + (capped.length ? ' Dose maximale du protocole atteinte, ' + (G.titr.who === 'ide' ? 'l\'IDE a' : G.cfg.sex === 'F' ? 'elle a' : 'il a') + ' appelé : ' + capped.join(', ') + '.' : '');
     }
     const sy = symptoms(m);
     const nHypo = pt.st.hypo - G.lastHypo;
@@ -489,6 +490,10 @@
     const metBefore = D.metDose(pt);
     Object.assign(pt.rx, { met: d.met, su: d.su, dpp4: d.dpp4, glp: d.glp, glpDose: d.glp === 'none' ? 0 : d.glpDose, sglt2: d.sglt2, acarb: d.acarb, basal: d.basal, basalType: d.basalType, rapidM: d.rapidM.slice(), rapid: d.rapid, act: d.act, sodaStop: d.sodaStop, wtGoal: d.wtGoal, diet: d.diet });
     if (d.cgm && !G.cgm) G.cgmStart = pt.day; // le capteur n'enregistre qu'à partir de sa pose
+    // Dose maximale sans avis médical : + 50 % de la dose prescrite (au moins + 6 U), comme dans les protocoles écrits.
+    d.titr.caps = { basal: d.basal > 0 ? Math.max(d.basal + 6, Math.round(d.basal * 1.5)) : null };
+    d.rapidM.forEach((u, m) => { d.titr.caps['m' + m] = u > 0 ? Math.max(u + 6, Math.round(u * 1.5)) : null; });
+    G.titrState.capped = {};
     G.titr = JSON.parse(JSON.stringify(d.titr)); G.cgm = d.cgm; G.asg = d.asg; G.goal = d.goal;
     if (d.cgm) G.cgmAcquired = true;
     if (d.ppr && G.ev.ppr == null) G.ev.ppr = pt.day;
@@ -554,9 +559,54 @@
       h('p', { class: 'sv-rx' }, [h('strong', null, 'Traitement en cours : '), rxLabel(pt.rx)]),
       h('div', { class: 'sv-actions' }, [
         h('button', { type: 'button', class: 'sv-secondary', onclick: undo, disabled: !G.undo.length }, '↶ Annuler la dernière étape'),
-        h('button', { type: 'button', class: 'sv-secondary', onclick: setup }, 'Nouveau patient')
-      ])
+        h('button', { type: 'button', class: 'sv-secondary', onclick: setup }, 'Nouveau patient'),
+        h('button', { type: 'button', class: 'sv-secondary', id: 'dtExport', onclick: exportReport }, '⇩ Exporter le suivi')
+      ]),
+      h('div', { id: 'dtExportBox', hidden: true })
     ]);
+  }
+
+  // Export du rapport de suivi (JSON) : patient, physiologie cachée, ordonnances, bilans, carnets, AGP,
+  // titration et courbe quotidienne du modèle ; pour l'analyse hors du simulateur.
+  function exportData() {
+    const pt = G.pt, p = pt.par, r2 = (x) => (typeof x === 'number' ? Math.round(x * 100) / 100 : x);
+    const visits = G.history.map((e) => e.prescription ? { jour: e.day, ordonnance: e.rx } : {
+      jour: e.day, note: e.note, evenement: e.event, labo: Object.fromEntries(Object.entries(e.labs).map(([k, v]) => [k, r2(v)])), autres: e.q, poids: r2(e.w), pa: e.sbp,
+      plaintes: e.symptoms, traitement: e.rx, titration: e.titr, cible: e.T && { max: e.T.max, plancher: e.T.floor, fixeeParLePrescripteur: !!e.T.chosen },
+      carnet: e.carnet && e.carnet.map((x) => ({ jour: x.d, basale: x.basal, bolus: x.u, glycemies: Object.fromEntries(Object.entries(x.v).map(([k, v]) => [k, r2(v)])), remarques: x.rem })),
+      agp: e.agp && { jours: e.agp.st.days, capturepc: r2(e.agp.st.capture), moyenne: r2(e.agp.st.mean), gmi: r2(e.agp.st.gmi), cv: r2(e.agp.st.cv), tirPc: r2(e.agp.st.tir), sous070Pc: r2(e.agp.st.low + e.agp.st.vlow), sous054Pc: r2(e.agp.st.vlow), sup180Pc: r2(e.agp.st.high + e.agp.st.vhigh), sup250Pc: r2(e.agp.st.vhigh), medianeParHeure: e.agp.st.prof.filter((q) => q.i % 4 === 0).map((q) => r2(q.p50)) }
+    });
+    return {
+      export: 'Patient virtuel DT2 · rapport de suivi', version: 1, date: new Date().toISOString(), jourActuel: pt.day,
+      patient: G.cfg,
+      physiologieCachee: { reserveB0: r2(p.B0), reserveActuelle: r2(D.beta(pt)), sensibilite: r2(p.Si0), sensibiliteRecalee: p.siFit ? r2(p.siFit) : null, declinAnnuel: r2(p.rate), observance: r2(p.adh), reponseMetformine: r2(p.metResp), reponseAGLP1: r2(p.glpResp), reponsePoids: r2(p.wResp), atteinteRHD: r2(p.lifeAch), poidsEquilibre: r2(p.weight0) },
+      reglages: { titration: G.titr, autosurveillance: G.asg, capteur: G.cgm, capteurDepuis: G.cgmStart, indicationCapteurAcquise: !!G.cgmAcquired, objectifHbA1c: G.goal },
+      ordonnanceActuelle: Object.assign({}, pt.rx), libelle: rxLabel(pt.rx),
+      etat: { hba1c: r2(pt.st.A), glycemieMoyenne: r2(pt.st.MG), poids: r2(pt.st.W), dfg: r2(pt.st.dfg), hypoglycemies: pt.st.hypo, hypoglycemiesSeveres: pt.st.hypoSev },
+      consultations: visits,
+      titrationJourParJour: G.titrLog.map((x) => ({ jour: x.day, changements: x.log.map((l) => ({ dose: l.name, de: l.from, a: l.to, pourquoi: l.why })) })),
+      courbeQuotidienne: pt.log.map((q) => ({ j: q.day, a1c: r2(q.a1c), gm: r2(q.mg), gaj: r2(q.fpg), poids: r2(q.w), dfg: r2(q.dfg), met: q.met, su: q.su, insuline: q.ins, glp: r2(q.glp) })),
+      evenements: G.ev
+    };
+  }
+  function exportReport() {
+    const box = document.getElementById('dtExportBox');
+    const txt = JSON.stringify(exportData(), null, 1);
+    const name = 'suivi-dt2-J' + G.pt.day + '.json';
+    let ok = false;
+    try {
+      const url = URL.createObjectURL(new Blob([txt], { type: 'application/json' }));
+      const a = h('a', { href: url, download: name }); document.body.append(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000); ok = true;
+    } catch (err) { ok = false; }
+    const ta = h('textarea', { class: 'sv-export', readonly: true, rows: 8, 'aria-label': 'Rapport de suivi (JSON)' }, txt);
+    const msg = h('p', { class: 'sv-note' }, (ok ? 'Fichier « ' + name + ' » proposé au téléchargement. ' : '') + 'Si le téléchargement est bloqué, copiez le texte ci-dessous et collez-le dans la conversation.');
+    box.textContent = '';
+    box.append(msg, ta, h('div', { class: 'sv-actions' }, [
+      h('button', { type: 'button', class: 'sv-secondary', onclick: () => { ta.select(); let c = false; try { c = document.execCommand('copy'); } catch (err) { c = false; } if (navigator.clipboard) navigator.clipboard.writeText(txt).then(() => { msg.textContent = 'Copié dans le presse-papiers.'; }, () => {}); if (c) msg.textContent = 'Copié dans le presse-papiers.'; } }, 'Copier'),
+      h('button', { type: 'button', class: 'sv-secondary', onclick: () => { box.hidden = true; } }, 'Fermer')
+    ]));
+    box.hidden = false;
   }
 
   function rxCard() {
@@ -637,7 +687,7 @@
       ]),
       h('div', { class: 'sv-form' }, [rng('rev', 'Objectif au réveil'), rng('avDej', 'Avant les repas'), rng('coucher', 'Au coucher'), rng('pp', '2 h après les repas')]),
       h('label', { class: 'sv-check sv-small' }, [h('input', { type: 'checkbox', id: 'dtTitr10', checked: t.sfd10, onchange: (e) => { t.sfd10 = e.target.checked; } }), ' Au-delà de 40 U, pas de 10 % (SFD 2025) au lieu de 2 U']),
-      h('p', { class: 'sv-note' }, 'Protocole du service : pas de 1 U sous 10 U, de 2 U au-delà ; baisse dès l\'injection suivante si hypoglycémie ou glycémie < ' + fmt(O.rev[0], 2) + ' g/L ; basale jugée sur le réveil, bolus sur la glycémie avant le repas suivant.'),
+      h('p', { class: 'sv-note' }, 'Protocole du service : pas de 1 U sous 10 U, de 2 U au-delà ; baisse dès l\'injection suivante si glycémie < ' + fmt(O.rev[0], 2) + ' g/L, double baisse si hypoglycémie, puis pas de hausse pendant 7 jours ; basale jugée sur le réveil, bolus sur la glycémie avant le repas suivant ; dose maximale sans avis médical : + 50 % de la dose prescrite (au moins + 6 U).'),
       h('h4', null, 'Surveillance glycémique'),
       h('label', { class: 'sv-check' }, [h('input', { type: 'checkbox', id: 'dtCgm', checked: d.cgm, onchange: (e) => { d.cgm = e.target.checked; d.asg = d.cgm ? '0' : (d.basal + d.rapidM.reduce((a, x) => a + x, 0) > 0 ? (d.rapidM.some((x) => x > 0) ? '4' : '1') : d.su > 0 ? 'w4' : '0'); re(); } }), ' Capteur de glucose (mesure en continu, rapport AGP)' + (G.cgmAcquired ? ' · indication acquise' : '')]),
       d.cgm ? h('p', { class: 'sv-note', id: 'dtSurvCgm' }, 'Surveillance par le capteur : l\'autosurveillance capillaire est arrêtée (bandelettes réservées aux doutes : symptômes discordants, capteur défaillant). Le rapport AGP des 14 derniers jours est joint à chaque bilan.')

@@ -29,14 +29,16 @@
   // node tools/calib-dt2.js.
   const P = {
     met: 0.5,       // effet maximal de la metformine à 2 g [met-mono, met-500, met-2000]
-    metIns: 1.0,    // atténuation de la metformine sous insuline titrée [met-ins]
+    metIns: 1.4,    // atténuation de la metformine sous insuline titrée [met-ins]
     metCo: 0.4,     // effets moins qu'additifs en association orale [met-addon]
     su: 0.85,       // effet des sulfamides, quasi plateau dès la dose faible [su-mono, su-dose]
     suExp: 0.15,
+    suIns: 1.5,     // sulfamide atténué sous insuline [su-ins]
     dpp: 0.31,      // [dpp4]
     sglt25: 0.19, sglt10: 0.14, // [empa25-g2, empa10-g2] ; atténuation rénale [empa25-g3]
     acarb: 0.2,     // [acarb]
     insK: 1.2,      // U/kg/j d'insuline injectée équivalant à la sécrétion normale [basal-t2t]
+    bCap: 0.45,     // saturation de l'effet de la basale (≈ 0,5 U/kg) : sur-basalisation [basal-t2t]
     wExp: 1.5,        // sensibilité à l'insuline ∝ (poids initial / poids)^wExp [lookahead]
     wlB: 16, wlDur: 6, // récupération de la fonction β après perte de poids si diabète récent [direct]
     coLife: 0.6,
@@ -113,8 +115,11 @@
     const gd = clamp((MG - 0.8) / 0.6, 0.15, 1); // effet glucodépendant des incrétines
     // Réserve insulinique faible (peptide C bas) : insulinosécréteurs et incrétines peu efficaces.
     const br = p.suBoost > 1 ? 1 : clamp(beta(pt) / 0.15, 0.5, 1);
-    const iex = (rx.basal + rx.rapid) * a / (P.insK * pt.par.weight0);
-    const eSu = su > 0 ? P.su * Math.pow(Math.min(su, 120) / 120, P.suExp) * (p.suBoost || 1) * br : 0;
+    // Insuline injectée. La basale freine surtout la production hépatique de glucose : au-delà des besoins,
+    // son effet sature (sur-basalisation, SFD 2025 avis 19) ; les bolus couvrent les repas.
+    const iexB = rx.basal * a / (P.insK * pt.par.weight0), iexR = rx.rapid * a / (P.insK * pt.par.weight0);
+    const iex = P.bCap * (1 - Math.exp(-iexB / P.bCap)) + iexR, iexRaw = iexB + iexR;
+    const eSu = su > 0 ? P.su * Math.pow(Math.min(su, 120) / 120, P.suExp) * (p.suBoost || 1) * br / (1 + P.suIns * Math.min(1.5, iexB + iexR)) : 0;
     const eDpp = (rx.dpp4 > 0 ? P.dpp * Math.min(1, rx.dpp4 * a / 100) * p.incr : 0) * gd * br;
     const eGlp = (take.glp ? P.glpSec * glpFrac(rx) * a * p.incr * p.glpResp : 0) * gd * br;
     // Part de l'effet des aGLP1 indépendante de la sécrétion résiduelle (glucagon, vidange gastrique, satiété) :
@@ -122,10 +127,10 @@
     const eGlpX = take.glp ? Math.min(0.8, P.glpX * glpFrac(rx) * a * p.glpResp * Math.sqrt(p.incr) * gd) : 0;
     return {
       eSu, eDpp, eGlp, eGlpX,
-      eMet: P.met * metCurve(met) * p.metResp / (1 + P.metIns * Math.min(1.5, iex) + P.metCo * (eSu + eDpp + eGlp)),
+      eMet: P.met * metCurve(met) * p.metResp / (1 + P.metIns * Math.min(1.5, iexRaw) + P.metCo * (eSu + eDpp + eGlp)),
       sglt: rx.sglt2 !== 'none' ? (rx.sglt2 === 'empa25' ? P.sglt25 : P.sglt10) * clamp((s.dfg - 20) / 40, 0, 1) * a : 0,
       acarb: rx.acarb > 0 ? P.acarb * Math.min(1, rx.acarb / 300) * a : 0,
-      iex
+      iex, iexRaw
     };
   }
 
@@ -214,7 +219,7 @@
     d -= Math.min(life, 0.12); // perte de poids hygiéno-diététique plafonnée à 12 % (complément : Look AHEAD ≈ 9 % à 1 an)
     if (rx.met && pt.take.met) d -= 0.01;
     if (rx.su && pt.take.su) d += 0.025 * Math.min(1, rx.su / 120) * (e.iex > 0 ? 0.5 : 1); // moindre sous insuline
-    d += 0.04 * Math.min(1, e.iex);
+    d += 0.04 * Math.min(1, e.iexRaw);
     if (rx.glp !== 'none' && pt.take.glp) d -= (0.005 + P.glpW * glpFrac(rx) * (GLP1[rx.glp].wk ? GLP1[rx.glp].wk / GLP1[rx.glp].k : 1)) * p.wResp * p.adh;
     if (rx.sglt2 !== 'none') d -= 0.025;
     if (s.MG > 2.6) d -= 0.03 * (s.MG - 2.6); // catabolisme de l'hyperglycémie majeure
@@ -233,7 +238,7 @@
     const e = effects(pt, s.MG);
     // Analogues d'action très prolongée (glargine U300, dégludec) : moins d'hypoglycémies nocturnes ; NPH : plus (SFD 2025, avis 18 bis).
     const insF = { g300: 0.7, deg: 0.7, nph: 1.4 }[pt.rx.basalType] || 1;
-    const expo = 0.05 * e.eSu * (p.suBoost > 1 ? 2 : 1) * (s.dfg < 45 ? 1.8 : 1) + 0.17 * e.iex * (pt.rx.rapid > 0 ? 1 : insF);
+    const expo = 0.05 * e.eSu * (p.suBoost > 1 ? 2 : 1) * (s.dfg < 45 ? 1.8 : 1) + 0.17 * e.iexRaw * (pt.rx.rapid > 0 ? 1 : insF);
     const risk = (p.age >= 75 ? 2 : 1) * (p.irregular ? 2 : 1);
     const lam = expo * risk * Math.exp(-(s.MG - 1.15) / 0.17);
     const sevFrac = 0.04 * (p.age >= 75 ? 2.5 : 1) * (s.dfg < 45 ? 2 : 1);
@@ -265,7 +270,9 @@
     const basalShare = pt.rx.basal * p.adh / (P.insK * p.weight0);
     // Les bolus d'insuline rapide ne couvrent pas la nuit : la glycémie à jeun se calcule sans eux.
     const mg = pt.rx.rapid > 0 ? s.MG + Math.max(0, eqMG(pt, { rapid: 0, rapidM: [0, 0, 0] }) - eqMG(pt, {})) : s.MG;
-    return Math.max(0.5, mg * 0.9 + 0.04 - 0.5 * Math.min(1, 2 * basalShare));
+    // Au-delà de 0,6 U/kg, la basale continue d'abaisser la glycémie à jeun (sur-basalisation : réveil bas,
+    // journée haute) alors que son effet sur la glycémie moyenne sature.
+    return Math.max(0.5, mg * 0.9 + 0.04 - 0.5 * Math.min(1, 2 * basalShare) - 0.6 * Math.max(0, basalShare - 0.5));
   }
   function measure(pt) {
     const s = pt.st, rx = pt.rx, p = pt.par;
