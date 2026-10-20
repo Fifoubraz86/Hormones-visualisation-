@@ -38,7 +38,7 @@
     acarb: 0.2,     // [acarb]
     insK: 1.2,      // U/kg/j d'insuline injectée équivalant à la sécrétion normale [basal-t2t]
     wExp: 1.5,        // sensibilité à l'insuline ∝ (poids initial / poids)^wExp [lookahead]
-    wlB: 14, wlDur: 6, // récupération de la fonction β après perte de poids si diabète récent [direct]
+    wlB: 16, wlDur: 6, // récupération de la fonction β après perte de poids si diabète récent [direct]
     coLife: 0.6,
     gtox: 0.4,      // glucotoxicité : levée d'autant plus marquée que l'HbA1c initiale est haute [base-a1c]
     glpW: 0.035     // perte de poids sous aGLP1 à dose pleine (fraction du poids) [sema-1-w]
@@ -113,7 +113,7 @@
     const iex = (rx.basal + rx.rapid) * a / (P.insK * pt.par.weight0);
     const eSu = su > 0 ? P.su * Math.pow(Math.min(su, 120) / 120, P.suExp) * (p.suBoost || 1) * br : 0;
     const eDpp = (rx.dpp4 > 0 ? P.dpp * Math.min(1, rx.dpp4 * a / 100) * p.incr : 0) * gd * br;
-    const eGlp = (take.glp ? 0.8 * glpFrac(rx) * a * p.incr * p.glpResp : 0) * gd * br;
+    const eGlp = (take.glp ? 0.87 * glpFrac(rx) * a * p.incr * p.glpResp : 0) * gd * br;
     return {
       eSu, eDpp, eGlp,
       eMet: P.met * metCurve(met) * p.metResp / (1 + P.metIns * Math.min(1.5, iex) + P.metCo * (eSu + eDpp + eGlp)),
@@ -133,7 +133,7 @@
 
   function targetMG(pt, MG) {
     const p = pt.par, s = pt.st;
-    if (p.gck) return 1.3 - 0.05 * Math.min(1, effects(pt, MG).iex * 3);
+    if (p.gck) return (p.gckSet || 1.3) - 0.05 * Math.min(1, effects(pt, MG).iex * 3);
     const e = effects(pt, MG);
     // Perte de poids et activité : gains de sensibilité moins qu'additifs (Umpierre : conseils d'activité
     // + régime ≈ − 0,6 %, proche de Look AHEAD) [lookahead].
@@ -168,22 +168,31 @@
     if (!prof.gck) par.Si0 *= 1 + 0.025 * Math.min(c.duration || 0, 20);
     const st = { MG: 1, A: c.a1c, W: c.weight, dfg: c.dfg, sbp: c.sbp, hypo: 0, hypoSev: 0, hypoAcc: 0, sevAcc: 0 };
     const pt = { par, st, day: 0, rx: Object.assign({}, RX0, c.rx0 || {}), take: { met: true, su: true, glp: true }, log: [], flags: {}, metRamp: null };
-    // Réserve insulinique calée sur l'HbA1c initiale, sans traitement.
-    if (par.gck) par.B0 = 0.9;
+    // Calage sur l'HbA1c saisie, sous le traitement en cours : c'est une donnée du patient, le modèle
+    // ajuste sa physiologie cachée pour la reproduire (et non l'inverse). D'abord la réserve insulinique ;
+    // si même une réserve minimale donne une HbA1c trop basse (fortes doses d'insuline), c'est que le
+    // patient est plus insulinorésistant que son profil : on cale alors la sensibilité à l'insuline.
+    // Le poids saisi est le poids actuel, sous ce traitement : il est calé avant, pour un état d'équilibre.
+    const targetMg = (c.a1c * 28.7 - 46.7) / 100;
+    const eq = (m0) => { let m = m0; for (let k = 0; k < 40; k++) m = targetMG(pt, m); return m; };
+    const fitWeight = () => { if (c.rx0) { st.MG = targetMg; par.weight0 = c.weight; par.weight0 = c.weight * c.weight / weightTarget(pt); } };
+    const bisect = (set, lo, hi, increasing) => {
+      for (let i = 0; i < 40; i++) { const mid = (lo + hi) / 2; set(mid); const m = eq(targetMg); if ((m > targetMg) === increasing) hi = mid; else lo = mid; }
+      set((lo + hi) / 2);
+    };
+    if (par.gck) { par.B0 = 0.9; par.gckSet = Math.max(1.05, Math.min(1.6, targetMg)); } // MODY 2 : glycémie de consigne
     else {
-      const targetMg = (c.a1c * 28.7 - 46.7) / 100;
-      let lo = 0.01, hi = 2;
-      for (let i = 0; i < 40; i++) {
-        const mid = (lo + hi) / 2; par.B0 = mid;
-        let m = targetMg; for (let k = 0; k < 30; k++) m = targetMG(pt, m);
-        if (m > targetMg) lo = mid; else hi = mid;
-      }
-      par.B0 = (lo + hi) / 2;
+      fitWeight();
+      const Si = par.Si0;
+      par.B0 = 0.01;
+      if (eq(targetMg) < targetMg - 0.01) {
+        par.B0 = 0.03; // réserve résiduelle
+        bisect((k) => { par.Si0 = Si * k; }, 0.03, 1, false);
+        par.siFit = par.Si0 / Si;
+      } else bisect((b) => { par.B0 = b; }, 0.01, 2, false);
+      fitWeight();
     }
-    let m = 1.5; for (let k = 0; k < 60; k++) m = targetMG(pt, m);
-    st.MG = m; st.A = a1cOf(m);
-    // Traitement déjà en cours : le poids saisi est le poids actuel, sous ce traitement.
-    if (c.rx0) { const wt = weightTarget(pt); par.weight0 = c.weight * c.weight / wt; }
+    st.MG = eq(1.5); st.A = a1cOf(st.MG);
     record(pt);
     return pt;
   }

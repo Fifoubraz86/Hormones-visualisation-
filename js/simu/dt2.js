@@ -384,7 +384,7 @@
     const labs = {}, q = [];
     let carnet = null, agp = null;
     tests.forEach((k) => {
-      if (k === 'a1c') labs.a1c = m.a1c;
+      if (k === 'a1c') labs.a1c = G.history.length ? m.a1c : pt.st.A; // bilan initial : la valeur saisie
       else if (k === 'fpg') labs.fpg = G.glyDays.length ? G.glyDays[G.glyDays.length - 1].rdg.rev : m.fpg;
       else if (k === 'creat') labs.dfg = m.dfg;
       else if (k === 'carnet') { if (G.asg !== '0' || G.cgm) carnet = carnetRows(); else q.push(['Carnet glycémique', 'pas d\'autosurveillance glycémique prescrite']); }
@@ -907,6 +907,7 @@
       'Réponse individuelle : metformine × ' + fmt(p.metResp, 2) + ', aGLP1 × ' + fmt(p.glpResp, 2) + ' (incrétines × ' + fmt(p.incr, 1) + ' selon l\'origine)' + (p.suBoost > 1 ? ', sulfamides × ' + p.suBoost + ' (MODY HNF1A)' : '') + '.',
       'Sensibilité digestive à la metformine : ' + Math.round(p.giSens * 100) + ' %.'
     ];
+    if (p.siFit) items.push('Insulinorésistance plus forte que ne le laisse prévoir son profil (sensibilité × ' + fmt(p.siFit, 2) + ') : c\'est ce qu\'il faut pour expliquer une HbA1c de ' + fmt(G.cfg.a1c, 1) + ' % sous ' + ((G.cfg.rx0 && G.cfg.rx0.basal) || 0) + ' U d\'insuline.');
     if (p.gck) items.push('MODY GCK : glycémie de consigne autour de 1,30 g/L, insensible aux antidiabétiques oraux.');
     return h('details', { class: 'sv-card sv-det' }, [h('summary', null, 'Révéler le patient'), h('ul', { class: 'sv-keys' }, items.map((t) => h('li', null, t)))]);
   }
