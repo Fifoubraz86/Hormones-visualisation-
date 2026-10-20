@@ -66,12 +66,24 @@
   const segArea = (a, b) => { let s2 = 0; for (let t = a; t < b; t += 1 / 12) s2 += dayShape(t % 24) / 12; return s2; };
   const SEG_AREA = [segArea(7.5, 12.5), segArea(12.5, 19.5), segArea(19.5, 27)];
 
+  /* ---------- Travail posté ---------- */
+  // Décalage de l'horloge biologique (h) selon le poste du jour : la journée « physiologique » (réveil, repas,
+  // coucher) est la même, mais décalée sur l'horloge ; les 2 premiers jours d'un nouveau poste sont irréguliers.
+  function shiftOf(work, day) {
+    const w = Math.floor(day / 7), first = ((day % 7) + 7) % 7 < 2;
+    if (work === 'nuit') return { off: 11, label: 'nuit', change: false };
+    if (work === '2x8') return w % 2 ? { off: 2.5, label: 'après-midi', change: first } : { off: -2, label: 'matin', change: first };
+    if (work === '3x8') { const k = ((w % 3) + 3) % 3; return [{ off: -2, label: 'matin', change: first }, { off: 2.5, label: 'après-midi', change: first }, { off: 11, label: 'nuit', change: first }][k]; }
+    return { off: 0, label: '', change: false };
+  }
+
   /* ---------- Une journée ---------- */
   // pt : patient du modèle ; ctx : { seed, irregular, newHypo, newSev } ; renvoie les paramètres de la journée.
   function makeDay(pt, D, ctx) {
     const r = rng(ctx.seed);
     const s = pt.st, rx = pt.rx, p = pt.par;
-    const irr = ctx.irregular ? 1 : 0;
+    const sh = shiftOf(ctx.work || p.work || 'jour', pt.day);
+    const irr = ctx.irregular || sh.change ? 1 : 0;
     const MG = s.MG;
     const F0 = D.fpgOf(pt);
     const F = Math.max(0.55, F0 * Math.exp(0.07 * gauss(r) * (1 + irr)));
@@ -105,7 +117,7 @@
     }
     const noise = [0, 1, 2].map(() => ({ a: (0.025 + 0.03 * r()) * Math.max(0.8, MG / 1.4), f: 1 / (2 + 4 * r()), ph: 2 * Math.PI * r() }));
     // Hypoglycémies du modèle : placées plus bas, au creux du profil.
-    const dp = { d: pt.day, F, dawn, dday, sig, w, tm, skip, u, cut, segCut, extra, noise, hypos: [], mg: MG, basal: rx.basal, rapid: u.slice(), meter: [0, 1, 2, 3, 4, 5, 6].map(() => 1 + 0.04 * gauss(r)), sensorSeed: Math.floor(r() * 1e9) };
+    const dp = { d: pt.day, off: sh.off, shift: sh.label, F, dawn, dday, sig, w, tm, skip, u, cut, segCut, extra, noise, hypos: [], mg: MG, basal: rx.basal, rapid: u.slice(), meter: [0, 1, 2, 3, 4, 5, 6].map(() => 1 + 0.04 * gauss(r)), sensorSeed: Math.floor(r() * 1e9) };
     // Hypoglycémies : là où la glycémie de la journée est la plus basse. Celles que le modèle a tirées
     // (sulfamide, insuline) s'y placent ; un creux du profil sous 0,60 g/L en est une aussi (ressentie).
     const curve = []; for (let i = 0; i < 96; i++) curve.push(glucose(dp, i / 4));
@@ -142,12 +154,16 @@
     return Math.max(0.35, Math.min(5.5, g));
   }
 
+  // Glycémie à l'heure de l'horloge (capteur, AGP) : la journée physiologique est décalée selon le poste.
+  const clock = (dp, tc) => glucose(dp, (((tc - (dp.off || 0)) % 24) + 24) % 24);
+
   // Glycémies capillaires du jour (toutes les mesures possibles ; le carnet n'affiche que celles faites).
+  // Moments physiologiques (réveil, avant les repas, coucher) ; t : heure physiologique, tc : heure de l'horloge.
   function readings(dp) {
     const o = {};
     MOMENTS.forEach(([k, , t], i) => { o[k] = glucose(dp, t) * dp.meter[i]; });
     // Hypoglycémie ressentie : resucrage, glycémie notée au moment du malaise.
-    o.hypos = dp.hypos.map((hy) => ({ t: hy.t0 + hy.dur / 2, g: hy.depth * dp.meter[0], sev: hy.sev }));
+    o.hypos = dp.hypos.map((hy) => { const t = hy.t0 + hy.dur / 2; return { t, tc: (((t + (dp.off || 0)) % 24) + 24) % 24, g: hy.depth * dp.meter[0], sev: hy.sev }; });
     return o;
   }
 
@@ -173,6 +189,7 @@
           state.above[name] = 0;
           const cap = prot.caps && prot.caps[name];
           if (cap != null && dose + step(dose) > cap) { if (!state.capped) state.capped = {}; if (!state.capped[name]) { state.capped[name] = true; log.push({ name, from: dose, to: dose, why: 'dose maximale du protocole atteinte (' + cap + ' U) : appeler le médecin', cap: true }); } }
+          else if (apply && prot.upProb != null && (prot.rnd ? prot.rnd() : Math.random()) > prot.upProb) log.push({ name, from: dose, to: dose, why: 'hausse prévue non faite (' + (prot.upWhy || 'non suivie') + ')', skip: true });
           else if (apply) { const nd = dose + step(dose); set(nd); log.push({ name, from: dose, to: nd, why: prot.delai + ' jours au-dessus de l\'objectif' }); }
         }
       } else state.above[name] = 0;
@@ -199,7 +216,7 @@
       for (let i = 0; i < 96; i++) {
         if (gapStart >= 0 && i >= gapStart && i < gapStart + gapLen) { pts.push({ d: dp.d, i, g: null }); continue; }
         drift = 0.9 * drift + 0.1 * gauss(r) * 0.06;
-        pts.push({ d: dp.d, i, g: Math.max(0.4, glucose(dp, i / 4) * (1 + drift + 0.02 * gauss(r))) });
+        pts.push({ d: dp.d, i, g: Math.max(0.4, clock(dp, i / 4) * (1 + drift + 0.02 * gauss(r))) });
       }
     });
     return pts;
@@ -300,10 +317,11 @@
     const anyRapid = rows.some((r) => r.u.some((x) => x > 0));
     const anyPP = rows.some((r) => r.v.ppDej != null);
     const cols = [['rev', 'Réveil'], anyPP && ['ppPdj', '2 h ap. pdj'], ['avDej', 'Av. midi'], anyPP && ['ppDej', '2 h ap. déj'], ['avDin', 'Av. soir'], anyPP && ['ppDin', '2 h ap. dîner'], ['coucher', 'Coucher']].filter(Boolean);
-    const head = ['Jour', 'Basale (U)'].concat(anyRapid ? ['Rapides (U) m/m/s'] : []).concat(cols.map((c) => c[1])).concat(['Remarques']);
+    const anyShift = rows.some((r) => r.shift);
+    const head = ['Jour'].concat(anyShift ? ['Poste'] : []).concat(['Basale (U)']).concat(anyRapid ? ['Rapides (U) m/m/s'] : []).concat(cols.map((c) => c[1])).concat(['Remarques']);
     return h('div', { class: 'sv-scroll' }, h('table', { class: 'sv-carnet' }, [
       h('thead', null, h('tr', null, head.map((t) => h('th', null, t)))),
-      h('tbody', null, rows.map((r) => h('tr', null, [h('td', { class: 'gc-day' }, 'J' + r.d), h('td', { class: 'gc-dose' }, r.basal ? String(r.basal) : '—')]
+      h('tbody', null, rows.map((r) => h('tr', null, [h('td', { class: 'gc-day' }, 'J' + r.d)].concat(anyShift ? [h('td', { class: 'gc-day' }, r.shift || '—')] : []).concat([h('td', { class: 'gc-dose' }, r.basal ? String(r.basal) : '—')])
         .concat(anyRapid ? [h('td', { class: 'gc-dose' }, r.u.map((x) => x || '–').join(' / '))] : [])
         .concat(cols.map(([k]) => h('td', { class: 'gc-v ' + cls(k, r.v[k]) }, r.v[k] == null ? '' : fr(r.v[k], 2))))
         .concat([h('td', { class: 'gc-rem' }, r.rem.join(' ; '))]))))
@@ -360,5 +378,5 @@
     ]);
   }
 
-  S.glyco = { PROTO, objOf, ASG, MOMENTS, MEALS, HYPO, makeDay, glucose, readings, titrate, cgm, agpStats, cgmTargets, interpretAGP, interpretCarnet, carnetTable, agpReport, rng };
+  S.glyco = { PROTO, objOf, shiftOf, clock, ASG, MOMENTS, MEALS, HYPO, makeDay, glucose, readings, titrate, cgm, agpStats, cgmTargets, interpretAGP, interpretCarnet, carnetTable, agpReport, rng };
 })();

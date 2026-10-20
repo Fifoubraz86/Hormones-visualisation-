@@ -159,6 +159,16 @@
       if (rx.rapid > 0 && !GLP(rx)) add('tip', 'Avant les bolus, l\'ajout d\'un aGLP1 ou du tirzépatide à la basale est préféré dans la majorité des cas (efficacité comparable, moins d\'hypoglycémies et de prise de poids).', 'avis 19');
     }
 
+    // Travail posté (avis 16, 18 bis), peur de l'hypoglycémie, détresse psychologique (avis 4).
+    if (c.work && c.work !== 'jour') {
+      const w = { nuit: 'de nuit', '2x8': 'en 2 × 8', '3x8': 'en 3 × 8' }[c.work];
+      if (rx.su > 0) add('warn', 'Travail ' + w + ' : prise alimentaire irrégulière, sulfamide à éviter (hypoglycémies).', 'avis 16');
+      if (rx.basal > 0 && (rx.basalType === 'g100' || rx.basalType === 'nph')) add('tip', 'Travail ' + w + ' : glargine U300 ou dégludec, plus souples sur l\'horaire d\'injection et moins hypoglycémiantes la nuit.', 'avis 18 bis');
+      if (rx.rapid > 0) add('tip', 'Travail ' + w + ' : bolus à caler sur les repas réels (et non sur l\'heure), adaptation au poste ; l\'insulinothérapie fonctionnelle et le capteur aident.', 'avis 19 et 23');
+      if (!GLP(rx) && !ISGLT2(rx) && above) add('tip', 'Travail posté : les traitements sans hypoglycémie (aGLP1, iSGLT2, iDPP4) sont les plus simples à vivre.', 'avis 10 et 16');
+    }
+    if (c.adh === 'peur') add('tip', 'Peur de l\'hypoglycémie : éducation (reconnaître, traiter, prévenir), capteur avec alarmes, analogue lent d\'action prolongée, objectifs négociés ; préférer les traitements sans hypoglycémie (aGLP1, iSGLT2).', 'avis 4, 18 bis et 23');
+    if (c.adh === 'detresse') add('tip', 'Détresse psychologique : accompagnement psychologique et éducation thérapeutique, simplification du traitement (injection hebdomadaire, moins de prises), objectifs réalistes ; évaluer l\'adhésion avant toute intensification.', 'avis 4');
     // Personne âgée (avis 21 bis).
     if (g === 'fragile' && !(rx.dpp4 > 0) && !INS(rx) && above) add('tip', 'Personne âgée fragile : metformine + iDPP4 à privilégier, puis insuline basale (analogue lent).', 'avis 21 bis');
 

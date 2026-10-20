@@ -30,28 +30,34 @@
   const ACARB = [0, 150, 300];
   const Y = S.glyco, SFD = S.sfd;
   const TESTS = [['a1c', 'HbA1c'], ['fpg', 'Glycémie à jeun'], ['carnet', 'Carnet glycémique'], ['agp', 'Rapport AGP (capteur)'], ['creat', 'Créatinine (DFG)'], ['alb', 'Albuminurie'], ['cpep', 'Peptide C'], ['gad', 'Anti-GAD'], ['cetone', 'Cétonémie'], ['lipase', 'Lipase'], ['fo', 'Fond d\'œil']];
+  // Situations de départ : les étapes des arbres de la prise de position SFD 2025 (doses selon le poids).
+  const STAGES = [
+    { g: 'Au diagnostic', id: 'diag', label: 'Diabète découvert, sans traitement', a1c: 8.5, dur: 0, rx: () => null },
+    { g: 'Monothérapie', id: 'mono', label: 'Metformine', a1c: 7.8, dur: 4, rx: () => ({ met: 2000 }) },
+    { g: 'Bithérapie', id: 'bi_sglt2', label: 'Metformine + iSGLT2', a1c: 7.9, dur: 6, rx: () => ({ met: 2000, sglt2: 'empa10' }) },
+    { g: 'Bithérapie', id: 'bi_glp', label: 'Metformine + aGLP1', a1c: 7.8, dur: 6, rx: () => ({ met: 2000, glp: 'sema', glpDose: 1 }) },
+    { g: 'Bithérapie', id: 'bi_dpp4', label: 'Metformine + iDPP4', a1c: 8.0, dur: 6, rx: () => ({ met: 2000, dpp4: 100 }) },
+    { g: 'Bithérapie', id: 'bi_su', label: 'Metformine + sulfamide', a1c: 8.2, dur: 8, rx: () => ({ met: 2000, su: 60 }) },
+    { g: 'Trithérapie', id: 'tri_glp', label: 'Metformine + aGLP1 + iSGLT2', a1c: 8.1, dur: 10, rx: () => ({ met: 2000, glp: 'sema', glpDose: 1, sglt2: 'empa10' }) },
+    { g: 'Trithérapie', id: 'tri_oral', label: 'Metformine + iSGLT2 + iDPP4', a1c: 8.4, dur: 10, rx: () => ({ met: 2000, sglt2: 'empa10', dpp4: 100 }) },
+    { g: 'Trithérapie', id: 'tri_su', label: 'Metformine + iDPP4 + sulfamide', a1c: 9.2, dur: 12, rx: () => ({ met: 2000, dpp4: 100, su: 120 }) },
+    { g: 'Insuline', id: 'basal', label: 'Insuline basale + metformine', a1c: 8.6, dur: 14, rx: (W) => ({ met: 2000, basal: Math.round(0.35 * W) }) },
+    { g: 'Insuline', id: 'basal_glp', label: 'Insuline basale + metformine + aGLP1', a1c: 8.3, dur: 15, rx: (W) => ({ met: 2000, basal: Math.round(0.4 * W), glp: 'sema', glpDose: 1 }) },
+    { g: 'Insuline', id: 'basal_over', label: 'Basale à 0,7 U/kg (sur-basalisation)', a1c: 8.6, dur: 16, rx: (W) => ({ met: 2000, basal: Math.round(0.7 * W) }) },
+    { g: 'Insuline', id: 'basal_plus', label: 'Basal-plus (basale + 1 bolus au déjeuner)', a1c: 8.4, dur: 17, rx: (W) => ({ met: 2000, basal: Math.round(0.45 * W), rapidM: [0, Math.round(0.08 * W), 0], rapid: Math.round(0.08 * W) }) },
+    { g: 'Insuline', id: 'basal_bolus', label: 'Basal-bolus (basale + 3 bolus)', a1c: 8.5, dur: 18, rx: (W) => { const m = [Math.round(0.08 * W), Math.round(0.12 * W), Math.round(0.1 * W)]; return { met: 2000, basal: Math.round(0.4 * W), rapidM: m, rapid: m[0] + m[1] + m[2] }; } }
+  ];
+  // Diabètes atypiques : patients types.
   const PRESETS = [
-    { label: 'Metformine seule, HbA1c 7,8', cfg: { profile: 'sird', sex: 'F', age: 58, weight: 88, height: 163, a1c: 7.8, duration: 4, rx0: { met: 2000 } } },
-    { label: 'Metformine + gliclazide, HbA1c 8,4', cfg: { profile: 'sird', sex: 'M', age: 63, weight: 92, height: 174, a1c: 8.4, duration: 8, rx0: { met: 2000, su: 60 } } },
-    { label: 'Trithérapie orale, HbA1c 9,2', cfg: { profile: 'sird', sex: 'M', age: 61, weight: 101, height: 176, a1c: 9.2, duration: 12, rx0: { met: 2000, su: 120, dpp4: 100 } } },
-    { label: 'Metformine + sémaglutide + empagliflozine, HbA1c 8,1', cfg: { profile: 'sird', sex: 'F', age: 59, weight: 96, height: 165, a1c: 8.1, duration: 10, rx0: { met: 2000, glp: 'sema', glpDose: 1, sglt2: 'empa10' } } },
-    { label: 'Insuline basale + metformine, HbA1c 8,8', cfg: { profile: 'sird', sex: 'M', age: 66, weight: 104, height: 178, a1c: 8.8, duration: 15, rx0: { met: 2000, basal: 24 } } },
-    { label: 'Insuline à initier : trithérapie en échec, HbA1c 9,4', cfg: { profile: 'sird', sex: 'M', age: 62, weight: 95, height: 175, a1c: 9.4, duration: 14, rx0: { met: 2000, su: 120, dpp4: 100 } } },
-    { label: 'Basale à 0,7 U/kg, HbA1c 8,6', cfg: { profile: 'sird', sex: 'F', age: 64, weight: 100, height: 165, a1c: 8.6, duration: 16, rx0: { met: 2000, basal: 70 } } },
-    { label: 'Sujet âgé fragile, 79 ans, sous gliclazide', cfg: { profile: 'mard', sex: 'F', age: 79, weight: 66, height: 160, a1c: 7.4, duration: 18, dfg: 52, geria: 'fragile', rx0: { met: 1000, su: 60 } } },
-    { label: 'Sédentaire, 1 L de soda par jour', cfg: { profile: 'sird', sex: 'M', age: 44, weight: 112, height: 178, a1c: 8.2, duration: 1, act0: 0, soda0: 4, snack0: 'important', motiv: 'forte' } },
-    { label: 'DT2 obèse, HbA1c 8,5', cfg: { profile: 'sird', sex: 'M', age: 56, weight: 98, height: 172, a1c: 8.5, duration: 1 } },
-    { label: 'DT2 mince, HbA1c 10', cfg: { profile: 'sidd', sex: 'M', age: 52, weight: 64, height: 175, a1c: 10, duration: 6 } },
-    { label: 'Sujet âgé, 82 ans, DFG 38', cfg: { profile: 'mard', sex: 'F', age: 82, weight: 62, height: 158, a1c: 8, duration: 15, dfg: 38, irregular: true, geria: 'fragile' } },
-    { label: 'DT2 et insuffisance cardiaque', cfg: { profile: 'sird', sex: 'M', age: 67, weight: 90, height: 175, a1c: 8.2, duration: 10, hfail: true, cvd: true, dfg: 55, alb: 'micro' } },
-    { label: 'Rétinopathie proliférante, HbA1c 11', cfg: { profile: 'sird', sex: 'F', age: 49, weight: 85, height: 162, a1c: 11, duration: 12, retino: 'prolif' } },
-    { label: 'Origine asiatique, IMC 24', cfg: { profile: 'mard', sex: 'F', age: 60, weight: 60, height: 158, a1c: 8, duration: 3, ethnic: 'asie' } },
     { label: 'LADA, 42 ans', cfg: { profile: 'lada', sex: 'F', age: 42, weight: 62, height: 165, a1c: 8.4, duration: 1 } },
+    { label: 'Origine asiatique, IMC 24', cfg: { profile: 'mard', sex: 'F', age: 60, weight: 60, height: 158, a1c: 8, duration: 3, ethnic: 'asie' } },
     { label: 'MODY 3 (HNF1A), 24 ans', cfg: { profile: 'hnf1a', sex: 'F', age: 24, weight: 58, height: 166, a1c: 8.5, duration: 1 } },
     { label: 'MODY 2 (GCK), 30 ans', cfg: { profile: 'gck', sex: 'M', age: 30, weight: 72, height: 180, a1c: 6.4, duration: 5 } },
-    { label: 'Observance moyenne', cfg: { profile: 'sird', sex: 'M', age: 48, weight: 104, height: 178, a1c: 9, duration: 4, adh: 'moyenne' } }
+    { label: 'DT2 insulinopénique, mince, HbA1c 10', cfg: { profile: 'sidd', sex: 'M', age: 52, weight: 64, height: 175, a1c: 10, duration: 6 } }
   ];
-  const BASE = { profile: 'sird', sex: 'M', age: 56, weight: 98, height: 172, a1c: 8.5, duration: 1, dfg: 85, alb: 'normo', ethnic: 'eur', sbp: 142, retino: 'none', hfail: false, cvd: false, hcvr: false, masld: false, severe: false, driver: false, geria: 'bonne', panc: false, mtc: false, myco: false, irregular: false, lowcarb: false, adh: 'bonne', variab: 'moyen', rx0: null, act0: 30, soda0: 1, snack0: 'modere', motiv: 'moyenne' };
+  const WORK = { jour: 'De jour, horaires réguliers', nuit: 'De nuit, en poste fixe', '2x8': 'En 2 × 8 alternés (matin / après-midi, par semaine)', '3x8': 'En 3 × 8 alternés (matin / après-midi / nuit, par semaine)' };
+  const ADH = { bonne: 'Bonne', moyenne: 'Oublis fréquents', peur: 'Peur de l\'hypoglycémie', detresse: 'Détresse psychologique, syndrome dépressif', cachee: 'Inconnue (cachée)' };
+  const BASE = { profile: 'sird', sex: 'M', age: 56, weight: 98, height: 172, a1c: 8.5, duration: 1, dfg: 85, alb: 'normo', ethnic: 'eur', sbp: 142, retino: 'none', hfail: false, cvd: false, hcvr: false, masld: false, severe: false, driver: false, geria: 'bonne', panc: false, mtc: false, myco: false, irregular: false, lowcarb: false, adh: 'bonne', work: 'jour', stage: 'diag', variab: 'moyen', rx0: null, act0: 30, soda0: 1, snack0: 'modere', motiv: 'moyenne' };
   let cfg = Object.assign({}, BASE);
   let G = null;
 
@@ -86,7 +92,8 @@
   const rangBadge = (r) => (r ? h('span', { class: 'sv-rang sv-rang-' + r }, 'Rang ' + r) : null);
 
   /* ---------- Configuration ---------- */
-  function setup() {
+  function setup(keep) {
+    const y0 = window.scrollY;
     G = null;
     statusEl.hidden = true;
     main.textContent = '';
@@ -96,6 +103,14 @@
     const sel = (id, val, opts, on) => h('select', { id, onchange: (e) => on(e.target.value) }, opts.map(([k, t]) => h('option', { value: k, selected: String(val) === String(k) }, t)));
     const chk = (id, key, label) => h('label', { class: 'sv-check' }, [h('input', { type: 'checkbox', id, checked: cfg[key], onchange: (e) => { cfg[key] = e.target.checked; } }), ' ' + label]);
     const bmi = cfg.weight / Math.pow(cfg.height / 100, 2);
+    // Curseur : valeur affichée à côté du libellé, mise à jour en direct ; rerender au relâchement si besoin.
+    const slider = (id, label, key, min, max, step, unit, d, after) => {
+      const out = h('output', { for: id, class: 'sv-range-v' }, fmt(cfg[key], d) + (unit ? ' ' + unit : ''));
+      return h('div', { class: 'sv-field sv-slider' }, [h('label', { for: id }, [label + ' : ', out]),
+        h('input', { type: 'range', id, class: 'sv-range', min, max, step, value: cfg[key], oninput: (e) => { cfg[key] = parseFloat(e.target.value); out.textContent = fmt(cfg[key], d) + (unit ? ' ' + unit : ''); const b2 = document.getElementById('dtBmi'); if (b2) b2.textContent = 'IMC : ' + fmt(cfg.weight / Math.pow(cfg.height / 100, 2), 1) + ' kg/m².'; }, onchange: after ? () => after() : null })]);
+    };
+    const pickStage = (st) => { cfg.stage = st.id; cfg.a1c = st.a1c; cfg.duration = st.dur; cfg.rx0 = st.rx(cfg.weight); setup(true); };
+    const groups = [...new Set(STAGES.map((x) => x.g))];
     main.append(
       h('section', { class: 'sv-intro' }, [
         h('p', { class: 'sv-eyebrow' }, 'Diabète de type 2 · mode thérapeutique'),
@@ -103,27 +118,31 @@
         h('p', { class: 'sv-lead' }, 'Créez un patient avec ses facteurs prédictifs de réponse (réserve insulinique, insulinorésistance, fonction rénale, origine, sous-type, observance, comorbidités), prescrivez librement, choisissez la date du bilan : HbA1c, glycémies, poids, hypoglycémies et événements indésirables découlent de vos choix. Aucune correction.')
       ]),
       h('section', { class: 'sv-card sv-setup' }, [
-        h('h3', null, 'Exemples'),
-        h('div', { class: 'sv-chips' }, PRESETS.map((p) => h('button', { type: 'button', class: 'sv-chip', onclick: () => { cfg = Object.assign({}, BASE, { variab: cfg.variab }, p.cfg); setup(); } }, p.label))),
+        h('h3', null, 'Situation de départ (arbres de la SFD 2025)'),
+        h('div', { class: 'sv-stages' }, groups.map((gname) => h('div', { class: 'sv-stage-g' }, [h('p', { class: 'sv-stage-h' }, gname), h('div', { class: 'sv-chips' }, STAGES.filter((x) => x.g === gname).map((st) => h('button', { type: 'button', class: 'sv-chip' + (cfg.stage === st.id ? ' on' : ''), 'aria-pressed': String(cfg.stage === st.id), onclick: () => pickStage(st) }, st.label)))]))),
+        h('p', { class: 'sv-note' }, 'Fixe le traitement en cours (doses selon le poids), une HbA1c et une ancienneté typiques, modifiables ci-dessous. Les comorbidités (insuffisance cardiaque, maladie rénale, âge…) se règlent plus bas.'),
+        h('h3', null, 'Diabètes atypiques'),
+        h('div', { class: 'sv-chips' }, PRESETS.map((p) => h('button', { type: 'button', class: 'sv-chip', onclick: () => { cfg = Object.assign({}, BASE, { variab: cfg.variab }, p.cfg, { stage: null }); setup(true); } }, p.label))),
         h('h3', null, 'Le patient'),
         h('div', { class: 'sv-form' }, [
           field('Profil', sel('dtProf', cfg.profile, Object.entries(D.PROFILES).map(([k, v]) => [k, v.label]), (v) => { cfg.profile = v; setup(); }), 'dtProf'),
           field('Sexe', sel('dtSex', cfg.sex, [['F', 'Femme'], ['M', 'Homme']], (v) => { cfg.sex = v; }), 'dtSex'),
-          field('Âge (ans)', h('input', { type: 'number', id: 'dtAge', value: cfg.age, step: 1, min: 15, max: 100, inputmode: 'decimal', class: 'sv-num', oninput: (e) => { cfg.age = parseFloat(e.target.value); }, onchange: () => setup() }), 'dtAge'),
-          field('Poids (kg)', num('dtW', cfg.weight, 1, 35, 250, (v) => { cfg.weight = v; }), 'dtW'),
-          field('Taille (cm)', num('dtH', cfg.height, 1, 130, 210, (v) => { cfg.height = v; }), 'dtH'),
-          field('HbA1c initiale (%)', num('dtA1c', cfg.a1c, 0.1, 6, 15, (v) => { cfg.a1c = v; }), 'dtA1c'),
-          field('Ancienneté du diabète (ans)', num('dtDur', cfg.duration, 1, 0, 40, (v) => { cfg.duration = v; }), 'dtDur'),
-          field('DFG (mL/min/1,73 m²)', num('dtDfg', cfg.dfg, 1, 10, 130, (v) => { cfg.dfg = v; }), 'dtDfg'),
+          slider('dtAge', 'Âge', 'age', 18, 95, 1, 'ans', 0, () => setup(true)),
+          slider('dtW', 'Poids', 'weight', 40, 200, 1, 'kg', 0, () => { const st = STAGES.find((x) => x.id === cfg.stage); if (st && st.rx(cfg.weight) && (st.rx(cfg.weight).basal || 0) > 0) { cfg.rx0 = st.rx(cfg.weight); setup(true); } }),
+          slider('dtH', 'Taille', 'height', 140, 205, 1, 'cm', 0),
+          slider('dtA1c', 'HbA1c actuelle', 'a1c', 6, 14, 0.1, '%', 1),
+          slider('dtDur', 'Ancienneté du diabète', 'duration', 0, 40, 1, 'ans', 0),
+          slider('dtDfg', 'DFG', 'dfg', 10, 130, 1, 'mL/min/1,73 m²', 0),
+          slider('dtSbp', 'PA systolique', 'sbp', 90, 200, 1, 'mmHg', 0),
           field('Albuminurie', sel('dtAlb', cfg.alb, Object.entries(D.ALB).map(([k, v]) => [k, v.label]), (v) => { cfg.alb = v; }), 'dtAlb'),
-          field('PA systolique (mmHg)', num('dtSbp', cfg.sbp, 1, 90, 200, (v) => { cfg.sbp = v; }), 'dtSbp'),
           field('Origine', sel('dtEth', cfg.ethnic, Object.entries(D.ETHNIC).map(([k, v]) => [k, v.label]), (v) => { cfg.ethnic = v; }), 'dtEth'),
           field('Rétinopathie', sel('dtRet', cfg.retino, Object.entries(D.RETINO), (v) => { cfg.retino = v; }), 'dtRet'),
           cfg.age >= 75 ? field('Statut gériatrique (≥ 75 ans)', sel('dtGer', cfg.geria, [['bonne', 'En bonne santé, autonome'], ['fragile', 'Fragile'], ['dependant', 'Dépendant(e), santé très altérée']], (v) => { cfg.geria = v; }), 'dtGer') : null,
-          field('Observance', sel('dtAdh', cfg.adh, [['bonne', 'Bonne'], ['moyenne', 'Moyenne (oublis fréquents)'], ['cachee', 'Inconnue (cachée)']], (v) => { cfg.adh = v; }), 'dtAdh'),
+          field('Rythme de travail', sel('dtWork', cfg.work, Object.entries(WORK), (v) => { cfg.work = v; }), 'dtWork'),
+          field('Observance et situation psychologique', sel('dtAdh', cfg.adh, Object.entries(ADH), (v) => { cfg.adh = v; }), 'dtAdh'),
           field('Variabilité', sel('dtVar', cfg.variab, [['moyen', 'Patient moyen (reproductible)'], ['reel', 'Patient réel (réponses cachées)']], (v) => { cfg.variab = v; }), 'dtVar')
         ]),
-        h('p', { class: 'sv-note' }, 'IMC : ' + fmt(bmi, 1) + ' kg/m².'),
+        h('p', { class: 'sv-note', id: 'dtBmi' }, 'IMC : ' + fmt(bmi, 1) + ' kg/m².'),
         h('div', { class: 'sv-advice' }, [
           chk('dtHf', 'hfail', 'Insuffisance cardiaque'),
           chk('dtCvd', 'cvd', 'Maladie cardiovasculaire avérée (coronaropathie, AVC, AOMI)'),
@@ -159,14 +178,15 @@
               Gp.doses.length ? sel('dtR0glpDose', r.glpDose, Gp.doses.map((x) => [x, String(x).replace('.', ',') + ' ' + Gp.unit]), (v) => setR('glpDose', +v)) : null
             ]), 'dtR0glp'),
             field('iSGLT2', sel('dtR0sglt', r.sglt2 || 'none', Object.entries(D.SGLT2), (v) => setR('sglt2', v)), 'dtR0sglt'),
-            field('Insuline basale (U/j)', num('dtR0bas', r.basal || 0, 1, 0, 300, (v) => setR('basal', Math.max(0, Math.round(v) || 0))), 'dtR0bas')
+            field('Insuline basale (U/j)', num('dtR0bas', r.basal || 0, 1, 0, 300, (v) => setR('basal', Math.max(0, Math.round(v) || 0))), 'dtR0bas'),
+            field('Bolus (petit-déj. / déj. / dîner, U)', h('div', { class: 'sv-inline' }, [0, 1, 2].map((m) => num('dtR0bol' + m, (r.rapidM || [0, 0, 0])[m], 1, 0, 100, (v) => { const rm = (cfg.rx0 && cfg.rx0.rapidM ? cfg.rx0.rapidM : [0, 0, 0]).slice(); rm[m] = Math.max(0, Math.round(v) || 0); setR('rapidM', rm); setR('rapid', rm[0] + rm[1] + rm[2]); }))), 'dtR0bol0')
           ];
         })()),
         h('div', { class: 'sv-actions' }, h('button', { type: 'button', class: 'sv-primary', onclick: begin }, 'Voir le patient →'))
       ]),
       h('p', { class: 'sv-disc' }, 'Modèle pédagogique simplifié : effets et délais illustratifs (HbA1c jugée à 3 mois, demi-vie de l\'HbA1c ≈ 1 mois) ; ne remplace ni le jugement clinique ni les recommandations. Repères : prise de position SFD 2025 sur les traitements de l\'hyperglycémie, item EDN 247 (fiche LiSA), protocole d\'adaptation des doses d\'insuline du service ; effets des traitements : référentiel de la littérature.')
     );
-    window.scrollTo(0, 0);
+    window.scrollTo(0, keep ? y0 : 0);
   }
 
   /* ---------- Partie ---------- */
@@ -238,7 +258,9 @@
   function recordDay(titrate) {
     const pt = G.pt;
     const newHypo = pt.st.hypo - (G.lastH == null ? pt.st.hypo : G.lastH), newSev = pt.st.hypoSev - (G.lastS == null ? pt.st.hypoSev : G.lastS);
-    const dp = Y.makeDay(pt, D, { seed: (G.seed + pt.day * 7919) >>> 0, irregular: G.cfg.irregular || G.cfg.adh === 'moyenne', newHypo, newSev });
+    const dp = Y.makeDay(pt, D, { seed: (G.seed + pt.day * 7919) >>> 0, irregular: G.cfg.irregular || G.cfg.adh === 'moyenne' || G.cfg.adh === 'detresse', work: G.cfg.work, newHypo, newSev });
+    // Peur de l'hypoglycémie : après un malaise, collations de sécurité pendant deux semaines.
+    if (pt.par.fear && (newHypo > 0 || dp.native > 0)) pt.st.fearUntil = pt.day + 14;
     pt.st.hypo += dp.native;
     G.lastH = pt.st.hypo; G.lastS = pt.st.hypoSev;
     const rdg = Y.readings(dp);
@@ -246,7 +268,10 @@
     if (titrate && G.titr.who !== 'none' && (pt.rx.basal > 0 || pt.rx.rapid > 0)) {
       const follow = G.cfg.variab !== 'reel' || G.titr.who === 'ide' || Math.random() < 0.85;
       const before = { b: pt.rx.basal, m: pt.rx.rapidM.slice() };
-      const log = Y.titrate(pt.rx, rdg, G.titr, G.titrState, follow);
+      // Peur de l'hypoglycémie ou détresse : le patient ne fait qu'une partie des hausses prévues (pas l'IDE).
+      const rr = Y.rng((G.seed ^ (pt.day * 2654435761)) >>> 0);
+      const prot = G.titr.who === 'ide' ? G.titr : Object.assign({}, G.titr, pt.par.fear ? { upProb: 0.3, upWhy: 'peur de l\'hypoglycémie', rnd: rr } : pt.par.distress ? { upProb: 0.5, upWhy: 'découragement', rnd: rr } : {});
+      const log = Y.titrate(pt.rx, rdg, prot, G.titrState, follow);
       if (log.length) G.titrLog.push({ day: pt.day, log, before });
     }
     dp.basalAfter = pt.rx.basal;
@@ -262,8 +287,12 @@
       const set = G.cgm ? (dp.rapid.some((x) => x > 0) ? Y.MOMENTS.map((m) => m[0]) : ['rev', 'avDej', 'avDin', 'coucher']) : asg !== '0' ? Y.ASG[asg].set(dp.d) : [];
       const v = {};
       set.forEach((k) => { v[k] = dp.rdg[k]; });
-      const rem = dp.rdg.hypos.map((hy) => 'malaise à ' + Math.floor(hy.t) + ' h ' + String(Math.round((hy.t % 1) * 60)).padStart(2, '0') + ' : ' + fmt(hy.g, 2) + ' g/L' + (hy.sev ? ' (tierce personne)' : ', resucrage'));
-      return { d: dp.d, basal: dp.basal, u: dp.rapid, v, hypos: dp.rdg.hypos, rem };
+      const tc = (hy) => (hy.tc != null ? hy.tc : hy.t);
+      const rem = dp.rdg.hypos.map((hy) => 'malaise à ' + Math.floor(tc(hy)) + ' h ' + String(Math.round((tc(hy) % 1) * 60)).padStart(2, '0') + ' : ' + fmt(hy.g, 2) + ' g/L' + (hy.sev ? ' (tierce personne)' : ', resucrage'));
+      if (G.pt.par.fear && dp.d > 0 && G.pt.st.fearUntil >= dp.d) rem.push('collation « de sécurité » au coucher');
+      // Détresse psychologique : carnet incomplet (une journée sur trois sans mesure).
+      if (G.pt.par.distress && Y.rng((G.seed + dp.d * 97) >>> 0)() < 0.35) { Object.keys(v).forEach((k) => { delete v[k]; }); rem.push('pas de mesure'); }
+      return { d: dp.d, shift: dp.shift, basal: dp.basal, u: dp.rapid, v, hypos: dp.rdg.hypos, rem };
     });
   }
 
@@ -403,7 +432,8 @@
       rx.rapidM.forEach((u, i) => { if (first.m[i] !== u) parts.push('bolus du ' + ['petit-déjeuner', 'déjeuner', 'dîner'][i] + ' ' + first.m[i] + ' → ' + u + ' U'); });
       const down = tl.reduce((a, x) => a + x.log.filter((l) => l.to < l.from).length, 0), up = tl.reduce((a, x) => a + x.log.filter((l) => l.to > l.from).length, 0);
       const capped = tl.flatMap((x) => x.log.filter((l) => l.cap)).map((l) => ({ basal: 'basale', m0: 'bolus du petit-déjeuner', m1: 'bolus du déjeuner', m2: 'bolus du dîner' })[l.name] + ' (' + l.from + ' U)');
-      titr = (G.titr.who === 'ide' ? 'L\'IDE' : G.cfg.sex === 'F' ? 'La patiente' : 'Le patient') + ' a appliqué le protocole : ' + (parts.join(', ') || 'doses revenues à leur point de départ') + ' (' + up + ' hausse' + (up > 1 ? 's' : '') + ', ' + down + ' baisse' + (down > 1 ? 's' : '') + ').' + (capped.length ? ' Dose maximale du protocole atteinte, ' + (G.titr.who === 'ide' ? 'l\'IDE a' : G.cfg.sex === 'F' ? 'elle a' : 'il a') + ' appelé : ' + capped.join(', ') + '.' : '');
+      const skipped = tl.reduce((n, x) => n + x.log.filter((l) => l.skip).length, 0);
+      titr = (G.titr.who === 'ide' ? 'L\'IDE' : G.cfg.sex === 'F' ? 'La patiente' : 'Le patient') + ' a appliqué le protocole : ' + (parts.join(', ') || 'doses revenues à leur point de départ') + ' (' + up + ' hausse' + (up > 1 ? 's' : '') + ', ' + down + ' baisse' + (down > 1 ? 's' : '') + ').' + (capped.length ? ' Dose maximale du protocole atteinte, ' + (G.titr.who === 'ide' ? 'l\'IDE a' : G.cfg.sex === 'F' ? 'elle a' : 'il a') + ' appelé : ' + capped.join(', ') + '.' : '') + (skipped ? ' ' + skipped + ' hausse' + (skipped > 1 ? 's' : '') + ' prévue' + (skipped > 1 ? 's' : '') + ' non faite' + (skipped > 1 ? 's' : '') + ' (' + (pt.par.fear ? 'peur de l\'hypoglycémie' : 'découragement') + ').' : '');
     }
     const sy = symptoms(m);
     const nHypo = pt.st.hypo - G.lastHypo;
@@ -426,6 +456,9 @@
     if (n > 0) out.push(n + ' malaise' + (n > 1 ? 's' : '') + ' avec sueurs et tremblements, corrigé' + (n > 1 ? 's' : '') + ' par du sucre');
     if (pt.st.MG > 2.5) out.push('soif, urines abondantes, fatigue');
     if (G.cfg.adh === 'moyenne' || (pt.par.adh < 0.75)) out.push('reconnaît oublier souvent ses médicaments');
+    if (pt.par.fear) out.push('dit avoir très peur de faire un malaise' + (pt.rx.basal + pt.rx.rapid > 0 ? ', n\'ose pas monter les doses d\'insuline' : '') + ', se resucre « au cas où »');
+    if (pt.par.distress) out.push('moral bas, se dit « dépassé(e) par le diabète », carnet tenu irrégulièrement');
+    if (G.cfg.work !== 'jour') out.push('travaille ' + { nuit: 'de nuit', '2x8': 'en 2 × 8', '3x8': 'en 3 × 8' }[G.cfg.work] + ' : repas et sommeil décalés' + (G.cfg.work === 'nuit' ? '' : ', changements de poste difficiles'));
     if (pt.rx.met && !pt.take.met && !out.some((x) => x.includes('metformine'))) out.push('ne prend plus la metformine (troubles digestifs)');
     if (pt.rx.glp !== 'none' && !pt.take.glp) out.push('ne fait plus l\'injection d\'aGLP1 (vomissements)');
     return out;
@@ -550,7 +583,7 @@
   function patientCard() {
     const c = G.cfg, pt = G.pt;
     const bmi = c.weight / Math.pow(c.height / 100, 2);
-    const co = [c.hfail && 'insuffisance cardiaque', c.cvd && 'maladie CV avérée', c.panc && 'ATCD de pancréatite', c.mtc && 'ATCD familial de CMT', c.myco && 'mycoses récidivantes', c.irregular && 'repas irréguliers', c.lowcarb && 'régime cétogène', c.retino !== 'none' && D.RETINO[c.retino].toLowerCase() + (G.ev.ppr != null ? ' (photocoagulée à J' + G.ev.ppr + ')' : ''), c.hcvr && 'risque CV élevé', c.masld && 'MASLD', c.severe && 'espérance de vie < 5 ans ou comorbidité sévère', c.driver && 'conduite professionnelle', c.age >= 75 && { bonne: 'âgé(e) en bonne santé', fragile: 'âgé(e) fragile', dependant: 'âgé(e) dépendant(e)' }[c.geria]].filter(Boolean);
+    const co = [c.hfail && 'insuffisance cardiaque', c.cvd && 'maladie CV avérée', c.panc && 'ATCD de pancréatite', c.mtc && 'ATCD familial de CMT', c.myco && 'mycoses récidivantes', c.irregular && 'repas irréguliers', c.lowcarb && 'régime cétogène', c.retino !== 'none' && D.RETINO[c.retino].toLowerCase() + (G.ev.ppr != null ? ' (photocoagulée à J' + G.ev.ppr + ')' : ''), c.hcvr && 'risque CV élevé', c.masld && 'MASLD', c.severe && 'espérance de vie < 5 ans ou comorbidité sévère', c.driver && 'conduite professionnelle', c.age >= 75 && { bonne: 'âgé(e) en bonne santé', fragile: 'âgé(e) fragile', dependant: 'âgé(e) dépendant(e)' }[c.geria], c.work !== 'jour' && 'travail ' + { nuit: 'de nuit', '2x8': 'en 2 × 8', '3x8': 'en 3 × 8' }[c.work], c.adh === 'peur' && 'peur de l\'hypoglycémie', c.adh === 'detresse' && 'détresse psychologique', c.adh === 'moyenne' && 'oublis fréquents'].filter(Boolean);
     return h('div', { class: 'sv-card sv-id' }, [
       h('p', { class: 'sv-eyebrow' }, 'Patient simulé'),
       h('h2', null, (c.sex === 'F' ? 'Femme' : 'Homme') + ', ' + c.age + ' ans, ' + fmt(c.weight, 0) + ' kg, IMC ' + fmt(bmi, 1)),

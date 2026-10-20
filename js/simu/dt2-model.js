@@ -82,7 +82,7 @@
   // (Umpierre 2011 : − 0,89 % au-delà, − 0,36 % en deçà) [ex-150, ex-90].
   const fAct = (a) => 1 + 0.3 * Math.pow(Math.min(1, a / 150), 1.5) + 0.08 * Math.min(1, Math.max(0, a - 150) / 150);
   // Atteinte réelle des objectifs hygiéno-diététiques (meilleure avec un suivi diététique).
-  function lifeAch(pt) { return Math.min(1, pt.par.lifeAch * (pt.rx.diet ? 1.25 : 1)); }
+  function lifeAch(pt) { const p = pt.par; return Math.min(1, p.lifeAch * (pt.rx.diet ? 1.25 : 1) * (p.distress ? 0.5 : 1) * (p.work && p.work !== 'jour' ? 0.8 : 1)); }
   function actNow(pt) { const p = pt.par, a = pt.rx.act; return a > p.act0 ? p.act0 + (a - p.act0) * lifeAch(pt) : p.act0; }
   function sodaNow(pt) { return pt.rx.sodaStop ? pt.par.soda0 * (1 - lifeAch(pt)) : pt.par.soda0; }
   // Metformine : dose effectivement atteinte (introduction progressive : + 500 mg par semaine).
@@ -159,6 +159,8 @@
     // Sans sulfamide ni insuline, la contre-régulation empêche la glycémie de descendre sous la normale :
     // plancher vers 1,02 g/L (HbA1c ≈ 5,2 %), comme chez le non-diabétique.
     if (!(e.eSu > 0) && !(e.iex > 0)) m = Math.max(m, 1.02);
+    // Peur de l'hypoglycémie : collations « de sécurité », glycémies maintenues hautes, davantage après un malaise.
+    if (p.fear) m += 0.03 + (s.fearUntil > pt.day ? 0.08 : 0);
     return m + 0.035 * sodaNow(pt);
   }
 
@@ -170,7 +172,9 @@
       weight0: c.weight, height: c.height, age: c.age, sex: c.sex, rate: prof.rate * (real ? rnd(0.7, 1.4) : 1),
       suBoost: prof.suBoost || 1, gck: !!prof.gck, gad: !!prof.gad, incr: ETHNIC[c.ethnic].incr,
       metResp: real ? rnd(0.7, 1.25) : 1, glpResp: real ? rnd(0.7, 1.25) : 1, wResp: real ? rnd(0.6, 1.4) : 1,
-      adh: c.adh === 'bonne' ? 1 : c.adh === 'moyenne' ? 0.75 : real ? rnd(0.6, 1) : 1,
+      adh: { bonne: 1, moyenne: 0.75, peur: 0.95, detresse: 0.65 }[c.adh] || (real ? rnd(0.6, 1) : 1),
+      // Peur de l'hypoglycémie (collations de sécurité, doses non montées), détresse psychologique, travail posté.
+      fear: c.adh === 'peur', distress: c.adh === 'detresse', work: c.work || 'jour',
       adhLife: real ? rnd(0.2, 1) : 0.6, giSens: real ? rnd(0, 1) : 0.5,
       albRate: ALB[c.alb].rate, retino: c.retino, hfail: c.hfail, cvd: c.cvd, panc: c.panc, mtc: c.mtc,
       mycoHist: c.myco, irregular: c.irregular, lowcarb: c.lowcarb, sbp0: c.sbp,
@@ -239,7 +243,8 @@
     // Analogues d'action très prolongée (glargine U300, dégludec) : moins d'hypoglycémies nocturnes ; NPH : plus (SFD 2025, avis 18 bis).
     const insF = { g300: 0.7, deg: 0.7, nph: 1.4 }[pt.rx.basalType] || 1;
     const expo = 0.05 * e.eSu * (p.suBoost > 1 ? 2 : 1) * (s.dfg < 45 ? 1.8 : 1) + 0.17 * e.iexRaw * (pt.rx.rapid > 0 ? 1 : insF);
-    const risk = (p.age >= 75 ? 2 : 1) * (p.irregular ? 2 : 1);
+    // Travail posté : horaires de repas et de sommeil décalés ; alternance : risque d'hypoglycémie × 1,6.
+    const risk = (p.age >= 75 ? 2 : 1) * (p.irregular ? 2 : 1) * ({ nuit: 1.2, '2x8': 1.4, '3x8': 1.6 }[p.work] || 1);
     const lam = expo * risk * Math.exp(-(s.MG - 1.15) / 0.17);
     const sevFrac = 0.04 * (p.age >= 75 ? 2.5 : 1) * (s.dfg < 45 ? 2 : 1);
     if (rng) { if (rng() < lam) s.hypo++; if (rng() < lam * sevFrac) s.hypoSev++; }

@@ -368,3 +368,13 @@ select { background: var(--panel-2); border: 1px solid var(--line-2); border-rad
 .sv-tr-r1 > .sv-tr-head .sv-tr-rank { color: var(--good); } .sv-tr-r4 > .sv-tr-head .sv-tr-rank { color: var(--warn); } .sv-tr-r5 > .sv-tr-head .sv-tr-rank { color: var(--bad); }
 .sv-export { width: 100%; font: 11.5px var(--font-data); background: var(--panel-2); color: var(--fg); border: 1px solid var(--line-2); border-radius: 8px; padding: 6px; resize: vertical; }
 #dtExportBox { display: grid; gap: 6px; margin-top: 8px; }
+
+/* Configuration : situations de départ, curseurs */
+.sv-stages { display: grid; gap: 8px; }
+.sv-stage-g { display: grid; grid-template-columns: 9em 1fr; gap: 8px; align-items: start; }
+.sv-stage-h { font: 600 12px var(--font-body); color: var(--muted); padding-top: 6px; }
+.sv-chip.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--fg); font-weight: 600; }
+.sv-slider label { display: flex; justify-content: space-between; gap: 8px; }
+.sv-range-v { font: 600 13px var(--font-data); color: var(--accent); }
+.sv-range { width: 100%; accent-color: var(--accent); }
+@media (max-width: 620px) { .sv-stage-g { grid-template-columns: 1fr; } .sv-stage-h { padding-top: 0; } }
