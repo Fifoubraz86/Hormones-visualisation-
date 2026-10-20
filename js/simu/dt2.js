@@ -259,7 +259,7 @@
   function carnetRows() {
     const days = G.glyDays.slice(-14), asg = G.asg;
     return days.map((dp) => {
-      const set = asg !== '0' ? Y.ASG[asg].set(dp.d) : G.cgm ? ['rev', 'avDej', 'avDin', 'coucher'] : [];
+      const set = G.cgm ? (dp.rapid.some((x) => x > 0) ? Y.MOMENTS.map((m) => m[0]) : ['rev', 'avDej', 'avDin', 'coucher']) : asg !== '0' ? Y.ASG[asg].set(dp.d) : [];
       const v = {};
       set.forEach((k) => { v[k] = dp.rdg[k]; });
       const rem = dp.rdg.hypos.map((hy) => 'malaise à ' + Math.floor(hy.t) + ' h ' + String(Math.round((hy.t % 1) * 60)).padStart(2, '0') + ' : ' + fmt(hy.g, 2) + ' g/L' + (hy.sev ? ' (tierce personne)' : ', resucrage'));
@@ -446,13 +446,13 @@
   function snapshot() {
     const pt = G.pt;
     return JSON.stringify({ metRamp: pt.metRamp, st: pt.st, day: pt.day, rx: pt.rx, take: pt.take, par: Object.assign({}, pt.par), logLen: pt.log.length, hist: G.history.length, vis: G.visits.length, ev: G.ev, lastHypo: G.lastHypo,
-      gly: G.glyDays, titrState: G.titrState, titrLog: G.titrLog.length, starts: G.starts, titr: G.titr, cgm: G.cgm, asg: G.asg, goal: G.goal, lastH: G.lastH, lastS: G.lastS });
+      gly: G.glyDays, titrState: G.titrState, titrLog: G.titrLog.length, starts: G.starts, titr: G.titr, cgm: G.cgm, cgmAcq: !!G.cgmAcquired, asg: G.asg, goal: G.goal, lastH: G.lastH, lastS: G.lastS });
   }
   function restore(js) {
     const s = JSON.parse(js), pt = G.pt;
     pt.st = s.st; pt.day = s.day; pt.rx = s.rx; pt.take = s.take; pt.metRamp = s.metRamp; Object.assign(pt.par, s.par);
     pt.log.length = s.logLen; G.history.length = s.hist; G.visits.length = s.vis; G.ev = s.ev; G.lastHypo = s.lastHypo;
-    G.glyDays = s.gly; G.titrState = s.titrState; G.titrLog.length = s.titrLog; G.starts = s.starts; G.titr = s.titr; G.cgm = s.cgm; G.asg = s.asg; G.goal = s.goal; G.lastH = s.lastH; G.lastS = s.lastS;
+    G.glyDays = s.gly; G.titrState = s.titrState; G.titrLog.length = s.titrLog; G.starts = s.starts; G.titr = s.titr; G.cgm = s.cgm; G.cgmAcquired = s.cgmAcq; G.asg = s.asg; G.goal = s.goal; G.lastH = s.lastH; G.lastS = s.lastS;
     Object.assign(G.draft, pt.rx, { rapidM: pt.rx.rapidM.slice(), titr: JSON.parse(JSON.stringify(G.titr)), cgm: G.cgm, asg: G.asg, goal: G.goal });
   }
 
@@ -473,7 +473,8 @@
     if (!d.tests.size) { say('Cochez au moins un examen.'); return; }
     d.rapid = d.rapidM.reduce((a, x) => a + x, 0);
     // Initiation de l'insuline : règle de bonne pratique, refus si non respectée (SFD 2025, avis 18).
-    const block = SFD.insulinInit(pt.rx, d, pt.st.W).concat(SFD.monitoring(d, d.asg, d.cgm, lastA1c()));
+    if (d.cgm) d.asg = '0'; // sous capteur, la surveillance se fait sur le capteur
+    const block = SFD.insulinInit(pt.rx, d, pt.st.W).concat(SFD.monitoring(d, d.asg, d.cgm, lastA1c(), G.cgmAcquired));
     const onInsD = d.basal + d.rapid > 0;
     if (onInsD && d.titr.who !== 'none' && d.asg === '0' && !d.cgm) block.push('Titration de l\'insuline sans autosurveillance ni capteur : impossible ; il faut au moins la glycémie du réveil chaque jour.');
     if (onInsD && d.titr.who !== 'none' && d.rapid > 0 && d.titr.bolusCtl === 'pp' && d.asg !== '6' && !d.cgm) block.push('Bolus adaptés sur la glycémie post-prandiale : prescrire l\'autosurveillance 6 fois par jour (avant et 2 h après les repas) ou un capteur.');
@@ -483,6 +484,7 @@
     const metBefore = D.metDose(pt);
     Object.assign(pt.rx, { met: d.met, su: d.su, dpp4: d.dpp4, glp: d.glp, glpDose: d.glp === 'none' ? 0 : d.glpDose, sglt2: d.sglt2, acarb: d.acarb, basal: d.basal, basalType: d.basalType, rapidM: d.rapidM.slice(), rapid: d.rapid, act: d.act, sodaStop: d.sodaStop, wtGoal: d.wtGoal, diet: d.diet });
     G.titr = JSON.parse(JSON.stringify(d.titr)); G.cgm = d.cgm; G.asg = d.asg; G.goal = d.goal;
+    if (d.cgm) G.cgmAcquired = true;
     if (d.ppr && G.ev.ppr == null) G.ev.ppr = pt.day;
     // Début des traitements, pour les règles d'arrêt (SFD 2025, avis 5).
     const on = { su: (r) => r.su > 0, dpp4: (r) => r.dpp4 > 0, sglt2: (r) => r.sglt2 !== 'none', glp: (r) => r.glp !== 'none' };
@@ -629,11 +631,10 @@
       h('label', { class: 'sv-check sv-small' }, [h('input', { type: 'checkbox', id: 'dtTitr10', checked: t.sfd10, onchange: (e) => { t.sfd10 = e.target.checked; } }), ' Au-delà de 40 U, pas de 10 % (SFD 2025) au lieu de 2 U']),
       h('p', { class: 'sv-note' }, 'Protocole du service : pas de 1 U sous 10 U, de 2 U au-delà ; baisse dès l\'injection suivante si hypoglycémie ou glycémie < ' + fmt(O.rev[0], 2) + ' g/L ; basale jugée sur le réveil, bolus sur la glycémie avant le repas suivant.'),
       h('h4', null, 'Surveillance glycémique'),
-      h('div', { class: 'sv-form' }, [
-        sel('dtAsg', 'Autosurveillance capillaire', d.asg, [['0', 'Aucune']].concat(Object.entries(Y.ASG).map(([k, v]) => [k, v.label])), (v) => { d.asg = v; })
-      ]),
-      h('p', { class: 'sv-note' }, 'Lecteur et bandelettes : seulement sous traitement hypoglycémiant ; hors insuline, 200 bandelettes par an (HAS). Capteur : sous insuline à 3 injections/j ou plus sans condition, ou en moins de 3 injections (basale seule comprise) avec HbA1c > 8 % (LPPR).'),
-      h('label', { class: 'sv-check' }, [h('input', { type: 'checkbox', id: 'dtCgm', checked: d.cgm, onchange: (e) => { d.cgm = e.target.checked; } }), ' Capteur de glucose (mesure en continu, rapport AGP)']),
+      h('label', { class: 'sv-check' }, [h('input', { type: 'checkbox', id: 'dtCgm', checked: d.cgm, onchange: (e) => { d.cgm = e.target.checked; d.asg = d.cgm ? '0' : (d.basal + d.rapidM.reduce((a, x) => a + x, 0) > 0 ? (d.rapidM.some((x) => x > 0) ? '4' : '1') : d.su > 0 ? 'w4' : '0'); re(); } }), ' Capteur de glucose (mesure en continu, rapport AGP)' + (G.cgmAcquired ? ' · indication acquise' : '')]),
+      d.cgm ? h('p', { class: 'sv-note', id: 'dtSurvCgm' }, 'Surveillance par le capteur : l\'autosurveillance capillaire est arrêtée (bandelettes réservées aux doutes : symptômes discordants, capteur défaillant).')
+        : h('div', { class: 'sv-form' }, [sel('dtAsg', 'Autosurveillance capillaire', d.asg, [['0', 'Aucune']].concat(Object.entries(Y.ASG).map(([k, v]) => [k, v.label])), (v) => { d.asg = v; })]),
+      h('p', { class: 'sv-note' }, 'Lecteur et bandelettes : seulement sous traitement hypoglycémiant ; hors insuline, 200 bandelettes par an (HAS). Capteur : sous insuline à 3 injections/j ou plus sans condition, ou en moins de 3 injections (basale seule comprise) avec HbA1c > 8 % (LPPR) ; une fois posée, l\'indication reste acquise même si l\'HbA1c repasse sous 8 %.'),
       retNeed ? h('label', { class: 'sv-check' }, [h('input', { type: 'checkbox', id: 'dtPpr', checked: d.ppr, onchange: (e) => { d.ppr = e.target.checked; } }), ' Adresser en urgence en ophtalmologie : photocoagulation panrétinienne']) : null
     ]);
   }
@@ -706,7 +707,7 @@
     const read = Y.interpretCarnet(e.carnet, prot, { basal: G.pt.rx.basal, basalUkg: e.ukg, a1c: e.labs.a1c });
     return h('div', { class: 'sv-gly' }, [
       h('h4', null, 'Carnet glycémique · ' + e.carnet.length + ' derniers jours'),
-      h('p', { class: 'sv-note' }, (G.asg !== '0' ? 'Autosurveillance : ' + Y.ASG[G.asg].label : 'Valeurs relevées sur le capteur') + '. Couleurs selon les objectifs fixés : réveil ' + fmt(O.rev[0], 2) + '–' + fmt(O.rev[1], 2) + ', avant les repas ' + fmt(O.avDej[0], 2) + '–' + fmt(O.avDej[1], 2) + ', coucher ' + fmt(O.coucher[0], 2) + '–' + fmt(O.coucher[1], 2) + (O.pp ? ', 2 h après les repas ' + fmt(O.pp[0], 2) + '–' + fmt(O.pp[1], 2) : '') + ' g/L ; rouge : < 0,70 g/L.'),
+      h('p', { class: 'sv-note' }, (G.cgm ? 'Valeurs relevées sur le capteur aux heures du carnet (pas d\'autosurveillance capillaire)' : 'Autosurveillance : ' + Y.ASG[G.asg].label) + '. Couleurs selon les objectifs fixés : réveil ' + fmt(O.rev[0], 2) + '–' + fmt(O.rev[1], 2) + ', avant les repas ' + fmt(O.avDej[0], 2) + '–' + fmt(O.avDej[1], 2) + ', coucher ' + fmt(O.coucher[0], 2) + '–' + fmt(O.coucher[1], 2) + (O.pp ? ', 2 h après les repas ' + fmt(O.pp[0], 2) + '–' + fmt(O.pp[1], 2) : '') + ' g/L ; rouge : < 0,70 g/L.'),
       Y.carnetTable(e.carnet, prot, h),
       h('details', { class: 'sv-det sv-how' }, [h('summary', null, 'Comment lire un carnet'), h('ol', { class: 'sv-keys' }, [
         h('li', null, 'Les hypoglycémies d\'abord : à quelle heure, après quelle dose ? Hypoglycémie nocturne ou réveil sous l\'objectif : baisser la basale ; avant le repas suivant ou 2 à 4 h après un repas : baisser le bolus de ce repas (dès l\'injection suivante).'),

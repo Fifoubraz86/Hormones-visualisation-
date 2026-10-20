@@ -204,7 +204,8 @@
     sim.titr = { who, prof: obj === 'fra' ? 'fra' : 'std', delai: del === '7' ? 7 : +del, sfd10: false, obj: JSON.parse(JSON.stringify(Y.PROTO[obj === 'fra' ? 'fra' : 'std'])), bolusCtl: 'next' };
     if (obj === 'sfd') sim.titr.obj.rev = [0.8, 1.3];
     if (obj === 'tight') sim.titr.obj.rev = [0.7, 1.0];
-    sim.asg = cgm && (asg === '0' || asg === 'w4') ? '0' : asg === 'w4' || asg === '0' ? '1' : asg; // le carnet du patient : au moins le réveil
+    if (cgm && asg !== '0') fb.push({ tone: 'info', text: 'Sous capteur, la surveillance se fait sur le capteur : l\'autosurveillance capillaire s\'arrête (bandelettes réservées aux doutes).', src: 'SFD 2025, avis 23' });
+    sim.asg = cgm ? '0' : asg === 'w4' || asg === '0' ? '1' : asg; // sans capteur : au moins le réveil
     sim.cgm = cgm;
     g.ans1 = { dose, used, who, su, met, dpp, type, cgm };
     g.journal.push({ title: 'J0 · initiation', rx: used + ' U de ' + { g100: 'glargine U100', g300: 'glargine U300', deg: 'dégludec', nph: 'NPH' }[type], fb });
@@ -297,7 +298,7 @@
         h('p', null, 'Basale actuelle : ' + pt.rx.basal + ' U/j (' + fmt(ukg, 2) + ' U/kg), après ' + titrN + ' adaptation' + (titrN > 1 ? 's' : '') + ' selon le protocole. ' + (pt.st.hypo ? 'Malaises depuis le début : ' + pt.st.hypo + '.' : 'Aucun malaise.')),
         h('p', { class: 'sv-muted' }, 'Il accepte maintenant « une injection de plus par semaine si ça évite d\'augmenter encore l\'insuline ».')
       ]),
-      carnetCard(sim, sim.asg === '1' ? '2' : sim.asg, sim.cgm, 'Carnet des 14 derniers jours', 'Pour cette consultation, il a mesuré aussi un autre moment de la journée.'),
+      carnetCard(sim, sim.asg === '1' ? '2' : sim.asg, sim.cgm, 'Carnet des 14 derniers jours', sim.cgm ? 'Valeurs relevées sur le capteur.' : 'Pour cette consultation, il a mesuré aussi un autre moment de la journée.'),
       agp,
       statementsBlock('s3_', g.st3),
       h('div', { class: 'sv-card sv-ordo' }, [
