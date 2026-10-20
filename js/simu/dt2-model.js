@@ -41,7 +41,9 @@
     wlB: 16, wlDur: 6, // récupération de la fonction β après perte de poids si diabète récent [direct]
     coLife: 0.6,
     gtox: 0.4,      // glucotoxicité : levée d'autant plus marquée que l'HbA1c initiale est haute [base-a1c]
-    glpW: 0.035     // perte de poids sous aGLP1 à dose pleine (fraction du poids) [sema-1-w]
+    glpSec: 0.1,    // part sécrétoire des aGLP1 (glucodépendante, liée à la réserve) [sema-1, lira-18]
+    glpX: 0.5,      // part non sécrétoire [sema5]
+    glpW: 0.055     // perte de poids sous aGLP1 à dose pleine (fraction du poids) [sema-1-w]
   };
 
   const PROFILES = {
@@ -58,11 +60,12 @@
     none: { name: 'Aucun', doses: [] },
     // SUSTAIN 1 : 0,5 mg ≈ 90 % de l'effet de 1 mg [sema-05] ; dulaglutide 4,5 mg ≈ sémaglutide 1 mg
     // (comparaison indirecte), 0,75 mg ≈ 1,5 mg (AWARD-3) ; LEAD-3 : 1,2 mg ≈ 75 % de 1,8 mg [lira-12].
-    sema: { name: 'Sémaglutide (Ozempic®), hebdomadaire', unit: 'mg/sem', doses: [0.25, 0.5, 1, 2], frac: [0.2, 0.8, 0.9, 1], step: 28, k: 1 },
+    // Sémaglutide 2 mg (SUSTAIN FORTE) non commercialisé en France (SFD 2025, avis 6 bis) : non proposé.
+    sema: { name: 'Sémaglutide (Ozempic®), hebdomadaire', unit: 'mg/sem', doses: [0.25, 0.5, 1], frac: [0.2, 0.8, 0.9], step: 28, k: 1 },
     dula: { name: 'Dulaglutide (Trulicity®), hebdomadaire', unit: 'mg/sem', doses: [0.75, 1.5, 3, 4.5], frac: [0.65, 0.77, 0.82, 0.88], step: 28, k: 1 },
     lira: { name: 'Liraglutide (Victoza®), quotidien', unit: 'mg/j', doses: [0.6, 1.2, 1.8], frac: [0.3, 0.6, 0.8], step: 7, k: 0.54 },
     // AR GIP/GLP-1 (SURPASS-2 : 5/10/15 mg − 2,01/− 2,24/− 2,30 % contre − 1,86 % sous sémaglutide 1 mg) [tirz-15].
-    tirz: { name: 'Tirzépatide (Mounjaro®), hebdomadaire — AR GIP/GLP-1', unit: 'mg/sem', doses: [2.5, 5, 7.5, 10, 12.5, 15], frac: [0.3, 0.72, 0.8, 0.86, 0.9, 0.93], step: 28, k: 1.45, wk: 3.2 }
+    tirz: { name: 'Tirzépatide (Mounjaro®), hebdomadaire — AR GIP/GLP-1', unit: 'mg/sem', doses: [2.5, 5, 7.5, 10, 12.5, 15], frac: [0.3, 0.72, 0.8, 0.86, 0.9, 0.93], step: 28, k: 1.45, wk: 1.9 }
   };
   const SGLT2 = { none: 'Aucun', dapa10: 'Dapagliflozine 10 mg', empa10: 'Empagliflozine 10 mg', empa25: 'Empagliflozine 25 mg' };
   const ALB = { normo: { label: 'Normale', rate: 0.8 }, micro: { label: 'Microalbuminurie (30–300 mg/24 h)', rate: 2.5 }, macro: { label: 'Protéinurie (> 300 mg/24 h)', rate: 5 } };
@@ -113,9 +116,12 @@
     const iex = (rx.basal + rx.rapid) * a / (P.insK * pt.par.weight0);
     const eSu = su > 0 ? P.su * Math.pow(Math.min(su, 120) / 120, P.suExp) * (p.suBoost || 1) * br : 0;
     const eDpp = (rx.dpp4 > 0 ? P.dpp * Math.min(1, rx.dpp4 * a / 100) * p.incr : 0) * gd * br;
-    const eGlp = (take.glp ? 0.87 * glpFrac(rx) * a * p.incr * p.glpResp : 0) * gd * br;
+    const eGlp = (take.glp ? P.glpSec * glpFrac(rx) * a * p.incr * p.glpResp : 0) * gd * br;
+    // Part de l'effet des aGLP1 indépendante de la sécrétion résiduelle (glucagon, vidange gastrique, satiété) :
+    // elle persiste sous insuline (SUSTAIN 5) [sema5].
+    const eGlpX = take.glp ? Math.min(0.8, P.glpX * glpFrac(rx) * a * p.glpResp * Math.sqrt(p.incr) * gd) : 0;
     return {
-      eSu, eDpp, eGlp,
+      eSu, eDpp, eGlp, eGlpX,
       eMet: P.met * metCurve(met) * p.metResp / (1 + P.metIns * Math.min(1.5, iex) + P.metCo * (eSu + eDpp + eGlp)),
       sglt: rx.sglt2 !== 'none' ? (rx.sglt2 === 'empa25' ? P.sglt25 : P.sglt10) * clamp((s.dfg - 20) / 40, 0, 1) * a : 0,
       acarb: rx.acarb > 0 ? P.acarb * Math.min(1, rx.acarb / 300) * a : 0,
@@ -143,8 +149,11 @@
     const Bf = beta(pt) * gtox * (1 + e.eSu + e.eDpp + e.eGlp);
     const IA = (Bf + e.iex) * si * (1 + e.eMet);
     let m = mgOf(IA);
-    if (m > 1) m = 1 + (m - 1) * (1 - e.sglt) * (1 - e.acarb);
+    if (m > 1) m = 1 + (m - 1) * (1 - e.sglt) * (1 - e.acarb) * (1 - e.eGlpX);
     // Boissons sucrées : charge glucidique directe (≈ 0,035 g/L de glycémie moyenne par verre quotidien, complément).
+    // Sans sulfamide ni insuline, la contre-régulation empêche la glycémie de descendre sous la normale :
+    // plancher vers 1,02 g/L (HbA1c ≈ 5,2 %), comme chez le non-diabétique.
+    if (!(e.eSu > 0) && !(e.iex > 0)) m = Math.max(m, 1.02);
     return m + 0.035 * sodaNow(pt);
   }
 

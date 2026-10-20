@@ -536,7 +536,7 @@
     main.textContent = '';
     main.className = 'sv-main sv-game sv-sandbox';
     const left = h('aside', { class: 'sv-dossier' }, [patientCard(), G.dead ? deathCard() : rxCard()]);
-    const right = h('section', { class: 'sv-consult' }, [latestCard(), sfdCard(), chartCard(), marginCard(), historyCard(), factorsCard(), refCard(), effectsCard(), revealCard()]);
+    const right = h('section', { class: 'sv-consult' }, [latestCard(), sfdCard(), chartCard(), marginCard(), historyCard(), treeCard(), guideCard(), factorsCard(), refCard(), effectsCard(), revealCard()]);
     main.append(left, right);
     const box = right.querySelector('.sv-chartbox');
     if (box) requestAnimationFrame(() => chart(box));
@@ -899,6 +899,52 @@
       h('div', { class: 'sv-scroll' }, h('table', { class: 'sv-res sv-reftab' }, [h('thead', null, h('tr', null, [h('th', null, 'Traitement · situation'), h('th', null, 'Effet publié'), h('th', null, 'Modèle')])), h('tbody', null, rows)]))
     ]);
     return det;
+  }
+
+  // Arbre des décisions : options classées selon la SFD 2025 et simulées 6 mois (js/simu/dt2-tree.js).
+  function treeCard() {
+    const body = h('div', { class: 'sv-tree' }, h('p', { class: 'sv-note' }, 'Calcul en cours…'));
+    let done = false;
+    const det = h('details', { class: 'sv-card sv-det', ontoggle: () => {
+      if (!det.open || done) return;
+      done = true;
+      setTimeout(() => {
+        const T = S.dt2tree.build(G.pt, G.cfg);
+        const g1 = (v) => fmt(v, 1);
+        const res = (r) => h('span', { class: 'sv-tr-res' }, [h('b', null, 'HbA1c ' + g1(r.a1c) + ' %'), ' · poids ' + (r.dW >= 0 ? '+' : '') + g1(r.dW) + ' kg' + (r.hypo ? ' · ' + r.hypo + ' hypoglycémie' + (r.hypo > 1 ? 's' : '') + (r.sev ? ' dont ' + r.sev + ' sévère' + (r.sev > 1 ? 's' : '') : '') : '') + (r.basal ? ' · basale ' + r.basal + ' U' : '') + (r.rapid ? ' + bolus ' + r.rapid + ' U' : '')]);
+        body.textContent = '';
+        body.append(
+          h('p', { class: 'sv-tr-root' }, ['Aujourd\'hui : HbA1c ' + g1(T.a1c) + ' %, cible ≤ ' + g1(T.T.max) + ' %' + (T.T.floor ? ' (pas sous ' + g1(T.T.floor) + ' %)' : '') + ' · traitement : ' + rxLabel(G.pt.rx) + '.']),
+          h('ol', { class: 'sv-tr' }, T.branches.map((b) => h('li', { class: 'sv-tr-b sv-tr-r' + b.r }, [
+            h('div', { class: 'sv-tr-head' }, [h('span', { class: 'sv-tr-rank' }, b.r + ' · ' + S.dt2tree.RANK[b.r]), h('span', { class: 'sv-tr-name' }, b.o.name)]),
+            h('p', { class: 'sv-tr-why' }, [b.why + ' ', h('span', { class: 'sv-src' }, '(' + (b.src.startsWith('HAS') ? '' : 'SFD 2025, ') + b.src + ')')]),
+            h('p', null, ['À 6 mois : ', res(b.res)]),
+            b.next ? h('div', { class: 'sv-tr-next sv-tr-r' + b.next.r }, [h('p', null, [h('span', { class: 'sv-tr-rank' }, 'puis'), ' ' + b.next.o.name + ' — ' + b.next.why]), h('p', null, ['À 12 mois : ', res(b.next.res)])]) : null
+          ])))
+        );
+      }, 20);
+    } }, [
+      h('summary', null, 'Arbre des décisions pour ce patient'),
+      h('p', { class: 'sv-note' }, 'Chaque option possible aujourd\'hui, de la meilleure à la pire selon la SFD 2025, avec ce que le modèle prévoit à 6 mois pour ce patient (observance bonne, aGLP1 par paliers mensuels, insuline instaurée titrée sur la glycémie à jeun) ; pour les trois meilleures branches encore au-dessus de la cible, l\'étape suivante la mieux classée, à 12 mois. Couleurs : vert recommandé, bleu acceptable, gris possible, orange à éviter, rouge erreur.'),
+      body
+    ]);
+    return det;
+  }
+
+  // Guide du modèle : ce que fait chaque traitement et chaque situation (js/simu/dt2-guide.js).
+  function guideCard() {
+    const GU = S.dt2guide;
+    return h('details', { class: 'sv-card sv-det' }, [
+      h('summary', null, 'Guide du modèle : traitements et situations'),
+      h('h4', null, 'Le cœur du modèle'),
+      h('ul', { class: 'sv-keys' }, GU.CORE.map((t) => h('li', null, t))),
+      ...GU.TREATMENTS.map((t) => h('details', { class: 'sv-det sv-how' }, [h('summary', null, t.name), h('dl', { class: 'sv-exam sv-qual' }, [
+        ['Dans le modèle', t.how(D.P, D.GLP1)], ['Ce qui module la réponse', t.mod], ['Ce que l\'on obtient', t.expect], ['Tolérance, événements', t.safety], ['Repères de calage', t.refs]
+      ].flatMap(([k, v]) => [h('dt', null, k), h('dd', null, v)]))])),
+      h('h4', null, 'Situations'),
+      h('dl', { class: 'sv-exam sv-qual' }, GU.SITUATIONS.flatMap(([k, v]) => [h('dt', null, k), h('dd', null, v)])),
+      h('p', { class: 'sv-note' }, 'Patient moyen, observance bonne ; en mode patient réel, chaque patient s\'en écarte. Version détaillée, arbres de six patients types et enchaînements simulés : docs/guide-modele-dt2.md.')
+    ]);
   }
 
   function revealCard() {

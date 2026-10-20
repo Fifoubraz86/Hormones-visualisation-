@@ -109,6 +109,12 @@ Même principe que la thyroïde : on crée le patient, on prescrit librement, on
 
 Examens : HbA1c, glycémie à jeun, carnet d'autosurveillance (glycémies et hypoglycémies depuis le dernier bilan), créatinine (DFG), albuminurie, peptide C, anti-GAD, cétonémie, lipase, fond d'œil. Encarts « Facteurs prédictifs de réponse », « Référentiel (item 247) » avec les rangs de la grille, et « Référentiel d'effets (littérature) » : effet publié, source, et valeur produite par le modèle sur le même essai.
 
+## Arbre des décisions et guide du modèle
+
+- **Arbre des décisions pour ce patient** (`js/simu/dt2-tree.js`, carte du mode DT2) : chaque option possible au moment présent est classée de la meilleure à la pire selon la SFD 2025 (rang 1 recommandé à 5 erreur, avec l'avis cité), puis simulée 6 mois sur le patient affiché ; pour les trois meilleures branches encore au-dessus de la cible, l'étape suivante la mieux classée est simulée jusqu'à 12 mois.
+- **Guide du modèle** (`js/simu/dt2-guide.js`, carte du mode DT2, et [`guide-modele-dt2.md`](guide-modele-dt2.md) généré par `node tools/guide-dt2.js`) : pour chaque traitement, ce que fait le modèle et avec quels paramètres, ce qui module la réponse, ce que l'on obtient, la tolérance ; pour chaque situation, son effet ; arbres de six patients types ; enchaînements de traitements simulés.
+- Sans sulfamide ni insuline, la glycémie moyenne ne descend pas sous 1,02 g/L (HbA1c ≈ 5,2 %).
+
 ## Cas guidé : initier une insuline basale (`js/simu/dt2-case.js`)
 
 Onglet « Cas commentés », ou `simulateur.html#cas-insuline`. M. L., 62 ans, IMC 31, DT2 depuis 14 ans, metformine + gliclazide + sitagliptine, HbA1c 9,4 % (patient théorique du modèle DT2, reproductible). Quatre temps : (1) lecture de son carnet sous sulfamide (4 mesures par semaine) puis ordonnance d'initiation : dose de départ, insuline, metformine, sulfamide, iDPP4, qui titre, objectif au réveil, délai d'augmentation, autosurveillance, capteur ; (2) J14 : il n'a pas osé adapter la dose, carnet à lire et dose du soir à décider ; (3) M3 : HbA1c, carnet (et AGP si capteur), lecture puis intensification ; (4) M9 : évolution sous la décision et débriefing noté sur 20. Les affirmations à cocher sur les carnets sont jugées sur les valeurs affichées (pas de corrigé figé) ; les décisions sont corrigées selon la SFD 2025 (avis 14, 18, 18 bis, 18 ter, 19, 20, 23), la LPPR (capteur) et le protocole du service. Une erreur coûte 2 points (dose de départ excessive : 3, le senior la ramène à 10 U), une décision discutable 1 point, une affirmation mal jugée 0,5 point.
@@ -126,6 +132,9 @@ Onglet « Cas commentés », ou `simulateur.html#cas-insuline`. M. L., 62 ans, I
 | `js/simu/dt2-model.js` | Modèle du diabète de type 2 (paramètres calés `P`, rejeu des essais `replay`). |
 | `js/simu/sfd.js` | Prise de position SFD 2025 : cible individualisée, lecture de l'ordonnance, initiation de l'insuline, repères. |
 | `js/simu/glyco.js` | Profil glycémique de 24 h, carnet, capteur et rapport AGP, titration de l'insuline selon le protocole du service, lectures guidées. |
+| `js/simu/dt2-tree.js` | Arbre des décisions : options classées selon la SFD 2025 et simulées. |
+| `js/simu/dt2-guide.js` | Guide didactique du modèle (traitements, situations). |
+| `tools/guide-dt2.js` | Génère `docs/guide-modele-dt2.md`. |
 | `js/simu/dt2-case.js` | Cas guidé d'initiation de l'insuline basale, carnets à interpréter. |
 | `js/simu/dt2-ref.js` | Référentiel d'effets publiés (traitement, situation, effet, source, essai virtuel de calibration). |
 | `tools/calib-dt2.js` | Banc de calibration : `node tools/calib-dt2.js` (contrôle), `--md` (tableau du référentiel). |
