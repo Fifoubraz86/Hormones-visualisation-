@@ -60,7 +60,7 @@
     const dp = Y.makeDay(pt, D, { seed: (SEED + pt.day * 7919) >>> 0, newHypo, newSev });
     pt.st.hypo += dp.native; sim.lastH = pt.st.hypo; sim.lastS = pt.st.hypoSev;
     dp.rdg = Y.readings(dp);
-    if (titrate && sim.titr.who !== 'none' && pt.rx.basal + pt.rx.rapid > 0) { const log = Y.titrate(pt.rx, dp.rdg, sim.titr, sim.state, true); if (log.length) sim.titrLog.push({ day: pt.day, log }); }
+    if (titrate && sim.titr.who !== 'none' && pt.rx.basal + pt.rx.rapid > 0) { const log = Y.titrate(pt.rx, dp.rdg, Object.assign({ cgm: sim.cgm, basalMax: Math.round(0.5 * pt.st.W) }, sim.titr), sim.state, true); if (log.length) sim.titrLog.push({ day: pt.day, log }); }
     sim.days.push(dp);
   }
   function run(sim, n, titrate) { for (let i = 0; i < n; i++) day(sim, titrate); }

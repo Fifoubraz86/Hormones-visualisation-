@@ -128,10 +128,21 @@
     const add = (i, sev) => { if (used.some((j) => Math.abs(j - i) < 8)) return false; used.push(i); dp.hypos.push({ t0: i / 4 - 0.4, dur: 0.6 + 0.5 * r(), depth: sev ? 0.36 : Math.min(curve[i], 0.52 + 0.14 * r()), sev }); return true; };
     minima.filter((i) => curve[i] < 0.6).forEach((i) => add(i, false));
     const native = dp.hypos.length;
+    // Hypoglycémie tirée par le modèle : dans la période de l'insuline qui agit (nuit : basale ou sulfamide ;
+    // matinée, après-midi, soirée : bolus du repas), d'autant plus probable que la dose y est forte et que la
+    // glycémie y est déjà basse ; placée au point le plus bas de cette période.
+    const PER = [[0, 28], [34, 50], [54, 78], [82, 95]];
+    const pickLow = () => {
+      const low = PER.map(([a2, b2]) => { let j = a2; for (let k = a2; k <= b2; k++) if (curve[k] < curve[j]) j = k; return j; });
+      const ins = [Math.max(rx.basal || 0, rx.su ? 20 : 0, 4)].concat(u);
+      const wts = low.map((j, k) => ins[k] * Math.exp(-curve[j] / 0.15));
+      let x = r() * wts.reduce((a2, v) => a2 + v, 0);
+      for (let k = 0; k < 4; k++) { x -= wts[k]; if (x <= 0) return low[k]; }
+      return low[0];
+    };
     const nH = ctx.newHypo || 0;
     for (let k = 0; k < nH; k++) {
-      const pool = minima.slice(0, 3);
-      const i = pool.length ? pool[Math.floor(r() * pool.length)] : Math.floor(r() * 96);
+      const i = pickLow();
       if (!add(i, k < (ctx.newSev || 0))) { const hy = dp.hypos.find((x) => Math.abs(x.t0 + 0.4 - i / 4) < 2); if (hy && k < (ctx.newSev || 0)) { hy.depth = 0.36; hy.sev = true; } }
     }
     dp.native = Math.max(0, native - nH);
@@ -163,6 +174,10 @@
     const o = {};
     MOMENTS.forEach(([k, , t], i) => { o[k] = glucose(dp, t) * dp.meter[i]; });
     // Hypoglycémie ressentie : resucrage, glycémie notée au moment du malaise.
+    // Creux de chaque période, vus par un capteur : nuit (avant le réveil) et après chaque bolus (1 h après le repas
+    // jusqu'au repas suivant).
+    const nad = (a, b) => { let m = 9; for (let t = a; t <= b; t += 0.25) m = Math.min(m, glucose(dp, t)); return m; };
+    o.nadir = { night: nad(0, 7.25), m0: nad(8.5, 12.25), m1: nad(13.5, 19.25), m2: nad(20.5, 23.75) };
     o.hypos = dp.hypos.map((hy) => { const t = hy.t0 + hy.dur / 2; return { t, tc: (((t + (dp.off || 0)) % 24) + 24) % 24, g: hy.depth * dp.meter[0], sev: hy.sev }; });
     return o;
   }
@@ -173,7 +188,9 @@
     const O = objOf(prot);
     const log = [];
     const step = (dose) => (prot.sfd10 && dose > 40 ? Math.max(2, Math.round(dose * 0.1)) : dose < 10 ? 1 : 2);
-    const nightHypo = rdg.hypos.some((h) => h.t < 7.5 || h.t > 22);
+    // Hypoglycémie nocturne : imputée à la basale ; entre 22 h et 2 h, au bolus du dîner s'il y en a un.
+    const dinB = rx.rapidM && rx.rapidM[2] > 0;
+    const nightHypo = rdg.hypos.some((h) => (dinB ? h.t >= 2 && h.t < 7.5 : h.t < 7.5 || h.t > 22));
     // Après une baisse (hypoglycémie ou glycémie sous l'objectif), pas de hausse pendant 7 jours pour cette
     // dose : on ne remonte pas une insuline qui vient de donner une hypoglycémie (règle de sécurité, complément).
     state.hold = state.hold || {};
@@ -187,19 +204,26 @@
         state.above[name] = (state.above[name] || 0) + 1;
         if (state.above[name] >= prot.delai) {
           state.above[name] = 0;
-          const cap = prot.caps && prot.caps[name];
-          if (cap != null && dose + step(dose) > cap) { if (!state.capped) state.capped = {}; if (!state.capped[name]) { state.capped[name] = true; log.push({ name, from: dose, to: dose, why: 'dose maximale du protocole atteinte (' + cap + ' U) : appeler le médecin', cap: true }); } }
+          // Plafonds : +50 % de la dose prescrite, et basale à 0,5 U/kg (au-delà, sur-basalisation possible :
+          // on n'augmente plus la basale sans avis médical, on renforce plutôt les bolus ; SFD 2025, avis 19).
+          let cap = prot.caps && prot.caps[name], why = 'dose maximale du protocole atteinte (' + cap + ' U) : appeler le médecin';
+          if (name === 'basal' && prot.basalMax && (cap == null || prot.basalMax < cap)) { cap = Math.max(prot.basalMax, Math.min(dose, cap == null ? dose : cap)); why = 'basale à ' + cap + ' U (≥ 0,5 U/kg) : sur-basalisation possible, ne plus augmenter sans avis médical (SFD, avis 19)'; }
+          if (cap != null && dose + step(dose) > cap) { if (!state.capped) state.capped = {}; if (!state.capped[name]) { state.capped[name] = true; log.push({ name, from: dose, to: dose, why, cap: true }); } }
           else if (apply && prot.upProb != null && (prot.rnd ? prot.rnd() : Math.random()) > prot.upProb) log.push({ name, from: dose, to: dose, why: 'hausse prévue non faite (' + (prot.upWhy || 'non suivie') + ')', skip: true });
           else if (apply) { const nd = dose + step(dose); set(nd); log.push({ name, from: dose, to: nd, why: prot.delai + ' jours au-dessus de l\'objectif' }); }
         }
       } else state.above[name] = 0;
     };
-    ctl('basal', rx.basal, rdg.rev, O.rev, nightHypo, (v) => { rx.basal = v; });
+    // Avec un capteur, un creux sous l'objectif (nuit pour la basale, période qui suit le repas pour un bolus)
+    // compte comme une glycémie sous l'objectif : on baisse, et on ne monte pas.
+    const lowN = prot.cgm && rdg.nadir && rdg.nadir.night < O.rev[0];
+    ctl('basal', rx.basal, lowN ? Math.min(rdg.rev, rdg.nadir.night) : rdg.rev, O.rev, nightHypo, (v) => { rx.basal = v; });
     (rx.rapidM || []).forEach((dose, m) => {
       const pp = prot.bolusCtl === 'pp';
       const k = pp ? BOLUS_PP[m] : BOLUS_CTRL[m], obj = pp ? (O.pp || [1.2, 1.8]) : (O[k] || O.avDej);
-      const hypo = rdg.hypos.some((h) => h.t > ([7.5, 12.5, 19.5][m] + 1) && h.t < ([12.5, 19.5, 26][m]));
-      ctl('m' + m, dose, rdg[k], obj, hypo, (v) => { rx.rapidM[m] = v; });
+      const hypo = rdg.hypos.some((h) => { const t = m === 2 && h.t < 2 ? h.t + 24 : h.t; return t > [7.5, 12.5, 19.5][m] + 1 && t < [12.5, 19.5, 26][m]; });
+      const low = prot.cgm && rdg.nadir && rdg.nadir['m' + m] < obj[0];
+      ctl('m' + m, dose, low ? Math.min(rdg[k], rdg.nadir['m' + m]) : rdg[k], obj, hypo, (v) => { rx.rapidM[m] = v; });
     });
     rx.rapid = (rx.rapidM || []).reduce((a, x) => a + x, 0);
     return log;

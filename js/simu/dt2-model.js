@@ -274,7 +274,9 @@
     const s = pt.st, p = pt.par;
     const basalShare = pt.rx.basal * p.adh / (P.insK * p.weight0);
     // Les bolus d'insuline rapide ne couvrent pas la nuit : la glycémie à jeun se calcule sans eux.
-    const mg = pt.rx.rapid > 0 ? s.MG + Math.max(0, eqMG(pt, { rapid: 0, rapidM: [0, 0, 0] }) - eqMG(pt, {})) : s.MG;
+    // La nuit, seule la fin d'action du bolus du dîner joue : l'écart est plafonné à 0,25 g/L (sinon, sous gros
+    // bolus, le réveil resterait haut quoi que fasse la basale).
+    const mg = pt.rx.rapid > 0 ? s.MG + Math.min(0.25, Math.max(0, eqMG(pt, { rapid: 0, rapidM: [0, 0, 0] }) - eqMG(pt, {}))) : s.MG;
     // Au-delà de 0,6 U/kg, la basale continue d'abaisser la glycémie à jeun (sur-basalisation : réveil bas,
     // journée haute) alors que son effet sur la glycémie moyenne sature.
     return Math.max(0.5, mg * 0.9 + 0.04 - 0.5 * Math.min(1, 2 * basalShare) - 0.6 * Math.max(0, basalShare - 0.5));

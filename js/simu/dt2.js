@@ -270,7 +270,7 @@
       const before = { b: pt.rx.basal, m: pt.rx.rapidM.slice() };
       // Peur de l'hypoglycémie ou détresse : le patient ne fait qu'une partie des hausses prévues (pas l'IDE).
       const rr = Y.rng((G.seed ^ (pt.day * 2654435761)) >>> 0);
-      const prot = G.titr.who === 'ide' ? G.titr : Object.assign({}, G.titr, pt.par.fear ? { upProb: 0.3, upWhy: 'peur de l\'hypoglycémie', rnd: rr } : pt.par.distress ? { upProb: 0.5, upWhy: 'découragement', rnd: rr } : {});
+      const prot = Object.assign({ cgm: G.cgm, basalMax: Math.round(0.5 * pt.st.W) }, G.titr.who === 'ide' ? G.titr : Object.assign({}, G.titr, pt.par.fear ? { upProb: 0.3, upWhy: 'peur de l\'hypoglycémie', rnd: rr } : pt.par.distress ? { upProb: 0.5, upWhy: 'découragement', rnd: rr } : {}));
       const log = Y.titrate(pt.rx, rdg, prot, G.titrState, follow);
       if (log.length) G.titrLog.push({ day: pt.day, log, before });
     }
@@ -431,7 +431,7 @@
       if (first.b !== rx.basal) parts.push('basale ' + first.b + ' → ' + rx.basal + ' U');
       rx.rapidM.forEach((u, i) => { if (first.m[i] !== u) parts.push('bolus du ' + ['petit-déjeuner', 'déjeuner', 'dîner'][i] + ' ' + first.m[i] + ' → ' + u + ' U'); });
       const down = tl.reduce((a, x) => a + x.log.filter((l) => l.to < l.from).length, 0), up = tl.reduce((a, x) => a + x.log.filter((l) => l.to > l.from).length, 0);
-      const capped = tl.flatMap((x) => x.log.filter((l) => l.cap)).map((l) => ({ basal: 'basale', m0: 'bolus du petit-déjeuner', m1: 'bolus du déjeuner', m2: 'bolus du dîner' })[l.name] + ' (' + l.from + ' U)');
+      const capped = tl.flatMap((x) => x.log.filter((l) => l.cap)).map((l) => ({ basal: 'basale', m0: 'bolus du petit-déjeuner', m1: 'bolus du déjeuner', m2: 'bolus du dîner' })[l.name] + ' (' + l.from + ' U' + (/avis 19/.test(l.why) ? ', ≥ 0,5 U/kg : sur-basalisation ?' : '') + ')');
       const skipped = tl.reduce((n, x) => n + x.log.filter((l) => l.skip).length, 0);
       titr = (G.titr.who === 'ide' ? 'L\'IDE' : G.cfg.sex === 'F' ? 'La patiente' : 'Le patient') + ' a appliqué le protocole : ' + (parts.join(', ') || 'doses revenues à leur point de départ') + ' (' + up + ' hausse' + (up > 1 ? 's' : '') + ', ' + down + ' baisse' + (down > 1 ? 's' : '') + ').' + (capped.length ? ' Dose maximale du protocole atteinte, ' + (G.titr.who === 'ide' ? 'l\'IDE a' : G.cfg.sex === 'F' ? 'elle a' : 'il a') + ' appelé : ' + capped.join(', ') + '.' : '') + (skipped ? ' ' + skipped + ' hausse' + (skipped > 1 ? 's' : '') + ' prévue' + (skipped > 1 ? 's' : '') + ' non faite' + (skipped > 1 ? 's' : '') + ' (' + (pt.par.fear ? 'peur de l\'hypoglycémie' : 'découragement') + ').' : '');
     }
