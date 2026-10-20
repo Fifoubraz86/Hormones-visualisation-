@@ -94,11 +94,13 @@
     }
     if (best !== current) setCurrent(best);
   }
-  function isActive(sc) {
+  function inView(sc) {
     const r = HV.rectOf(sc);
     const h = (cam.w * vh) / vw;
-    if (r.w / cam.w < 0.05) return false;
     return r.x < cam.cx + cam.w / 2 && r.x + r.w > cam.cx - cam.w / 2 && r.y < cam.cy + h / 2 && r.y + r.h > cam.cy - h / 2;
+  }
+  function isActive(sc) {
+    return HV.rectOf(sc).w / cam.w >= 0.05 && inView(sc);
   }
 
   /* ---------- Interaction : glisser, molette, pincement, clic ---------- */
@@ -511,8 +513,15 @@
         sc.content.style.opacity = op;
         sc.content.style.visibility = op === 0 ? 'hidden' : '';
       }
-      if (op === 0 || !isActive(sc)) continue;
-      for (const f of sc.flows) f.step(sdt);
+      // Allègement du rendu : une scène hors champ (ou réduite à un point) sort de l'arbre de rendu ;
+      // vue de loin, ses particules sont masquées et ne sont plus animées.
+      const frac = HV.rectOf(sc).w / cam.w;
+      const on = op > 0 && frac > 0.012 && inView(sc);
+      if (on !== sc._on) { sc._on = on; sc.content.style.display = on ? '' : 'none'; }
+      const fl = on && frac > 0.2;
+      if (fl !== sc._fl) { sc._fl = fl; for (const f of sc.flows) f.layer.style.display = fl ? '' : 'none'; }
+      if (!on || !isActive(sc)) continue;
+      if (fl) for (const f of sc.flows) f.step(sdt);
       for (const fn of sc.dyn) fn(sdt);
     }
     labTimer -= dt;
