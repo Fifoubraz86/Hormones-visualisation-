@@ -60,16 +60,15 @@
   }
 
   // Dispositifs de surveillance (remboursement) : capteur et bandelettes. Renvoie les messages bloquants.
-  // Capteur (FreeStyle Libre 2, extension LPPR 2023) : insulinothérapie intensifiée (≥ 3 injections/j ou
-  // pompe), ou insulinothérapie non intensifiée avec HbA1c ≥ 8 %. Autosurveillance capillaire : réservée
+  // Capteur (FreeStyle Libre 2, extension LPPR 2023) : patient sous insuline, une basale seule suffit, avec
+  // une HbA1c > 8 %. Autosurveillance capillaire : réservée
   // aux patients sous traitement hypoglycémiant (sulfamide, glinide, insuline) ; hors insuline, 200
   // bandelettes et lancettes par an (HAS).
   function monitoring(rx, asg, cgm, a1c) {
     const out = [];
-    const nInj = (rx.basal > 0 ? 1 : 0) + (rx.rapidM || []).filter((x) => x > 0).length;
     if (cgm) {
       if (!INS(rx)) out.push('Capteur de glucose : pris en charge seulement sous insuline (HAS, LPPR). Sans insuline, il n\'est pas remboursé.');
-      else if (nInj < 3 && !(a1c >= 8)) out.push('Capteur de glucose sous insulinothérapie non intensifiée (' + nInj + ' injection' + (nInj > 1 ? 's' : '') + '/j) : remboursé seulement si l\'HbA1c est ≥ 8 % (dernière HbA1c ' + (a1c != null ? fmt(a1c, 1) + ' %' : 'inconnue') + ') ; sous insulinothérapie intensifiée (≥ 3 injections/j), sans condition d\'HbA1c.');
+      else if (!(a1c > 8)) out.push('Capteur de glucose : remboursé sous insuline (une basale seule suffit) si l\'HbA1c est > 8 % ; dernière HbA1c ' + (a1c != null ? fmt(a1c, 1) + ' %' : 'inconnue') + '.');
     }
     if (asg && asg !== '0') {
       if (!INS(rx) && !(rx.su > 0)) out.push('Autosurveillance glycémique capillaire : sans traitement hypoglycémiant (sulfamide, glinide, insuline), elle n\'est pas recommandée en routine et le lecteur et les bandelettes ne sont pas pris en charge (HAS).');
@@ -203,7 +202,7 @@
     ['Insuline basale', 'Une injection d\'un analogue lent, 6 à 10 U/j ou 0,1 à 0,2 U/kg/j ; glycémie au réveil 0,80–1,30 g/L ; adaptation tous les 3 jours de ± 2 U (± 10 % au-delà de 40 U). Garder la metformine, arrêter les SU. Capteur recommandé. Glargine U300 ou dégludec si risque d\'hypoglycémie nocturne.', 'avis 18, 18 bis, 18 ter'],
     ['Échec de la basale', 'HbA1c au-dessus de la cible malgré une glycémie à jeun dans la cible, ou basale > 0,5 U/kg : avis diabétologique ; ajouter un aGLP1 ou le tirzépatide (préféré), un oral (iSGLT2, iDPP4, SU) ou des bolus (basal-plus, basal-bolus) ; prémélanges moins flexibles.', 'avis 19'],
     ['HAS 2024 (stratégie thérapeutique du patient vivant avec un DT2)', 'Mode de vie (activité physique, nutrition) en première intention chez tous ; metformine en première intention médicamenteuse ; iSGLT2 ou aGLP1 selon le profil, indépendamment de la metformine et de l\'HbA1c (maladie cardiovasculaire avérée : iSGLT2 ou aGLP1 ; insuffisance cardiaque ou maladie rénale : iSGLT2 ; obésité IMC > 30 : aGLP1) ; cible d\'HbA1c de 7 % pour la majorité, individualisée et décidée avec le patient.', 'HAS 2024'],
-    ['Surveillance : bandelettes et capteur', 'Autosurveillance capillaire réservée aux traitements hypoglycémiants (sulfamide, glinide, insuline) ; hors insuline, 200 bandelettes et lancettes par an. Capteur de glucose pris en charge sous insulinothérapie intensifiée (≥ 3 injections/j), ou non intensifiée avec HbA1c ≥ 8 % (LPPR, 2023) ; recommandé sous insuline par la SFD.', 'HAS ; LPPR ; avis 23'],
+    ['Surveillance : bandelettes et capteur', 'Autosurveillance capillaire réservée aux traitements hypoglycémiants (sulfamide, glinide, insuline) ; hors insuline, 200 bandelettes et lancettes par an. Capteur de glucose pris en charge sous insuline, basale seule comprise, avec une HbA1c > 8 % (LPPR, 2023) ; recommandé sous insuline par la SFD.', 'HAS ; LPPR ; avis 23'],
     ['Personne âgée', 'Fragile : metformine + iDPP4, puis analogue lent ; éviter SU et glinides. Dépendante : pas de SU, de glinide ni d\'aGLP1 ; iDPP4, insuline basale ; HbA1c > 7,5 % sous insuline.', 'avis 21 bis']
   ];
 
