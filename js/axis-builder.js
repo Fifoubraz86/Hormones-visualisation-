@@ -118,7 +118,7 @@
       level: ax.level || 'Axe',
       lead: ax.lead,
       points: ax.points,
-      source: ax.source || 'Source : Polycopié de sémiologie endocrinienne, CEEDMM, 1re édition 2023.',
+      source: ax.source || 'Source : Polycopié de sémiologie endocrinienne, CEEDMM, 2e édition (2023).',
       legend: legendMols,
       build(g, a) {
         a.frame(ax.name, ax.sub);
