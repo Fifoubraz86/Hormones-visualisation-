@@ -15,7 +15,7 @@
   // Contrôles toutes les 4 h (heure physiologique) ; le repas dont dépend chaque contrôle avant repas.
   const CHECKS = [[3, '3 h'], [7, 'réveil'], [11.75, 'avant déjeuner'], [15.5, '15 h 30'], [19.25, 'avant dîner'], [23, '23 h']];
   const TARGETS = { a: [0.8, 1.4], b: [1.0, 1.6], c: [1.0, 1.8] };
-  const DEFAULTS = { days: 7, rate0: 1, incr: 0.25, target: 'b', bolusKg: 0.1, stopSu: true, cgm: true, exit: 'inj' };
+  const DEFAULTS = { days: 7, rate0: 1, incr: 0.25, target: 'b', bolusKg: 0.1, stopSu: true, cgm: true, exit: 'auto' };
 
   // pt, D (modèle), Y (glyco) ; o : réglages ; renvoie le journal du séjour (heure par heure).
   function run(pt, D, Y, o0, seed) {
@@ -97,5 +97,42 @@
     return { o, lo, hi, hours, checks, days, hypos, relay, last, rate, W };
   }
 
-  S.dt2hosp = { run, DEFAULTS, TARGETS, CHECKS };
+  // Règle d'admission (simulée, à adapter au service) : HbA1c ≥ 10 %, hyperglycémie majeure symptomatique, ou
+  // échec du basal-bolus ambulatoire avec HbA1c ≥ 9 %.
+  function eligible(a1c, rx, mg) {
+    const nInj = rx.pump > 0 ? 4 : (rx.basal > 0 ? 1 : 0) + (rx.rapidM || []).filter((u) => u > 0).length;
+    if (a1c >= 10) return { ok: true, why: 'HbA1c ≥ 10 %' };
+    if (mg > 2.6) return { ok: true, why: 'hyperglycémie majeure symptomatique' };
+    if (a1c >= 9 && nInj >= 4) return { ok: true, why: 'échec du basal-bolus ambulatoire (HbA1c ≥ 9 % sous 4 injections)' };
+    return { ok: false, why: 'HbA1c ' + String(Math.round(a1c * 10) / 10).replace('.', ',') + ' %' + (nInj >= 4 ? ' sous basal-bolus (seuil : 9 %)' : ' (seuil : 10 %, ou 9 % après échec du basal-bolus)') + ', sans hyperglycémie majeure' };
+  }
+
+  // Sortie : relais de la pompe transitoire. Algorithme de sortie selon l'HbA1c d'entrée (Umpierrez, Diabetes Care
+  // 2014 : > 9 %, ADO + glargine ou basal-bolus à 80 % de la dose hospitalière ; 7–9 %, 50 %) ; relais sans insuline
+  // possible si les besoins sont faibles et le diabète récent (Weng 2008 ; insuline courte puis metformine et/ou
+  // linagliptine, essai chinois 2024 ; exénatide après insuline intensive : rémission 68 % contre 37 % à 1 an, Shi 2017).
+  const EXITS = [['auto', 'Selon le séjour (règle simulée du service)'], ['oral', 'ADO seuls, sans insuline'], ['glp', 'ADO + aGLP1, sans insuline'], ['basal', 'ADO + basale (80 % du débit de base)'], ['basalGlp', 'ADO + aGLP1 + basale (70 % du débit de base)'], ['bb', 'Basal-bolus (80 % des doses de la pompe)'], ['pump', 'Garder la pompe'], ['loop', 'Boucle fermée hybride']];
+  function exitPlan(pt, r, choice, c) {
+    const W = pt.st.W, last = r.last, tdd = last.basal24 + last.bol.reduce((a, x) => a + x, 0), ukg = tdd / W;
+    const bmi = W / Math.pow(c.height / 100, 2), glpOk = !c.panc && !c.mtc;
+    let k = choice || 'auto', why = '';
+    if (k === 'auto') {
+      // Au diagnostic (≤ 1 an), l'insuline intensive vise la levée de la glucotoxicité puis l'arrêt (Weng 2008 :
+      // arrêt après 2 semaines de normoglycémie, rémission 51 % à 1 an) : relais sans insuline sauf besoins très élevés.
+      if ((ukg < 0.45 && (c.duration || 0) <= 3) || (ukg < 1.2 && (c.duration || 0) <= 1)) { k = bmi >= 30 && glpOk ? 'glp' : 'oral'; why = 'besoins faibles (' + ukg.toFixed(2).replace('.', ',') + ' U/kg/j) et diabète récent : relais sans insuline, rémission possible'; }
+      else if (bmi >= 27 && glpOk) { k = 'basalGlp'; why = 'IMC ' + Math.round(bmi) + ' : aGLP1 + basale (moins d\'insuline, moins de poids, moins d\'hypoglycémies que les bolus)'; }
+      else { k = 'basal'; why = 'ADO + basale, les bolus seulement si la journée reste haute'; }
+    }
+    const b80 = Math.max(6, Math.round(0.8 * last.basal24 / 2) * 2), b70 = Math.max(6, Math.round(0.7 * last.basal24 / 2) * 2);
+    const plan = { kind: k, why, ukg, tdd, basal: 0, pump: 0, device: 'inj', rapidM: [0, 0, 0], glp: false, ins: true };
+    if (k === 'oral') plan.ins = false;
+    else if (k === 'glp') { plan.ins = false; plan.glp = true; }
+    else if (k === 'basal') plan.basal = b80;
+    else if (k === 'basalGlp') { plan.basal = b70; plan.glp = true; } // dose réduite : l'aGLP1 diminue les besoins (complément)
+    else if (k === 'bb') { plan.basal = b80; plan.rapidM = last.bol.map((u) => Math.round(u * 0.8)); }
+    else { plan.device = k; plan.pump = Math.round(last.basal24); plan.rapidM = last.bol.slice(); }
+    return plan;
+  }
+
+  S.dt2hosp = { run, DEFAULTS, TARGETS, CHECKS, EXITS, eligible, exitPlan };
 })();

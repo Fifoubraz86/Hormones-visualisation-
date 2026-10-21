@@ -797,8 +797,15 @@
     const o = d.hosp, pt = G.pt, W = pt.st.W;
     const sel = (id, label, val, opts, on) => h('div', { class: 'sv-field' }, [h('label', { for: id }, label), h('select', { id, onchange: (e) => { on(e.target.value); } }, opts.map(([k, t]) => h('option', { value: k, selected: String(val) === String(k) }, t)))]);
     const a1c = lastA1c();
+    const el = H.eligible(a1c, pt.rx, pt.st.MG);
+    if (!el.ok) return h('div', { class: 'sv-hospform' }, [
+      h('h3', null, 'Hospitalisation en diabétologie'),
+      S.toon('chef', { titre: 'Le chef de service a lu votre demande d\'hospitalisation.' }),
+      h('p', { class: 'sv-hospwhy', id: 'dtHospNo' }, 'Hospitalisation refusée : ' + el.why + '. À ce niveau, l\'intensification se fait en ambulatoire (aGLP1 ou tirzépatide, titration de la basale, bolus, éducation, capteur), en consultation ou en téléconsultation. Règle simulée du service : hospitalisation si HbA1c ≥ 10 %, hyperglycémie majeure symptomatique, ou échec du basal-bolus ambulatoire avec HbA1c ≥ 9 %.')
+    ]);
     return h('div', { class: 'sv-hospform' }, [
       h('h3', null, 'Hospitalisation en diabétologie'),
+      h('p', { class: 'sv-hospok' }, '✓ Admission acceptée : ' + el.why + '.'),
       h('p', { class: 'sv-muted' }, 'Insulinothérapie intensive transitoire par pompe (protocole du service) : débit de base contrôlé toutes les 4 h, augmenté de 20 à 30 % hors de la cible (− 20 % sous la cible, − 30 % et resucrage si hypoglycémie) ; bolus de départ par repas adaptés chaque jour selon le protocole d\'adaptation des doses. À la sortie, relais sous-cutané prérempli dans l\'ordonnance.'),
       a1c >= 10 ? h('p', { class: 'sv-hospwhy' }, 'HbA1c ' + fmt(a1c, 1) + ' % : glucotoxicité probable (sécrétion et sensibilité à l\'insuline freinées). La pompe ramène la glycémie en 4 à 6 jours et lève la glucotoxicité en 2 à 3 semaines, ce que la titration ambulatoire fait en plusieurs mois (Weng 2008 ; Kramer 2013 ; avis d\'expert dans le DT2 ancien).') : h('p', { class: 'sv-muted' }, 'HbA1c ' + fmt(a1c, 1) + ' % : l\'hospitalisation se discute surtout au-delà de 10 %, en cas de catabolisme, ou après un échec de l\'intensification ambulatoire.'),
       h('div', { class: 'sv-form' }, [
@@ -808,7 +815,8 @@
         sel('dtHTarget', 'Cible glycémique', o.target, Object.entries(H.TARGETS).map(([k, [a, b]]) => [k, fmt(a, 2) + '–' + fmt(b, 2) + ' g/L' + (k === 'b' ? ' (service)' : '')]), (v) => { o.target = v; }),
         sel('dtHBol', 'Bolus de départ', o.bolusKg, [[0.05, '0,05 U/kg/repas (' + Math.round(0.05 * W) + ' U)'], [0.1, '0,1 U/kg/repas (' + Math.round(0.1 * W) + ' U)'], [0.15, '0,15 U/kg/repas (' + Math.round(0.15 * W) + ' U)']], (v) => { o.bolusKg = +v; })
       ]),
-      sel('dtHExit', 'À la sortie', o.exit || 'inj', [['inj', 'Relais par stylos (basale = 80 % du débit de base)'], ['pump', 'Garder la pompe (débit de base inchangé)'], ['loop', 'Passer en boucle fermée hybride']], (v) => { o.exit = v; }),
+      h('div', { class: 'sv-form' }, [sel('dtHExit', 'Relais à la sortie', o.exit || 'auto', H.EXITS, (v) => { o.exit = v; })]),
+      h('p', { class: 'sv-note' }, 'Relais : ADO conservés (metformine, iSGLT2, iDPP4 ; sulfamide arrêté). « Selon le séjour » : sans insuline si les besoins sont faibles (< 0,45 U/kg/j, diabète ≤ 3 ans ; < 1,2 U/kg/j au diagnostic, l\'insuline intensive visant la levée de la glucotoxicité puis l\'arrêt) ; sinon aGLP1 + basale si IMC ≥ 27, ou basale seule. Basale de sortie = 80 % du débit de base des dernières 24 h (Umpierrez, Diabetes Care 2014), 70 % avec un aGLP1. Le basal-bolus n\'est qu\'un choix explicite.'),
       pt.rx.su ? h('label', { class: 'sv-check' }, [h('input', { type: 'checkbox', id: 'dtHSu', checked: o.stopSu, onchange: (e) => { o.stopSu = e.target.checked; } }), ' Arrêt du sulfamide à l\'entrée']) : null,
       h('label', { class: 'sv-check' }, [h('input', { type: 'checkbox', id: 'dtHCgm', checked: o.cgm, onchange: (e) => { o.cgm = e.target.checked; } }), ' Pose d\'un capteur de glucose, gardé à la sortie (≥ 3 injections/j : remboursé)']),
       h('div', { class: 'sv-actions' }, h('button', { type: 'button', class: 'sv-primary', id: 'dtHosp', onclick: hospitalise }, 'Hospitaliser →'))
@@ -826,14 +834,18 @@
       hours: r.hours.filter((x) => Math.abs(x.t % 0.5) < 1e-9).map((x) => ({ d: x.d, t: x.t, g: Math.round(x.g * 100) / 100, r: x.rate })),
       checks: r.checks.map((c) => ({ d: c.d, t: c.t, label: c.label, g: Math.round(c.g * 100) / 100, rate: c.rate, newRate: c.newRate, act: c.act })),
       days: r.days.map((x) => ({ d: x.d, mg: x.mg, min: x.min, max: x.max, basal24: x.basal24, bol: x.bol, hypo: x.hypo, bolLog: x.bolLog })) };
-    // Relais prérempli : basale = 80 % du débit de base des dernières 24 h, bolus atteints, protocole et capteur.
+    // Relais prérempli selon le plan de sortie (H.exitPlan) : ADO conservés, sulfamide arrêté, aGLP1 si prévu,
+    // basale à 80 % du débit de base, bolus seulement en basal-bolus ou sous pompe.
+    const plan = H.exitPlan(pt, r, o.exit, G.cfg);
+    hosp.plan = plan;
     if (o.stopSu) { pt.rx.su = 0; d.su = 0; }
-    d.device = o.exit || 'inj';
-    d.basal = d.device === 'inj' ? r.relay.basal : Math.round(r.last.basal24); d.rapidM = r.relay.rapidM.slice(); d.rapid = d.rapidM.reduce((a, x) => a + x, 0);
-    if (d.device === 'loop') o.cgm = true;
+    d.su = 0;
+    if (!(d.met > 0) && pt.st.dfg >= 30 && !G.cfg.metIntol) { d.met = 1000; d.metProg = true; }
+    if (plan.glp && d.glp === 'none') { d.glp = 'sema'; d.glpDose = D.GLP1.sema.doses[0]; }
+    d.device = plan.device; d.basal = plan.device === 'inj' ? plan.basal : plan.pump; d.rapidM = plan.rapidM.slice(); d.rapid = d.rapidM.reduce((a, x) => a + x, 0);
     if (d.basalType === 'nph') d.basalType = 'g100';
-    if (d.titr.who === 'none') d.titr.who = 'patient';
-    if (o.cgm) { d.cgm = true; d.asg = '0'; G.cgmAcquired = true; }
+    if (plan.ins) { if (d.titr.who === 'none') d.titr.who = 'patient'; if (o.cgm || plan.device === 'loop') { d.cgm = true; d.asg = '0'; G.cgmAcquired = true; } else if (d.asg === '0') d.asg = d.rapid > 0 ? '4' : '1'; }
+    else { d.titr.who = 'none'; d.cgm = false; d.asg = '0'; }
     d.mode = 'consult'; d.wait = 4; d.unit = 'sem';
     G.glyDays = []; G.titrState = { above: {} }; G.cgmStart = pt.day;
     G.lastHypo = pt.st.hypo; // hypoglycémies du séjour : dans le compte rendu, pas dans les plaintes
@@ -861,11 +873,27 @@
         h('tbody', null, x.days.map((q) => h('tr', { class: q.hypo ? 'sv-row-low' : '' }, [h('td', null, 'J' + (q.d + 1)), h('td', { class: 'sv-v' }, fmt(q.basal24, 0) + ' U/24 h'), h('td', { class: 'sv-v' }, q.bol.join(' / ')), h('td', { class: 'sv-v' }, g2(q.mg)), h('td', { class: 'sv-v' }, fmt(q.min, 2) + ' – ' + fmt(q.max, 2)), h('td', null, (q.hypo ? '⚠ hypoglycémie · ' : '') + (q.bolLog && q.bolLog.length ? q.bolLog.join(', ') : '—'))])))
       ])),
       h('div', { class: 'sv-relay' }, [
-        h('h4', null, (x.o.exit || 'inj') === 'inj' ? 'Relais sous-cutané (prérempli dans l\'ordonnance)' : x.o.exit === 'loop' ? 'Sortie en boucle fermée hybride (préremplie)' : 'Sortie sous pompe (préremplie)'),
-        h('p', null, ((x.o.exit || 'inj') === 'inj' ? 'Basale ' + x.relay.basal + ' U/j (80 % du débit de base des dernières 24 h, ' + fmt(last.basal24, 0) + ' U)' : 'Débit de base ' + Math.round(last.basal24) + ' U/24 h' + (x.o.exit === 'loop' ? ' au départ, puis ajusté par l\'algorithme' : '')) + ' · bolus ' + x.relay.rapidM.join(' / ') + ' U' + (x.o.cgm ? ' · capteur de glucose' : '') + ' · protocole d\'adaptation des doses par le patient.'),
-        h('p', { class: 'sv-muted' }, 'La glucotoxicité finit de se lever dans les 2 à 3 semaines qui suivent : les besoins en insuline baissent, attention aux hypoglycémies (revoir à 2–4 semaines, en téléconsultation avec le rapport du capteur si possible).')
+        h('h4', null, 'Relais de sortie (prérempli dans l\'ordonnance)'),
+        h('p', null, relayText(x)),
+        x.plan && x.plan.why ? h('p', { class: 'sv-muted' }, 'Choix automatique : ' + x.plan.why + '.') : null,
+        h('p', { class: 'sv-muted' }, 'Insuline des dernières 24 h sous pompe : ' + Math.round(x.plan ? x.plan.tdd : 0) + ' U (' + fmt(x.plan ? x.plan.ukg : 0, 2) + ' U/kg/j). La glucotoxicité finit de se lever dans les 2 à 3 semaines qui suivent : les besoins baissent, attention aux hypoglycémies ; revoir à 2–4 semaines (téléconsultation avec le rapport du capteur si possible).')
       ])
     ]);
+  }
+
+  function relayText(x) {
+    const p = x.plan;
+    if (!p) return 'Basale ' + x.relay.basal + ' U/j · bolus ' + x.relay.rapidM.join(' / ') + ' U.';
+    const ado = 'ADO conservés (sulfamide arrêté)';
+    return {
+      oral: ado + ', sans insuline : surveillance de l\'HbA1c ; insuline courte puis metformine et/ou iDPP4 (essai chinois, ACP Journal Club 2024), rémission possible au diagnostic (Weng 2008).',
+      glp: ado + ' + aGLP1 (sémaglutide par paliers), sans insuline : exénatide après insuline intensive, rémission 68 % contre 37 % à 1 an (Shi, Sci Rep 2017).',
+      basal: ado + ' + basale ' + p.basal + ' U/j (80 % du débit de base), titrée par le patient ; bolus seulement si la journée reste haute (Umpierrez 2014).',
+      basalGlp: ado + ' + aGLP1 (sémaglutide par paliers) + basale ' + p.basal + ' U/j (70 % du débit de base, réduite car l\'aGLP1 diminue les besoins), à baisser quand l\'aGLP1 monte (SFD 2025, avis 16 bis et 19).',
+      bb: 'Basal-bolus : basale ' + p.basal + ' U/j, bolus ' + p.rapidM.join(' / ') + ' U (80 % des doses de la pompe ; Umpierrez 2014 : 44 % d\'hypoglycémies avec ce schéma contre 25 à 30 % avec la basale).',
+      pump: 'Pompe gardée : débit de base ' + p.pump + ' U/24 h, bolus ' + p.rapidM.join(' / ') + ' U, protocole d\'adaptation.',
+      loop: 'Boucle fermée hybride : débit de base ' + p.pump + ' U/24 h au départ puis automatique, bolus ' + p.rapidM.join(' / ') + ' U.'
+    }[p.kind] + (x.o.cgm && p.ins ? ' Capteur de glucose gardé.' : '');
   }
 
   function kpi(label, value, sub, warn) {

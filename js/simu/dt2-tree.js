@@ -19,7 +19,7 @@
     const ger = c.age >= 75 ? c.geria || 'bonne' : null;
     const onIns = rx.basal + rx.rapid > 0;
     const n = (rx.met > 0) + (rx.su > 0) + (rx.dpp4 > 0) + (rx.sglt2 !== 'none') + (rx.glp !== 'none') + (rx.acarb > 0);
-    return { c, rx, dfg, a1c, T, ger, onIns, n, bmi: pt.st.W / Math.pow(c.height / 100, 2), cv: c.cvd || c.hcvr, hf: c.hfail, ckd: dfg < 60 || c.alb !== 'normo', fpg: S.dt2.fpgOf(pt), W: pt.st.W };
+    return { c, rx, dfg, a1c, T, ger, onIns, n, mg: pt.st.MG, bmi: pt.st.W / Math.pow(c.height / 100, 2), cv: c.cvd || c.hcvr, hf: c.hfail, ckd: dfg < 60 || c.alb !== 'normo', fpg: S.dt2.fpgOf(pt), W: pt.st.W };
   }
 
   // Catalogue d'options : disponible ? classement SFD (rang, raison, avis) ; modification de l'ordonnance.
@@ -67,7 +67,7 @@
       rate: (x) => (x.a1c >= 10 ? [2, 'intensification ambulatoire : efficace mais lente tant que la glucotoxicité persiste', 'avis 8 bis et 19'] : x.rx.glp === 'none' ? [3, 'l\'aGLP1 ou un seul bolus d\'abord', 'avis 19'] : [2, 'après basale + aGLP1 si la journée reste haute', 'avis 19']),
       apply: (rx, sim) => { if (!(rx.basal > 0)) rx.basal = 10; rx.su = 0; rx.rapidM = [4, 4, 4]; rx.rapid = 12; sim.titr = true; } },
     // Hospitalisation : pompe transitoire (protocole du service, js/simu/dt2-hosp.js), puis relais basal-bolus titré.
-    { id: 'hosp', name: 'Hospitaliser : pompe à insuline 7 jours, puis relais basal-bolus titré', ok: (x) => x.a1c >= 9.5,
+    { id: 'hosp', name: 'Hospitaliser : pompe à insuline 7 jours, puis relais selon le séjour (ADO ± aGLP1 ± basale)', ok: (x) => S.dt2hosp && S.dt2hosp.eligible(x.a1c, x.rx, x.mg).ok,
       rate: (x) => (x.a1c >= 10 && (x.onIns || x.n >= 2) ? [1, 'déséquilibre majeur malgré le traitement : la pompe lève la glucotoxicité en quelques jours (avis d\'expert dans le DT2 ancien)', 'avis 8 bis ; Weng 2008, Kramer 2013'] : x.a1c >= 10 || x.cat ? [2, 'déséquilibre majeur : intensification rapide, rémission possible au diagnostic', 'avis 8 bis ; Weng 2008, Kramer 2013'] : [3, 'possible, mais l\'intensification ambulatoire suffit souvent sous 10 %', 'avis 8 bis']),
       apply: (rx, sim) => { sim.hosp = true; sim.titr = true; } }
   ];
@@ -86,7 +86,11 @@
     let above = 0, d0 = 0;
     if (sim.hosp && S.dt2hosp) {
       const r = S.dt2hosp.run(cp, D, S.glyco, { days: 7 }, 4242);
-      cp.rx.basal = r.relay.basal; cp.rx.rapidM = r.relay.rapidM.slice(); cp.rx.rapid = cp.rx.rapidM.reduce((a, u) => a + u, 0); cp.rx.su = 0;
+      const plan = S.dt2hosp.exitPlan(cp, r, 'auto', x.c);
+      cp.rx.su = 0; if (!(cp.rx.met > 0) && x.dfg >= 30) cp.rx.met = 1000;
+      cp.rx.basal = plan.basal; cp.rx.rapidM = plan.rapidM.slice(); cp.rx.rapid = cp.rx.rapidM.reduce((a, u) => a + u, 0);
+      if (plan.glp && cp.rx.glp === 'none') { cp.rx.glp = 'sema'; cp.rx.dpp4 = 0; sim.plan = [0.25, 0.5, 1]; }
+      sim.titr = plan.ins; sim.exit = plan.kind;
       d0 = 7;
     }
     for (let d = d0; d < days; d++) {

@@ -110,6 +110,19 @@
     hepat: () => `${guy(90, 56, { skin: '#ffd84a', mouth: 'flat' })}<text x="120" y="50" class="tn-small">un peu jaune,</text><text x="120" y="64" class="tn-small">non ?</text>`,
     rash: () => `${guy(90, 56, { mouth: 'wavy' })}${[[80, 48], [100, 44], [86, 66], [104, 62], [74, 60]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3" fill="#ff5a7a"/>`).join('')}<text x="120" y="96" class="tn-small">ça gratte</text>`,
     crise: () => `${guy(80, 46, { mouth: 'o' })}${body(80, 46)}<rect x="140" y="30" width="12" height="70" rx="6" fill="#ffffff" class="tn-o"/><circle cx="146" cy="104" r="10" fill="#ff5a5a" class="tn-o"/><rect x="143" y="36" width="6" height="64" fill="#ff5a5a"/><text x="120" y="134" class="tn-small">41 °C</text>`,
+    // Chef de service (personnage inventé) : blouse, lunettes, bras croisés, refus.
+    chef: () => `
+      <rect x="0" y="128" width="220" height="22" class="tn-ground"/>
+      ${guy(70, 40, { mouth: 'flat' })}
+      <path d="M58,36 h9 M73,36 h9" class="tn-l"/><circle cx="62" cy="38" r="5" fill="none" class="tn-l"/><circle cx="78" cy="38" r="5" fill="none" class="tn-l"/>
+      <path d="M52,58 h36 l6,60 h-48 z" fill="#ffffff" class="tn-o"/><path d="M70,58 v60" class="tn-l"/>
+      <path d="M52,76 q18,10 36,0 M52,82 q18,10 36,0" class="tn-l tn-w"/>
+      <path d="M62,58 q-4,18 6,22" fill="none" stroke="#5a7bb5" stroke-width="2"/>
+      <path d="M62,118 v10 M78,118 v10" class="tn-l tn-w"/>
+      <path d="M104,18 h104 a8,8 0 0 1 8,8 v38 a8,8 0 0 1 -8,8 h-82 l-14,12 l2,-12 h-10 a8,8 0 0 1 -8,-8 v-38 a8,8 0 0 1 8,-8 z" fill="#ffffff" class="tn-o"/>
+      <text x="156" y="40" class="tn-big" text-anchor="middle">NON.</text>
+      <text x="158" y="58" class="tn-small" text-anchor="middle">lits pleins à 112 %</text>
+      <text x="150" y="104" class="tn-small" text-anchor="middle">« L'ambulatoire, vous</text><text x="150" y="118" class="tn-small" text-anchor="middle">connaissez ? »</text>`,
     trophy: () => `
       <path d="M80,30 h60 v20 a30,30 0 0 1 -60,0 z" fill="#ffd34a" class="tn-o"/><path d="M80,36 h-14 a12,12 0 0 0 14,20 M140,36 h14 a12,12 0 0 1 -14,20" class="tn-l"/>
       <rect x="104" y="78" width="12" height="20" fill="#ffd34a" class="tn-o"/><rect x="88" y="98" width="44" height="12" rx="2" fill="#c8a02a" class="tn-o"/>
