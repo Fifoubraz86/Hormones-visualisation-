@@ -375,7 +375,7 @@
         /* ---- Horloge et niveaux ---- */
         let clockHand = null, clockTxt = null, cycleMark = null, cycleTxt = null;
         if (ax.clock === 'day') {
-          const cg = a.el('g', { class: 'clock', transform: `translate(${ax.clockX || 790} 92)`, 'data-info': ax.id + '.clock' });
+          const cg = a.el('g', { class: 'clock', transform: `translate(${ax.clockX || Math.max(790, 60 + ax.name.length * 28 + 90)} 92)`, 'data-info': ax.id + '.clock' });
           HV.INFO[ax.id + '.clock'] = { t: 'Horloge simulée', k: '24 h en 48 s', d: ax.clockInfo || 'Le temps de la scène défile pour montrer les variations rythmiques de sécrétion.', live: () => String(Math.floor(T.h)).padStart(2, '0') + ' h' };
           a.el('circle', { r: 44, class: 'clock-face' }, cg);
           for (let i = 0; i < 24; i += 3) {

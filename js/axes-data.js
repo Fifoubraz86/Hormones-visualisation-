@@ -87,7 +87,7 @@
       { id: 'liver', x: 1330, y: 240, organ: 'liver', s: 0.9, label: 'Foie', sub: 'néoglucogenèse', color: 'p-gold' },
       { id: 'muscle', x: 1330, y: 440, organ: 'muscle', s: 0.9, label: 'Muscle', sub: 'catabolisme protidique', color: 'p-gold' },
       { id: 'fat', x: 1330, y: 640, organ: 'fat', s: 0.9, label: 'Tissu adipeux', sub: 'lipogenèse viscérale', color: 'p-gold' },
-      { id: 'inflam', x: 230, y: 735, label: 'Inflammation', sub: 'cytokines', color: 'bad', info: 'Certaines molécules de la réponse inflammatoire augmentent la sécrétion d\'ACTH : l\'axe interagit avec le système immunitaire.' },
+      { id: 'inflam', x: 200, y: 795, label: 'Inflammation', color: 'bad', info: 'Certaines molécules de la réponse inflammatoire augmentent la sécrétion d\'ACTH : l\'axe interagit avec le système immunitaire.' },
       { id: 'andro', x: 930, y: 760, label: 'Androgènes surrénaliens', w: 280, sub: ['SDHEA, androstènedione', 'pas de rétrocontrôle'], color: 'p-sky', info: 'Les androgènes surrénaliens (DHEA, SDHEA, androstènedione) dépendent de l\'ACTH (polycopié p. 73) mais ne freinent pas l\'axe (complément). Ils baissent dans toutes les insuffisances surrénales et dans l\'adénome cortisolique ; ils augmentent dans le bloc en 21-hydroxylase.' }
     ],
     links: [
@@ -96,7 +96,7 @@
       { from: 'adr', to: 'liver', mol: 'cortisol', mod: R.circadian, rate: 1 },
       { from: 'adr', to: 'muscle', mol: 'cortisol', mod: R.circadian, rate: 1, label: '' },
       { from: 'adr', to: 'fat', mol: 'cortisol', mod: R.circadian, rate: 1, label: '' },
-      { from: 'adr', to: 'pit', kind: 'inhib', mol: 'cortisol', bend: -110, mod: R.circadian, rate: 0.9, label: 'cortisol −' },
+      { from: 'adr', to: 'pit', kind: 'inhib', mol: 'cortisol', bend: -110, mod: R.circadian, rate: 0.9, label: 'cortisol −', labelAt: 0.32 },
       { from: 'adr', to: 'hypo', kind: 'inhib', mol: 'cortisol', bend: -230, mod: R.circadian, rate: 0.9, label: '' },
       { from: 'inflam', to: 'pit', kind: 'stim', color: 'bad', info: 'cortico.inflam', label: 'cytokines' },
       { from: 'adr', to: 'andro', mol: 'dhea', rate: 1 }
@@ -134,7 +134,7 @@
       { from: 'pit', to: 'liver', kind: 'stim', mol: 'gh', mod: R.ghNight, rate: 2.2 },
       { from: 'liver', to: 'bone', mol: 'igf1' },
       { from: 'liver', to: 'muscle', mol: 'igf1', label: '' },
-      { from: 'liver', to: 'pit', kind: 'inhib', mol: 'igf1', bend: -120, rate: 0.9, label: 'IGF-1 −' },
+      { from: 'liver', to: 'pit', kind: 'inhib', mol: 'igf1', bend: -120, rate: 0.9, label: 'IGF-1 −', labelAt: 0.32 },
       { from: 'liver', to: 'hypo', kind: 'inhib', mol: 'igf1', bend: -240, rate: 0.9, label: '' },
       { from: 'hypog', to: 'pit', kind: 'stim', color: 'p-lime', label: '' },
       { from: 'hgpo', to: 'pit', kind: 'inhib', color: 'p-lime', label: '' }
@@ -200,7 +200,7 @@
       { from: 'post', to: 'vessel', kind: 'stim', mol: 'adh', bend: 60, rate: 0.5, label: '' },
       { from: 'baro', to: 'hypo', kind: 'stim', color: 'p-red', bend: -40, label: '' },
       { from: 'cort', to: 'hypo', kind: 'inhib', mol: 'cortisol', bend: -80, rate: 0.5, label: '' },
-      { from: 'post', to: 'uterus', kind: 'stim', mol: 'oxy', bend: 30, rate: 0.9, label: 'ocytocine' },
+      { from: 'post', to: 'uterus', kind: 'stim', mol: 'oxy', bend: 30, rate: 0.9, label: 'ocytocine', labelAt: 0.75 },
       { from: 'post', to: 'breast', kind: 'stim', mol: 'oxy', bend: 60, rate: 0.7, label: '' },
       { from: 'suck', to: 'hypo', kind: 'stim', color: 'p-rose', bend: -60, label: '' },
       { from: 'cervix', to: 'hypo', kind: 'stim', color: 'p-rose', bend: -110, label: '' },
@@ -331,7 +331,7 @@
       { from: 'para', to: 'kidney', kind: 'stim', mol: 'pth', mod: pthLvl },
       { from: 'para', to: 'bone', kind: 'stim', mol: 'pth', mod: pthLvl, label: '' },
       { from: 'kidney', to: 'gut', kind: 'stim', mol: 'calcitriol', mod: pthLvl },
-      { from: 'kidney', to: 'ca', mol: 'ca', bend: -150, label: 'réabsorption', rate: 1 },
+      { from: 'kidney', to: 'ca', mol: 'ca', bend: -150, label: 'réabsorption', labelAt: 0.3, rate: 1 },
       { from: 'bone', to: 'ca', mol: 'ca', bend: 150, label: 'libération', labelAt: 0.6, mod: pthLvl, rate: 1 },
       { from: 'gut', to: 'ca', mol: 'ca', bend: -480, label: 'absorption', rate: 0.9 },
       { from: 'ccell', to: 'bone', kind: 'inhib', mol: 'calcitonin', rate: 0.6, label: 'calcitonine (− résorption)' }
