@@ -16,7 +16,7 @@
   const CV_GLP = (rx) => (rx.glp === 'lira' && rx.glpDose >= 1.8) || (rx.glp === 'dula' && rx.glpDose >= 1.5) || (rx.glp === 'sema' && rx.glpDose >= 1) || (rx.glp === 'tirz' && rx.glpDose >= 15);
   const ISGLT2 = (rx) => rx.sglt2 && rx.sglt2 !== 'none';
   const GLP = (rx) => rx.glp && rx.glp !== 'none';
-  const INS = (rx) => (rx.basal || 0) + (rx.rapid || 0) > 0;
+  const INS = (rx) => (rx.basal || 0) + (rx.pump || 0) + (rx.rapid || 0) > 0;
 
   function bmiOf(c, W) { return (W || c.weight) / Math.pow(c.height / 100, 2); }
   function ckd(c, dfg) { return dfg < 60 || c.alb !== 'normo'; }
@@ -69,7 +69,7 @@
   function monitoring(rx, asg, cgm, a1c, acquired) {
     const out = [];
     if (cgm) {
-      const nInj = (rx.basal > 0 ? 1 : 0) + (rx.rapidM || []).filter((x) => x > 0).length;
+      const nInj = rx.pump > 0 || (rx.device && rx.device !== 'inj') ? 3 : (rx.basal > 0 ? 1 : 0) + (rx.rapidM || []).filter((x) => x > 0).length; // pompe : comme ≥ 3 injections
       if (!INS(rx)) out.push('Capteur de glucose : pris en charge seulement sous insuline (HAS, LPPR). Sans insuline, il n\'est pas remboursé.');
       else if (nInj < 3 && !(a1c > 8) && !acquired) out.push('Capteur de glucose : sous insuline en moins de 3 injections par jour (basale seule comprise), remboursé seulement si l\'HbA1c est > 8 % ; dernière HbA1c ' + (a1c != null ? fmt(a1c, 1) + ' %' : 'inconnue') + ', et pas d\'HbA1c > 8 % sous insuline jusqu\'ici (sinon l\'indication serait acquise). À 3 injections par jour ou plus, sans condition d\'HbA1c.');
     }
@@ -156,7 +156,10 @@
       if (rx.basal > 0 && st.titr && st.titr.who === 'none') add('warn', 'Insuline basale sans protocole de titration : prévoir l\'adaptation des doses (tous les 3 jours sur la glycémie au réveil, cible 0,80–1,30 g/L pour une HbA1c < 7 %).', 'avis 18');
       if (rx.basal > 0 && rx.basal / W <= 0.5 && above && st.fpg != null && st.fpg <= 1.3) add('tip', 'HbA1c au-dessus de la cible malgré une glycémie au réveil dans la cible (' + fmt(st.fpg, 2) + ' g/L) : la basale est titrée, c\'est la journée qui pèche. Avis diabétologique souhaitable ; garder la metformine et ajouter un aGLP1 ou le tirzépatide (préféré), un antidiabétique oral (iSGLT2, puis iDPP4, puis SU), ou un bolus au repas le plus hyperglycémiant.', 'avis 19');
       if (rx.basal / W > 0.5 && above) add('warn', 'Basale > 0,5 U/kg/j (' + fmt(rx.basal / W, 2) + ') et HbA1c au-dessus de la cible : avis diabétologique ; ne pas monter davantage la basale ; ajouter un aGLP1 ou le tirzépatide (préféré à l\'insulinothérapie intensifiée), un antidiabétique oral, ou des bolus.', 'avis 19');
-      if ((rx.basal + rx.rapid) / W > 1) add('warn', 'Insuline totale > 1 U/kg/j (' + fmt((rx.basal + rx.rapid) / W, 2) + ') : avis diabétologique ; rechercher une sur-insulinisation (hypoglycémies, prise de poids), privilégier aGLP1 ou tirzépatide, mesures hygiéno-diététiques, vérifier les sites d\'injection (lipodystrophies).', 'avis 19');
+      const nInj = (rx.basal > 0 ? 1 : 0) + (rx.rapidM || []).filter((u) => u > 0).length;
+      if (!(rx.pump > 0) && nInj >= 4 && above && a1c != null && a1c > 8) add('tip', 'Échec du basal-bolus (HbA1c ' + fmt(a1c, 1) + ' % sous 4 injections par jour) : après vérification de l\'observance, des techniques d\'injection et de l\'éducation, pompe à insuline à discuter en centre initiateur (OpT2mise, Lancet 2014 : HbA1c − 1,1 contre − 0,4 sous multi-injections, 20 % d\'insuline en moins), voire boucle fermée hybride (2IQP, NEJM 2025 : − 0,9 contre − 0,3 ; prise en charge dans le DT2 à vérifier). Si l\'HbA1c dépasse 10 %, une hospitalisation pour pompe transitoire est une autre voie.', 'complément');
+      if (rx.pump > 0 && !st.cgm) add('tip', 'Sous pompe, le capteur de glucose est fortement recommandé (et indispensable en boucle fermée).', 'avis 23');
+      if ((rx.basal + (rx.pump || 0) + rx.rapid) / W > 1) add('warn', 'Insuline totale > 1 U/kg/j (' + fmt((rx.basal + (rx.pump || 0) + rx.rapid) / W, 2) + ') : avis diabétologique ; rechercher une sur-insulinisation (hypoglycémies, prise de poids), privilégier aGLP1 ou tirzépatide, mesures hygiéno-diététiques, vérifier les sites d\'injection (lipodystrophies).', 'avis 19');
       if (rx.rapid > 0 && !GLP(rx)) add('tip', 'Avant les bolus, l\'ajout d\'un aGLP1 ou du tirzépatide à la basale est préféré dans la majorité des cas (efficacité comparable, moins d\'hypoglycémies et de prise de poids).', 'avis 19');
     }
 

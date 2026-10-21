@@ -45,7 +45,8 @@
     gtox: 0.3,      // glucotoxicité : levée d'autant plus marquée que l'HbA1c initiale est haute [base-a1c]
     gir: 0.5,       // glucotoxicité sur la sensibilité à l'insuline (Garvey 1985 ; Kramer 2013, HOMA-IR − 43 %, complément)
     gtTau: 7,       // constante de temps (j) de la glucotoxicité : levée en 2 à 3 semaines de normoglycémie
-    gtHi: 2.4,      // levée nulle au-dessus de cette glycémie moyenne, pleine vitesse sous 1,4 g/L [base-a1c]
+    loopK: 0.1,     // boucle fermée : part d'insuline ajoutée en corrections automatiques [2IQP]
+    gtHi: 2.2,      // levée nulle au-dessus de cette glycémie moyenne, pleine vitesse sous 1,4 g/L [base-a1c]
     glpSec: 0.1,    // part sécrétoire des aGLP1 (glucodépendante, liée à la réserve) [sema-1, lira-18]
     glpX: 0.5,      // part non sécrétoire [sema5]
     glpW: 0.055     // perte de poids sous aGLP1 à dose pleine (fraction du poids) [sema-1-w]
@@ -121,7 +122,9 @@
     // Insuline injectée. La basale freine surtout la production hépatique de glucose : au-delà des besoins,
     // son effet sature (sur-basalisation, SFD 2025 avis 19) ; les bolus couvrent les repas.
     const iexB = rx.basal * a / (P.insK * pt.par.weight0), iexR = (rx.rapid + (rx.pump || 0)) * a / (P.insK * pt.par.weight0); // pompe : débit de base non saturé
-    const iex = P.bCap * (1 - Math.exp(-iexB / P.bCap)) + iexR, iexRaw = iexB + iexR;
+    // Boucle fermée : corrections automatiques quand la glycémie monte (2IQP, NEJM 2025 : HbA1c − 0,9 contre − 0,3).
+    const iexL = rx.device === 'loop' && rx.pump > 0 ? P.loopK * (iexB + iexR) * clamp((MG - 1.1) / 0.8, 0, 1) : 0;
+    const iex = P.bCap * (1 - Math.exp(-iexB / P.bCap)) + iexR + iexL, iexRaw = iexB + iexR;
     const eSu = su > 0 ? P.su * Math.pow(Math.min(su, 120) / 120, P.suExp) * (p.suBoost || 1) * br / (1 + P.suIns * Math.min(1.5, iexB + iexR)) : 0;
     const eDpp = (rx.dpp4 > 0 ? P.dpp * Math.min(1, rx.dpp4 * a / 100) * p.incr : 0) * gd * br;
     const eGlp = (take.glp ? P.glpSec * glpFrac(rx) * a * p.incr * p.glpResp : 0) * gd * br;
@@ -251,8 +254,8 @@
     // Hypoglycémies : insulinosécréteurs et insuline, d'autant plus que la glycémie moyenne est basse.
     const e = effects(pt, s.MG);
     // Analogues d'action très prolongée (glargine U300, dégludec) : moins d'hypoglycémies nocturnes ; NPH : plus (SFD 2025, avis 18 bis).
-    const insF = { g300: 0.7, deg: 0.7, nph: 1.4 }[pt.rx.basalType] || 1;
-    const expo = 0.05 * e.eSu * (p.suBoost > 1 ? 2 : 1) * (s.dfg < 45 ? 1.8 : 1) + 0.17 * e.iexRaw * (pt.rx.rapid > 0 ? 1 : insF);
+    const insF = pt.rx.device === 'loop' ? 0.5 : pt.rx.pump > 0 ? 0.8 : { g300: 0.7, deg: 0.7, nph: 1.4 }[pt.rx.basalType] || 1;
+    const expo = 0.05 * e.eSu * (p.suBoost > 1 ? 2 : 1) * (s.dfg < 45 ? 1.8 : 1) + 0.17 * e.iexRaw * (pt.rx.pump > 0 || pt.rx.rapid === 0 ? insF : 1);
     // Travail posté : horaires de repas et de sommeil décalés ; alternance : risque d'hypoglycémie × 1,6.
     const risk = (p.age >= 75 ? 2 : 1) * (p.irregular ? 2 : 1) * ({ nuit: 1.2, '2x8': 1.4, '3x8': 1.6 }[p.work] || 1);
     const lam = expo * risk * Math.exp(-(s.MG - 1.15) / 0.17);
@@ -286,7 +289,7 @@
 
   function record(pt) {
     const s = pt.st;
-    pt.log.push({ day: pt.day, a1c: s.A, mg: s.MG, fpg: fpgOf(pt), w: s.W, dfg: s.dfg, met: pt.rx.met, su: pt.rx.su, ins: pt.rx.basal + pt.rx.rapid, glp: glpFrac(pt.rx) });
+    pt.log.push({ day: pt.day, a1c: s.A, mg: s.MG, fpg: fpgOf(pt), w: s.W, dfg: s.dfg, met: pt.rx.met, su: pt.rx.su, ins: pt.rx.basal + (pt.rx.pump || 0) + pt.rx.rapid, glp: glpFrac(pt.rx) });
   }
 
   function advance(pt, days, onDay, rng) {

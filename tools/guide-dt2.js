@@ -10,7 +10,7 @@ const path = require('path');
 const vm = require('vm');
 const ctx = { window: {}, Math, console };
 vm.createContext(ctx);
-for (const f of ['dt2-ref.js', 'dt2-model.js', 'glyco.js', 'sfd.js', 'dt2-tree.js', 'dt2-guide.js']) vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'js', 'simu', f), 'utf8'), ctx);
+for (const f of ['dt2-ref.js', 'dt2-model.js', 'glyco.js', 'sfd.js', 'dt2-tree.js', 'dt2-hosp.js', 'dt2-guide.js']) vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'js', 'simu', f), 'utf8'), ctx);
 const S = ctx.window.HV.simu, D = S.dt2, TR = S.dt2tree, GU = S.dt2guide;
 const fr = (x, d = 1) => x.toFixed(d).replace('.', ',');
 const sg = (x) => (x >= 0 ? '+' : '−') + fr(Math.abs(x));

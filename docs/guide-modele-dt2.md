@@ -107,13 +107,13 @@ Cible SFD : HbA1c ≤ 7,0 %.
 | Rang | Option | Pourquoi (SFD 2025) | HbA1c à 6 mois | Poids | Hypoglycémies | Puis (à 12 mois) |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 · recommandé | Metformine progressive + sémaglutide d'emblée | obésité ou MASLD : bithérapie d'emblée, quel que soit l'HbA1c (avis 8, 11, 14, 15) | 5,8 % | −5,6 kg | 0 | — |
-| 1 · recommandé | Metformine progressive + iSGLT2 d'emblée | HbA1c ≥ 8,5 % : bithérapie d'emblée possible (avis 8 bis) | 6,4 % | −3,1 kg | 0 | — |
-| 1 · recommandé | Metformine progressive jusqu'à 2 g/j | première intention médicamenteuse, doses progressives (avis 8 et 9) | 7,1 % | −0,9 kg | 0 | Ajouter un iSGLT2 (empagliflozine 10 mg) → 6,4 %, −3,2 kg |
+| 1 · recommandé | Metformine progressive jusqu'à 2 g/j | première intention médicamenteuse, doses progressives (avis 8 et 9) | 7,2 % | −0,9 kg | 0 | Ajouter un iSGLT2 (empagliflozine 10 mg) → 6,4 %, −3,2 kg |
 | 3 · possible, moins bon | Ajouter ou passer au tirzépatide (paliers jusqu'à 10 mg/sem) | sans metformine, alors qu'elle est possible : l'associer plutôt (monothérapie réservée à l'intolérance ou à la contre-indication) ; le plus efficace sur l'HbA1c et le poids (non remboursé en 2025) (avis 8 et 20 ; avis 6 bis, 10, 14) | 5,9 % | −8,1 kg | 0 | — |
 | 3 · possible, moins bon | Ajouter le sémaglutide (paliers jusqu'à 1 mg/sem) | sans metformine, alors qu'elle est possible : l'associer plutôt (monothérapie réservée à l'intolérance ou à la contre-indication) ; obésité, HbA1c > cible + 1 point (avis 8 et 20 ; avis 10, 11, 14, 19) | 6,3 % | −4,7 kg | 0 | — |
+| 3 · possible, moins bon | Metformine progressive + iSGLT2 d'emblée | bithérapie d'emblée sans indication particulière (avis 8) | 6,4 % | −3,1 kg | 0 | — |
 | 3 · possible, moins bon | Ajouter un sulfamide (gliclazide LM 60 mg) | sans metformine, alors qu'elle est possible : l'associer plutôt (monothérapie réservée à l'intolérance ou à la contre-indication) ; troisième rang : hypoglycémies, prise de poids (avis 8 et 20 ; avis 10) | 7,1 % | +1,1 kg | 0 | — |
 | 3 · possible, moins bon | Ajouter un iSGLT2 (empagliflozine 10 mg) | sans metformine, alors qu'elle est possible : l'associer plutôt (monothérapie réservée à l'intolérance ou à la contre-indication) ; option orale, effet modéré sur l'HbA1c (avis 8 et 20 ; avis 16 et 19) | 7,3 % | −2,2 kg | 0 | — |
-| 3 · possible, moins bon | Instaurer une insuline basale (10 U, titrée) | sans metformine, alors qu'elle est possible : l'associer plutôt (monothérapie réservée à l'intolérance ou à la contre-indication) ; moins appropriée à ce stade qu'un aGLP1 ou une trithérapie orale (avis 8 et 20 ; avis 16) | 7,5 % | +1,2 kg | 0 | — |
+| 3 · possible, moins bon | Instaurer une insuline basale (10 U, titrée) | sans metformine, alors qu'elle est possible : l'associer plutôt (monothérapie réservée à l'intolérance ou à la contre-indication) ; moins appropriée à ce stade qu'un aGLP1 ou une trithérapie orale (avis 8 et 20 ; avis 16) | 7,5 % | +1,3 kg | 0 | — |
 | 3 · possible, moins bon | Ajouter un iDPP4 (sitagliptine) | sans metformine, alors qu'elle est possible : l'associer plutôt (monothérapie réservée à l'intolérance ou à la contre-indication) ; deuxième rang après iSGLT2 et aGLP1 ; meilleure tolérance (avis 8 et 20 ; avis 10) | 7,7 % | +0,0 kg | 0 | — |
 | 4 · à éviter | Renforcer les mesures hygiéno-diététiques seules | seules, insuffisantes si l'HbA1c est à plus d'un point de la cible (à associer) (avis 4 et 8) | 6,5 % | −6,1 kg | 0 | — |
 | 5 · erreur | Ne rien changer | HbA1c au-dessus de la cible : inertie thérapeutique (avis 5) | 8,5 % | +0,0 kg | 0 | — |
@@ -143,7 +143,7 @@ Cible SFD : HbA1c ≤ 7,0 %.
 | 1 · recommandé | Ajouter un iSGLT2 (empagliflozine 10 mg) | protection cardiaque et rénale, quel que soit l'HbA1c (avis 12 ter et 13) | 7,7 % | −2,1 kg | 0 | Ajouter le sémaglutide (paliers jusqu'à 1 mg/sem) → 6,5 %, −6,6 kg |
 | 2 · acceptable | Ajouter ou passer au tirzépatide (paliers jusqu'à 10 mg/sem) | insuffisance cardiaque ou maladie rénale : l'iSGLT2 d'abord (avis 12 ter et 13) | 6,3 % | −7,5 kg | 0 | — |
 | 2 · acceptable | Ajouter le sémaglutide (paliers jusqu'à 1 mg/sem) | insuffisance cardiaque ou maladie rénale : l'iSGLT2 d'abord, l'aGLP1 ensuite ou en cas d'intolérance (avis 12 ter et 13) | 6,7 % | −4,3 kg | 0 | — |
-| 3 · possible, moins bon | Instaurer une insuline basale (10 U, titrée) | moins appropriée à ce stade qu'un aGLP1 ou une trithérapie orale (avis 16) | 7,1 % | +0,9 kg | 0 | — |
+| 3 · possible, moins bon | Instaurer une insuline basale (10 U, titrée) | moins appropriée à ce stade qu'un aGLP1 ou une trithérapie orale (avis 16) | 7,2 % | +0,9 kg | 0 | — |
 | 3 · possible, moins bon | Ajouter un iDPP4 (sitagliptine) | moins bon qu'un iSGLT2 ou un aGLP1 à bénéfice démontré (avis 11 à 13) | 7,6 % | +0,0 kg | 0 | — |
 | 4 · à éviter | Ajouter un sulfamide (gliclazide LM 60 mg) | patient à risque d'hypoglycémie (avis 16) | 7,1 % | +1,0 kg | 0 | — |
 | 4 · à éviter | Renforcer les mesures hygiéno-diététiques seules | seules, insuffisantes si l'HbA1c est à plus d'un point de la cible (à associer) (avis 4 et 8) | 7,7 % | −5,6 kg | 0 | — |
@@ -155,12 +155,12 @@ Cible SFD : HbA1c ≤ 7,0 %.
 
 | Rang | Option | Pourquoi (SFD 2025) | HbA1c à 6 mois | Poids | Hypoglycémies | Puis (à 12 mois) |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 · recommandé | Ajouter ou passer au tirzépatide (paliers jusqu'à 10 mg/sem) | le plus efficace sur l'HbA1c et le poids (non remboursé en 2025) (avis 6 bis, 10, 14) | 6,7 % | −7,7 kg | 0 | — |
-| 1 · recommandé | Ajouter le sémaglutide (paliers jusqu'à 1 mg/sem) | obésité, HbA1c > cible + 1 point (avis 10, 11, 14, 19) | 7,4 % | −4,5 kg | 0 | Ajouter ou passer au tirzépatide (paliers jusqu'à 10 mg/sem) → 6,7 %, −8,1 kg |
-| 2 · acceptable | Instaurer une insuline basale (10 U, titrée) | après échec de la trithérapie ou de l'aGLP1, en gardant la metformine (avis 16 bis et 17) | 7,6 % | −0,8 kg | 0 | Ajouter un iSGLT2 (empagliflozine 10 mg) → 7,2 %, −3,0 kg |
-| 2 · acceptable | Ajouter un iSGLT2 (empagliflozine 10 mg) | option orale, effet modéré sur l'HbA1c (avis 16 et 19) | 8,6 % | −2,1 kg | 0 | — |
-| 4 · à éviter | Renforcer les mesures hygiéno-diététiques seules | seules, insuffisantes si l'HbA1c est à plus d'un point de la cible (à associer) (avis 4 et 8) | 8,6 % | −5,8 kg | 0 | — |
-| 4 · à éviter | Monter la metformine à 3 g/j | n'apporte que peu par rapport à 2 g/j, plus de troubles digestifs (avis 8) | 9,3 % | +0,0 kg | 0 | — |
+| 1 · recommandé | Ajouter ou passer au tirzépatide (paliers jusqu'à 10 mg/sem) | le plus efficace sur l'HbA1c et le poids (non remboursé en 2025) (avis 6 bis, 10, 14) | 6,6 % | −7,7 kg | 0 | — |
+| 1 · recommandé | Ajouter le sémaglutide (paliers jusqu'à 1 mg/sem) | obésité, HbA1c > cible + 1 point (avis 10, 11, 14, 19) | 7,3 % | −4,5 kg | 0 | Ajouter ou passer au tirzépatide (paliers jusqu'à 10 mg/sem) → 6,6 %, −8,1 kg |
+| 2 · acceptable | Instaurer une insuline basale (10 U, titrée) | après échec de la trithérapie ou de l'aGLP1, en gardant la metformine (avis 16 bis et 17) | 7,5 % | −0,8 kg | 0 | Ajouter un iSGLT2 (empagliflozine 10 mg) → 7,1 %, −3,0 kg |
+| 2 · acceptable | Ajouter un iSGLT2 (empagliflozine 10 mg) | option orale, effet modéré sur l'HbA1c (avis 16 et 19) | 8,4 % | −2,1 kg | 0 | — |
+| 4 · à éviter | Renforcer les mesures hygiéno-diététiques seules | seules, insuffisantes si l'HbA1c est à plus d'un point de la cible (à associer) (avis 4 et 8) | 8,4 % | −5,8 kg | 0 | — |
+| 4 · à éviter | Monter la metformine à 3 g/j | n'apporte que peu par rapport à 2 g/j, plus de troubles digestifs (avis 8) | 9,4 % | +0,0 kg | 0 | — |
 | 5 · erreur | Ne rien changer | HbA1c au-dessus de la cible : inertie thérapeutique (avis 5) | 9,5 % | +0,0 kg | 0 | — |
 
 ### Basale à 0,7 U/kg + metformine (64 ans, IMC 37, HbA1c 8,6 %)
@@ -169,14 +169,15 @@ Cible SFD : HbA1c ≤ 7,0 %.
 
 | Rang | Option | Pourquoi (SFD 2025) | HbA1c à 6 mois | Poids | Hypoglycémies | Puis (à 12 mois) |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 · recommandé | Ajouter ou passer au tirzépatide (paliers jusqu'à 10 mg/sem) | le plus efficace sur l'HbA1c et le poids (non remboursé en 2025) (avis 6 bis, 10, 14) | 6,5 % | −8,4 kg | 2 | — |
-| 1 · recommandé | Ajouter le sémaglutide (paliers jusqu'à 1 mg/sem) | obésité, préféré aux bolus sous basale, HbA1c > cible + 1 point (avis 10, 11, 14, 19) | 7,0 % | −4,7 kg | 1 | Ajouter un iSGLT2 (empagliflozine 10 mg) → 6,7 %, −7,6 kg |
-| 1 · recommandé | Ajouter un iSGLT2 (empagliflozine 10 mg) | premier choix en ajout à la metformine (avec aGLP1 et tirzépatide) (avis 10) | 8,1 % | −2,2 kg | 0 | Ajouter le sémaglutide (paliers jusqu'à 1 mg/sem) → 6,7 %, −7,2 kg |
+| 1 · recommandé | Ajouter le sémaglutide (paliers jusqu'à 1 mg/sem) | obésité, préféré aux bolus sous basale, HbA1c > cible + 1 point (avis 10, 11, 14, 19) | 7,0 % | −4,7 kg | 1 | — |
+| 1 · recommandé | Ajouter ou passer au tirzépatide (paliers jusqu'à 10 mg/sem) | le plus efficace sur l'HbA1c et le poids (non remboursé en 2025) (avis 6 bis, 10, 14) | 6,5 % | −8,5 kg | 2 | — |
+| 1 · recommandé | Ajouter un iSGLT2 (empagliflozine 10 mg) | premier choix en ajout à la metformine (avec aGLP1 et tirzépatide) (avis 10) | 8,0 % | −2,2 kg | 0 | Ajouter le sémaglutide (paliers jusqu'à 1 mg/sem) → 6,7 %, −7,2 kg |
 | 2 · acceptable | Ajouter un bolus au repas principal (4 U, titré) | possible, mais l'aGLP1 ou le tirzépatide est préféré (avis 19) | 7,1 % | +1,3 kg | 1 | — |
 | 2 · acceptable | Ajouter un iDPP4 (sitagliptine) | deuxième rang après iSGLT2 et aGLP1 ; meilleure tolérance (avis 10) | 8,6 % | +0,0 kg | 0 | — |
+| 3 · possible, moins bon | Passer en basal-bolus en ambulatoire (bolus 4 U à chaque repas, titrés) | l'aGLP1 ou un seul bolus d'abord (avis 19) | 6,8 % | +1,5 kg | 3 | — |
 | 4 · à éviter | Renforcer les mesures hygiéno-diététiques seules | seules, insuffisantes si l'HbA1c est à plus d'un point de la cible (à associer) (avis 4 et 8) | 8,0 % | −6,1 kg | 0 | — |
 | 4 · à éviter | Monter la metformine à 3 g/j | n'apporte que peu par rapport à 2 g/j, plus de troubles digestifs (avis 8) | 8,5 % | +0,0 kg | 0 | — |
-| 5 · erreur | Augmenter la basale de 20 % | glycémie à jeun déjà dans la cible : sur-basalisation (avis 19) | 8,5 % | +0,5 kg | 0 | — |
+| 5 · erreur | Augmenter la basale de 20 % | glycémie à jeun déjà dans la cible : sur-basalisation (avis 19) | 8,4 % | +0,5 kg | 0 | — |
 | 5 · erreur | Ne rien changer | HbA1c au-dessus de la cible : inertie thérapeutique (avis 5) | 8,6 % | +0,0 kg | 0 | — |
 | 5 · erreur | Ajouter un sulfamide (gliclazide LM 60 mg) | pas de sulfamide sous insuline (avis 18 ter) | 8,6 % | +0,6 kg | 0 | — |
 
@@ -190,7 +191,7 @@ Cible SFD : HbA1c ≤ 8,0 %.
 | 1 · recommandé | Ajouter un iDPP4 (sitagliptine) | personne âgée fragile ou dépendante : metformine + iDPP4 à privilégier (avis 21 bis) | 7,7 % | +0,0 kg | 0 | — |
 | 1 · recommandé | Ne rien changer | objectif atteint : poursuivre, réévaluer à 3–6 mois (avis 5) | 8,0 % | +0,0 kg | 0 | — |
 | 2 · acceptable | Ajouter le sémaglutide (paliers jusqu'à 1 mg/sem) | insuffisance cardiaque ou maladie rénale : l'iSGLT2 d'abord, l'aGLP1 ensuite ou en cas d'intolérance (avis 12 ter et 13) | 6,6 % | −3,0 kg | 0 | — |
-| 2 · acceptable | Instaurer une insuline basale (10 U, titrée) | analogue lent en une injection si les orales ne suffisent pas (avis 21 bis) | 6,8 % | +0,5 kg | 3 | — |
+| 2 · acceptable | Instaurer une insuline basale (10 U, titrée) | analogue lent en une injection si les orales ne suffisent pas (avis 21 bis) | 6,7 % | +0,5 kg | 4 | — |
 | 3 · possible, moins bon | Renforcer les mesures hygiéno-diététiques seules | à associer à tout traitement, rarement suffisantes seules (avis 4) | 7,5 % | −3,9 kg | 0 | — |
 | 3 · possible, moins bon | Ajouter ou passer au tirzépatide (paliers jusqu'à 10 mg/sem) | expérience très limitée après 75 ans (avis 21 bis) | 6,3 % | −5,2 kg | 0 | — |
 | 4 · à éviter | Ajouter un sulfamide (gliclazide LM 60 mg) | patient à risque d'hypoglycémie (avis 16) | 6,9 % | +0,7 kg | 5 (1 sévère) | — |
@@ -201,13 +202,13 @@ Patient type : diabète découvert, obèse (56 ans, IMC 33, HbA1c 8,5 %). Chaque
 
 | Enchaînement | Étapes (HbA1c, poids cumulé, hypoglycémies) | À la fin |
 | --- | --- | --- |
-| Metformine → iSGLT2 → sémaglutide | Metformine progressive jusqu'à 2 g/j : 7,1 %, −0,9 kg → + iSGLT2 : 6,4 %, −3,2 kg → + sémaglutide : 5,5 %, −8,1 kg | HbA1c 5,5 %, −8,1 kg, 0 hypoglycémie |
-| Metformine → sémaglutide → iSGLT2 | Metformine progressive jusqu'à 2 g/j : 7,1 %, −0,9 kg → + sémaglutide : 5,8 %, −5,7 kg → + iSGLT2 : 5,4 %, −8,5 kg | HbA1c 5,4 %, −8,5 kg, 0 hypoglycémie |
+| Metformine → iSGLT2 → sémaglutide | Metformine progressive jusqu'à 2 g/j : 7,2 %, −0,9 kg → + iSGLT2 : 6,4 %, −3,2 kg → + sémaglutide : 5,5 %, −8,1 kg | HbA1c 5,5 %, −8,1 kg, 0 hypoglycémie |
+| Metformine → sémaglutide → iSGLT2 | Metformine progressive jusqu'à 2 g/j : 7,2 %, −0,9 kg → + sémaglutide : 5,8 %, −5,7 kg → + iSGLT2 : 5,4 %, −8,5 kg | HbA1c 5,4 %, −8,5 kg, 0 hypoglycémie |
 | Metformine + sémaglutide d'emblée → iSGLT2 | Metformine progressive + sémaglutide d'emblée : 5,8 %, −5,6 kg → + iSGLT2 : 5,4 %, −8,5 kg | HbA1c 5,4 %, −8,5 kg, 0 hypoglycémie |
-| Metformine → tirzépatide | Metformine progressive jusqu'à 2 g/j : 7,1 %, −0,9 kg → + ou passer au tirzépatide : 5,4 %, −9,1 kg | HbA1c 5,4 %, −9,1 kg, 0 hypoglycémie |
-| Metformine → iDPP4 → sulfamide → insuline basale | Metformine progressive jusqu'à 2 g/j : 7,1 %, −0,9 kg → + iDPP4 : 6,7 %, −1,0 kg → + sulfamide : 6,3 %, +0,1 kg, 2 hypo → Instaurer une insuline basale : 6,7 %, −0,3 kg, 1 hypo | HbA1c 6,7 %, −0,3 kg, 3 hypoglycémies |
-| Metformine → sulfamide → insuline basale → bolus | Metformine progressive jusqu'à 2 g/j : 7,1 %, −0,9 kg → + sulfamide : 6,5 %, +0,1 kg, 1 hypo → Instaurer une insuline basale : 7,0 %, −0,0 kg, 1 hypo → + bolus au repas principal : 6,8 %, +0,3 kg, 1 hypo | HbA1c 6,8 %, +0,3 kg, 3 hypoglycémies |
-| Metformine → insuline basale → sémaglutide | Metformine progressive jusqu'à 2 g/j : 7,1 %, −0,9 kg → Instaurer une insuline basale : 6,9 %, −0,2 kg → + sémaglutide : 5,8 %, −4,8 kg, 4 hypo | HbA1c 5,8 %, −4,8 kg, 4 hypoglycémies |
+| Metformine → tirzépatide | Metformine progressive jusqu'à 2 g/j : 7,2 %, −0,9 kg → + ou passer au tirzépatide : 5,4 %, −9,1 kg | HbA1c 5,4 %, −9,1 kg, 0 hypoglycémie |
+| Metformine → iDPP4 → sulfamide → insuline basale | Metformine progressive jusqu'à 2 g/j : 7,2 %, −0,9 kg → + iDPP4 : 6,7 %, −1,0 kg → + sulfamide : 6,3 %, +0,1 kg, 2 hypo → Instaurer une insuline basale : 6,7 %, −0,3 kg, 1 hypo | HbA1c 6,7 %, −0,3 kg, 3 hypoglycémies |
+| Metformine → sulfamide → insuline basale → bolus | Metformine progressive jusqu'à 2 g/j : 7,2 %, −0,9 kg → + sulfamide : 6,5 %, +0,1 kg, 1 hypo → Instaurer une insuline basale : 7,0 %, −0,0 kg, 1 hypo → + bolus au repas principal : 6,9 %, +0,3 kg, 1 hypo | HbA1c 6,9 %, +0,3 kg, 3 hypoglycémies |
+| Metformine → insuline basale → sémaglutide | Metformine progressive jusqu'à 2 g/j : 7,2 %, −0,9 kg → Instaurer une insuline basale : 6,9 %, −0,2 kg → + sémaglutide : 5,8 %, −4,8 kg, 4 hypo | HbA1c 5,8 %, −4,8 kg, 4 hypoglycémies |
 | Mode de vie seul → metformine → sémaglutide | Renforcer les mesures hygiéno-diététiques seules : 6,5 %, −6,1 kg → Metformine progressive jusqu'à 2 g/j : 5,4 %, −7,5 kg → + sémaglutide : 5,2 %, −12,3 kg | HbA1c 5,2 %, −12,3 kg, 0 hypoglycémie |
 | Ne rien faire pendant 1 an | Ne rien changer : 8,5 %, +0,0 kg → Ne rien changer : 8,6 %, +0,0 kg | HbA1c 8,6 %, +0,0 kg, 0 hypoglycémie |
 

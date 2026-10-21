@@ -90,16 +90,19 @@
     // et les sulfamides, et avec la carence insulinique (CV DT2 : ≈ 18 % sous régime ou metformine, 23–26 % sans
     // insuline en vie réelle, 28–30 % sous insuline basale ou basal-bolus ; DT1 36–38 % ; Monnier, Diabetes Care
     // 2017 ; Dunn, Diabetes Technol Ther 2024).
-    const insU = Math.min(1, ((rx.basal || 0) + (rx.rapid || 0)) / (0.5 * p.weight0));
-    const absF = { g300: 0.7, deg: 0.7, nph: 1.4 }[rx.basalType] || 1;
-    const gvK = (p.gv || 1) * (1 + irr);
+    const bas = (rx.basal || 0) + (rx.pump || 0);
+    const insU = Math.min(1, (bas + (rx.rapid || 0)) / (0.5 * p.weight0));
+    // Pompe : perfusion continue d'analogue rapide, plus reproductible qu'une basale injectée ; boucle fermée :
+    // le débit s'ajuste au capteur, variabilité réduite (2IQP, NEJM 2025 : TIR 48 → 64 %).
+    const absF = rx.pump > 0 ? 0.6 : { g300: 0.7, deg: 0.7, nph: 1.4 }[rx.basalType] || 1;
+    const gvK = (p.gv || 1) * (1 + irr) * (rx.device === 'loop' ? 0.7 : 1);
     const sdD = (V.day + V.dayIns * insU * absF + (rx.su ? V.daySu : 0)) * gvK;
     const dm = Math.exp(sdD * gauss(r) - sdD * sdD / 2);
     const MG = s.MG * dm;
     const F0 = D.fpgOf(pt) * dm;
-    const sdF = (V.fast + V.fastIns * Math.min(1, (rx.basal || 0) / (0.3 * p.weight0)) * absF) * gvK;
+    const sdF = (V.fast + V.fastIns * Math.min(1, bas / (0.3 * p.weight0)) * absF) * gvK;
     const F = Math.max(0.55, F0 * Math.exp(sdF * gauss(r) - sdF * sdF / 2));
-    const dawn = rx.basal > 0 ? 0.04 : Math.min(0.15, 0.05 + 0.04 * Math.max(0, MG - 1.3));
+    const dawn = bas > 0 ? 0.04 : Math.min(0.15, 0.05 + 0.04 * Math.max(0, MG - 1.3));
     const glp = D.glpFrac(rx);
     const u = (rx.rapidM || [0, 0, 0]).slice();
     const sumU = u.reduce((a, x) => a + x, 0);
@@ -133,7 +136,7 @@
     }
     const noise = [0, 1, 2].map(() => ({ a: (0.025 + 0.03 * r()) * Math.max(0.8, MG / 1.4), f: 1 / (2 + 4 * r()), ph: 2 * Math.PI * r() }));
     // Hypoglycémies du modèle : placées plus bas, au creux du profil.
-    const dp = { d: pt.day, off: sh.off, shift: sh.label, F, dawn, dday, sig, w, tm, skip, u, cut, segCut, extra, noise, hypos: [], mg: MG, basal: rx.basal, rapid: u.slice(), meter: [0, 1, 2, 3, 4, 5, 6].map(() => 1 + 0.04 * gauss(r)), sensorSeed: Math.floor(r() * 1e9) };
+    const dp = { d: pt.day, off: sh.off, shift: sh.label, F, dawn, dday, sig, w, tm, skip, u, cut, segCut, extra, noise, hypos: [], mg: MG, basal: bas, pump: rx.pump > 0, rapid: u.slice(), meter: [0, 1, 2, 3, 4, 5, 6].map(() => 1 + 0.04 * gauss(r)), sensorSeed: Math.floor(r() * 1e9) };
     // Hypoglycémies : là où la glycémie de la journée est la plus basse. Celles que le modèle a tirées
     // (sulfamide, insuline) s'y placent ; un creux du profil sous 0,60 g/L en est une aussi (ressentie).
     const curve = []; for (let i = 0; i < 96; i++) curve.push(glucose(dp, i / 4));
@@ -150,7 +153,7 @@
     const PER = [[0, 28], [34, 50], [54, 78], [82, 95]];
     const pickLow = () => {
       const low = PER.map(([a2, b2]) => { let j = a2; for (let k = a2; k <= b2; k++) if (curve[k] < curve[j]) j = k; return j; });
-      const ins = [Math.max(rx.basal || 0, rx.su ? 20 : 0, 4)].concat(u);
+      const ins = [Math.max(bas, rx.su ? 20 : 0, 4)].concat(u);
       const wts = low.map((j, k) => ins[k] * Math.exp(-curve[j] / 0.15));
       let x = r() * wts.reduce((a2, v) => a2 + v, 0);
       for (let k = 0; k < 4; k++) { x -= wts[k]; if (x <= 0) return low[k]; }
@@ -233,7 +236,14 @@
     // Avec un capteur, un creux sous l'objectif (nuit pour la basale, période qui suit le repas pour un bolus)
     // compte comme une glycémie sous l'objectif : on baisse, et on ne monte pas.
     const lowN = prot.cgm && rdg.nadir && rdg.nadir.night < O.rev[0];
-    ctl('basal', rx.basal, lowN ? Math.min(rdg.rev, rdg.nadir.night) : rdg.rev, O.rev, nightHypo, (v) => { rx.basal = v; });
+    // Pompe : le débit de base (U/24 h) se titre comme une basale ; boucle fermée : il s'ajuste seul au capteur
+    // (cible du réveil ≈ 1,10 g/L, baisse si creux nocturne), seuls les bolus suivent le protocole.
+    if (rx.device === 'loop' && rx.pump > 0) {
+      const lowL = (rdg.nadir && rdg.nadir.night < 0.8) || nightHypo;
+      const f = lowL ? 0.85 : rdg.rev > 1.3 ? 1.05 : rdg.rev < 0.95 ? 0.95 : 1;
+      if (f !== 1 && apply) { const nv = Math.max(4, Math.round(rx.pump * f)); if (nv !== rx.pump) log.push({ name: 'basal', from: rx.pump, to: nv, why: 'boucle fermée : débit ajusté au capteur', auto: true }); rx.pump = nv; }
+    } else if (rx.pump > 0) ctl('basal', rx.pump, lowN ? Math.min(rdg.rev, rdg.nadir.night) : rdg.rev, O.rev, nightHypo, (v) => { rx.pump = v; });
+    else ctl('basal', rx.basal, lowN ? Math.min(rdg.rev, rdg.nadir.night) : rdg.rev, O.rev, nightHypo, (v) => { rx.basal = v; });
     (rx.rapidM || []).forEach((dose, m) => {
       const pp = prot.bolusCtl === 'pp';
       const k = pp ? BOLUS_PP[m] : BOLUS_CTRL[m], obj = pp ? (O.pp || [1.2, 1.8]) : (O[k] || O.avDej);

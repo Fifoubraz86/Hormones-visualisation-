@@ -62,7 +62,14 @@
       apply: (rx) => { rx.basal = Math.round(rx.basal * 1.2); } },
     { id: 'bolus', name: 'Ajouter un bolus au repas principal (4 U, titré)', ok: (x) => x.rx.basal > 0 && !(x.rx.rapid > 0),
       rate: (x) => (x.rx.glp === 'none' ? [2, 'possible, mais l\'aGLP1 ou le tirzépatide est préféré', 'avis 19'] : [1, 'après basale + aGLP1, si la journée reste haute', 'avis 19']),
-      apply: (rx, sim) => { rx.rapidM = [0, 4, 0]; rx.rapid = 4; sim.titr = true; } }
+      apply: (rx, sim) => { rx.rapidM = [0, 4, 0]; rx.rapid = 4; sim.titr = true; } },
+    { id: 'bb', name: 'Passer en basal-bolus en ambulatoire (bolus 4 U à chaque repas, titrés)', ok: (x) => !(x.rx.rapid > 0) && (x.rx.basal > 0 || x.a1c >= 10),
+      rate: (x) => (x.a1c >= 10 ? [2, 'intensification ambulatoire : efficace mais lente tant que la glucotoxicité persiste', 'avis 8 bis et 19'] : x.rx.glp === 'none' ? [3, 'l\'aGLP1 ou un seul bolus d\'abord', 'avis 19'] : [2, 'après basale + aGLP1 si la journée reste haute', 'avis 19']),
+      apply: (rx, sim) => { if (!(rx.basal > 0)) rx.basal = 10; rx.su = 0; rx.rapidM = [4, 4, 4]; rx.rapid = 12; sim.titr = true; } },
+    // Hospitalisation : pompe transitoire (protocole du service, js/simu/dt2-hosp.js), puis relais basal-bolus titré.
+    { id: 'hosp', name: 'Hospitaliser : pompe à insuline 7 jours, puis relais basal-bolus titré', ok: (x) => x.a1c >= 9.5,
+      rate: (x) => (x.a1c >= 10 && (x.onIns || x.n >= 2) ? [1, 'déséquilibre majeur malgré le traitement : la pompe lève la glucotoxicité en quelques jours (avis d\'expert dans le DT2 ancien)', 'avis 8 bis ; Weng 2008, Kramer 2013'] : x.a1c >= 10 || x.cat ? [2, 'déséquilibre majeur : intensification rapide, rémission possible au diagnostic', 'avis 8 bis ; Weng 2008, Kramer 2013'] : [3, 'possible, mais l\'intensification ambulatoire suffit souvent sous 10 %', 'avis 8 bis']),
+      apply: (rx, sim) => { sim.hosp = true; sim.titr = true; } }
   ];
 
   // Simulation d'une option pendant `days` jours sur une copie du patient.
@@ -76,8 +83,13 @@
     const sim = { plan: null, titr: false };
     const w0 = cp.st.W, h0 = cp.st.hypo, s0 = cp.st.hypoSev;
     opt.apply(cp.rx, sim, x);
-    let above = 0;
-    for (let d = 0; d < days; d++) {
+    let above = 0, d0 = 0;
+    if (sim.hosp && S.dt2hosp) {
+      const r = S.dt2hosp.run(cp, D, S.glyco, { days: 7 }, 4242);
+      cp.rx.basal = r.relay.basal; cp.rx.rapidM = r.relay.rapidM.slice(); cp.rx.rapid = cp.rx.rapidM.reduce((a, u) => a + u, 0); cp.rx.su = 0;
+      d0 = 7;
+    }
+    for (let d = d0; d < days; d++) {
       if (sim.plan) cp.rx.glpDose = sim.plan[Math.min(sim.plan.length - 1, Math.floor(d / 28))];
       cp.par.adh = 1;
       D.advance(cp, 1);
@@ -86,7 +98,7 @@
         const f = D.fpgOf(cp);
         if (!sim.titr) { if (f < 0.8) cp.rx.basal = Math.max(0, cp.rx.basal - 2); continue; }
         if (f > 1.2) { cp.rx.basal += cp.rx.basal < 10 ? 1 : 2; above++; } else if (f < 0.8) cp.rx.basal = Math.max(0, cp.rx.basal - 2);
-        if (cp.rx.rapid > 0 && f <= 1.2) { if (cp.st.MG > 1.5) cp.rx.rapidM[1] += 1; else if (cp.st.MG < 1.15) cp.rx.rapidM[1] = Math.max(0, cp.rx.rapidM[1] - 1); cp.rx.rapid = cp.rx.rapidM[1]; }
+        if (cp.rx.rapid > 0 && f <= 1.2) { const k = cp.st.MG > 1.5 ? 1 : cp.st.MG < 1.15 ? -1 : 0; cp.rx.rapidM = cp.rx.rapidM.map((u) => (u > 0 ? Math.max(1, u + k) : u)); cp.rx.rapid = cp.rx.rapidM.reduce((a, u) => a + u, 0); }
       }
     }
     return { pt: cp, a1c: cp.st.A, dW: cp.st.W - w0, hypo: cp.st.hypo - h0, sev: cp.st.hypoSev - s0, basal: cp.rx.basal, rapid: cp.rx.rapid };

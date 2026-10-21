@@ -15,7 +15,7 @@
   // Contrôles toutes les 4 h (heure physiologique) ; le repas dont dépend chaque contrôle avant repas.
   const CHECKS = [[3, '3 h'], [7, 'réveil'], [11.75, 'avant déjeuner'], [15.5, '15 h 30'], [19.25, 'avant dîner'], [23, '23 h']];
   const TARGETS = { a: [0.8, 1.4], b: [1.0, 1.6], c: [1.0, 1.8] };
-  const DEFAULTS = { days: 7, rate0: 1, incr: 0.25, target: 'b', bolusKg: 0.1, stopSu: true, cgm: true };
+  const DEFAULTS = { days: 7, rate0: 1, incr: 0.25, target: 'b', bolusKg: 0.1, stopSu: true, cgm: true, exit: 'inj' };
 
   // pt, D (modèle), Y (glyco) ; o : réglages ; renvoie le journal du séjour (heure par heure).
   function run(pt, D, Y, o0, seed) {
