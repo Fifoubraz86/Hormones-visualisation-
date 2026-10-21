@@ -217,6 +217,38 @@
     ill: (k, T) => 'Infection : hormones de stress, insulinorésistance, production hépatique accrue, cétose. Ne jamais arrêter l\'insuline (souvent l\'augmenter), glycémies et cétonémie rapprochées, hydratation ; suspendre iSGLT2 et metformine en cas de déshydratation (cétonémie ici jusqu\'à ' + fmt(T.ketMax, 1) + ' mmol/L).'
   };
 
+  /* ---------- Molécules (glyphes inspirés de l'atlas, js/molecules-axes.js) ---------- */
+  // Encombrement ≈ 14 unités ; couleur portée par la classe (variables du thème).
+  const MOLS = [['glc', 'glucose'], ['ins', 'insuline'], ['glu', 'glucagon'], ['inc', 'GLP-1, GIP'], ['ffa', 'acide gras'], ['ket', 'cétone']];
+  function buildMols(defs) {
+    const hexV = (r) => [-90, -30, 30, 90, 150, 210].map((a) => [r * Math.cos(a * Math.PI / 180), r * Math.sin(a * Math.PI / 180)]);
+    const P = (pts) => 'M' + pts.map((q) => q[0].toFixed(2) + ',' + q[1].toFixed(2)).join(' L') + ' Z';
+    let g = el('g', { id: 'phm-glc', class: 'phm phm-glc' }, defs); // β-D-glucopyranose : cycle à 6 sommets, O cyclique, OH
+    const hv = hexV(5);
+    el('path', { d: P(hv), class: 'phm-ring' }, g);
+    el('circle', { cx: hv[0][0], cy: hv[0][1], r: 1.5, class: 'phm-O' }, g);
+    [1, 2, 3, 4].forEach((i) => { const q = hv[i], k = 1.55; el('line', { x1: q[0], y1: q[1], x2: q[0] * k, y2: q[1] * k, class: 'phm-bond' }, g); el('circle', { cx: q[0] * 1.75, cy: q[1] * 1.75, r: 1.1, class: 'phm-O' }, g); });
+    g = el('g', { id: 'phm-ins', class: 'phm phm-ins' }, defs); // insuline : chaînes A et B, deux ponts disulfure
+    el('path', { d: 'M-7,-3.5 L6,-3.5', class: 'phm-chain' }, g); el('path', { d: 'M-8,3.5 L8,3.5', class: 'phm-chain' }, g);
+    for (let i = 0; i < 5; i++) el('circle', { cx: -7 + i * 3.2, cy: -3.5, r: 1.3, class: 'phm-res' }, g);
+    for (let i = 0; i < 6; i++) el('circle', { cx: -8 + i * 3.2, cy: 3.5, r: 1.3, class: 'phm-res b' }, g);
+    el('path', { d: 'M-4,-3.5 L-4,3.5 M3,-3.5 L3,3.5', class: 'phm-ss' }, g);
+    g = el('g', { id: 'phm-glu', class: 'phm phm-glu' }, defs); // glucagon : peptide de 29 acides aminés en hélice
+    el('path', { d: 'M-8,2 Q-6,-4 -3,1 T2,1 T7,-1', class: 'phm-chain' }, g);
+    [[-8, 2], [-5, -1.5], [-2, 1.5], [1, -1], [4, 1.5], [7, -1]].forEach(([x, y]) => el('circle', { cx: x, cy: y, r: 1.4, class: 'phm-res' }, g));
+    g = el('g', { id: 'phm-inc', class: 'phm phm-inc' }, defs); // incrétines (GLP-1, GIP) : peptides
+    el('path', { d: 'M-7,3 C-5,-4 4,-4 7,3', class: 'phm-chain' }, g);
+    [[-7, 3], [-4.5, -1.2], [0, -2.6], [4.5, -1.2], [7, 3]].forEach(([x, y]) => el('circle', { cx: x, cy: y, r: 1.4, class: 'phm-res' }, g));
+    g = el('g', { id: 'phm-ffa', class: 'phm phm-ffa' }, defs); // acide gras : chaîne carbonée, carboxyle
+    el('path', { d: 'M-9,1 L-6,-1.5 L-3,1 L0,-1.5 L3,1 L6,-1.5', class: 'phm-zig' }, g);
+    el('circle', { cx: 7.6, cy: -2.2, r: 1.4, class: 'phm-O' }, g); el('circle', { cx: 7.8, cy: 1.2, r: 1.2, class: 'phm-O' }, g);
+    g = el('g', { id: 'phm-ket', class: 'phm phm-ket' }, defs); // corps cétonique (acétoacétate, β-hydroxybutyrate)
+    el('path', { d: 'M-6,2 L-3,-1 L0,2 L3,-1 L6,2', class: 'phm-zig' }, g);
+    el('circle', { cx: -3, cy: -3.4, r: 1.4, class: 'phm-O' }, g); el('circle', { cx: 6.8, cy: 4, r: 1.4, class: 'phm-O' }, g);
+  }
+  // Molécule portée par chaque flux.
+  const FLOW_MOL = { ge: 'glc', ra: 'glc', inc: 'inc', insL: 'ins', insM: 'ins', glu: 'glu', egp: 'glc', upM: 'glc', upF: 'glc', ren: 'glc', exoL: 'ins', exoM: 'ins', ffa: 'ffa', ket: 'ket', hunger: 'glc' };
+
   function el(tag, a, par) { const n = document.createElementNS(NS, tag); for (const k in a) n.setAttribute(k, a[k]); if (par) par.appendChild(n); return n; }
 
   function card(ctx) {
@@ -270,6 +302,8 @@
     const playBtn = h('button', { type: 'button', class: 'sv-secondary', id: 'dtPhPlay', onclick: () => { st.play = !st.play; playBtn.textContent = st.play ? '⏸ Pause' : '▶ Lecture'; if (st.play) requestAnimationFrame(loop); } }, st.play ? '⏸ Pause' : '▶ Lecture');
     const sum = h('div', { class: 'ph-sum', id: 'dtPhSum' });
     const trend = el('svg', { viewBox: '0 0 300 70', class: 'ph-trend' });
+    const legend = el('svg', { viewBox: '0 0 760 36', class: 'ph-legend', role: 'img', 'aria-label': 'Légende des molécules' });
+    MOLS.forEach(([m, t], i) => { const x = 22 + i * 124; el('use', { href: '#phm-' + m, transform: 'translate(' + x + ',18) scale(1.7)' }, legend); el('text', { x: x + 19, y: 23, class: 'ph-ax ph-legt' }, legend).textContent = t; });
     root.append(
       h('div', { class: 'sv-card-head' }, [h('h3', null, 'Physiologie du patient : ce que font les traitements'), h('button', { type: 'button', class: 'sv-secondary', onclick: onClose }, 'Fermer')]),
       h('p', { class: 'sv-muted' }, 'Copie du patient (le dossier n\'est pas modifié). La glycémie est celle du patient simulé ; le module la décompose organe par organe. Cliquez sur un organe. Modifiez les traitements, puis faites avancer le temps.'),
@@ -284,7 +318,7 @@
         h('button', { type: 'button', class: 'sv-secondary', id: 'dtPhW4', onclick: () => advance(28) }, '+4 semaines'),
         h('button', { type: 'button', class: 'sv-linkbtn', onclick: () => { reset(); compute(); ctx.rerender(); } }, 'Revenir au patient')
       ]),
-      h('div', { class: 'ph-grid' }, [h('div', { class: 'ph-diag' }, svg), h('div', { class: 'ph-side' }, [sum, h('div', { class: 'ph-trendbox' }, trend), info])]),
+      h('div', { class: 'ph-grid' }, [h('div', { class: 'ph-diag' }, [svg, legend]), h('div', { class: 'ph-side' }, [sum, h('div', { class: 'ph-trendbox' }, trend), info])]),
       h('div', { class: 'ph-chartbox' }, chart),
       h('p', { class: 'sv-note' }, 'Mécanismes : modèle « glyc » de l\'atlas enrichi des effets pharmacologiques (complément) ; la captation par le muscle et le tissu adipeux est calculée par bilan de masse. Chaque journée reprend la glycémie moyenne du modèle DT2, calé sur les essais.')
     );
@@ -294,6 +328,7 @@
       svg.textContent = ''; chart.textContent = '';
       const k = st.res.k;
       const defs = el('defs', {}, svg);
+      buildMols(defs);
       ['g', 'i', 'x', 'n', 'u', 'k'].forEach((c) => { const m = el('marker', { id: 'phA' + c, viewBox: '0 0 10 10', refX: 6, refY: 5, markerWidth: 11, markerHeight: 11, markerUnits: 'userSpaceOnUse', orient: 'auto' }, defs); el('path', { d: 'M0,0 L10,5 L0,10 z', class: 'ph-ah ph-' + c }, m); });
       const arrow = (id, a, b, cls, bend) => { g[id] = el('path', { d: link(a, b, bend), class: 'ph-flow ph-' + cls, 'marker-end': 'url(#phA' + cls + ')' }, svg); };
       arrow('hunger', 'brain', 'stomach', 'n', 0);
@@ -311,6 +346,7 @@
       arrow('exoM', 'pen', 'fat', 'x', 30);
       arrow('ffa', 'fat', 'liver', 'k', -70);
       arrow('ket', 'liver', 'keto', 'k', -150);
+      g.mols = el('g', { class: 'ph-mols' }, svg);
       Object.entries(ORG).forEach(([id, o]) => {
         const off = id === 'pen' && !(k.rx.basal > 0 || k.rx.rapid > 0 || k.rx.pump > 0);
         const grp = el('g', { class: 'ph-org' + (st.sel === id ? ' sel' : '') + (off ? ' off' : ''), tabindex: 0, role: 'button', 'aria-label': o.t }, svg);
@@ -408,7 +444,7 @@
       tLab.textContent = hh + ' h ' + String(mm === 60 ? 0 : mm).padStart(2, '0');
       slider.value = st.t;
       const Wd = (v, max) => Math.max(1, Math.min(14, 1 + 13 * v / max));
-      const set = (id, v, max) => { const p = g[id]; if (!p) return; p.setAttribute('stroke-width', Wd(v, max).toFixed(1)); p.style.animationDuration = Math.max(0.35, 2.4 / Math.max(0.15, v / max)).toFixed(2) + 's'; p.classList.toggle('idle', v < max * 0.03); };
+      const set = (id, v, max) => { const p = g[id]; if (!p) return; p.setAttribute('stroke-width', Wd(v, max).toFixed(1)); p.style.animationDuration = Math.max(0.35, 2.4 / Math.max(0.15, v / max)).toFixed(2) + 's'; p.classList.toggle('idle', v < max * 0.03); st.flux = st.flux || {}; st.flux[id] = v < max * 0.03 ? 0 : Math.min(1.5, v / max); };
       set('ge', q.ge, 40); set('ra', q.ra, 40); set('inc', q.inc, 1.5); set('insL', q.isec, 6); set('insM', q.isec, 6); set('glu', q.glu, 2);
       set('egp', q.egp, 25); set('upM', q.up * 0.75, 30); set('upF', q.up * 0.25, 30); set('ren', q.ren, 6); set('exoL', q.iexo, 4); set('exoM', q.iexo, 4); set('ffa', q.lip, 1); set('ket', q.ket, 1.5); set('hunger', 1 - k.satiety, 1);
       const txt = (id, v) => { if (g[id]) g[id].textContent = v; };
@@ -443,7 +479,36 @@
       lastTs = ts;
       requestAnimationFrame(loop);
     }
+    // Molécules en mouvement le long des flux : nombre et vitesse proportionnels au flux de l'heure affichée.
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let mT = 0, mLast = 0;
+    const parts = {};
+    function mloop(ts) {
+      if (!root.isConnected) return;
+      const dt = mLast ? Math.min(0.1, (ts - mLast) / 1000) : 0; mLast = ts; mT += reduce ? 0 : dt;
+      const lay = g.mols;
+      if (lay) {
+        if (lay !== mloop.lay) { mloop.lay = lay; Object.keys(parts).forEach((k) => delete parts[k]); }
+        Object.keys(FLOW_MOL).forEach((id) => {
+          const path = g[id]; if (!path) return;
+          const f = (st.flux && st.flux[id]) || 0, n = f > 0 ? Math.max(1, Math.round(1 + 4 * Math.min(1, f))) : 0;
+          const arr = parts[id] || (parts[id] = []);
+          while (arr.length < n) { const u = el('use', { href: '#phm-' + FLOW_MOL[id], class: 'ph-mol' }, lay); arr.push({ u, ph: arr.length / Math.max(1, n) + Math.random() * 0.1 }); }
+          while (arr.length > n) arr.pop().u.remove();
+          if (!n) return;
+          const L = path.getTotalLength(), sp = 0.12 + 0.28 * Math.min(1.2, f);
+          arr.forEach((pa, i) => {
+            const x = ((pa.ph + i / n) + mT * sp) % 1, pt = path.getPointAtLength(x * L);
+            const sc = id === 'exoL' || id === 'exoM' ? 1.45 : 1.6;
+            pa.u.setAttribute('transform', 'translate(' + pt.x.toFixed(1) + ',' + pt.y.toFixed(1) + ') scale(' + sc + ')');
+            pa.u.setAttribute('opacity', (x < 0.08 ? x / 0.08 : x > 0.92 ? (1 - x) / 0.08 : 1).toFixed(2));
+          });
+        });
+      }
+      requestAnimationFrame(mloop);
+    }
     draw();
+    requestAnimationFrame(mloop);
     if (st.play) requestAnimationFrame(loop);
     return root;
   }
