@@ -569,3 +569,4 @@ body.ph-noscroll { overflow: hidden; }
 @keyframes phtube { to { stroke-dashoffset: -14; } }
 .ph-legend { height: 34px; width: auto; max-width: 100%; }
 .ph-pill, .ph-pt, .ph-pen-lab, .ph-flow, .ph-mols { pointer-events: none; }
+.ph-leader, .ph-dot { pointer-events: none; }
