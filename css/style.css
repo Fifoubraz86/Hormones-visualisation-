@@ -870,3 +870,6 @@ line.m-db { stroke: var(--mc); stroke-width: 0.9; }
 .atlas-tt { fill: var(--fg); font-family: var(--font-display); font-weight: 600; }
 .pause-btn { min-width: 92px; }
 .pause-btn[aria-pressed="false"] { border-color: var(--accent); color: var(--accent); }
+
+.warn-author { font-size: 14px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
+.warn-author strong { color: var(--fg); }
