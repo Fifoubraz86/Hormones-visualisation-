@@ -33,7 +33,7 @@
 
   function exoAt(rx, t, u, tm) {
     let x = 0;
-    if (rx.pump > 0) { const sg = rx.pumpSeg; x += sg ? sg[t < 3 ? 0 : t < 7 ? 1 : t < 22 ? 2 : 3] : rx.pump / 24; }
+    if (rx.pump > 0) { const sg = rx.pumpSeg; x += sg ? sg[Math.floor(t) % 24] : rx.pump / 24; }
     else if (rx.basal > 0) {
       if (rx.basalType === 'nph') { const tau = (t - 22 + 24) % 24; x += rx.basal * Math.max(0.15, Math.exp(-Math.pow((tau - 6) / 4, 2))) / 13.5; }
       else x += rx.basal / 24;

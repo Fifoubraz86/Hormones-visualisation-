@@ -486,3 +486,8 @@ select { background: var(--panel-2); border: 1px solid var(--line-2); border-rad
 .ph-lg.ph-l-g { fill: var(--tsh); } .ph-lg.ph-l-glu { fill: var(--trab); }
 .ph-l-a { fill: none; stroke: var(--t3); stroke-width: 2; }
 @media (max-width: 600px) { .ph-diag, .ph-chartbox { overflow-x: auto; } .ph-svg, .ph-chart { min-width: 600px; } }
+.sv-prof { display: grid; gap: 6px; }
+.sv-prof-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px 6px; }
+.sv-prof-c { display: flex; flex-direction: column; font: 11px var(--font-data); color: var(--muted); }
+.sv-prof-c .sv-num { width: 100%; min-width: 0; }
+@media (max-width: 600px) { .sv-prof-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }

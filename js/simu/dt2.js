@@ -458,13 +458,13 @@
     if (tl.length) {
       const first = tl[0].before, rx = pt.rx, parts = [];
       if (first.b !== bas(rx)) parts.push((rx.pump > 0 ? 'débit de base ' : 'basale ') + fmt(first.b, first.b % 1 ? 1 : 0) + ' → ' + fmt(bas(rx), bas(rx) % 1 ? 1 : 0) + ' U' + (rx.device === 'loop' ? ' (automatique)' : ''));
-      if (rx.pumpSeg && first.seg) rx.pumpSeg.forEach((v, i) => { if (i < 3 && first.seg[i] !== v) parts.push(Y.SEGS[i][2] + ' ' + fmt(first.seg[i], 2) + ' → ' + fmt(v, 2) + ' U/h'); });
+      if (rx.pumpSeg && first.seg && first.seg.length === 24) { const ch = rx.pumpSeg.map((v, i) => [i, first.seg[i], v]).filter(([, a, b]) => a !== b); if (ch.length) parts.push(ch.length + ' créneau' + (ch.length > 1 ? 'x' : '') + ' horaire' + (ch.length > 1 ? 's' : '') + ' modifié' + (ch.length > 1 ? 's' : '') + ' par le patient (' + ch.slice(0, 6).map(([i, a, b]) => Y.hourLab(i) + ' ' + fmt(a, 2) + ' → ' + fmt(b, 2)).join(' ; ') + (ch.length > 6 ? ' ; …' : '') + ' U/h)'); }
       if (rx.bolusMode === 'if') { if (first.ratio !== rx.ratio) parts.push('ratio 1 U pour ' + fmt(first.ratio, 1) + ' → ' + fmt(rx.ratio, 1) + ' g de glucides'); }
       else rx.rapidM.forEach((u, i) => { if (first.m[i] !== u) parts.push('bolus du ' + ['petit-déjeuner', 'déjeuner', 'dîner'][i] + ' ' + first.m[i] + ' → ' + u + ' U'); });
       // Ratio : un ratio plus grand donne moins d'insuline (baisse).
       const more = (l) => (l.name === 'ratio' ? l.to < l.from : l.to > l.from), less = (l) => (l.name === 'ratio' ? l.to > l.from : l.to < l.from);
       const down = tl.reduce((a, x) => a + x.log.filter(less).length, 0), up = tl.reduce((a, x) => a + x.log.filter(more).length, 0);
-      const capped = tl.flatMap((x) => x.log.filter((l) => l.cap)).map((l) => l.seg != null ? 'débit ' + Y.SEGS[l.seg][2] + ' (' + fmt(l.from, 2) + ' U/h)' : ({ basal: 'basale', m0: 'bolus du petit-déjeuner', m1: 'bolus du déjeuner', m2: 'bolus du dîner' })[l.name] + ' (' + l.from + ' U' + (/avis 19/.test(l.why) ? ', ≥ 0,5 U/kg : sur-basalisation ?' : '') + ')');
+      const capped = tl.flatMap((x) => x.log.filter((l) => l.cap)).map((l) => l.seg != null ? 'débit du créneau ' + Y.hourLab(l.seg) + ' (' + fmt(l.from, 2) + ' U/h)' : ({ basal: 'basale', m0: 'bolus du petit-déjeuner', m1: 'bolus du déjeuner', m2: 'bolus du dîner' })[l.name] + ' (' + l.from + ' U' + (/avis 19/.test(l.why) ? ', ≥ 0,5 U/kg : sur-basalisation ?' : '') + ')');
       const skipped = tl.reduce((n, x) => n + x.log.filter((l) => l.skip).length, 0);
       titr = (G.titr.who === 'ide' ? 'L\'IDE' : G.cfg.sex === 'F' ? 'La patiente' : 'Le patient') + ' a appliqué le protocole : ' + (parts.join(', ') || 'doses revenues à leur point de départ') + ' (' + up + ' hausse' + (up > 1 ? 's' : '') + ', ' + down + ' baisse' + (down > 1 ? 's' : '') + ').' + (capped.length ? ' Dose maximale du protocole atteinte, ' + (G.titr.who === 'ide' ? 'l\'IDE a' : G.cfg.sex === 'F' ? 'elle a' : 'il a') + ' appelé : ' + capped.join(', ') + '.' : '') + (skipped ? ' ' + skipped + ' hausse' + (skipped > 1 ? 's' : '') + ' prévue' + (skipped > 1 ? 's' : '') + ' non faite' + (skipped > 1 ? 's' : '') + ' (' + (pt.par.fear ? 'peur de l\'hypoglycémie' : 'découragement') + ').' : '');
     }
@@ -510,7 +510,7 @@
     if (rx.sglt2 !== 'none') o.push(D.SGLT2[rx.sglt2].toLowerCase());
     if (rx.acarb) o.push('acarbose ' + rx.acarb + ' mg/j');
     if (rx.basal) o.push('insuline basale (' + ({ g100: 'glargine U100', g300: 'glargine U300', deg: 'dégludec', nph: 'NPH' }[rx.basalType] || 'glargine') + ') ' + rx.basal + ' U/j');
-    if (rx.pump) o.push((rx.device === 'loop' ? 'boucle fermée hybride, débit de base automatique (' : 'pompe à insuline, débit de base ') + fmt(rx.pump, rx.pump % 1 ? 1 : 0) + ' U/24 h' + (rx.pumpSeg && rx.device !== 'loop' ? ' (' + rx.pumpSeg.slice(0, 3).map((v, i) => Y.SEGS[i][2].split(' (')[0] + ' ' + fmt(v, 2)).join(' ; ') + ' U/h)' : '') + (rx.device === 'loop' ? ')' : ''));
+    if (rx.pump) o.push((rx.device === 'loop' ? 'boucle fermée hybride, débit de base automatique (' : 'pompe à insuline, débit de base ') + fmt(rx.pump, rx.pump % 1 ? 1 : 0) + ' U/24 h' + (rx.pumpSeg && rx.device !== 'loop' ? ' (profil horaire de ' + fmt(Math.min(...rx.pumpSeg), 2) + ' à ' + fmt(Math.max(...rx.pumpSeg), 2) + ' U/h, nuit 00 h – 07 h ' + fmt(rx.pumpSeg.slice(0, 7).reduce((a, x) => a + x, 0) / 7, 2) + ' U/h en moyenne)' : '') + (rx.device === 'loop' ? ')' : ''));
     if (rx.pump && rx.bolusMode === 'if') { o.push('insulinothérapie fonctionnelle (1 U pour ' + fmt(rx.ratio, 1) + ' g de glucides ; correction 1 U pour ' + fmt(rx.isf, 2) + ' g/L au-dessus de 1,20)'); return o.join(' + '); }
     if (rx.rapid) o.push((rx.pump ? 'bolus ' : 'analogue rapide ') + (rx.rapidM || [0, rx.rapid, 0]).map((x) => x || 0).join('/') + ' U (petit-déj./déj./dîner)');
     return o.length ? o.join(' + ') : 'aucun traitement';
@@ -798,13 +798,15 @@
   function pumpBlock(d, re) {
     const tdd = Math.max(10, d.basal + d.rapidM.reduce((a, x) => a + x, 0));
     const rIn = (id, val, on, step, label) => h('input', { type: 'number', id, class: 'sv-num sv-num-s', value: val, min: 0, max: 50, step, inputmode: 'decimal', 'aria-label': label, oninput: (e) => { const v = parseFloat(String(e.target.value).replace(',', '.')); if (v >= 0) on(v); } });
-    const spread = () => { const r = d.basal / 24.6; d.seg = [r, 1.2 * r, r, r].map((x) => Math.round(x * 20) / 20); re(); };
+    const spread = () => { d.seg = Y.flatProfile(d.basal); re(); };
     return h('div', { class: 'sv-pump' }, [
       h('h4', null, 'Réglages de la pompe (protocole type)'),
-      d.device === 'loop' ? null : h('label', { class: 'sv-check' }, [h('input', { type: 'checkbox', id: 'dtSegOn', checked: !!d.seg, onchange: (e) => { if (e.target.checked) spread(); else { d.seg = null; re(); } } }), ' Profil horaire du débit de base (4 tranches)']),
-      d.seg && d.device !== 'loop' ? h('div', { class: 'sv-form' }, [
-        ...Y.SEGS.slice(0, 3).map(([, , lab], i) => h('div', { class: 'sv-field' }, [h('label', { for: 'dtSeg' + i }, lab + ' (U/h)'), rIn('dtSeg' + i, d.seg[i], (v) => { d.seg[i] = v; if (i === 0) d.seg[3] = v; d.basal = Math.round(Y.segTotal(d.seg)); }, 0.05, lab)])),
-        h('p', { class: 'sv-note' }, 'Total ' + fmt(Y.segTotal(d.seg), 1) + ' U/24 h (22 h – minuit = minuit – 3 h). Titration : nuit sur la glycémie de 3 h, aube sur le réveil, journée sur les glycémies avant le déjeuner et le dîner une fois les bolus réglés ; ± 10 % (− 20 % si hypoglycémie), plafond + 50 %.')
+      d.device === 'loop' ? null : h('label', { class: 'sv-check' }, [h('input', { type: 'checkbox', id: 'dtSegOn', checked: !!d.seg, onchange: (e) => { if (e.target.checked) spread(); else { d.seg = null; re(); } } }), ' Débit de base programmé heure par heure (24 créneaux)']),
+      d.seg && d.device !== 'loop' ? h('div', { class: 'sv-prof' }, [
+        h('p', { class: 'sv-note' }, 'Débit programmé heure par heure (U/h), de 00 h à 24 h. Total ' + fmt(Y.segTotal(d.seg), 1) + ' U/24 h.'),
+        h('div', { class: 'sv-prof-grid' }, d.seg.map((v, i) => h('label', { class: 'sv-prof-c' }, [h('span', null, Y.hourLab(i)), rIn('dtSegH' + i, v, (x) => { d.seg[i] = x; d.basal = Math.round(Y.segTotal(d.seg)); }, 0.05, 'Débit ' + Y.hourLab(i))]))),
+        h('div', { class: 'sv-actions' }, [h('button', { type: 'button', class: 'sv-secondary', onclick: () => { d.seg = d.seg.map((x) => Math.round(x * 1.1 * 20) / 20); d.basal = Math.round(Y.segTotal(d.seg)); re(); } }, 'Tout + 10 %'), h('button', { type: 'button', class: 'sv-secondary', onclick: () => { d.seg = d.seg.map((x) => Math.max(0.05, Math.round(x * 0.9 * 20) / 20)); d.basal = Math.round(Y.segTotal(d.seg)); re(); } }, 'Tout − 10 %'), h('button', { type: 'button', class: 'sv-secondary', onclick: spread }, 'Profil type (aube + 20 %)')]),
+        h('p', { class: 'sv-note' }, 'En ville, le patient adapte lui-même chaque créneau sur la glycémie du capteur 2 h plus tard, à distance des repas (nuit jusqu\'au petit-déjeuner, fin d\'après-midi ; journée lors d\'un repas sauté) : + 0,05 U/h (0,10 au-delà de 1 U/h) après 3 jours au-dessus de l\'objectif, baisse dès le lendemain d\'un passage sous l\'objectif (double si hypoglycémie) ; plafond + 50 % par créneau (complément, protocole type).')
       ]) : null,
       h('div', { class: 'sv-form' }, [h('div', { class: 'sv-field' }, [h('label', { for: 'dtBolMode' }, 'Bolus'), h('select', { id: 'dtBolMode', onchange: (e) => { d.bolusMode = e.target.value; if (d.bolusMode === 'if' && !d.ratio) { d.ratio = Math.round(500 / tdd * 2) / 2; d.isf = Math.round(18 / tdd * 100) / 100; } re(); } }, [['fixe', 'Doses fixes par repas'], ['if', 'Insulinothérapie fonctionnelle (ratio + correction)']].map(([k, t]) => h('option', { value: k, selected: (d.bolusMode || 'fixe') === k }, t)))])]),
       d.bolusMode === 'if' ? h('div', { class: 'sv-form' }, [

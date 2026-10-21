@@ -80,11 +80,13 @@
   /* ---------- Une journée ---------- */
   // pt : patient du modèle ; ctx : { seed, irregular, newHypo, newSev } ; renvoie les paramètres de la journée.
   // Écarts-types (log) de la variabilité glycémique ; calés sur les CV publiés (tools/cv-dt2.js).
-  // Pompe au long cours (protocole type, complément) : profil de débit de base en 4 tranches horaires, bolus fixes
-  // ou insulinothérapie fonctionnelle (glucides du repas / ratio + correction si glycémie > 1,20 g/L).
-  const SEGS = [[0, 3, 'minuit – 3 h'], [3, 7, '3 h – 7 h (aube)'], [7, 22, '7 h – 22 h'], [22, 24, '22 h – minuit']];
+  // Pompe au long cours (complément) : débit de base programmé heure par heure (24 créneaux, de 00 h à 24 h),
+  // adapté par le patient créneau par créneau ; bolus fixes ou insulinothérapie fonctionnelle (glucides du repas /
+  // ratio + correction si glycémie > 1,20 g/L).
+  const hourLab = (h) => String(h % 24).padStart(2, '0') + ' h';
+  const flatProfile = (total) => { const r = total / 24.8; return Array.from({ length: 24 }, (_, h) => Math.round((h >= 3 && h < 7 ? 1.2 * r : r) * 20) / 20); };
   const CARBS = [60, 60, 60]; // glucides de référence par repas (g), modulés par la taille du repas (wBase × aléa)
-  const segTotal = (sg) => SEGS.reduce((a, [h0, h1], i) => a + (h1 - h0) * sg[i], 0);
+  const segTotal = (sg) => sg.reduce((a, x) => a + x, 0);
   const V = { day: 0.05, dayIns: 0.12, daySu: 0.09, fast: 0.07, fastIns: 0.08, meal: 0.28, sig: 0.45, bol: 0.25 };
   function makeDay(pt, D, ctx) {
     const r = rng(ctx.seed);
@@ -105,17 +107,12 @@
     const dm = Math.exp(sdD * gauss(r) - sdD * sdD / 2);
     const MG = s.MG * dm;
     let F0 = D.fpgOf(pt) * dm;
-    // Profil horaire de pompe : plus de débit la nuit (minuit – 7 h) que la moyenne abaisse le réveil (la journée
-    // se compense, la moyenne restant fixée par l'insuline totale) ; une tranche de l'aube plus forte efface l'aube.
-    let dawnK = 1;
-    if (rx.pumpSeg && rx.pump > 0) {
-      const sg = rx.pumpSeg, mean = segTotal(sg) / 24, night = (3 * sg[0] + 4 * sg[1]) / 7;
-      F0 *= Math.max(0.6, Math.min(1.4, 1 - 0.35 * (night / mean - 1)));
-      dawnK = Math.max(0, 1 - 2.5 * Math.max(0, sg[1] / Math.max(0.05, sg[0]) - 1));
-    }
+    // Profil horaire de pompe : un créneau au-dessus du débit moyen abaisse la glycémie 1 h 30 à 2 h plus tard,
+    // un créneau en dessous la remonte (la moyenne de la journée reste fixée par l'insuline totale).
+    const rdev = rx.pumpSeg && rx.pump > 0 ? (() => { const mean = segTotal(rx.pumpSeg) / 24; return rx.pumpSeg.map((x) => (x - mean) / mean); })() : null;
     const sdF = (V.fast + V.fastIns * Math.min(1, bas / (0.3 * p.weight0)) * absF) * gvK;
     const F = Math.max(0.55, F0 * Math.exp(sdF * gauss(r) - sdF * sdF / 2));
-    const dawn = (bas > 0 ? 0.04 : Math.min(0.15, 0.05 + 0.04 * Math.max(0, MG - 1.3))) * (bas > 0 ? (rx.pump > 0 && !rx.pumpSeg ? 1.5 : dawnK) : 1);
+    const dawn = (bas > 0 ? 0.04 : Math.min(0.15, 0.05 + 0.04 * Math.max(0, MG - 1.3))) * (rx.pump > 0 ? 1.5 : 1); // pompe : l'aube n'est couverte que si le débit est programmé plus haut (3 h – 7 h)
     const glp = D.glpFrac(rx);
     const uRef = (rx.rapidM || [0, 0, 0]).slice();
     const sumU = uRef.reduce((a, x) => a + x, 0);
@@ -155,7 +152,7 @@
     alloc();
     const noise = [0, 1, 2].map(() => ({ a: (0.025 + 0.03 * r()) * Math.max(0.8, MG / 1.4), f: 1 / (2 + 4 * r()), ph: 2 * Math.PI * r() }));
     // Hypoglycémies du modèle : placées plus bas, au creux du profil.
-    const dp = { d: pt.day, off: sh.off, shift: sh.label, F, dawn, dday, sig, w, tm, skip, u, cut, segCut, extra, noise, hypos: [], mg: MG, basal: bas, pump: rx.pump > 0, rapid: u.slice(), meter: [0, 1, 2, 3, 4, 5, 6].map(() => 1 + 0.04 * gauss(r)), sensorSeed: Math.floor(r() * 1e9) };
+    const dp = { d: pt.day, off: sh.off, shift: sh.label, rdev, kr: 0.45 * Math.max(1, MG / 1.4), F, dawn, dday, sig, w, tm, skip, u, cut, segCut, extra, noise, hypos: [], mg: MG, basal: bas, pump: rx.pump > 0, rapid: u.slice(), meter: [0, 1, 2, 3, 4, 5, 6].map(() => 1 + 0.04 * gauss(r)), sensorSeed: Math.floor(r() * 1e9) };
     // Corrections (insulinothérapie fonctionnelle) : glycémie avant le repas au-dessus de 1,20 g/L → + (g − 1,20) /
     // sensibilité, arrondi à 0,5 U.
     if (IF && rx.isf > 0) {
@@ -202,6 +199,7 @@
   function glucose(dp, t) {
     const sg = t >= 7.5 && t < 12.5 ? 0 : t >= 12.5 && t < 19.5 ? 1 : t >= 19.5 || t < 3 ? 2 : -1;
     let g = dp.F - dp.dawn * dawnDip(t) + dp.dday * dayShape(t) * (sg >= 0 ? 1 - dp.segCut[sg] : 1);
+    if (dp.rdev) { const x = (((t - 1.75) % 24) + 24) % 24, i0 = Math.floor(x), f = x - i0; g -= dp.kr * (dp.rdev[i0] * (1 - f) + dp.rdev[(i0 + 1) % 24] * f); }
     for (let m = 0; m < 3; m++) {
       if (!dp.skip[m]) g += dp.sig * dp.w[m] * (1 - dp.cut[m]) * kMeal(t - dp.tm[m]);
       if (dp.extra[m]) g -= dp.extra[m] * kBol(t - dp.tm[m]);
@@ -224,11 +222,13 @@
     const o = {};
     MOMENTS.forEach(([k, , t], i) => { o[k] = glucose(dp, t) * dp.meter[i]; });
     o.n3 = glucose(dp, 3) * dp.meter[0]; // 3 h du matin (titration de la nuit sous pompe)
+    o.hourly = Array.from({ length: 24 }, (_, h) => glucose(dp, h + 0.5) * dp.meter[0]); // capteur, heure par heure
     // Hypoglycémie ressentie : resucrage, glycémie notée au moment du malaise.
     // Creux de chaque période, vus par un capteur : nuit (avant le réveil) et après chaque bolus (1 h après le repas
     // jusqu'au repas suivant).
     const nad = (a, b) => { let m = 9; for (let t = a; t <= b; t += 0.25) m = Math.min(m, glucose(dp, t)); return m; };
     o.nadir = { night: nad(0, 7.25), m0: nad(8.5, 12.25), m1: nad(13.5, 19.25), m2: nad(20.5, 23.75) };
+    o.lunchSkipped = !!dp.skip[1];
     o.hypos = dp.hypos.map((hy) => { const t = hy.t0 + hy.dur / 2; return { t, tc: (((t + (dp.off || 0)) % 24) + 24) % 24, g: hy.depth * dp.meter[0], sev: hy.sev }; });
     return o;
   }
@@ -270,16 +270,17 @@
     const lowN = prot.cgm && rdg.nadir && rdg.nadir.night < O.rev[0];
     // Pompe : le débit de base (U/24 h) se titre comme une basale ; boucle fermée : il s'ajuste seul au capteur
     // (cible du réveil ≈ 1,10 g/L, baisse si creux nocturne), seuls les bolus suivent le protocole.
-    // Tranche de débit (U/h) : ± 10 % (− 20 % si hypoglycémie), arrondi à 0,05 U/h, mêmes délais que les doses.
+    // Créneau horaire (U/h) : + 0,05 U/h (0,10 au-delà de 1 U/h) après « délai » jours au-dessus de l'objectif ;
+    // baisse dès le lendemain d'un passage sous l'objectif (double si hypoglycémie), puis pas de hausse pendant 3 jours.
     const ctlR = (name, i, val, obj, hypo) => {
-      const sg = rx.pumpSeg, rate = sg[i];
+      const sg = rx.pumpSeg, rate = sg[i], stp = rate < 1 ? 0.05 : 0.1, lab = hourLab(i) + ' – ' + hourLab(i + 1);
       if (state.hold[name] > 0) state.hold[name]--;
-      const setR = (nv, why) => { nv = Math.max(0.1, Math.round(nv * 20) / 20); if (nv === rate || !apply) return; sg[i] = nv; if (i === 0) sg[3] = nv; rx.pump = Math.round(segTotal(sg) * 10) / 10; log.push({ name: 'basal', seg: i, from: rate, to: nv, why: SEGS[i][2] + ' : ' + why, rate: true }); };
-      if ((val != null && val < obj[0]) || hypo) { state.above[name] = 0; state.hold[name] = 7; setR(rate * (hypo ? 0.8 : 0.9), hypo ? 'hypoglycémie' : 'sous l\'objectif'); }
+      const setR = (nv, why) => { nv = Math.max(0.05, Math.round(nv * 20) / 20); if (nv === rate || !apply) return; sg[i] = nv; rx.pump = Math.round(segTotal(sg) * 100) / 100; log.push({ name: 'basal', seg: i, from: rate, to: nv, why: 'créneau ' + lab + ' : ' + why, rate: true }); };
+      if ((val != null && val < obj[0]) || hypo) { state.above[name] = 0; state.hold[name] = 3; setR(rate - stp * (hypo ? 2 : 1), hypo ? 'hypoglycémie 2 h plus tard' : 'glycémie 2 h plus tard sous l\'objectif'); }
       else if (val != null && val > obj[1] && !(state.hold[name] > 0)) { state.above[name] = (state.above[name] || 0) + 1; if (state.above[name] >= prot.delai) { state.above[name] = 0;
         const cap = prot.segCap && prot.segCap[i];
-        if (cap && rate * 1.1 > cap + 1e-9) { if (!state.capped) state.capped = {}; if (!state.capped[name]) { state.capped[name] = true; log.push({ name: 'basal', seg: i, from: rate, to: rate, why: SEGS[i][2] + ' : débit maximal du protocole atteint (' + cap.toFixed(2).replace('.', ',') + ' U/h) : appeler le médecin', cap: true }); } }
-        else setR(rate * 1.1, prot.delai + ' jours au-dessus de l\'objectif'); } }
+        if (cap && rate + stp > cap + 1e-9) { if (!state.capped) state.capped = {}; if (!state.capped[name]) { state.capped[name] = true; log.push({ name: 'basal', seg: i, from: rate, to: rate, why: 'créneau ' + lab + ' : débit maximal du protocole atteint (' + cap.toFixed(2).replace('.', ',') + ' U/h) : appeler le médecin', cap: true }); } }
+        else setR(rate + stp, prot.delai + ' jours au-dessus de l\'objectif 2 h plus tard'); } }
       else state.above[name] = 0;
     };
     if (rx.device === 'loop' && rx.pump > 0) {
@@ -287,14 +288,17 @@
       const f = lowL ? 0.85 : rdg.rev > 1.3 ? 1.05 : rdg.rev < 0.95 ? 0.95 : 1;
       if (f !== 1 && apply) { const nv = Math.max(4, Math.round(rx.pump * f)); if (nv !== rx.pump) log.push({ name: 'basal', from: rx.pump, to: nv, why: 'boucle fermée : débit ajusté au capteur', auto: true }); if (rx.pumpSeg) rx.pumpSeg = rx.pumpSeg.map((x) => Math.round(x * nv / rx.pump * 20) / 20); rx.pump = nv; }
     } else if (rx.pump > 0 && rx.pumpSeg) {
-      // Profil horaire : minuit – 3 h sur la glycémie de 3 h, aube sur le réveil, journée sur les glycémies avant
-      // le déjeuner et le dîner (à distance des bolus) ; la tranche 22 h – minuit suit celle de minuit – 3 h.
-      const hyN = rdg.hypos.some((h) => h.t < 3), hyA = rdg.hypos.some((h) => h.t >= 3 && h.t < 7.5), hyD = rdg.hypos.some((h) => h.t >= 11 && h.t < 12.5) || rdg.hypos.some((h) => h.t >= 17.5 && h.t < 19.5);
-      ctlR('seg0', 0, rdg.n3, O.rev, hyN);
-      ctlR('seg1', 1, rdg.rev, O.rev, hyA);
-      // Le débit de jour ne se touche que si les glycémies après les repas sont dans l'objectif (bolus d'abord).
-      const ppOk = [rdg.ppPdj, rdg.ppDej, rdg.ppDin].every((x) => x <= (O.pp || [1.2, 1.8])[1]);
-      ctlR('seg2', 2, ppOk || (rdg.avDej + rdg.avDin) / 2 < O.avDej[0] ? (rdg.avDej + rdg.avDin) / 2 : null, O.avDej, hyD);
+      // En ville, le patient adapte lui-même chaque créneau horaire (00 h – 24 h), sur la glycémie du capteur 2 h plus
+      // tard, aux heures à distance des repas et des bolus (nuit jusqu'au petit-déjeuner, fin d'après-midi) ; les
+      // créneaux de la journée se vérifient par un repas sauté (test de jeûne), ici quand le déjeuner est sauté.
+      const hv = prot.cgm && rdg.hourly ? rdg.hourly : null;
+      const at = (e) => (hv ? hv[e] : { 3: rdg.n3, 7: rdg.rev, 19: rdg.avDin }[e]);
+      const fastE = [1, 2, 3, 4, 5, 6, 7, 18, 19].concat(rdg.lunchSkipped ? [13, 14, 15, 16, 17] : []);
+      for (let h0 = 0; h0 < 24; h0++) {
+        const e = (h0 + 2) % 24;
+        if (!fastE.includes(e) || at(e) == null) continue;
+        ctlR('h' + h0, h0, at(e), e <= 7 ? O.rev : O.avDin, rdg.hypos.some((x) => Math.abs(x.t - e) <= 1));
+      }
     } else if (rx.pump > 0) ctl('basal', rx.pump, lowN ? Math.min(rdg.rev, rdg.nadir.night) : rdg.rev, O.rev, nightHypo, (v) => { rx.pump = v; });
     else ctl('basal', rx.basal, lowN ? Math.min(rdg.rev, rdg.nadir.night) : rdg.rev, O.rev, nightHypo, (v) => { rx.basal = v; });
     if (rx.bolusMode === 'if' && rx.ratio > 0) {
@@ -492,5 +496,5 @@
     ]);
   }
 
-  S.glyco = { V, SEGS, CARBS, segTotal, PROTO, objOf, shiftOf, clock, ASG, MOMENTS, MEALS, HYPO, makeDay, glucose, readings, titrate, cgm, agpStats, cgmTargets, interpretAGP, interpretCarnet, carnetTable, agpReport, rng };
+  S.glyco = { V, hourLab, flatProfile, CARBS, segTotal, PROTO, objOf, shiftOf, clock, ASG, MOMENTS, MEALS, HYPO, makeDay, glucose, readings, titrate, cgm, agpStats, cgmTargets, interpretAGP, interpretCarnet, carnetTable, agpReport, rng };
 })();
