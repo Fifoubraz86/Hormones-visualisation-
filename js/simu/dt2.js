@@ -492,6 +492,7 @@
     G.history.push(Object.assign({ day: pt.day, labs, q, w: m.w, bmi: m.bmi, sbp: Math.round(m.sbp), symptoms: sy, rx: rxLabel(pt.rx), note, event: event || null, toon, caption: G.ev.caption || toon, banner: G.ev.banner || null, epitaphe: G.ev.epitaphe || null, carnet, agp, titr, T, a1cTrue: pt.st.A, ukg: bas(pt.rx) / pt.st.W, mode: 'consult' }, extra || {}));
     G.ev.eventToon = null; G.ev.toonNext = null; G.ev.banner = null; G.ev.epitaphe = null; G.ev.caption = null;
     G.visits.push({ day: pt.day, labs });
+    { const eh = G.history[G.history.length - 1]; eh.hypoN = pt.st.hypo - G.lastHypo; eh.sevN = pt.st.hypoSev - (G.lastSevL || 0); G.lastSevL = pt.st.hypoSev; }
     G.lastHypo = pt.st.hypo;
     G.ev.notes = [];
   }
@@ -1015,6 +1016,45 @@
 
   // Correction d'une décision (mode entraînement) : rang du choix dans l'arbre SFD du jour, lecture SFD de
   // l'ordonnance, meilleures options et leur résultat prévu.
+  // Adaptations posologiques attendues au moment de la décision (contre-indications, effets indésirables,
+  // surtraitement) : chacune est vérifiée sur la nouvelle ordonnance (mode entraînement).
+  function adaptNeeds(prev, rx) {
+    const pt = G.pt, ev = G.ev, c = G.cfg;
+    const e = [...G.history].reverse().find((x) => !x.prescription) || { labs: {} };
+    const dfg = e.labs.dfg != null ? e.labs.dfg : pt.st.dfg, a1c = lastA1c(), T = goalT();
+    const hy = e.hypoN || 0, sev = e.sevN || 0, ins = (r) => bas(r) + (r.rapid || 0);
+    const N = [];
+    const need = (kind, what, why, ok, src) => N.push({ kind, what, why, done: !!ok, src });
+    // Metformine : DFG, intolérance digestive.
+    if (prev.met > 0 && dfg < 30) need('stop', 'arrêter la metformine', 'DFG ' + Math.round(dfg) + ' < 30 : contre-indication (acidose lactique)', !(rx.met > 0), 'avis 12 bis');
+    else if (prev.met > 1000 && dfg < 45) need('reduce', 'metformine ≤ 1000 mg/j', 'DFG ' + Math.round(dfg) + ' entre 30 et 44', rx.met <= 1000, 'avis 12 bis');
+    else if (prev.met > 2000 && dfg < 60) need('reduce', 'metformine ≤ 2000 mg/j', 'DFG ' + Math.round(dfg) + ' entre 45 et 59', rx.met <= 2000, 'avis 12 bis');
+    if (prev.met > 0 && !pt.take.met && !(dfg < 30)) need('reduce', 'metformine : reprise à plus faible dose et progressive (ou arrêt)', 'intolérance digestive : le patient l\'a arrêtée', rx.met < prev.met || (rx.met > 0 && G.draft.metProg), 'avis 6');
+    // iDPP4 : dose selon le DFG ; pancréatite.
+    if (prev.dpp4 > 50 && dfg < 45 && dfg >= 30) need('reduce', 'sitagliptine 50 mg/j', 'DFG ' + Math.round(dfg) + ' entre 30 et 44', rx.dpp4 <= 50, 'RCP');
+    if (prev.dpp4 > 25 && dfg < 30) need('reduce', 'sitagliptine 25 mg/j', 'DFG ' + Math.round(dfg) + ' < 30', rx.dpp4 <= 25, 'RCP');
+    if (ev.panc && (prev.dpp4 > 0 || prev.glp !== 'none' || rx.dpp4 > 0 || rx.glp !== 'none')) need('stop', 'arrêter définitivement les incrétines (iDPP4, aGLP1)', 'pancréatite aiguë', !(rx.dpp4 > 0) && rx.glp === 'none', 'RCP');
+    // aGLP1 : vomissements.
+    if (prev.glp !== 'none' && !pt.take.glp) need('reduce', 'aGLP1 : redescendre d\'un palier (ou arrêter)', 'vomissements : le patient ne fait plus l\'injection', rx.glp === 'none' || D.GLP1[rx.glp].doses.indexOf(rx.glpDose) < D.GLP1[prev.glp].doses.indexOf(prev.glpDose) || rx.glp !== prev.glp, 'avis 6 bis');
+    // Sulfamide : hypoglycémies, insuline, sujet âgé, insuffisance rénale sévère.
+    if (prev.su > 0) {
+      const ger = c.age >= 75 && c.geria && c.geria !== 'bonne';
+      if (sev > 0 || ger || dfg < 30 || ins(rx) > 0) need('stop', 'arrêter le sulfamide', sev > 0 ? 'hypoglycémie sévère' : ger ? 'personne âgée ' + c.geria : dfg < 30 ? 'DFG < 30' : 'pas de sulfamide sous insuline', !(rx.su > 0), sev > 0 ? 'avis 10' : ger ? 'avis 21 bis' : ins(rx) > 0 ? 'avis 18 ter' : 'avis 12 bis');
+      else if (hy > 0) need('reduce', 'baisser ou arrêter le sulfamide', hy + ' hypoglycémie' + (hy > 1 ? 's' : '') + ' depuis le dernier bilan', rx.su < prev.su, 'avis 10');
+    }
+    // Insuline : hypoglycémies (sans sulfamide en cause), surtraitement.
+    if (ins(prev) > 0 && !(prev.su > 0) && (sev > 0 || hy >= 3)) need('reduce', 'baisser l\'insuline (≈ 10 à 20 %) et en chercher la cause', sev > 0 ? 'hypoglycémie sévère' : hy + ' hypoglycémies depuis le dernier bilan', ins(rx) <= ins(prev) * 0.92, 'avis 18');
+    if (T.floor && a1c < T.floor && (prev.su > 0 || ins(prev) > 0)) need('reduce', 'désescalader (sulfamide ou insuline)', 'HbA1c ' + fmt(a1c, 1) + ' % sous le plancher de ' + fmt(T.floor, 1) + ' % (surtraitement, risque d\'hypoglycémie)', rx.su < prev.su || ins(rx) < ins(prev), 'avis 21 bis');
+    // Baisses ou arrêts sans motif apparent.
+    const motive = N.length > 0 || a1c < T.max - 1;
+    const drops = [];
+    if (prev.met > 0 && rx.met < prev.met && !N.some((n) => /metformine/.test(n.what))) drops.push('metformine');
+    if (prev.glp !== 'none' && rx.glp === 'none' && !N.some((n) => /aGLP1|incrétines/.test(n.what))) drops.push('aGLP1');
+    if (prev.sglt2 !== 'none' && rx.sglt2 === 'none' && !ev.keto) drops.push('iSGLT2');
+    if (prev.dpp4 > 0 && !(rx.dpp4 > 0) && rx.glp === 'none' && !N.some((n) => /sitagliptine|incrétines/.test(n.what))) drops.push('iDPP4');
+    return { needs: N, drops: motive ? [] : drops };
+  }
+
   function makeDebrief(T, prev, rx, a1c) {
     const ids = [];
     const on = (r, k) => (k === 'glp' ? r.glp !== 'none' : k === 'sglt2' ? r.sglt2 !== 'none' : (r[k] || 0) > 0);
@@ -1035,9 +1075,15 @@
     const A = SFD.advise({ c: G.cfg, rx, dfg: G.pt.st.dfg, a1c, W: G.pt.st.W, hypos: G.pt.st.hypo, sevHypo: G.pt.st.hypoSev > 0, starts: G.starts, day: G.pt.day, ppr: G.ev.ppr != null, cgm: G.draft.cgm, titr: G.draft.titr, goal: G.goal, asg: G.draft.asg, fpg: null });
     const stops = A.items.filter((x) => x.lvl === 'stop'), warns = A.items.filter((x) => x.lvl === 'warn');
     const r = match ? match.r : null;
-    const v = stops.length ? ['bad', 'Erreur'] : r === 1 ? ['good', 'Conforme (rang 1, recommandé)'] : r === 2 ? ['ok', 'Acceptable (rang 2)'] : r != null ? ['warn', 'À revoir (rang ' + r + ' : ' + S.dt2tree.RANK[r] + ')'] : warns.length ? ['warn', 'À revoir'] : ['ok', 'Hors des options de l\'arbre'];
+    const AD = adaptNeeds(prev, rx);
+    const missStop = AD.needs.filter((n) => !n.done && n.kind === 'stop'), missRed = AD.needs.filter((n) => !n.done && n.kind === 'reduce');
+    const adaptOnly = !match || match.o.id === 'none';
+    let v = stops.length || missStop.length ? ['bad', 'Erreur'] : r === 1 ? ['good', 'Conforme (rang 1, recommandé)'] : r === 2 ? ['ok', 'Acceptable (rang 2)'] : r != null ? ['warn', 'À revoir (rang ' + r + ' : ' + S.dt2tree.RANK[r] + ')'] : warns.length ? ['warn', 'À revoir'] : ['ok', 'Hors des options de l\'arbre'];
+    if (v[0] !== 'bad' && missRed.length && (v[0] === 'good' || v[0] === 'ok')) v = ['warn', 'À revoir (adaptation posologique manquante)'];
+    if (v[0] !== 'bad' && adaptOnly && AD.needs.length && !missRed.length) v = warns.length ? ['ok', 'Adaptation posologique conforme, mais des points SFD restent à traiter'] : ['good', 'Adaptation posologique conforme'];
+    if (v[0] === 'good' && AD.drops.length) v = ['warn', 'À revoir (arrêt ou baisse sans motif)'];
     const pick = (b) => ({ name: b.o.name, r: b.r, why: b.why, src: b.src, a1c: b.res.a1c, dW: b.res.dW, hypo: b.res.hypo });
-    return { day: G.pt.day, a1c, cls: v[0], label: v[1], rank: r, prev: rxLabel(prev), choice: rxLabel(rx), chosen: match ? pick(match) : null, best: T.branches.slice(0, 3).map(pick), stops: stops.map((x) => x.t), warns: warns.map((x) => x.t), target: T.T.max };
+    return { day: G.pt.day, a1c, cls: v[0], label: v[1], rank: r, prev: rxLabel(prev), choice: rxLabel(rx), chosen: match ? pick(match) : null, best: T.branches.slice(0, 3).map(pick), stops: stops.map((x) => x.t), warns: warns.map((x) => x.t), target: T.T.max, needs: AD.needs, drops: AD.drops };
   }
 
   function debriefBlock(b, e) {
@@ -1049,6 +1095,9 @@
       b.chosen ? h('p', null, [h('strong', null, 'Dans l\'arbre SFD de ce jour : '), b.chosen.name + ' — rang ' + b.chosen.r + ', ' + b.chosen.why + ' (prévu : ' + res(b.chosen) + ').']) : null,
       h('p', null, h('strong', null, 'Les meilleures options ce jour-là (HbA1c ' + g1(b.a1c) + ' %, cible ≤ ' + g1(b.target) + ' %) :')),
       h('ol', { class: 'sv-debrief-l' }, b.best.map((x) => h('li', null, x.name + ' — rang ' + x.r + ' (' + S.dt2tree.RANK[x.r] + ') : ' + x.why + ' ; prévu : ' + res(x) + '.'))),
+      b.needs && b.needs.length ? h('p', null, h('strong', null, 'Adaptation posologique (contre-indications, effets indésirables, surtraitement) :')) : null,
+      b.needs && b.needs.length ? h('ul', { class: 'sv-sfd-l' }, b.needs.map((n) => h('li', { class: n.done ? 'sv-sfd-ok' : n.kind === 'stop' ? 'sv-sfd-stop' : 'sv-sfd-warn' }, (n.done ? '✓ fait : ' : n.kind === 'stop' ? '⛔ manquant : ' : '⚠ manquant : ') + n.what + ' — ' + n.why + ' (' + (n.src.startsWith('avis') ? 'SFD 2025, ' : '') + n.src + ').'))) : null,
+      b.drops && b.drops.length ? h('p', { class: 'sv-sfd-warn' }, '⚠ Arrêt ou baisse sans motif apparent : ' + b.drops.join(', ') + ' (traitement efficace et toléré, HbA1c pas très en dessous de la cible).') : null,
       b.stops.length || b.warns.length ? h('p', null, h('strong', null, 'Lecture SFD de votre ordonnance :')) : h('p', { class: 'sv-muted' }, 'Lecture SFD : pas d\'erreur ni de point d\'alerte sur cette ordonnance.'),
       b.stops.length || b.warns.length ? h('ul', { class: 'sv-sfd-l' }, b.stops.map((t) => h('li', { class: 'sv-sfd-stop' }, '⛔ ' + t)).concat(b.warns.map((t) => h('li', { class: 'sv-sfd-warn' }, '⚠ ' + t)))) : null,
       e.labs.a1c != null ? h('p', null, [h('strong', null, 'Résultat obtenu : '), 'HbA1c ' + g1(b.a1c) + ' → ' + g1(e.labs.a1c) + ' %.']) : null
