@@ -599,9 +599,67 @@ body.ph-noscroll { overflow: hidden; }
 .ph-standalone .sv-chips { margin-bottom: 6px; }
 .ph-slow { font-size: 0.85rem; color: var(--warn); min-width: 11em; }
 /* Lisibilité : flux estompés hors thème, repères des organes non sélectionnés atténués, badges des médicaments */
-.ph-flow.dim { opacity: 0.06; animation: none; }
+.ph-flow.dim { opacity: 0.13; animation: none; }
 .ph-flow.idle { opacity: 0.08; }
 .ph-org.far .ph-leader { opacity: 0.25; } .ph-org.far .ph-dot { opacity: 0.35; }
 .ph-org.sel .ph-leader { stroke: var(--accent); stroke-width: 1.6; stroke-dasharray: none; opacity: 1; }
 .ph-pt-s { font-size: 10.5px; }
 .ph-pill, .ph-pt { pointer-events: none; }
+/* Schéma des axes (style de l'atlas, sans corps) */
+.px-svg { background: var(--panel); border-radius: 14px; }
+.px-halo { fill: var(--tsh); opacity: 0.1; stroke: none; }
+.px-h-brain, .px-h-adrenal { fill: var(--trab); } .px-h-liver, .px-h-muscle, .px-h-stomach, .px-h-gut { fill: #8fbf2f; } .px-h-fat { fill: #e0a020; } .px-h-kidney, .px-h-bladder { fill: var(--t4); } .px-h-islet { fill: var(--accent); } .px-h-pen { fill: var(--warn); }
+.px-node { cursor: pointer; } .px-node:focus { outline: none; }
+.px-node:hover .px-halo { opacity: 0.22; }
+.px-node.sel .px-halo { opacity: 0.28; stroke: var(--accent); stroke-width: 3; }
+.px-node.how .px-halo { opacity: 0.32; stroke: var(--warn); stroke-width: 5; stroke-dasharray: 10 6; animation: px-spin 8s linear infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes px-spin { to { transform: rotate(360deg); } }
+.px-lbl { font: 700 25px var(--font-body); fill: var(--fg); }
+.px-v { font: 600 21px var(--font-mono, monospace); fill: var(--accent); }
+.px-big { font-size: 34px; fill: var(--fg); }
+.px-sub { font: 400 17px var(--font-body); fill: var(--muted); }
+.px-box { fill: var(--panel-2, var(--panel)); stroke: var(--line); stroke-width: 2.5; }
+.px-box-blood { fill: color-mix(in srgb, #8fbf2f 14%, var(--panel)); stroke: #8fbf2f; stroke-width: 3.5; }
+.px-box-blood.high { stroke: var(--warn); } .px-box-blood.low { stroke: var(--bad); stroke-width: 5; }
+.px-box-keto { fill: color-mix(in srgb, var(--bad) 10%, var(--panel)); stroke: var(--bad); }
+.px-node.sel .px-box { stroke: var(--accent); stroke-width: 4; }
+.px-gbg { fill: var(--line); } .px-gok { fill: #8fbf2f; opacity: 0.6; } .px-needle { fill: var(--fg); }
+.px-flow { stroke-dasharray: 3 14; }
+.px-flow.px-sig { stroke-dasharray: 2 9; }
+.px-pill rect { fill: var(--panel); stroke: currentColor; stroke-width: 2; }
+.px-pill text { font: 600 17px var(--font-body); fill: var(--fg); }
+.px-pill.ph-g { color: #8fbf2f; } .px-pill.ph-i { color: var(--accent); } .px-pill.ph-n { color: var(--trab); } .px-pill.ph-u { color: var(--t4); } .px-pill.ph-k { color: var(--t3); } .px-pill.ph-f { color: #b07a45; } .px-pill.ph-a { color: #e5484d; } .px-pill.ph-x { color: var(--warn); }
+.px-pill, .px-sign, .px-badge, .px-badge-t { pointer-events: none; }
+.px-pill.dim, .px-sign.dim { opacity: 0.3; }
+.px-sign circle { fill: var(--panel); stroke-width: 2.5; }
+.px-sign path { fill: none; stroke-width: 3; stroke-linecap: round; }
+.px-sign.stim circle, .px-sign.stim path { stroke: var(--good); } .px-sign.inhib circle, .px-sign.inhib path { stroke: var(--bad); }
+.px-badge-t { font-size: 16px; }
+.px-penic { font-size: 54px; }
+.px-cface { fill: var(--panel); stroke: var(--line); stroke-width: 2; } .px-cday { fill: color-mix(in srgb, var(--warn) 18%, transparent); }
+.px-ctick { stroke: var(--muted); stroke-width: 2; } .px-chand { stroke: var(--accent); stroke-width: 4; stroke-linecap: round; }
+.px-ct { font: 600 22px var(--font-mono, monospace); fill: var(--fg); }
+.phb-isletc { fill: color-mix(in srgb, var(--o-pancreas) 50%, #fff); stroke: var(--o-line); stroke-width: 1.5; }
+.phb-islet-b { fill: #4f7cff; } .phb-islet-a { fill: #ff9f43; }
+.phb-org.o-bladder { fill: #e8cf6a; } .phb-ureter { fill: none; stroke: #d9b84a; stroke-width: 3; stroke-linecap: round; }
+.phb-org.o-adrenal { fill: #e9b445; } .phb-org.o-brain { fill: var(--o-brain); } .phb-org.o-cerebellum { fill: var(--o-cerebellum); } .phb-org.o-hypo { fill: var(--o-hypo); }
+.phb-org.o-stomach { fill: var(--o-stomach); } .phb-org.o-pancreas { fill: var(--o-pancreas); } .phb-org.o-colon { fill: var(--o-colon); } .phb-org.o-small { fill: var(--o-small); }
+.phb-org { stroke: var(--o-line); stroke-width: 1.2; }
+.phb-fiber { fill: none; stroke: rgba(255, 255, 255, 0.3); stroke-width: 1.5; }
+.px-svg .ph-drop { stroke-width: 1.2; } .px-svg .ph-trem { stroke-width: 3.5; } .px-svg .ph-neuro { font-size: 60px; } .px-svg .ph-coma { font-size: 44px; }
+.px-svg .ph-pen-lab { font-size: 11px; }
+/* Boutons « Comment ça marche ? » */
+.px-howwrap { margin: 10px 0 12px; padding: 10px 12px; border: 2px solid var(--accent); border-radius: 14px; background: color-mix(in srgb, var(--accent) 7%, transparent); }
+.px-howlab { margin: 0 0 8px !important; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.85rem; }
+.px-howbar { display: flex; flex-wrap: wrap; gap: 6px; }
+.px-howbtn { font: 700 0.92rem var(--font-body); padding: 7px 12px; border-radius: 999px; border: 1.5px solid var(--accent); background: var(--panel); color: var(--fg); cursor: pointer; }
+.px-howbtn:hover { background: color-mix(in srgb, var(--accent) 15%, var(--panel)); }
+.px-howbtn.on { background: var(--accent); color: var(--panel); }
+.px-howbox { margin-top: 10px; padding: 10px 14px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); }
+.px-howbox p { margin: 6px 0; }
+.px-howhead { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 1.05rem; }
+.ph-grid { grid-template-columns: 1fr !important; }
+.ph-side { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; }
+@media (max-width: 900px) { .ph-side { grid-template-columns: 1fr; } }
+.ph-predcol { display: flex; flex-direction: column; gap: 8px; }
+.ph-full .px-svg { max-height: 82vh; }
