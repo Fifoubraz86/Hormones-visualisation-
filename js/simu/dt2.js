@@ -97,6 +97,8 @@
   };
   const rangBadge = (r) => (r ? h('span', { class: 'sv-rang sv-rang-' + r }, 'Rang ' + r) : null);
 
+  const INS0 = (r) => !!r && ((r.basal || 0) + (r.rapidM || [0, 0, 0]).reduce((a, x) => a + x, 0) + (r.rapid || 0)) > 0;
+
   /* ---------- Configuration ---------- */
   function setup(keep) {
     const y0 = window.scrollY;
@@ -115,7 +117,8 @@
       return h('div', { class: 'sv-field sv-slider' }, [h('label', { for: id }, [label + ' : ', out]),
         h('input', { type: 'range', id, class: 'sv-range', min, max, step, value: cfg[key], oninput: (e) => { cfg[key] = parseFloat(e.target.value); out.textContent = fmt(cfg[key], d) + (unit ? ' ' + unit : ''); const b2 = document.getElementById('dtBmi'); if (b2) b2.textContent = 'IMC : ' + fmt(cfg.weight / Math.pow(cfg.height / 100, 2), 1) + ' kg/m².'; }, onchange: after ? () => after() : null })]);
     };
-    const pickStage = (st) => { cfg.stage = st.id; cfg.a1c = st.a1c; cfg.duration = st.dur; cfg.rx0 = st.rx(cfg.weight); setup(true); };
+    // Une HbA1c réglée à la main est verrouillée : changer de situation de départ ne l'écrase plus.
+    const pickStage = (st) => { cfg.stage = st.id; if (!cfg.a1cLocked) cfg.a1c = st.a1c; cfg.duration = st.dur; cfg.rx0 = st.rx(cfg.weight); if (!INS0(cfg.rx0)) cfg.cgm0 = false; setup(true); };
     const groups = [...new Set(STAGES.map((x) => x.g))];
     main.append(
       h('section', { class: 'sv-intro' }, [
@@ -128,7 +131,7 @@
         h('div', { class: 'sv-stages' }, groups.map((gname) => h('div', { class: 'sv-stage-g' }, [h('p', { class: 'sv-stage-h' }, gname), h('div', { class: 'sv-chips' }, STAGES.filter((x) => x.g === gname).map((st) => h('button', { type: 'button', class: 'sv-chip' + (cfg.stage === st.id ? ' on' : ''), 'aria-pressed': String(cfg.stage === st.id), onclick: () => pickStage(st) }, st.label)))]))),
         h('p', { class: 'sv-note' }, 'Fixe le traitement en cours (doses selon le poids), une HbA1c et une ancienneté typiques, modifiables ci-dessous. Les comorbidités (insuffisance cardiaque, maladie rénale, âge…) se règlent plus bas.'),
         h('h3', null, 'Diabètes atypiques'),
-        h('div', { class: 'sv-chips' }, PRESETS.map((p) => h('button', { type: 'button', class: 'sv-chip', onclick: () => { cfg = Object.assign({}, BASE, { variab: cfg.variab }, p.cfg, { stage: null }); setup(true); } }, p.label))),
+        h('div', { class: 'sv-chips' }, PRESETS.map((p) => h('button', { type: 'button', class: 'sv-chip', onclick: () => { const keep = cfg.a1cLocked ? { a1c: cfg.a1c, a1cLocked: true } : {}; cfg = Object.assign({}, BASE, { variab: cfg.variab }, p.cfg, { stage: null }, keep); setup(true); } }, p.label))),
         h('h3', null, 'Le patient'),
         h('div', { class: 'sv-form' }, [
           field('Profil', sel('dtProf', cfg.profile, Object.entries(D.PROFILES).map(([k, v]) => [k, v.label]), (v) => { cfg.profile = v; setup(); }), 'dtProf'),
@@ -136,7 +139,8 @@
           slider('dtAge', 'Âge', 'age', 18, 95, 1, 'ans', 0, () => setup(true)),
           slider('dtW', 'Poids', 'weight', 40, 200, 1, 'kg', 0, () => { const st = STAGES.find((x) => x.id === cfg.stage); if (st && st.rx(cfg.weight) && (st.rx(cfg.weight).basal || 0) > 0) { cfg.rx0 = st.rx(cfg.weight); setup(true); } }),
           slider('dtH', 'Taille', 'height', 140, 205, 1, 'cm', 0),
-          slider('dtA1c', 'HbA1c actuelle', 'a1c', 6, 14, 0.1, '%', 1),
+          slider('dtA1c', 'HbA1c actuelle' + (cfg.a1cLocked ? ' 🔒' : ''), 'a1c', 6, 14, 0.1, '%', 1, () => { if (!cfg.a1cLocked) { cfg.a1cLocked = true; setup(true); } }),
+          cfg.a1cLocked ? h('p', { class: 'sv-note', id: 'dtA1cLock' }, ['HbA1c verrouillée : c\'est celle du bilan initial, quoi que vous changiez. ', h('button', { type: 'button', class: 'sv-linkbtn', onclick: () => { cfg.a1cLocked = false; setup(true); } }, 'Déverrouiller')]) : null,
           slider('dtDur', 'Ancienneté du diabète', 'duration', 0, 40, 1, 'ans', 0),
           slider('dtDfg', 'DFG', 'dfg', 10, 130, 1, 'mL/min/1,73 m²', 0),
           slider('dtSbp', 'PA systolique', 'sbp', 90, 200, 1, 'mmHg', 0),
@@ -188,6 +192,7 @@
             field('Bolus (petit-déj. / déj. / dîner, U)', h('div', { class: 'sv-inline' }, [0, 1, 2].map((m) => num('dtR0bol' + m, (r.rapidM || [0, 0, 0])[m], 1, 0, 100, (v) => { const rm = (cfg.rx0 && cfg.rx0.rapidM ? cfg.rx0.rapidM : [0, 0, 0]).slice(); rm[m] = Math.max(0, Math.round(v) || 0); setR('rapidM', rm); setR('rapid', rm[0] + rm[1] + rm[2]); }))), 'dtR0bol0')
           ];
         })()),
+        h('label', { class: 'sv-check' }, [h('input', { type: 'checkbox', id: 'dtCgm0', checked: !!cfg.cgm0 && INS0(cfg.rx0), disabled: !INS0(cfg.rx0), onchange: (e) => { cfg.cgm0 = e.target.checked; } }), ' Capteur de glucose déjà posé' + (INS0(cfg.rx0) ? ' (rapport AGP dès le bilan initial)' : ' (seulement sous insuline : non remboursé sinon)')]),
         h('div', { class: 'sv-actions' }, h('button', { type: 'button', class: 'sv-primary', onclick: begin }, 'Voir le patient →'))
       ]),
       h('p', { class: 'sv-disc' }, 'Modèle pédagogique simplifié : effets et délais illustratifs (HbA1c jugée à 3 mois, demi-vie de l\'HbA1c ≈ 1 mois) ; ne remplace ni le jugement clinique ni les recommandations. Repères : prise de position SFD 2025 sur les traitements de l\'hyperglycémie, item EDN 247 (fiche LiSA), protocole d\'adaptation des doses d\'insuline du service ; effets des traitements : référentiel de la littérature.')
@@ -213,11 +218,13 @@
       draft: Object.assign({}, r0, { metProg: true, wait: 12, unit: 'sem', tests: new Set(['a1c', 'fpg']), ppr: false, device: 'inj', mode: 'consult', hosp: Object.assign({}, H.DEFAULTS) })
     };
     G.titr.obj = JSON.parse(JSON.stringify(Y.PROTO[G.titr.prof])); G.titr.bolusCtl = 'next';
+    // Capteur déjà en place : surveillance par le capteur dès le départ, indication acquise, AGP au bilan initial.
+    if (c.cgm0 && onIns) { G.cgm = true; G.asg = '0'; G.cgmStart = -15; G.cgmAcquired = true; }
     G.draft.titr = JSON.parse(JSON.stringify(G.titr)); G.draft.cgm = G.cgm; G.draft.asg = G.asg; G.draft.goal = null;
     // Quatorze jours de glycémies avant la première consultation (carnet, capteur).
     for (let k = 14; k > 0; k--) { pt.day = -k; recordDay(); }
     pt.day = 0;
-    doLabs(new Set(['a1c', 'fpg', 'creat']), 'Bilan initial');
+    doLabs(new Set(['a1c', 'fpg', 'creat'].concat(G.cgm ? ['agp'] : [])), 'Bilan initial');
     render();
   }
 

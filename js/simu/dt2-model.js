@@ -171,7 +171,7 @@
     if (!(e.eSu > 0) && !(e.iex > 0)) m = Math.max(m, 1.02);
     // Peur de l'hypoglycémie : collations « de sécurité », glycémies maintenues hautes, davantage après un malaise.
     if (p.fear) m += 0.03 + (s.fearUntil > pt.day ? 0.08 : 0);
-    return m + 0.035 * sodaNow(pt);
+    return m + 0.035 * sodaNow(pt) + (p.mgOff || 0);
   }
 
   function create(c) {
@@ -222,7 +222,11 @@
       } else bisect((b) => { par.B0 = b; }, 0.01, 2, false);
       fitWeight();
     }
-    st.MG = eq(targetMg); st.A = a1cOf(st.MG); st.GT = Math.max(0, st.MG - 1.8);
+    // Verrou : si aucun réglage physiologique ne reproduit l'HbA1c saisie (traitements dont l'effet plafonne, comme
+    // aGLP1 + iSGLT2 à HbA1c très haute), un écart résiduel inexpliqué est ajouté : l'HbA1c de départ est toujours
+    // celle saisie.
+    for (let k = 0; k < 6; k++) { const m = eq(targetMg); if (Math.abs(m - targetMg) < 0.002) break; par.mgOff = (par.mgOff || 0) + (targetMg - m); }
+    st.MG = eq(targetMg); st.A = c.a1c; st.GT = Math.max(0, st.MG - 1.8);
     record(pt);
     return pt;
   }
