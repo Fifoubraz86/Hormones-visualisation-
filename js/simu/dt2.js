@@ -228,6 +228,20 @@
     render();
   }
 
+  // Titration des aGLP1 et du tirzépatide entre les consultations : un palier par intervalle (4 semaines ;
+  // 1 semaine pour le liraglutide) jusqu'à la dose cible ; nausées possibles à chaque palier (≈ 15 %, patient réel).
+  function glpStep() {
+    const P = G.glpUp, pt = G.pt, rx = pt.rx, ev = G.ev;
+    if (!P || rx.glp !== P.glp || !pt.take.glp) return;
+    const Gp = D.GLP1[rx.glp], i = Gp.doses.indexOf(rx.glpDose), it = Gp.doses.indexOf(P.target);
+    if (i < 0 || i >= it || pt.day - ev.lastGlpChange < Gp.step) return;
+    const from = rx.glpDose;
+    rx.glpDose = Gp.doses[i + 1]; ev.lastGlpChange = pt.day;
+    if (G.cfg.variab === 'reel' && Math.random() < 0.15) ev.glpGI = { day: pt.day + 3, severe: false, fired: false };
+    (G.glpLog = G.glpLog || []).push({ day: pt.day, from, to: rx.glpDose });
+    if (rx.glpDose === P.target) G.glpUp = null;
+  }
+
   /* ---------- Événements ---------- */
   function onPrescribe(prev, metBefore, prog) {
     const pt = G.pt, rx = pt.rx, ev = G.ev, p = pt.par, real = G.cfg.variab === 'reel';
@@ -439,6 +453,8 @@
     // Titration faite entre les deux consultations.
     const tl = G.titrLog.filter((x) => x.day >= (G.visitStart == null ? 0 : G.visitStart));
     let titr = null;
+    const gl = (G.glpLog || []).filter((x) => x.day >= (G.visitStart == null ? 0 : G.visitStart));
+    const glpTxt = gl.length ? 'Paliers de ' + D.GLP1[pt.rx.glp].name.split(' (')[0].toLowerCase() + ' : ' + [gl[0].from].concat(gl.map((x) => x.to)).map((x) => String(x).replace('.', ',')).join(' → ') + ' ' + D.GLP1[pt.rx.glp].unit + ' (J' + gl.map((x) => x.day).join(', J') + ').' : '';
     if (tl.length) {
       const first = tl[0].before, rx = pt.rx, parts = [];
       if (first.b !== bas(rx)) parts.push((rx.pump > 0 ? 'débit de base ' : 'basale ') + first.b + ' → ' + bas(rx) + ' U' + (rx.device === 'loop' ? ' (automatique)' : ''));
@@ -450,6 +466,7 @@
     }
     const sy = symptoms(m);
     const nHypo = pt.st.hypo - G.lastHypo;
+    if (glpTxt) titr = (titr ? titr + ' ' : '') + glpTxt;
     let toon = G.ev.eventToon || G.ev.toonNext || (nHypo >= 3 ? 'hypo' : null);
     const T = goalT();
     const target = T.max;
@@ -485,7 +502,7 @@
     if (rx.met) o.push('metformine ' + rx.met + ' mg/j');
     if (rx.su) o.push('gliclazide LM ' + rx.su + ' mg/j');
     if (rx.dpp4) o.push('sitagliptine ' + rx.dpp4 + ' mg/j');
-    if (rx.glp !== 'none') o.push(D.GLP1[rx.glp].name.split(' (')[0].toLowerCase() + ' ' + fmt(rx.glpDose, rx.glpDose % 1 ? 2 : 0).replace(/,?0+$/, '') + ' ' + D.GLP1[rx.glp].unit);
+    if (rx.glp !== 'none') o.push(D.GLP1[rx.glp].name.split(' (')[0].toLowerCase() + ' ' + String(rx.glpDose).replace('.', ',') + ' ' + D.GLP1[rx.glp].unit);
     if (rx.sglt2 !== 'none') o.push(D.SGLT2[rx.sglt2].toLowerCase());
     if (rx.acarb) o.push('acarbose ' + rx.acarb + ' mg/j');
     if (rx.basal) o.push('insuline basale (' + ({ g100: 'glargine U100', g300: 'glargine U300', deg: 'dégludec', nph: 'NPH' }[rx.basalType] || 'glargine') + ') ' + rx.basal + ' U/j');
@@ -497,13 +514,13 @@
   function snapshot() {
     const pt = G.pt;
     return JSON.stringify({ metRamp: pt.metRamp, st: pt.st, day: pt.day, rx: pt.rx, take: pt.take, par: Object.assign({}, pt.par), logLen: pt.log.length, hist: G.history.length, vis: G.visits.length, ev: G.ev, lastHypo: G.lastHypo,
-      gly: G.glyDays, titrState: G.titrState, titrLog: G.titrLog.length, starts: G.starts, titr: G.titr, cgm: G.cgm, cgmStart: G.cgmStart, cgmAcq: !!G.cgmAcquired, asg: G.asg, goal: G.goal, lastH: G.lastH, lastS: G.lastS });
+      gly: G.glyDays, titrState: G.titrState, titrLog: G.titrLog.length, starts: G.starts, titr: G.titr, cgm: G.cgm, cgmStart: G.cgmStart, cgmAcq: !!G.cgmAcquired, asg: G.asg, goal: G.goal, lastH: G.lastH, lastS: G.lastS, glpLog: (G.glpLog || []).length, glpUp: G.glpUp || null });
   }
   function restore(js) {
     const s = JSON.parse(js), pt = G.pt;
     pt.st = s.st; pt.day = s.day; pt.rx = s.rx; pt.take = s.take; pt.metRamp = s.metRamp; Object.assign(pt.par, s.par);
     pt.log.length = s.logLen; G.history.length = s.hist; G.visits.length = s.vis; G.ev = s.ev; G.lastHypo = s.lastHypo;
-    G.glyDays = s.gly; G.titrState = s.titrState; G.titrLog.length = s.titrLog; G.starts = s.starts; G.titr = s.titr; G.cgm = s.cgm; G.cgmStart = s.cgmStart; G.cgmAcquired = s.cgmAcq; G.asg = s.asg; G.goal = s.goal; G.lastH = s.lastH; G.lastS = s.lastS;
+    G.glyDays = s.gly; G.titrState = s.titrState; G.titrLog.length = s.titrLog; G.starts = s.starts; G.titr = s.titr; G.cgm = s.cgm; G.cgmStart = s.cgmStart; G.cgmAcquired = s.cgmAcq; G.asg = s.asg; G.goal = s.goal; G.lastH = s.lastH; G.lastS = s.lastS; if (G.glpLog) G.glpLog.length = s.glpLog || 0; G.glpUp = s.glpUp;
     Object.assign(G.draft, pt.rx, { basal: bas(pt.rx), device: pt.rx.device || 'inj', rapidM: pt.rx.rapidM.slice(), titr: JSON.parse(JSON.stringify(G.titr)), cgm: G.cgm, asg: G.asg, goal: G.goal });
   }
 
@@ -549,6 +566,7 @@
     d.titr.caps = { basal: d.basal > 0 ? Math.max(d.basal + 6, Math.round(d.basal * 1.5)) : null };
     d.rapidM.forEach((u, m) => { d.titr.caps['m' + m] = u > 0 ? Math.max(u + 6, Math.round(u * 1.5)) : null; });
     G.titrState.capped = {};
+    G.glpUp = d.glp !== 'none' && d.glpUp && D.GLP1[d.glp].doses.indexOf(d.glpTarget) > D.GLP1[d.glp].doses.indexOf(d.glpDose) ? { glp: d.glp, target: d.glpTarget } : null;
     G.titr = JSON.parse(JSON.stringify(d.titr)); G.cgm = d.cgm; G.asg = d.asg; G.goal = d.goal;
     if (d.cgm) G.cgmAcquired = true;
     if (d.ppr && G.ev.ppr == null) G.ev.ppr = pt.day;
@@ -562,9 +580,9 @@
     G.visitStart = pt.day;
     let interrupt = null;
     const rng = G.cfg.variab === 'reel' ? Math.random : null;
-    D.advance(pt, days, () => { recordDay(true); const e = daily(); if (e) { interrupt = e; return false; } return true; }, rng);
+    D.advance(pt, days, () => { recordDay(true); glpStep(); const e = daily(); if (e) { interrupt = e; return false; } return true; }, rng);
     // Doses atteintes par la titration : point de départ de la prochaine ordonnance.
-    d.basal = bas(pt.rx); d.rapidM = pt.rx.rapidM.slice(); d.rapid = pt.rx.rapid;
+    d.basal = bas(pt.rx); d.rapidM = pt.rx.rapidM.slice(); d.rapid = pt.rx.rapid; d.glpDose = pt.rx.glp === d.glp ? pt.rx.glpDose : d.glpDose;
     let note = (d.mode === 'tele' ? 'Téléconsultation à ' : 'Consultation à ') + (d.unit === 'sem' ? d.wait + ' semaine' + (d.wait > 1 ? 's' : '') : days + ' jour' + (days > 1 ? 's' : ''));
     let tests = d.tests;
     if (interrupt) {
@@ -690,9 +708,12 @@
         sel('dtSu', 'Gliclazide LM (sulfamide)', d.su, SU.map((x) => [x, x ? x + ' mg/j' : 'Aucun']), (v) => { d.su = +v; }),
         sel('dtDpp', 'Sitagliptine (iDPP4)', d.dpp4, DPP4.map((x) => [x, x ? x + ' mg/j' : 'Aucune']), (v) => { d.dpp4 = +v; }),
         h('div', { class: 'sv-field' }, [h('label', { for: 'dtGlp' }, 'Agoniste du GLP-1'), h('div', { class: 'sv-inline' }, [
-          h('select', { id: 'dtGlp', onchange: (e) => { d.glp = e.target.value; d.glpDose = d.glp === 'none' ? 0 : D.GLP1[d.glp].doses[0]; re(); } }, Object.entries(D.GLP1).map(([k, v]) => h('option', { value: k, selected: d.glp === k }, v.name))),
-          Gp.doses.length ? h('select', { id: 'dtGlpDose', 'aria-label': 'Dose', onchange: (e) => { d.glpDose = +e.target.value; } }, Gp.doses.map((x) => h('option', { value: x, selected: d.glpDose === x }, String(x).replace('.', ',') + ' ' + Gp.unit))) : null
-        ])]),
+          h('select', { id: 'dtGlp', onchange: (e) => { d.glp = e.target.value; d.glpDose = d.glp === 'none' ? 0 : D.GLP1[d.glp].doses[0]; if (d.glp !== 'none') { d.glpUp = true; d.glpTarget = D.GLP1[d.glp].doses[D.GLP1[d.glp].doses.length - 1]; } re(); } }, Object.entries(D.GLP1).map(([k, v]) => h('option', { value: k, selected: d.glp === k }, v.name))),
+          Gp.doses.length ? h('select', { id: 'dtGlpDose', 'aria-label': 'Dose', onchange: (e) => { d.glpDose = +e.target.value; re(); } }, Gp.doses.map((x) => h('option', { value: x, selected: d.glpDose === x }, String(x).replace('.', ',') + ' ' + Gp.unit))) : null
+        ]),
+          Gp.doses.length && Gp.doses.indexOf(d.glpDose) < Gp.doses.length - 1 ? h('div', { class: 'sv-inline sv-small' }, [h('label', { class: 'sv-check sv-small' }, [h('input', { type: 'checkbox', id: 'dtGlpUp', checked: !!d.glpUp, onchange: (e) => { d.glpUp = e.target.checked; if (d.glpUp && !(Gp.doses.indexOf(d.glpTarget) > Gp.doses.indexOf(d.glpDose))) d.glpTarget = Gp.doses[Gp.doses.length - 1]; } }), ' Monter d\'un palier ' + (Gp.step >= 28 ? 'toutes les 4 semaines' : 'chaque semaine') + ' jusqu\'à']),
+            h('select', { id: 'dtGlpTarget', 'aria-label': 'Dose cible', onchange: (e) => { d.glpTarget = +e.target.value; d.glpUp = true; } }, Gp.doses.filter((x) => x > d.glpDose).map((x) => h('option', { value: x, selected: (d.glpTarget || Gp.doses[Gp.doses.length - 1]) === x }, String(x).replace('.', ',') + ' ' + Gp.unit)))]) : null
+        ]),
         sel('dtSglt', 'iSGLT2', d.sglt2, Object.entries(D.SGLT2), (v) => { d.sglt2 = v; }),
         sel('dtAcarb', 'Acarbose', d.acarb, ACARB.map((x) => [x, x ? x + ' mg/j' : 'Aucune']), (v) => { d.acarb = +v; }),
       ]),
