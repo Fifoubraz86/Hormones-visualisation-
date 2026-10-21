@@ -428,7 +428,14 @@
     if (k === 'alb') return D.ALB[G.cfg.alb].label.split(' (')[0].toLowerCase() + (pt.rx.sglt2 !== 'none' ? ', en baisse' : '');
     if (k === 'cpep') return fmt(m.cpep, 1) + ' ng/mL (N 0,9–4)';
     if (k === 'gad') return p.gad ? 'positifs (85 UI/mL)' : 'négatifs';
-    if (k === 'cetone') return ev.keto && G.lastEvent === 'keto' ? '4,8 mmol/L' : (D.beta(pt) < 0.1 && pt.st.MG > 2.5 ? '2,6 mmol/L' : '< 0,3 mmol/L');
+    if (k === 'cetone') {
+      if (ev.keto && G.lastEvent === 'keto') return '4,8 mmol/L (acidocétose)';
+      if (D.beta(pt) < 0.1 && pt.st.MG > 2.5) return '2,6 mmol/L (cétose de carence insulinique)';
+      // Sinon, cétonémie du matin estimée par le module de physiologie (lipolyse, rapport glucagon/insuline, iSGLT2).
+      const dp = G.glyDays[G.glyDays.length - 1];
+      if (dp && S.dt2physio) { const r = S.dt2physio.decompose(pt, D, Y, dp), v = r.pts[Math.round(7 / (1 / 12))].ket; return (v < 0.3 ? '< 0,3' : fmt(v, 1)) + ' mmol/L' + (v > 1.5 ? ' (cétose marquée : risque d\'acidocétose)' : v > 0.6 ? ' (cétose)' : ''); }
+      return '< 0,3 mmol/L';
+    }
     if (k === 'lipase') return ev.panc ? '12 N' : 'normale';
     if (k === 'fo') return ev.retinoDone ? 'hémorragie intravitréenne, néovaisseaux : panphotocoagulation à programmer' : D.RETINO[p.retino];
     return '';

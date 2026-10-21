@@ -491,3 +491,8 @@ select { background: var(--panel-2); border: 1px solid var(--line-2); border-rad
 .sv-prof-c { display: flex; flex-direction: column; font: 11px var(--font-data); color: var(--muted); }
 .sv-prof-c .sv-num { width: 100%; min-width: 0; }
 @media (max-width: 600px) { .sv-prof-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.ph-flow.ph-k { stroke: var(--t3); } .ph-ah.ph-k { fill: var(--t3); }
+.ph-box-keto { fill: color-mix(in srgb, var(--t3) 10%, var(--panel-2)); }
+.ph-pill-ket { fill: color-mix(in srgb, var(--bad) 30%, var(--panel)); stroke: var(--bad); }
+.ph-l-ket { fill: none; stroke: var(--t3); stroke-width: 1.6; stroke-dasharray: 1 3; stroke-linecap: round; }
+.ph-lg.ph-l-ket { fill: var(--t3); } .ph-ax-ket { fill: var(--t3); }

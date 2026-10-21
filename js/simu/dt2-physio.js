@@ -44,7 +44,7 @@
 
   // Décomposition d'une journée dp (makeDay) du patient pt.
   function decompose(pt, D, Y, dp) {
-    const rx = pt.rx, s = pt.st;
+    const rx = pt.rx, s = pt.st, p = pt.par;
     const e = D.effects(pt, s.MG);
     const glpF = Math.min(1.2, D.glpFrac(rx)), isT = rx.glp === 'tirz', shortA = rx.glp === 'lira';
     const gt = s.GT || 0;
@@ -81,11 +81,24 @@
       const glu = Math.max(0.15, (1 + 2 * Math.max(0, 0.9 - G)) / (1 + 0.45 * portal) * (1 - gluSup) * (1 + 0.5 * Math.min(1, ra / 30)));
       let egp = egp0 * (0.4 + 0.6 * glu) * (1 - metK) / (1 + 0.35 * portal * si);
       const ren = renK * Math.max(0, G - tm);
+      // Lipolyse (tissu adipeux, relatif au jeûne normal) : très sensible à l'insuline (freinée dès des taux bas),
+      // accrue par le glucagon et l'insulinorésistance du tissu adipeux, par un régime très pauvre en glucides.
+      const insAd = (isec * 0.6 + iexo) * Math.min(1.2, si * 1.4);
+      const lip = (0.4 + 0.6 * glu) * (1 + 0.8 * Math.max(0, 1 - si)) * (p.lowcarb ? 1.3 : 1) / (1 + 0.5 * insAd);
+      // Cétogenèse hépatique : acides gras disponibles × rapport glucagon / insuline portale ; iSGLT2 : moins
+      // d'insuline, plus de glucagon, cétogenèse accrue (acidocétose possible à glycémie peu élevée).
+      const kss = 0.06 + 2.0 * Math.max(0, lip - 0.25) * glu / (1 + 0.4 * portal) * (e.sglt > 0 ? 1.8 : 1) * (p.lowcarb ? 1.8 : 1);
       let up = egp + ra - ren - V * dG;
       if (up < 4) { egp += 4 - up; up = 4; }
       tot.ra += ra * DT; tot.egp += egp * DT; tot.up += up * DT; tot.ren += ren * DT; tot.isec += isec * DT; tot.exo += iexo * DT;
-      pts.push({ t, G, ra, ge, egp, up, ren, isec, iexo, glu, inc: incE + incP, incE, incP, Qs, su });
+      pts.push({ t, G, ra, ge, egp, up, ren, isec, iexo, glu, inc: incE + incP, incE, incP, Qs, su, lip, kss });
     }
+    // Cétonémie (β-hydroxybutyrate, mmol/L) : suit la cétogenèse avec une constante de temps d'environ 2 h
+    // (deux passages pour partir d'un état périodique sur 24 h).
+    let ket = pts.reduce((a, q) => a + q.kss, 0) / 288;
+    for (let pass = 0; pass < 2; pass++) pts.forEach((q) => { ket += (q.kss - ket) * (1 - Math.exp(-DT / 2)); q.ket = Math.min(8, ket); });
+    tot.ketMax = Math.max(...pts.map((q) => q.ket)); tot.ketMean = pts.reduce((a, q) => a + q.ket, 0) / 288;
+    tot.lip = pts.reduce((a, q) => a + q.lip, 0) / 288;
     return { pts, tot, k: { B, si, glpF, isT, shortA, satiety, gluSup, tm, metK, dpp, kge, acarb: !!rx.acarb, su: (e.eSu || 0) > 0, egp0, e, rx, W } };
   }
 
@@ -100,9 +113,10 @@
     blood: { x: 395, y: 160, w: 100, h: 100, t: 'Glycémie', r: 50 },
     liver: { x: 640, y: 64, w: 200, h: 66, t: 'Foie' },
     muscle: { x: 655, y: 222, w: 190, h: 52, t: 'Muscle' },
-    fat: { x: 655, y: 300, w: 190, h: 52, t: 'Tissu adipeux' },
+    fat: { x: 655, y: 306, w: 190, h: 66, t: 'Tissu adipeux' },
     kidney: { x: 640, y: 440, w: 200, h: 52, t: 'Rein' },
-    pen: { x: 365, y: 450, w: 170, h: 46, t: 'Insuline injectée' }
+    pen: { x: 365, y: 450, w: 170, h: 46, t: 'Insuline injectée' },
+    keto: { x: 105, y: 430, w: 190, h: 66, t: 'Corps cétoniques' }
   };
   // Point du bord d'un organe en direction d'un point (x, y).
   function edge(o, x, y) {
@@ -127,7 +141,8 @@
     blood: () => 'Glycémie : stock de glucose du sang, entre ce qui entre (absorption, foie) et ce qui sort (muscle, tissu adipeux, cerveau, rein). C\'est la courbe du carnet et du capteur du patient.',
     liver: (k) => 'Foie : production de glucose (glycogénolyse, néoglucogenèse), excessive dans le DT2 surtout la nuit (glycémie à jeun haute). Freinée par l\'insuline (portale) ' + (k.metK > 0.01 ? 'et par la metformine (− ' + Math.round(k.metK * 100) + ' %)' : '') + ', stimulée par le glucagon. L\'insuline basale agit surtout ici.',
     muscle: (k) => 'Muscle : principal site de captation du glucose après un repas, sous l\'effet de l\'insuline. Sensibilité à l\'insuline : ' + Math.round(k.si * 100) + ' % (référence 100 %), améliorée par l\'activité physique et la perte de poids, abaissée par la glucotoxicité. Le cerveau consomme environ 100 g/j sans insuline.',
-    fat: () => 'Tissu adipeux : captation et stockage (lipogenèse) sous insuline ; l\'adiposité viscérale entretient l\'insulinorésistance. Le tirzépatide (GIP) et la perte de poids améliorent sa fonction.',
+    keto: (k, T) => 'Corps cétoniques (β-hydroxybutyrate) : le foie les fabrique à partir des acides gras libérés par la lipolyse quand l\'insuline manque et que le glucagon domine (jeûne, carence insulinique). Normale < 0,6 mmol/L ; cétose 0,6–3 ; acidocétose au-delà de 3 avec acidose. ' + (k.e.sglt > 0 ? 'Sous iSGLT2, moins d\'insuline et plus de glucagon : cétogenèse accrue, acidocétose possible à glycémie peu élevée (« euglycémique ») chez l\'insulinopénique (LADA, DT2 ancien), en cas de jeûne, de régime cétogène, d\'intervention ou de réduction trop forte de l\'insuline. ' : '') + 'Ici : moyenne ' + fmt(T.ketMean, 2) + ', maximum ' + fmt(T.ketMax, 2) + ' mmol/L.',
+    fat: () => 'Tissu adipeux : captation et stockage (lipogenèse) sous insuline ; la lipolyse (libération d\'acides gras) est freinée par de faibles taux d\'insuline, accrue par le glucagon et l\'insulinorésistance ; l\'adiposité viscérale entretient l\'insulinorésistance. Le tirzépatide (GIP) et la perte de poids améliorent sa fonction.',
     kidney: (k) => 'Rein : le glucose filtré est réabsorbé (SGLT2) jusqu\'à un seuil d\'environ 1,80 g/L ; au-delà, glycosurie. ' + (k.tm < 1.7 ? 'L\'iSGLT2 abaisse le seuil vers ' + fmt(k.tm, 2) + ' g/L : le patient « urine du sucre » (≈ 4 kcal/g), même à glycémie normale, moins si le DFG baisse.' : 'Sans iSGLT2, glycosurie seulement quand la glycémie dépasse le seuil.'),
     pen: (k) => (k.rx.pump > 0 ? 'Pompe : débit continu d\'analogue rapide et bolus aux repas.' : k.rx.basal > 0 || k.rx.rapid > 0 ? 'Insuline injectée : la basale freine surtout le foie (nuit, jeûne), les bolus couvrent les repas (pic à 1 h, 4 à 5 h d\'action). Elle ne s\'adapte pas à la glycémie : hypoglycémie si la dose dépasse les besoins.' : 'Pas d\'insuline injectée.')
   };
@@ -208,7 +223,7 @@
       svg.textContent = ''; chart.textContent = '';
       const k = st.res.k;
       const defs = el('defs', {}, svg);
-      ['g', 'i', 'x', 'n', 'u'].forEach((c) => { const m = el('marker', { id: 'phA' + c, viewBox: '0 0 10 10', refX: 6, refY: 5, markerWidth: 11, markerHeight: 11, markerUnits: 'userSpaceOnUse', orient: 'auto' }, defs); el('path', { d: 'M0,0 L10,5 L0,10 z', class: 'ph-ah ph-' + c }, m); });
+      ['g', 'i', 'x', 'n', 'u', 'k'].forEach((c) => { const m = el('marker', { id: 'phA' + c, viewBox: '0 0 10 10', refX: 6, refY: 5, markerWidth: 11, markerHeight: 11, markerUnits: 'userSpaceOnUse', orient: 'auto' }, defs); el('path', { d: 'M0,0 L10,5 L0,10 z', class: 'ph-ah ph-' + c }, m); });
       const arrow = (id, a, b, cls, bend) => { g[id] = el('path', { d: link(a, b, bend), class: 'ph-flow ph-' + cls, 'marker-end': 'url(#phA' + cls + ')' }, svg); };
       arrow('hunger', 'brain', 'stomach', 'n', 0);
       arrow('ge', 'stomach', 'gut', 'g', 0);
@@ -223,6 +238,8 @@
       arrow('ren', 'blood', 'kidney', 'u', 60);
       arrow('exoL', 'pen', 'liver', 'x', 120);
       arrow('exoM', 'pen', 'fat', 'x', 30);
+      arrow('ffa', 'fat', 'liver', 'k', -70);
+      arrow('ket', 'liver', 'keto', 'k', -150);
       Object.entries(ORG).forEach(([id, o]) => {
         const off = id === 'pen' && !(k.rx.basal > 0 || k.rx.rapid > 0 || k.rx.pump > 0);
         const grp = el('g', { class: 'ph-org' + (st.sel === id ? ' sel' : '') + (off ? ' off' : ''), tabindex: 0, role: 'button', 'aria-label': o.t }, svg);
@@ -250,6 +267,7 @@
       if (rx.acarb > 0) pill(230, 292, 'acarbose', 'acarb');
       if (rx.act >= 150) pill(730, 190, 'activité', 'life');
       if (rx.diet) pill(230, 58, 'diététique', 'life');
+      if (st.res.tot.ketMax > 0.6) pill(105, 388, st.res.tot.ketMax > 1.5 ? 'risque d\'acidocétose' : 'cétose', 'ket');
       if (rx.basal > 0 || rx.pump > 0 || rx.rapid > 0) pill(365, 482, rx.pump > 0 ? 'pompe' : (rx.basal > 0 ? 'basale' : '') + (rx.basal > 0 && rx.rapid > 0 ? ' + ' : '') + (rx.rapid > 0 ? 'bolus' : ''), 'ins');
       drawChart();
       drawSum();
@@ -270,11 +288,13 @@
       area((q) => q.isec, 'ph-a-endo');
       el('path', { d: P.map((q, i) => (i ? 'L' : 'M') + X(q.t).toFixed(1) + ',' + (T + H - 22 * Math.min(2.5, q.glu)).toFixed(1)).join(' '), class: 'ph-l-glu' }, chart);
       el('path', { d: P.map((q, i) => (i ? 'L' : 'M') + X(q.t).toFixed(1) + ',' + Yg(q.G).toFixed(1)).join(' '), class: 'ph-l-g' }, chart);
+      el('path', { d: P.map((q, i) => (i ? 'L' : 'M') + X(q.t).toFixed(1) + ',' + (T + H - H * Math.min(3, q.ket) / 3).toFixed(1)).join(' '), class: 'ph-l-ket' }, chart);
+      el('text', { x: Wc - 2, y: T + 22, class: 'ph-ax ph-ax-ket', 'text-anchor': 'end' }, chart).textContent = 'cét. 0–3';
       P.forEach((q, i) => { if (i % 3 === 0 && q.ren > 0.05) el('rect', { x: X(q.t), y: T + H + 18, width: 3, height: Math.min(12, q.ren * 2), class: 'ph-b-ren' }, chart); });
       st.dp.tm.forEach((t, m) => { if (!st.dp.skip[m]) el('text', { x: X(t), y: T + 10, class: 'ph-meal', 'text-anchor': 'middle' }, chart).textContent = '🍽'; });
       g.cursor = el('line', { x1: X(st.t), x2: X(st.t), y1: T, y2: T + H + 30, class: 'ph-cur' }, chart);
       g.X = X;
-      [['ph-l-g', 'glycémie (g/L)'], ['ph-a-endo', 'insuline sécrétée'], ['ph-a-exo', 'insuline injectée'], ['ph-l-glu', 'glucagon'], ['ph-b-ren', 'glycosurie']].forEach(([c, t], i) => { const x0 = L + i * 138; el('rect', { x: x0, y: 214, width: 12, height: 8, class: c + ' ph-lg' }, chart); el('text', { x: x0 + 16, y: 222, class: 'ph-ax' }, chart).textContent = t; });
+      [['ph-l-g', 'glycémie'], ['ph-a-endo', 'insuline sécrétée'], ['ph-a-exo', 'injectée'], ['ph-l-glu', 'glucagon'], ['ph-b-ren', 'glycosurie'], ['ph-l-ket', 'cétones']].forEach(([c, t], i) => { const x0 = L + [0, 90, 225, 315, 405, 505][i]; el('rect', { x: x0, y: 214, width: 12, height: 8, class: c + ' ph-lg' }, chart); el('text', { x: x0 + 16, y: 222, class: 'ph-ax' }, chart).textContent = t; });
     }
 
     function drawSum() {
@@ -287,6 +307,7 @@
         row('Production hépatique', fmt(T.egp, 0) + ' g'),
         row('Captation (muscle, graisse, cerveau)', fmt(T.up, 0) + ' g'),
         row('Glycosurie', fmt(T.ren, 0) + ' g (' + fmt(T.ren * 4, 0) + ' kcal)'),
+        row('Cétonémie (moyenne · max)', fmt(T.ketMean, 2) + ' · ' + fmt(T.ketMax, 2) + ' mmol/L' + (T.ketMax > 1.5 ? ' ⚠' : T.ketMax > 0.6 ? ' ↑' : '')),
         row('Insuline sécrétée / injectée', fmt(T.isec, 0) + ' / ' + fmt(T.exo, 0) + ' U'),
         row('Sensibilité · réserve β', Math.round(k.si * 100) + ' % · ' + Math.round(k.B * 100) + ' %'),
         row('HbA1c · poids', fmt(pt.st.A, 1) + ' % · ' + fmt(pt.st.W, 1) + ' kg'),
@@ -313,7 +334,7 @@
       const Wd = (v, max) => Math.max(1, Math.min(14, 1 + 13 * v / max));
       const set = (id, v, max) => { const p = g[id]; if (!p) return; p.setAttribute('stroke-width', Wd(v, max).toFixed(1)); p.style.animationDuration = Math.max(0.35, 2.4 / Math.max(0.15, v / max)).toFixed(2) + 's'; p.classList.toggle('idle', v < max * 0.03); };
       set('ge', q.ge, 40); set('ra', q.ra, 40); set('inc', q.inc, 1.5); set('insL', q.isec, 6); set('insM', q.isec, 6); set('glu', q.glu, 2);
-      set('egp', q.egp, 25); set('upM', q.up * 0.75, 30); set('upF', q.up * 0.25, 30); set('ren', q.ren, 6); set('exoL', q.iexo, 4); set('exoM', q.iexo, 4); set('hunger', 1 - k.satiety, 1);
+      set('egp', q.egp, 25); set('upM', q.up * 0.75, 30); set('upF', q.up * 0.25, 30); set('ren', q.ren, 6); set('exoL', q.iexo, 4); set('exoM', q.iexo, 4); set('ffa', q.lip, 1); set('ket', q.ket, 1.5); set('hunger', 1 - k.satiety, 1);
       const txt = (id, v) => { if (g[id]) g[id].textContent = v; };
       txt('v_brain', 'satiété ' + (k.satiety > 0.01 ? '+' + Math.round(k.satiety * 100) + ' %' : 'normale'));
       txt('s_brain', fmt(st.res.tot.carbs, 0) + ' g de glucides/j');
@@ -326,13 +347,16 @@
       txt('s_liver', k.metK > 0.01 ? 'metformine − ' + Math.round(k.metK * 100) + ' %' : 'sans metformine');
       txt('v_muscle', fmt(q.up * 0.75, 1) + ' g/h');
       txt('v_fat', fmt(q.up * 0.25, 1) + ' g/h');
+      txt('s_fat', 'lipolyse × ' + fmt(q.lip, 2));
+      txt('v_keto', 'β-OHB ' + fmt(q.ket, 2) + ' mmol/L');
+      txt('s_keto', q.ket > 1.5 ? 'cétose marquée' : q.ket > 0.6 ? 'cétose' : 'normale (< 0,6)');
       txt('v_kidney', fmt(q.ren, 2) + ' g/h · seuil ' + fmt(k.tm, 2));
       txt('v_pen', fmt(q.iexo, 2) + ' U/h');
       if (g.bloodV) { g.bloodV.textContent = fmt(q.G, 2) + ' g/L'; g.bloodC.setAttribute('class', 'ph-blood ' + (q.G < 0.7 ? 'low' : q.G > 1.8 ? 'high' : 'ok')); }
       if (g.cursor) { const x = g.X(st.t); g.cursor.setAttribute('x1', x); g.cursor.setAttribute('x2', x); }
       if (st.infoSel !== st.sel) { st.infoSel = st.sel; }
       info.textContent = '';
-      info.append(h('h4', null, ORG[st.sel].t), h('p', null, INFO[st.sel](k)));
+      info.append(h('h4', null, ORG[st.sel].t), h('p', null, INFO[st.sel](k, st.res.tot)));
     }
 
     let lastTs = 0;
