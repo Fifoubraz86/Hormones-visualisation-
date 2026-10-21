@@ -25,7 +25,17 @@
   // Catalogue d'options : disponible ? classement SFD (rang, raison, avis) ; modification de l'ordonnance.
   const OPTIONS = [
     { id: 'none', name: 'Ne rien changer', ok: () => true,
-      rate: (x) => (x.a1c > x.T.max + 0.2 ? [5, 'HbA1c au-dessus de la cible : inertie thérapeutique', 'avis 5'] : [1, 'objectif atteint : poursuivre, réévaluer à 3–6 mois', 'avis 5']), apply: () => {} },
+      rate: (x) => {
+        // « Ne rien changer » n'est recommandé que si la cible est atteinte, sans surtraitement et avec la protection
+        // cardio-rénale indiquée ; au-dessus de la cible, c'est de l'inertie thérapeutique.
+        const prot = (x.cv || x.hf || x.ckd) && x.rx.sglt2 === 'none' && x.rx.glp === 'none';
+        const hypoRx = x.rx.su > 0 || x.onIns;
+        if (x.a1c > x.T.max + 0.5) return [5, 'HbA1c à plus de 0,5 point au-dessus de la cible : inertie thérapeutique', 'avis 5'];
+        if (x.a1c > x.T.max) return [3, 'HbA1c au-dessus de la cible : renforcer (mode de vie, observance) ou intensifier, réévaluer à 3 mois', 'avis 5'];
+        if (x.T.floor && x.a1c < x.T.floor && hypoRx) return [4, 'HbA1c sous le plancher sous sulfamide ou insuline : désescalader', 'avis 21 bis'];
+        if (prot) return [3, 'objectif atteint, mais protection cardiaque ou rénale indiquée (iSGLT2 ou aGLP1)', 'avis 11 à 15'];
+        return [1, 'objectif atteint : poursuivre, réévaluer à 3–6 mois', 'avis 5'];
+      }, apply: () => {} },
     { id: 'rhd', name: 'Renforcer les mesures hygiéno-diététiques seules', ok: (x) => !x.rx.diet || !(x.rx.act >= 150),
       rate: (x) => (x.a1c <= x.T.max + 0.5 && x.n === 0 && !x.onIns ? [1, 'au diagnostic, mode de vie d\'abord, évalué à 3–6 mois', 'avis 8 ; HAS'] : x.a1c > x.T.max + 1 ? [4, 'seules, insuffisantes si l\'HbA1c est à plus d\'un point de la cible (à associer)', 'avis 4 et 8'] : [3, 'à associer à tout traitement, rarement suffisantes seules', 'avis 4']),
       apply: (rx) => { rx.act = Math.max(rx.act || 0, 150); rx.diet = true; rx.wtGoal = Math.max(rx.wtGoal || 0, 7); rx.sodaStop = true; } },
