@@ -301,6 +301,21 @@
   // Molécule portée par chaque flux.
   const FLOW_MOL = { eat: 'food', ge: 'food', ra: 'glc', inc: 'inc', insL: 'ins', insM: 'ins', glu: 'glu', egp: 'glc', upM: 'glc', upF: 'glc', ren: 'glc', exoL: 'ins', exoM: 'ins', ffa: 'ffa', ket: 'ket', adr: 'adr', cort: 'cort' }; // la faim (cerveau → estomac) n'est pas un flux de molécules
 
+  // Lisibilité : on n'affiche en clair que les flux de l'organe sélectionné (ou d'un thème) ; les autres s'estompent.
+  const ORG_FLOWS = {
+    brain: ['hunger', 'symp', 'eat'], adrenal: ['symp', 'adr', 'cort'], liver: ['ra', 'egp', 'insL', 'glu', 'exoL', 'adr'], fat: ['upF', 'ffa'],
+    keto: ['ffa', 'ket'], pen: ['exoL', 'exoM'], blood: ['ra', 'egp', 'upM', 'upF', 'ren'], stomach: ['eat', 'ge', 'hunger'],
+    beta: ['insL', 'insM', 'inc'], alpha: ['glu'], gut: ['ge', 'ra', 'inc'], kidney: ['ren'], muscle: ['upM', 'insM', 'exoM']
+  };
+  const LAYERS = [
+    ['focus', 'Flux de l\'organe sélectionné'],
+    ['meal', 'Repas : faim, digestion, absorption, incrétines', ['hunger', 'eat', 'ge', 'ra', 'inc']],
+    ['ins', 'Hormones du pancréas et insuline injectée', ['insL', 'insM', 'glu', 'inc', 'exoL', 'exoM']],
+    ['glc', 'Trajet du glucose (entrées et sorties)', ['ra', 'egp', 'upM', 'upF', 'ren']],
+    ['lip', 'Graisses et cétones', ['ffa', 'ket', 'upF']],
+    ['hypo', 'Contre-régulation de l\'hypoglycémie', ['symp', 'adr', 'cort', 'glu', 'egp']],
+    ['all', 'Tous les flux (vue complète)']
+  ];
   function el(tag, a, par) { const n = document.createElementNS(NS, tag); for (const k in a) n.setAttribute(k, a[k]); if (par) par.appendChild(n); return n; }
 
   /* ---------- Corps humain (silhouette et organes de l'atlas) ---------- */
@@ -482,7 +497,8 @@
       h('div', { class: 'sv-card-head' }, [h('h3', null, 'Physiologie du patient : ce que font les traitements'), h('div', { class: 'sv-actions' }, [fullBtn, h('button', { type: 'button', class: 'sv-secondary', onclick: () => { setFull(false); onClose(); } }, 'Fermer')])]),
       h('p', { class: 'sv-muted' }, 'Copie du patient (le dossier n\'est pas modifié). La glycémie est celle du patient simulé ; le module la décompose organe par organe. Cliquez sur un organe. Modifiez les traitements, puis faites avancer le temps.'),
       ctx.train ? h('p', { class: 'sv-note ph-trainnote' }, 'Mode entraînement : le module montre la physiologie du traitement en cours ; les essais de traitements, l\'avance dans le temps et les prédictions sont masqués jusqu\'à la fin de l\'entraînement.') : h('div', { class: 'ph-tog' }, TOG.map(([id, lab, isOn, set]) => h('label', { class: 'sv-chipcheck' }, [h('input', { type: 'checkbox', id: 'dtPh-' + id, checked: isOn(pt.rx), onchange: (e) => { set(pt.rx, e.target.checked); if (id === 'glp' && e.target.checked) document.getElementById('dtPh-tirz').checked = false; if (id === 'tirz' && e.target.checked) document.getElementById('dtPh-glp').checked = false; compute(); draw(); } }), ' ' + lab]))),
-      h('div', { class: 'ph-evrow' }, [h('label', { for: 'dtPhEv' }, 'Événement de la journée'), h('select', { id: 'dtPhEv', onchange: (e) => { st.ev = e.target.value; compute(); draw(); } }, EVENTS.map(([k2, t]) => h('option', { value: k2, selected: (st.ev || 'none') === k2 }, t)))]),
+      h('div', { class: 'ph-evrow' }, [h('label', { for: 'dtPhLay' }, 'Afficher'), h('select', { id: 'dtPhLay', onchange: (e) => { st.layer = e.target.value; applyFocus(); } }, LAYERS.map(([k2, t]) => h('option', { value: k2, selected: (st.layer || 'focus') === k2 }, t)))]),
+      h('div', { class: 'ph-evrow' }, [h('label', { for: 'dtPhEv' }, 'Événement de la journée'), h('select', { id: 'dtPhEv', onchange: (e) => { st.ev = e.target.value; if (/^hypo/.test(st.ev) && (st.layer || 'focus') === 'focus') st.sel = 'adrenal'; compute(); draw(); } }, EVENTS.map(([k2, t]) => h('option', { value: k2, selected: (st.ev || 'none') === k2 }, t)))]),
       h('div', { class: 'ph-ctrl' }, [playBtn,
         h('select', { id: 'dtPhSpeed', 'aria-label': 'Vitesse', onchange: (e) => { st.speed = +e.target.value; } }, [[1, '1 h/s'], [2, '2 h/s'], [6, '6 h/s']].map(([v, t]) => h('option', { value: v, selected: st.speed === v }, t))),
         slider, tLab, slowLab,
@@ -536,22 +552,36 @@
         if (o.h > 60) g['s_' + id] = el('text', { x: o.x, y: o.y - o.h / 2 + 56, class: 'ph-s', 'text-anchor': 'middle' }, grp);
         if (id === 'blood') g.bloodC = box;
       });
-      // Pastilles des médicaments sur leur site d'action (dans le corps).
-      const pill = (x, y, txt, cls) => { const w = 7.6 * txt.length + 16; el('rect', { x: x - w / 2, y: y - 9, width: w, height: 18, rx: 9, class: 'ph-pill ph-pill-' + cls }, svg); el('text', { x, y: y + 4, class: 'ph-pt', 'text-anchor': 'middle' }, svg).textContent = txt; };
-      const rx = k.rx;
-      if (rx.met > 0) pill(-60, -160, 'metformine', 'met');
-      if (rx.su > 0) pill(10, -50, 'sulfamide', 'su');
-      if (rx.dpp4 > 0) pill(-40, 22, 'iDPP4', 'dpp');
-      if (k.glpF > 0.01) { const n = rx.glp === 'tirz' ? 'tirzépatide' : 'aGLP1'; pill(0, -446, n, 'glp'); pill(100, -146, n, 'glp'); pill(90, -88, n, 'glp'); if (rx.glp === 'tirz') pill(-92, -6, 'GIP', 'glp'); }
-      if (rx.sglt2 !== 'none') pill(104, -60, 'iSGLT2', 'sglt');
-      if (rx.acarb > 0) pill(40, 22, 'acarbose', 'acarb');
-      if (rx.act >= 150) pill(110, 190, 'activité', 'life');
-      if (rx.diet) pill(-70, -420, 'diététique', 'life');
-      if (st.res.tot.ketMax > 0.6) pill(-330, 98, st.res.tot.ketMax > 1.5 ? 'risque d\'acidocétose' : 'cétose', 'ket');
-      if (rx.basal > 0 || rx.pump > 0 || rx.rapid > 0) pill(74, 60, rx.pump > 0 ? 'pompe' : (rx.basal > 0 ? 'basale' : '') + (rx.basal > 0 && rx.rapid > 0 ? ' + ' : '') + (rx.rapid > 0 ? 'bolus' : ''), 'ins');
+      // Médicaments : badges sur la carte de leur organe cible (plus de pastilles sur le corps).
+      const rx = k.rx, badges = {};
+      const add = (id, txt, cls) => (badges[id] = badges[id] || []).push([txt, cls]);
+      if (rx.met > 0) add('liver', 'metformine', 'met');
+      if (rx.su > 0) add('beta', 'sulfamide', 'su');
+      if (rx.dpp4 > 0) { add('gut', 'iDPP4', 'dpp'); add('alpha', 'iDPP4', 'dpp'); }
+      if (k.glpF > 0.01) { const n = rx.glp === 'tirz' ? 'tirzépatide' : 'aGLP1'; add('brain', n, 'glp'); add('stomach', n, 'glp'); add('beta', n, 'glp'); add('alpha', n, 'glp'); if (rx.glp === 'tirz') add('fat', 'GIP', 'glp'); }
+      if (rx.sglt2 !== 'none') add('kidney', 'iSGLT2', 'sglt');
+      if (rx.acarb > 0) add('gut', 'acarbose', 'acarb');
+      if (rx.act >= 150) add('muscle', 'activité', 'life');
+      if (rx.diet) add('brain', 'diététique', 'life');
+      if (st.res.tot.ketMax > 0.6) add('keto', st.res.tot.ketMax > 1.5 ? 'risque d\'acidocétose' : 'cétose', 'ket');
+      if (rx.basal > 0 || rx.pump > 0 || rx.rapid > 0) add('pen', rx.pump > 0 ? 'pompe' : (rx.basal > 0 ? 'basale' : '') + (rx.basal > 0 && rx.rapid > 0 ? ' + ' : '') + (rx.rapid > 0 ? 'bolus' : ''), 'ins');
+      Object.entries(badges).forEach(([id, list]) => {
+        const o = ORG[id]; let x = o.x + o.w / 2 - 6;
+        list.forEach(([txt, cls]) => { const w = 6.6 * txt.length + 12; x -= w; el('rect', { x, y: o.y - o.h / 2 - 9, width: w, height: 16, rx: 8, class: 'ph-pill ph-pill-' + cls }, svg); el('text', { x: x + w / 2, y: o.y - o.h / 2 + 3, class: 'ph-pt ph-pt-s', 'text-anchor': 'middle' }, svg).textContent = txt; x -= 4; });
+      });
+      applyFocus();
       drawChart();
       drawSum();
       frame();
+    }
+
+    // Flux en clair (thème ou organe sélectionné), les autres estompés et sans molécules ; repères de l'organe.
+    function applyFocus() {
+      const lay = st.layer || 'focus', L0 = LAYERS.find((x) => x[0] === lay);
+      const on = lay === 'all' ? null : new Set(lay === 'focus' ? ORG_FLOWS[st.sel] || [] : L0[2]);
+      st.on = on;
+      Object.keys(PATHS).forEach((id) => { if (g[id]) g[id].classList.toggle('dim', !!on && !on.has(id)); });
+      svg.querySelectorAll('.ph-org').forEach((n) => n.classList.toggle('far', lay === 'focus' && !n.classList.contains('sel')));
     }
 
     function drawChart() {
@@ -704,7 +734,7 @@
         if (lay !== mloop.lay) { mloop.lay = lay; Object.keys(parts).forEach((k) => delete parts[k]); }
         Object.keys(FLOW_MOL).forEach((id) => {
           const path = g[id]; if (!path) return;
-          const f = (st.flux && st.flux[id]) || 0, n = f > 0 ? Math.max(1, Math.round(1 + 4 * Math.min(1, f))) : 0;
+          const f = (st.on && !st.on.has(id)) ? 0 : (st.flux && st.flux[id]) || 0, n = f > 0 ? Math.max(1, Math.round(1 + 4 * Math.min(1, f))) : 0;
           const arr = parts[id] || (parts[id] = []);
           while (arr.length < n) { const u = el('use', { href: '#phm-' + FLOW_MOL[id], class: 'ph-mol' }, lay); arr.push({ u, x: arr.length ? (arr[arr.length - 1].x + 1 / n) % 1 : Math.random() }); }
           while (arr.length > n) arr.pop().u.remove();
