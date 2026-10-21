@@ -515,3 +515,34 @@ select { background: var(--panel-2); border: 1px solid var(--line-2); border-rad
 .phm-res { fill: var(--mc); stroke: var(--panel); stroke-width: 0.5; } .phm-res.b { fill: color-mix(in srgb, var(--mc) 65%, var(--fg)); }
 .phm-ss { stroke: #f2c14e; stroke-width: 1.2; }
 .phm-zig { fill: none; stroke: var(--mc); stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
+/* Corps humain du module de physiologie (couleurs de l'atlas) */
+.sv-physio { --body: #142c4a; --body-line: #2f5d88; --o-brain: #c99a98; --o-cerebellum: #b98585; --o-hypo: #8fae3c; --o-heart: #b23a46; --o-aorta: #c9505a; --o-liver: #8f3b30; --o-gall: #5e9a4a; --o-muscle: #a8424a; --o-tendon: #d8d2c4; --o-fat: #e6c35e; --o-lung: #c98d9a; --o-kidney: #9c4a40; --o-pancreas: #e0b17e; --o-stomach: #c98a7a; --o-colon: #b9826e; --o-small: #d79a86; --o-line: rgba(0, 0, 0, 0.35); }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .sv-physio { --body: #dce8f4; --body-line: #8fb0cf; --o-brain: #e3b6b2; --o-cerebellum: #d49c9a; --o-hypo: #a3c24e; --o-heart: #c9414e; --o-aorta: #d65f68; --o-liver: #a2483b; --o-gall: #6dab58; --o-muscle: #c0525a; --o-tendon: #e9e4d8; --o-fat: #f0d070; --o-lung: #e1a9b4; --o-kidney: #b0574c; --o-pancreas: #ecc291; --o-stomach: #dca090; --o-colon: #c99480; --o-small: #e6ad99; --o-line: rgba(40, 20, 20, 0.35); } }
+:root[data-theme="light"] .sv-physio { --body: #dce8f4; --body-line: #8fb0cf; --o-brain: #e3b6b2; --o-cerebellum: #d49c9a; --o-hypo: #a3c24e; --o-heart: #c9414e; --o-aorta: #d65f68; --o-liver: #a2483b; --o-gall: #6dab58; --o-muscle: #c0525a; --o-tendon: #e9e4d8; --o-fat: #f0d070; --o-lung: #e1a9b4; --o-kidney: #b0574c; --o-pancreas: #ecc291; --o-stomach: #dca090; --o-colon: #c99480; --o-small: #e6ad99; --o-line: rgba(40, 20, 20, 0.35); }
+.phb-fill { fill: var(--body); } .phb-limb, .phb-head, .phb-ear { stroke: var(--body-line); stroke-width: 2; }
+.phb-outline { fill: none; stroke: var(--body-line); stroke-width: 2.5; stroke-linejoin: round; }
+.phb-line { fill: none; stroke: var(--body-line); stroke-width: 1.6; opacity: 0.55; stroke-linecap: round; }
+.phb-org { stroke: var(--o-line); stroke-width: 1.2; } .phb-shine { pointer-events: none; }
+.phb-org.o-brain { fill: var(--o-brain); } .phb-org.o-cerebellum { fill: var(--o-cerebellum); } .phb-org.o-hypo { fill: var(--o-hypo); }
+.phb-gyrus { fill: none; stroke: var(--o-line); stroke-width: 2; stroke-linecap: round; }
+.phb-org.o-lung { fill: var(--o-lung); opacity: 0.45; } .phb-org.o-heart { fill: var(--o-heart); } .phb-org.o-aorta { fill: var(--o-aorta); }
+.phb-org.o-liver { fill: var(--o-liver); } .phb-org.o-gall { fill: var(--o-gall); } .phb-org.o-kidney { fill: var(--o-kidney); opacity: 0.85; }
+.phb-org.o-stomach { fill: var(--o-stomach); } .phb-org.o-pancreas { fill: var(--o-pancreas); } .phb-org.o-colon { fill: var(--o-colon); opacity: 0.85; } .phb-org.o-small { fill: var(--o-small); }
+.phb-org.o-fat { fill: var(--o-fat); } .phb-org.o-muscle { fill: var(--o-muscle); } .phb-tendon { fill: none; stroke: var(--o-tendon); stroke-width: 6; stroke-linecap: round; }
+.phb-fiber { fill: none; stroke: rgba(255, 255, 255, 0.3); stroke-width: 1.5; }
+.phb-org.o-pen { fill: #f2c14e; } .phb-org.o-pen-n { fill: #8a8fa6; }
+.phb-islet-b { fill: #4f86c9; } .phb-islet-a { fill: #e86bd8; }
+.ph-leader { fill: none; stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 3; opacity: 0.8; }
+.ph-dot { fill: var(--fg); stroke: var(--panel); stroke-width: 1.2; }
+.ph-org.sel .ph-leader { stroke: var(--accent); opacity: 1; stroke-dasharray: none; stroke-width: 1.6; }
+.ph-box-blood.ok { stroke: var(--good); stroke-width: 2; } .ph-box-blood.high { stroke: var(--warn); stroke-width: 2.2; } .ph-box-blood.low { stroke: var(--bad); stroke-width: 2.6; }
+.ph-flow { opacity: 0.5; }
+.sv-physio.ph-full { position: fixed; inset: 0; z-index: 3000; overflow: auto; border-radius: 0; margin: 0; max-width: none; background: var(--panel); padding: 14px 20px; }
+.sv-physio:fullscreen { overflow: auto; background: var(--panel); padding: 14px 20px; }
+body.ph-noscroll { overflow: hidden; }
+.ph-full .ph-grid { grid-template-columns: minmax(0, 2.6fr) minmax(260px, 1fr); }
+.ph-full .ph-svg { max-height: 76vh; }
+.ph-full .ph-chart { max-height: 30vh; }
+@media (max-width: 900px) { .ph-full .ph-grid { grid-template-columns: 1fr; } }
+.ph-full .ph-svg { height: 72vh; max-height: none; width: 100%; }
+.ph-flow.ph-n { stroke-dasharray: 2 6; }
