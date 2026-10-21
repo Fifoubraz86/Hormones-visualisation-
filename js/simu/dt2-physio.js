@@ -47,22 +47,31 @@
   const EVENTS = [
     ['none', 'Journée habituelle'],
     ['sport', 'Activité physique : 45 min de marche rapide à 17 h'],
+    ['sportAdj', 'Activité physique avec adaptation (débit temporaire − 50 % ou collation)'],
     ['skip', 'Déjeuner sauté (sans son bolus)'],
     ['big', 'Dîner copieux (× 1,8)'],
     ['snack', 'Collation sucrée à 16 h (30 g, sans bolus)'],
     ['alcohol', 'Alcool au dîner (3 verres)'],
-    ['ill', 'Infection fébrile (maladie intercurrente)']
+    ['ill', 'Infection fébrile (maladie intercurrente)'],
+    ['illAdj', 'Infection fébrile avec adaptation des doses (jours de maladie)']
   ];
   function applyEvent(pt, dp, ev) {
     const rx = pt.rx, ins = rx.basal + (rx.pump || 0) + rx.rapid > 0 || rx.su > 0;
     const d = Object.assign({}, dp, { w: dp.w.slice(), skip: dp.skip.slice(), cut: dp.cut.slice(), segCut: dp.segCut.slice(), extra: dp.extra.slice(), u: (dp.u || [0, 0, 0]).slice(), snacks: null });
-    let dg = () => 0, egpF = () => 1, ketF = 1, upNote = '';
-    if (ev === 'sport') {
+    let dg = () => 0, egpF = () => 1, ketF = 1, exoF = () => 1;
+    if (ev === 'sport' || ev === 'sportAdj') {
       // Captation musculaire sans insuline pendant l'effort, sensibilité accrue 6 à 12 h ; chute plus forte (et
       // hypoglycémie possible) sous insuline ou sulfamide, qui ne baissent pas pendant l'effort.
       const A = 0.3 * (ins ? 1.7 : 1), B = 0.1 * (ins ? 1.5 : 1);
       dg = (t) => (t >= 17 && t < 17.75 ? -A * (t - 17) / 0.75 : t >= 17.75 ? -A * Math.exp(-(t - 17.75) / 1.2) - B * Math.exp(-(t - 17.75) / 8) : 0);
       egpF = (t) => (t >= 17 && t < 18 ? 1.25 : 1);
+      if (ev === 'sportAdj') {
+        // Pompe : débit temporaire − 50 % de 16 h à 18 h (1 h avant et pendant l'effort) ; injections ou sulfamide :
+        // collation de 15 g avant l'effort (complément, pratiques usuelles).
+        const base = dg;
+        if (rx.pump > 0) { exoF = (t) => (t >= 16 && t < 18 ? 0.5 : 1); dg = (t) => base(t) * 0.35; }
+        else if (ins) { d.snacks = [{ t: 16.75, w: 0.25 }]; dg = (t) => base(t) * 0.6; }
+      }
     } else if (ev === 'skip') {
       d.skip[1] = true; d.u[1] = 0; d.extra[1] = 0; d.segCut[1] *= 0.3; // l'après-midi ne montre plus que le débit de base (test de jeûne)
     } else if (ev === 'big') {
@@ -75,13 +84,19 @@
       const A = ins ? 0.35 : 0.12;
       dg = (t) => (t >= 22 || t < 8 ? -A * Math.sin(Math.PI * (((t - 22 + 24) % 24) / 10)) : 0);
       egpF = (t) => (t >= 22 || t < 8 ? 0.6 : 1);
-    } else if (ev === 'ill') {
+    } else if (ev === 'ill' || ev === 'illAdj') {
       // Hormones de stress (cortisol, catécholamines, glucagon) : insulinorésistance, production hépatique accrue,
       // cétose ; ne pas arrêter l'insuline, glycémies et cétonémie rapprochées, iSGLT2 et metformine suspendus.
       dg = (t) => 0.35 + 0.1 * Math.sin(Math.PI * t / 24);
       egpF = () => 1.3; ketF = 2.2;
+      if (ev === 'illAdj') {
+        // Jours de maladie : insuline + 20 % (débit temporaire + 30 % sous pompe), corrections toutes les 4 h,
+        // iSGLT2 suspendu ; sans insuline, la glycémie reste haute (insuline transitoire à discuter).
+        if (rx.basal + (rx.pump || 0) + rx.rapid > 0) { exoF = () => (rx.pump > 0 ? 1.3 : 1.2); dg = (t) => 0.12 + 0.05 * Math.sin(Math.PI * t / 24); ketF = 1.3; }
+        else ketF = 1.8;
+      }
     }
-    return { d, dg, egpF, ketF };
+    return { d, dg, egpF, ketF, exoF };
   }
 
   function decompose(pt, D, Y, dp0, ev) {
@@ -119,7 +134,7 @@
       const incP = 1.2 * glpF * (isT ? 1.25 : 1) * gd; // agonisme pharmacologique, glucodépendant
       const su = (e.eSu || 0) * B * 5;
       const isec = 8 * B * (0.08 + Math.max(0, G - 0.75)) * (1 + 1.4 * (incE + incP)) + su;
-      const iexo = exoAt(rx, t, dp.u || [0, 0, 0], dp.tm);
+      const iexo = exoAt(rx, t, dp.u || [0, 0, 0], dp.tm) * E.exoF(t);
       const portal = isec * 1.6 + iexo * 0.8;
       const glu = Math.max(0.15, (1 + 2 * Math.max(0, 0.9 - G)) / (1 + 0.45 * portal) * (1 - gluSup) * (1 + 0.5 * Math.min(1, ra / 30)));
       let egp = E.egpF(t) * egp0 * (0.4 + 0.6 * glu) * (1 - metK) / (1 + 0.35 * portal * si);
@@ -197,6 +212,8 @@
     big: (k) => 'Dîner copieux : ' + (k.rx.bolusMode === 'if' ? 'en insulinothérapie fonctionnelle, le bolus suit les glucides.' : k.rx.rapid > 0 ? 'avec un bolus fixe, l\'excursion post-prandiale n\'est pas couverte.' : 'la sécrétion résiduelle ne suffit pas : pic post-prandial et glycosurie.'),
     snack: () => 'Collation sucrée sans bolus : pic de l\'après-midi, glycémie avant le dîner plus haute (bolus du dîner faussement augmenté si on le juge sur elle).',
     alcohol: (k) => 'Alcool : le foie ne fait plus de néoglucogenèse. ' + (k.rx.basal + (k.rx.pump || 0) + k.rx.rapid > 0 || k.su ? 'Sous insuline ou sulfamide : hypoglycémie nocturne ou matinale possible ; collation glucidique, contrôle au coucher.' : 'Sans insuline ni sulfamide, baisse modérée.'),
+    sportAdj: (k, T) => (k.rx.pump > 0 ? 'Débit temporaire − 50 % de 16 h à 18 h (1 h avant et pendant l\'effort) : moins d\'insuline pendant l\'effort, la baisse est amortie. ' : k.rx.basal + k.rx.rapid > 0 || k.su ? 'Collation de 15 g avant l\'effort (sous insuline, on peut aussi réduire de 30 à 50 % le bolus du repas pris 1 à 3 h avant) : la baisse est amortie. ' : 'Sans insuline ni sulfamide, pas d\'adaptation nécessaire. ') + 'Glycémie minimale ' + fmt(T.gMin, 2) + ' g/L.',
+    illAdj: (k, T) => (k.rx.basal + (k.rx.pump || 0) + k.rx.rapid > 0 ? 'Jours de maladie : insuline augmentée (+ 20 %, débit temporaire + 30 % sous pompe), corrections toutes les 4 h, boissons, cétonémie si glycémie > 2,50 g/L ; iSGLT2 suspendu, metformine suspendue si déshydratation. ' : 'Sans insuline : glycémie haute pendant l\'infection ; suspendre iSGLT2 et metformine en cas de déshydratation, insuline transitoire si glycémies > 3 g/L ou cétose. ') + 'Cétonémie maximale ' + fmt(T.ketMax, 1) + ' mmol/L.',
     ill: (k, T) => 'Infection : hormones de stress, insulinorésistance, production hépatique accrue, cétose. Ne jamais arrêter l\'insuline (souvent l\'augmenter), glycémies et cétonémie rapprochées, hydratation ; suspendre iSGLT2 et metformine en cas de déshydratation (cétonémie ici jusqu\'à ' + fmt(T.ketMax, 1) + ' mmol/L).'
   };
 
