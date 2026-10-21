@@ -294,7 +294,7 @@
     dp.rdg = rdg;
     if (titrate && G.titr.who !== 'none' && (bas(pt.rx) > 0 || pt.rx.rapid > 0)) {
       const follow = G.cfg.variab !== 'reel' || G.titr.who === 'ide' || Math.random() < 0.85;
-      const before = { b: bas(pt.rx), m: pt.rx.rapidM.slice() };
+      const before = { b: bas(pt.rx), m: pt.rx.rapidM.slice(), seg: pt.rx.pumpSeg ? pt.rx.pumpSeg.slice() : null, ratio: pt.rx.ratio };
       // Peur de l'hypoglycémie ou détresse : le patient ne fait qu'une partie des hausses prévues (pas l'IDE).
       const rr = Y.rng((G.seed ^ (pt.day * 2654435761)) >>> 0);
       const prot = Object.assign({ cgm: G.cgm, basalMax: pt.rx.pump > 0 ? null : Math.round(0.5 * pt.st.W) }, G.titr.who === 'ide' ? G.titr : Object.assign({}, G.titr, pt.par.fear ? { upProb: 0.3, upWhy: 'peur de l\'hypoglycémie', rnd: rr } : pt.par.distress ? { upProb: 0.5, upWhy: 'découragement', rnd: rr } : {}));
@@ -457,10 +457,14 @@
     const glpTxt = gl.length ? 'Paliers de ' + D.GLP1[pt.rx.glp].name.split(' (')[0].toLowerCase() + ' : ' + [gl[0].from].concat(gl.map((x) => x.to)).map((x) => String(x).replace('.', ',')).join(' → ') + ' ' + D.GLP1[pt.rx.glp].unit + ' (J' + gl.map((x) => x.day).join(', J') + ').' : '';
     if (tl.length) {
       const first = tl[0].before, rx = pt.rx, parts = [];
-      if (first.b !== bas(rx)) parts.push((rx.pump > 0 ? 'débit de base ' : 'basale ') + first.b + ' → ' + bas(rx) + ' U' + (rx.device === 'loop' ? ' (automatique)' : ''));
-      rx.rapidM.forEach((u, i) => { if (first.m[i] !== u) parts.push('bolus du ' + ['petit-déjeuner', 'déjeuner', 'dîner'][i] + ' ' + first.m[i] + ' → ' + u + ' U'); });
-      const down = tl.reduce((a, x) => a + x.log.filter((l) => l.to < l.from).length, 0), up = tl.reduce((a, x) => a + x.log.filter((l) => l.to > l.from).length, 0);
-      const capped = tl.flatMap((x) => x.log.filter((l) => l.cap)).map((l) => ({ basal: 'basale', m0: 'bolus du petit-déjeuner', m1: 'bolus du déjeuner', m2: 'bolus du dîner' })[l.name] + ' (' + l.from + ' U' + (/avis 19/.test(l.why) ? ', ≥ 0,5 U/kg : sur-basalisation ?' : '') + ')');
+      if (first.b !== bas(rx)) parts.push((rx.pump > 0 ? 'débit de base ' : 'basale ') + fmt(first.b, first.b % 1 ? 1 : 0) + ' → ' + fmt(bas(rx), bas(rx) % 1 ? 1 : 0) + ' U' + (rx.device === 'loop' ? ' (automatique)' : ''));
+      if (rx.pumpSeg && first.seg) rx.pumpSeg.forEach((v, i) => { if (i < 3 && first.seg[i] !== v) parts.push(Y.SEGS[i][2] + ' ' + fmt(first.seg[i], 2) + ' → ' + fmt(v, 2) + ' U/h'); });
+      if (rx.bolusMode === 'if') { if (first.ratio !== rx.ratio) parts.push('ratio 1 U pour ' + fmt(first.ratio, 1) + ' → ' + fmt(rx.ratio, 1) + ' g de glucides'); }
+      else rx.rapidM.forEach((u, i) => { if (first.m[i] !== u) parts.push('bolus du ' + ['petit-déjeuner', 'déjeuner', 'dîner'][i] + ' ' + first.m[i] + ' → ' + u + ' U'); });
+      // Ratio : un ratio plus grand donne moins d'insuline (baisse).
+      const more = (l) => (l.name === 'ratio' ? l.to < l.from : l.to > l.from), less = (l) => (l.name === 'ratio' ? l.to > l.from : l.to < l.from);
+      const down = tl.reduce((a, x) => a + x.log.filter(less).length, 0), up = tl.reduce((a, x) => a + x.log.filter(more).length, 0);
+      const capped = tl.flatMap((x) => x.log.filter((l) => l.cap)).map((l) => l.seg != null ? 'débit ' + Y.SEGS[l.seg][2] + ' (' + fmt(l.from, 2) + ' U/h)' : ({ basal: 'basale', m0: 'bolus du petit-déjeuner', m1: 'bolus du déjeuner', m2: 'bolus du dîner' })[l.name] + ' (' + l.from + ' U' + (/avis 19/.test(l.why) ? ', ≥ 0,5 U/kg : sur-basalisation ?' : '') + ')');
       const skipped = tl.reduce((n, x) => n + x.log.filter((l) => l.skip).length, 0);
       titr = (G.titr.who === 'ide' ? 'L\'IDE' : G.cfg.sex === 'F' ? 'La patiente' : 'Le patient') + ' a appliqué le protocole : ' + (parts.join(', ') || 'doses revenues à leur point de départ') + ' (' + up + ' hausse' + (up > 1 ? 's' : '') + ', ' + down + ' baisse' + (down > 1 ? 's' : '') + ').' + (capped.length ? ' Dose maximale du protocole atteinte, ' + (G.titr.who === 'ide' ? 'l\'IDE a' : G.cfg.sex === 'F' ? 'elle a' : 'il a') + ' appelé : ' + capped.join(', ') + '.' : '') + (skipped ? ' ' + skipped + ' hausse' + (skipped > 1 ? 's' : '') + ' prévue' + (skipped > 1 ? 's' : '') + ' non faite' + (skipped > 1 ? 's' : '') + ' (' + (pt.par.fear ? 'peur de l\'hypoglycémie' : 'découragement') + ').' : '');
     }
@@ -506,7 +510,8 @@
     if (rx.sglt2 !== 'none') o.push(D.SGLT2[rx.sglt2].toLowerCase());
     if (rx.acarb) o.push('acarbose ' + rx.acarb + ' mg/j');
     if (rx.basal) o.push('insuline basale (' + ({ g100: 'glargine U100', g300: 'glargine U300', deg: 'dégludec', nph: 'NPH' }[rx.basalType] || 'glargine') + ') ' + rx.basal + ' U/j');
-    if (rx.pump) o.push((rx.device === 'loop' ? 'boucle fermée hybride, débit de base automatique (' : 'pompe à insuline, débit de base ') + rx.pump + ' U/24 h' + (rx.device === 'loop' ? ')' : ''));
+    if (rx.pump) o.push((rx.device === 'loop' ? 'boucle fermée hybride, débit de base automatique (' : 'pompe à insuline, débit de base ') + fmt(rx.pump, rx.pump % 1 ? 1 : 0) + ' U/24 h' + (rx.pumpSeg && rx.device !== 'loop' ? ' (' + rx.pumpSeg.slice(0, 3).map((v, i) => Y.SEGS[i][2].split(' (')[0] + ' ' + fmt(v, 2)).join(' ; ') + ' U/h)' : '') + (rx.device === 'loop' ? ')' : ''));
+    if (rx.pump && rx.bolusMode === 'if') { o.push('insulinothérapie fonctionnelle (1 U pour ' + fmt(rx.ratio, 1) + ' g de glucides ; correction 1 U pour ' + fmt(rx.isf, 2) + ' g/L au-dessus de 1,20)'); return o.join(' + '); }
     if (rx.rapid) o.push((rx.pump ? 'bolus ' : 'analogue rapide ') + (rx.rapidM || [0, rx.rapid, 0]).map((x) => x || 0).join('/') + ' U (petit-déj./déj./dîner)');
     return o.length ? o.join(' + ') : 'aucun traitement';
   }
@@ -521,7 +526,7 @@
     pt.st = s.st; pt.day = s.day; pt.rx = s.rx; pt.take = s.take; pt.metRamp = s.metRamp; Object.assign(pt.par, s.par);
     pt.log.length = s.logLen; G.history.length = s.hist; G.visits.length = s.vis; G.ev = s.ev; G.lastHypo = s.lastHypo;
     G.glyDays = s.gly; G.titrState = s.titrState; G.titrLog.length = s.titrLog; G.starts = s.starts; G.titr = s.titr; G.cgm = s.cgm; G.cgmStart = s.cgmStart; G.cgmAcquired = s.cgmAcq; G.asg = s.asg; G.goal = s.goal; G.lastH = s.lastH; G.lastS = s.lastS; if (G.glpLog) G.glpLog.length = s.glpLog || 0; G.glpUp = s.glpUp;
-    Object.assign(G.draft, pt.rx, { basal: bas(pt.rx), device: pt.rx.device || 'inj', rapidM: pt.rx.rapidM.slice(), titr: JSON.parse(JSON.stringify(G.titr)), cgm: G.cgm, asg: G.asg, goal: G.goal });
+    Object.assign(G.draft, pt.rx, { basal: bas(pt.rx), device: pt.rx.device || 'inj', seg: pt.rx.pumpSeg ? pt.rx.pumpSeg.slice() : null, rapidM: pt.rx.rapidM.slice(), titr: JSON.parse(JSON.stringify(G.titr)), cgm: G.cgm, asg: G.asg, goal: G.goal });
   }
 
   // Cible d'HbA1c : celle fixée par le prescripteur, sinon la cible SFD 2025 calculée.
@@ -561,6 +566,13 @@
     const prev = Object.assign({}, pt.rx, { rapidM: pt.rx.rapidM.slice() });
     const metBefore = D.metDose(pt);
     Object.assign(pt.rx, { met: d.met, su: d.su, dpp4: d.dpp4, glp: d.glp, glpDose: d.glp === 'none' ? 0 : d.glpDose, sglt2: d.sglt2, acarb: d.acarb, basal: d.device === 'inj' ? d.basal : 0, pump: d.device === 'inj' ? 0 : d.basal, device: d.device, basalType: d.basalType, rapidM: d.rapidM.slice(), rapid: d.rapid, act: d.act, sodaStop: d.sodaStop, wtGoal: d.wtGoal, diet: d.diet });
+    // Pompe : profil horaire (4 tranches) et insulinothérapie fonctionnelle (ratio, sensibilité).
+    pt.rx.pumpSeg = d.device !== 'inj' && d.seg ? d.seg.slice() : null;
+    if (pt.rx.pumpSeg) pt.rx.pump = Math.round(Y.segTotal(pt.rx.pumpSeg) * 10) / 10;
+    pt.rx.bolusMode = d.device !== 'inj' && d.bolusMode === 'if' ? 'if' : 'fixe';
+    if (pt.rx.bolusMode === 'if') { pt.rx.ratio = d.ratio; pt.rx.isf = d.isf; pt.rx.rapidM = Y.CARBS.map((c, m) => Math.round(c * [0.8, 1.1, 1][m] / d.ratio)); pt.rx.rapid = pt.rx.rapidM.reduce((a, x) => a + x, 0); }
+    else { pt.rx.ratio = 0; pt.rx.isf = 0; }
+    d.titr.segCap = pt.rx.pumpSeg ? pt.rx.pumpSeg.map((x) => x * 1.5) : null;
     if (d.cgm && !G.cgm) G.cgmStart = pt.day; // le capteur n'enregistre qu'à partir de sa pose
     // Dose maximale sans avis médical : + 50 % de la dose prescrite (au moins + 6 U), comme dans les protocoles écrits.
     d.titr.caps = { basal: d.basal > 0 ? Math.max(d.basal + 6, Math.round(d.basal * 1.5)) : null };
@@ -582,7 +594,7 @@
     const rng = G.cfg.variab === 'reel' ? Math.random : null;
     D.advance(pt, days, () => { recordDay(true); glpStep(); const e = daily(); if (e) { interrupt = e; return false; } return true; }, rng);
     // Doses atteintes par la titration : point de départ de la prochaine ordonnance.
-    d.basal = bas(pt.rx); d.rapidM = pt.rx.rapidM.slice(); d.rapid = pt.rx.rapid; d.glpDose = pt.rx.glp === d.glp ? pt.rx.glpDose : d.glpDose;
+    d.basal = bas(pt.rx); d.rapidM = pt.rx.rapidM.slice(); d.rapid = pt.rx.rapid; d.seg = pt.rx.pumpSeg ? pt.rx.pumpSeg.slice() : null; if (pt.rx.ratio) d.ratio = pt.rx.ratio; d.glpDose = pt.rx.glp === d.glp ? pt.rx.glpDose : d.glpDose;
     let note = (d.mode === 'tele' ? 'Téléconsultation à ' : 'Consultation à ') + (d.unit === 'sem' ? d.wait + ' semaine' + (d.wait > 1 ? 's' : '') : days + ' jour' + (days > 1 ? 's' : ''));
     let tests = d.tests;
     if (interrupt) {
@@ -761,6 +773,7 @@
           dev !== 'inj' ? null : h('select', { id: 'dtBasalType', 'aria-label': 'Insuline basale', onchange: (e) => { d.basalType = e.target.value; } }, [['g100', 'Glargine U100'], ['g300', 'Glargine U300'], ['deg', 'Dégludec'], ['nph', 'NPH']].map(([k, v]) => h('option', { value: k, selected: d.basalType === k }, v)))])]),
         h('div', { class: 'sv-field' }, [h('label', null, 'Analogue rapide aux repas (petit-déj. / déj. / dîner)'), h('div', { class: 'sv-inline' }, [0, 1, 2].map((m) => unit('dtBolus' + m, d.rapidM[m], (v) => { d.rapidM[m] = v; upd(); }, 'Bolus ' + Y.MEALS[m])))])
       ]),
+      dev !== 'inj' ? pumpBlock(d, re) : null,
       note,
       h('h4', null, 'Adaptation des doses entre les consultations'),
       h('div', { class: 'sv-form' }, [
@@ -778,6 +791,27 @@
         : h('div', { class: 'sv-form' }, [sel('dtAsg', 'Autosurveillance capillaire', d.asg, [['0', 'Aucune']].concat(Object.entries(Y.ASG).map(([k, v]) => [k, v.label])), (v) => { d.asg = v; })]),
       h('p', { class: 'sv-note' }, 'Lecteur et bandelettes : seulement sous traitement hypoglycémiant ; hors insuline, 200 bandelettes par an (HAS). Capteur : sous insuline à 3 injections/j ou plus sans condition, ou en moins de 3 injections (basale seule comprise) avec HbA1c > 8 % (LPPR) ; une fois posée, l\'indication reste acquise même si l\'HbA1c repasse sous 8 %.'),
       retNeed ? h('label', { class: 'sv-check' }, [h('input', { type: 'checkbox', id: 'dtPpr', checked: d.ppr, onchange: (e) => { d.ppr = e.target.checked; } }), ' Adresser en urgence en ophtalmologie : photocoagulation panrétinienne']) : null
+    ]);
+  }
+
+  // Pompe au long cours (protocole type, complément) : profil horaire en 4 tranches, insulinothérapie fonctionnelle.
+  function pumpBlock(d, re) {
+    const tdd = Math.max(10, d.basal + d.rapidM.reduce((a, x) => a + x, 0));
+    const rIn = (id, val, on, step, label) => h('input', { type: 'number', id, class: 'sv-num sv-num-s', value: val, min: 0, max: 50, step, inputmode: 'decimal', 'aria-label': label, oninput: (e) => { const v = parseFloat(String(e.target.value).replace(',', '.')); if (v >= 0) on(v); } });
+    const spread = () => { const r = d.basal / 24.6; d.seg = [r, 1.2 * r, r, r].map((x) => Math.round(x * 20) / 20); re(); };
+    return h('div', { class: 'sv-pump' }, [
+      h('h4', null, 'Réglages de la pompe (protocole type)'),
+      d.device === 'loop' ? null : h('label', { class: 'sv-check' }, [h('input', { type: 'checkbox', id: 'dtSegOn', checked: !!d.seg, onchange: (e) => { if (e.target.checked) spread(); else { d.seg = null; re(); } } }), ' Profil horaire du débit de base (4 tranches)']),
+      d.seg && d.device !== 'loop' ? h('div', { class: 'sv-form' }, [
+        ...Y.SEGS.slice(0, 3).map(([, , lab], i) => h('div', { class: 'sv-field' }, [h('label', { for: 'dtSeg' + i }, lab + ' (U/h)'), rIn('dtSeg' + i, d.seg[i], (v) => { d.seg[i] = v; if (i === 0) d.seg[3] = v; d.basal = Math.round(Y.segTotal(d.seg)); }, 0.05, lab)])),
+        h('p', { class: 'sv-note' }, 'Total ' + fmt(Y.segTotal(d.seg), 1) + ' U/24 h (22 h – minuit = minuit – 3 h). Titration : nuit sur la glycémie de 3 h, aube sur le réveil, journée sur les glycémies avant le déjeuner et le dîner une fois les bolus réglés ; ± 10 % (− 20 % si hypoglycémie), plafond + 50 %.')
+      ]) : null,
+      h('div', { class: 'sv-form' }, [h('div', { class: 'sv-field' }, [h('label', { for: 'dtBolMode' }, 'Bolus'), h('select', { id: 'dtBolMode', onchange: (e) => { d.bolusMode = e.target.value; if (d.bolusMode === 'if' && !d.ratio) { d.ratio = Math.round(500 / tdd * 2) / 2; d.isf = Math.round(18 / tdd * 100) / 100; } re(); } }, [['fixe', 'Doses fixes par repas'], ['if', 'Insulinothérapie fonctionnelle (ratio + correction)']].map(([k, t]) => h('option', { value: k, selected: (d.bolusMode || 'fixe') === k }, t)))])]),
+      d.bolusMode === 'if' ? h('div', { class: 'sv-form' }, [
+        h('div', { class: 'sv-field' }, [h('label', { for: 'dtRatio' }, 'Ratio : 1 U pour … g de glucides'), rIn('dtRatio', d.ratio, (v) => { d.ratio = v; }, 0.5, 'Ratio glucides')]),
+        h('div', { class: 'sv-field' }, [h('label', { for: 'dtIsf' }, 'Sensibilité : 1 U baisse de … g/L'), rIn('dtIsf', d.isf, (v) => { d.isf = v; }, 0.01, 'Sensibilité')]),
+        h('p', { class: 'sv-note' }, 'Départ : règle des 500 (ratio ≈ ' + fmt(500 / tdd, 1) + ' g/U) et des 1 800 (sensibilité ≈ ' + fmt(18 / tdd, 2) + ' g/L par U) pour ' + Math.round(tdd) + ' U/j. Repas de référence ≈ 50 / 65 / 60 g ; correction si la glycémie avant le repas dépasse 1,20 g/L. Le ratio se titre sur la glycémie 2 h après les repas (± 10 %).')
+      ]) : null
     ]);
   }
 
