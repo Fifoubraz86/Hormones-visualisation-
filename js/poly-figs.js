@@ -41,7 +41,7 @@
     ['23', 'Hypophysite', 1, 67, ['adh', 'lacto']],
     ['24', 'Rapports anatomiques des glandes surrénales, selon Sherlock M. et al. (Endocrine Reviews 2020)', 1, 68, ['cortico', 'medullo', 'raa']],
     ['25', 'Coupe de la glande surrénale humaine au microscope, montrant ses différentes zones', 1, 69, ['cortico', 'medullo', 'raa']],
-    ['26', 'Stéroïdogenèse dans les glandes surrénales', 1, 71, ['cortico', 'raa']],
+    ['26', 'Stéroïdogenèse dans les glandes surrénales', 1, 71, ['cortico', 'raa', 'surrenale']],
     ['27', 'Le système rénine-angiotensine-aldostérone', 1, 71, ['raa']],
     ['28', 'Biosynthèse des catécholamines dans les cellules chromaffines', 1, 73, ['medullo']],
     ['29', 'Action de l\'aldostérone sur les cellules principales du tubule rénal distal', 1, 75, ['raa']],

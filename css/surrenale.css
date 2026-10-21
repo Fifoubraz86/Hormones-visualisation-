@@ -1,0 +1,39 @@
+/* Physiologie surrénalienne : zones, cartes des stéroïdes, flèches enzymatiques, bilan. */
+.sr-zone { fill: color-mix(in srgb, var(--c) 8%, transparent); stroke: color-mix(in srgb, var(--c) 45%, transparent); stroke-width: 2; }
+.sr-zone-t { fill: var(--c, var(--fg)); font: 600 19px var(--font-display); }
+.sr-zone-s { fill: var(--muted); font: 500 14px var(--font-body); font-style: italic; }
+.sr-box { fill: var(--panel); stroke: var(--line-2); stroke-width: 1.5; }
+.sr-node.up .sr-box { stroke: var(--bad); stroke-width: 3; }
+.sr-node.down .sr-box { stroke: var(--p-blue); stroke-width: 3; stroke-dasharray: 6 4; }
+.sr-bond { fill: none; stroke: var(--fg); stroke-width: 1.5; stroke-linecap: round; }
+.sr-hash { stroke-dasharray: 2.5 2.5; }
+.sr-atom { fill: var(--p-red); font-family: var(--font-body); font-weight: 600; }
+.sr-atom.sr-s { fill: var(--p-gold); }
+.sr-name { fill: var(--fg); font: 600 17px var(--font-body); }
+.sr-name-s { font-size: 14px; }
+.sr-formula { fill: var(--muted); font: 500 14px var(--font-body); }
+.sr-bar-bg { fill: var(--line); }
+.sr-bar { fill: var(--accent); }
+.sr-node.up .sr-bar { fill: var(--bad); }
+.sr-node.down .sr-bar { fill: var(--p-blue); }
+.sr-val { fill: var(--fg); font: 600 15px var(--font-data); }
+.sr-node.up .sr-val { fill: var(--bad); }
+.sr-node.down .sr-val { fill: var(--p-blue); }
+.sr-in-box { fill: color-mix(in srgb, var(--c) 14%, var(--panel)); stroke: var(--c); stroke-width: 2; }
+.sr-in-t { fill: var(--fg); font: 600 17px var(--font-body); }
+.sr-in-v { fill: var(--muted); font: 500 14px var(--font-data); }
+.sr-input { cursor: pointer; }
+.sr-track { fill: none; stroke: var(--line-2); stroke-width: 3; }
+.sr-arrow.hot .sr-track { stroke: var(--bad); stroke-width: 5; }
+.sr-enz { fill: var(--muted); font: 600 13px var(--font-body); }
+.sr-block-bg { fill: var(--panel); stroke: var(--bad); stroke-width: 3; }
+.sr-block-x { stroke: var(--bad); stroke-width: 4; stroke-linecap: round; }
+.sr-block { transition: opacity 0.3s; }
+.sr-out { fill: var(--muted); font: 600 14px var(--font-body); font-style: italic; }
+.sr-note-bg { fill: var(--panel-2); stroke: var(--line-2); stroke-width: 1.5; }
+.sr-note { fill: var(--fg); font: 500 16px var(--font-body); }
+.sr-note tspan:first-child { font-weight: 700; }
+.sr-b-n { fill: var(--muted); font: 500 14px var(--font-body); }
+.sr-b-v { fill: var(--fg); font: 600 17px var(--font-data); }
+.sr-b-v.hi { fill: var(--bad); }
+.sr-b-v.lo { fill: var(--p-blue); }

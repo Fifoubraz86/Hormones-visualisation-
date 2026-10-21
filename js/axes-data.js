@@ -83,7 +83,7 @@
     nodes: [
       { id: 'hypo', at: 'hypo', leader: true, lx: 290, ly: -14, label: 'Hypothalamus', sub: 'noyau paraventriculaire : CRH', color: 'p-orange', info: 'Les neurones hypothalamiques libèrent la CRH dans le système porte.' },
       { id: 'pit', at: 'ant', leader: true, lx: 250, ly: 14, label: 'Antéhypophyse', sub: 'cellules corticotropes', color: 'p-orange2', info: 'Les cellules corticotropes sécrètent l\'ACTH (et l\'α-MSH, issue de la POMC).' },
-      { id: 'adr', zoom: 'steroido', x: 930, y: 380, organ: 'adrenalKidney', label: 'Corticosurrénale', sub: ['zone fasciculée : cortisol', 'zone réticulée : androgènes'], color: 'p-gold', info: 'Zone fasciculée : 75 à 80 % du volume du cortex, cortisol. Zone réticulée : DHEA, DHEA-S, androstènedione.' },
+      { id: 'adr', zoom: 'surrenale', x: 930, y: 380, organ: 'adrenalKidney', label: 'Corticosurrénale', sub: ['zone fasciculée : cortisol', 'zone réticulée : androgènes'], color: 'p-gold', info: 'Zone fasciculée : 75 à 80 % du volume du cortex, cortisol. Zone réticulée : DHEA, DHEA-S, androstènedione.' },
       { id: 'liver', x: 1330, y: 240, organ: 'liver', s: 0.9, label: 'Foie', sub: 'néoglucogenèse', color: 'p-gold' },
       { id: 'muscle', x: 1330, y: 440, organ: 'muscle', s: 0.9, label: 'Muscle', sub: 'catabolisme protidique', color: 'p-gold' },
       { id: 'fat', x: 1330, y: 640, organ: 'fat', s: 0.9, label: 'Tissu adipeux', sub: 'lipogenèse viscérale', color: 'p-gold' },
@@ -347,7 +347,7 @@
     points: ['Aldostérone : rôle important dans la régulation de la pression artérielle par la rétention sodée.', 'Toutes les hormones corticostéroïdes dérivent du cholestérol ; son transport mitochondrial par StAR est l\'étape limitante.', 'L\'hypovolémie, la baisse de la pression artérielle ou de la perfusion rénale stimulent la rénine ; l\'expansion volémique la met au repos.'],
     nodes: [
       { id: 'jga', bare: true, x: 626, y: 470, lx: -70, ly: 6, anchor: 'end', label: 'Appareil juxtaglomérulaire', sub: 'rénine', color: 'p-red', sheet: 'kidney', info: 'Les cellules juxtaglomérulaires de l\'artériole afférente libèrent la rénine quand la perfusion rénale ou la volémie baissent.' },
-      { id: 'adr', bare: true, x: 650, y: 330, lx: -80, ly: -40, anchor: 'end', label: 'Corticosurrénale : zone glomérulée', sub: 'aldostérone synthase', color: 'p-teal', sheet: 'adrenal', info: 'La surrénale coiffe le pôle supérieur du rein. Sa zone glomérulée, la plus externe, fabrique l\'aldostérone.' },
+      { id: 'adr', zoom: 'surrenale', bare: true, x: 650, y: 330, lx: -80, ly: -40, anchor: 'end', label: 'Corticosurrénale : zone glomérulée', sub: 'aldostérone synthase', color: 'p-teal', sheet: 'adrenal', info: 'La surrénale coiffe le pôle supérieur du rein. Sa zone glomérulée, la plus externe, fabrique l\'aldostérone.' },
       { id: 'tub', zoom: 'nephron-full', bare: true, x: 760, y: 500, lx: 60, ly: 40, label: 'Tube distal, canal collecteur', sub: ['Na⁺ et eau réabsorbés', 'K⁺ et H⁺ excrétés'], color: 'p-teal', sheet: 'kidney' },
       { id: 'liver', x: 230, y: 830, organ: 'liver', s: 0.85, label: 'Foie', sub: 'angiotensinogène (complément)', color: 'p-red' },
       { id: 'lung', x: 230, y: 590, organ: 'lungs', s: 0.85, label: 'Poumon', sub: 'enzyme de conversion (complément)', color: 'p-red' },
