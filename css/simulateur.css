@@ -570,3 +570,30 @@ body.ph-noscroll { overflow: hidden; }
 .ph-legend { height: 34px; width: auto; max-width: 100%; }
 .ph-pill, .ph-pt, .ph-pen-lab, .ph-flow, .ph-mols { pointer-events: none; }
 .ph-leader, .ph-dot { pointer-events: none; }
+/* Gros vaisseaux (à la place du cœur), surrénales, contre-régulation de l'hypoglycémie */
+.phb-ves { fill: none; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; opacity: 0.85; }
+.phb-ves-in { fill: none; stroke-width: 2.2; stroke-linecap: round; stroke: #fff; opacity: 0.22; }
+.phb-ves.phb-artery { stroke: #c9414e; } .phb-ves.phb-vein { stroke: #3d6fb8; }
+.phb-org.o-adrenal { fill: #d9a441; }
+.phm-adr { --mc: #e5484d; } .phm-cort { --mc: #b07ad9; } .phm-N { fill: #4f7cff; }
+.ph-flow.ph-a { stroke: #e5484d; } .ph-ah.ph-a { fill: #e5484d; }
+.ph-symG > * { opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+.ph-symG > .on { opacity: 1; }
+.ph-drop { fill: #7cc4ff; stroke: #2f7fc4; stroke-width: 0.8; }
+.ph-sweat.on .ph-drop { animation: ph-drip 1.4s ease-in infinite; }
+.ph-sweat.on .ph-drop:nth-child(2n) { animation-delay: 0.6s; }
+@keyframes ph-drip { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(10px); opacity: 0.2; } }
+.ph-trem { fill: none; stroke: var(--warn); stroke-width: 2.4; stroke-linecap: round; }
+.ph-tremor.on { animation: ph-shake 0.12s linear infinite alternate; }
+@keyframes ph-shake { from { transform: translateX(-2px); } to { transform: translateX(2px); } }
+.ph-neuro { fill: #b07ad9; font-size: 34px; font-weight: 800; }
+.ph-coma { fill: var(--bad); font-size: 26px; font-weight: 800; font-style: italic; }
+.ph-svg.ph-hypo2 .o-brain, .ph-svg.ph-hypo2 .o-cerebellum { filter: saturate(0.2) brightness(0.9); }
+.ph-svg.ph-hypo3 .o-brain, .ph-svg.ph-hypo3 .o-cerebellum { filter: grayscale(1) brightness(0.6); }
+.ph-svg.ph-hypo1 .o-adrenal, .ph-svg.ph-hypo2 .o-adrenal, .ph-svg.ph-hypo3 .o-adrenal { filter: drop-shadow(0 0 4px #e5484d); }
+.ph-sym { margin: 8px 0; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; font-size: 0.92rem; color: var(--muted); }
+.ph-sym.lv1 { border-color: var(--warn); color: var(--fg); background: color-mix(in srgb, var(--warn) 12%, transparent); }
+.ph-sym.lv2 { border-color: #b07ad9; color: var(--fg); background: color-mix(in srgb, #b07ad9 14%, transparent); }
+.ph-sym.lv3 { border-color: var(--bad); color: var(--fg); background: color-mix(in srgb, var(--bad) 16%, transparent); }
+.ph-thr { stroke: var(--bad); stroke-width: 1; stroke-dasharray: 3 4; opacity: 0.7; }
+.ph-standalone .sv-chips { margin-bottom: 6px; }

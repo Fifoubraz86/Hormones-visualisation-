@@ -53,12 +53,14 @@
     ['snack', 'Collation sucrée à 16 h (30 g, sans bolus)'],
     ['alcohol', 'Alcool au dîner (3 verres)'],
     ['ill', 'Infection fébrile (maladie intercurrente)'],
-    ['illAdj', 'Infection fébrile avec adaptation des doses (jours de maladie)']
+    ['illAdj', 'Infection fébrile avec adaptation des doses (jours de maladie)'],
+    ['hypo', 'Hypoglycémie : bolus du déjeuner trop fort, repas pauvre en glucides'],
+    ['hypoSev', 'Hypoglycémie sévère : dose excessive, repas sauté (tierce personne)']
   ];
   function applyEvent(pt, dp, ev) {
     const rx = pt.rx, ins = rx.basal + (rx.pump || 0) + rx.rapid > 0 || rx.su > 0;
     const d = Object.assign({}, dp, { w: dp.w.slice(), skip: dp.skip.slice(), cut: dp.cut.slice(), segCut: dp.segCut.slice(), extra: dp.extra.slice(), u: (dp.u || [0, 0, 0]).slice(), snacks: null });
-    let dg = () => 0, egpF = () => 1, ketF = 1, exoF = () => 1;
+    let dg = () => 0, egpF = () => 1, ketF = 1, exoF = () => 1, dip = null;
     if (ev === 'sport' || ev === 'sportAdj') {
       // Captation musculaire sans insuline pendant l'effort, sensibilité accrue 6 à 12 h ; chute plus forte (et
       // hypoglycémie possible) sous insuline ou sulfamide, qui ne baissent pas pendant l'effort.
@@ -95,8 +97,14 @@
         if (rx.basal + (rx.pump || 0) + rx.rapid > 0) { exoF = () => (rx.pump > 0 ? 1.3 : 1.2); dg = (t) => 0.12 + 0.05 * Math.sin(Math.PI * t / 24); ketF = 1.3; }
         else ketF = 1.8;
       }
+    } else if (ev === 'hypo') {
+      // Creux vers 0,45 g/L à 14 h 30 : signes adrénergiques, puis neuroglucopéniques brefs ; resucrage (15 g).
+      d.w[1] *= 0.6; dip = { tn: 14.5, g: 0.45, fall: 1.2, rise: 0.7 };
+    } else if (ev === 'hypoSev') {
+      // Creux vers 0,25 g/L à 15 h : coma hypoglycémique, glucagon ou G30 % par un tiers, remontée rapide.
+      d.skip[1] = true; d.segCut[1] *= 0.3; dip = { tn: 15, g: 0.25, fall: 1.6, rise: 0.5 };
     }
-    return { d, dg, egpF, ketF, exoF };
+    return { d, dg, egpF, ketF, exoF, dip };
   }
 
   function decompose(pt, D, Y, dp0, ev) {
@@ -121,7 +129,13 @@
     let Qs = 0, Qi = 0;
     const pts = [];
     const tot = { ra: 0, egp: 0, up: 0, ren: 0, isec: 0, exo: 0, carbs: carbs.reduce((a, x) => a + x, 0) };
-    const gAt = (t) => { const tt = ((t % 24) + 24) % 24; return Math.max(0.4, Y.glucose(dp, tt) + E.dg(tt)); };
+    let gAt = (t) => { const tt = ((t % 24) + 24) % 24; return Math.max(0.2, Y.glucose(dp, tt) + E.dg(tt)); };
+    if (E.dip) {
+      // Hypoglycémie imposée : la glycémie rejoint le creux (chute en quelques dizaines de minutes), puis remonte
+      // (resucrage, glucagon, contre-régulation).
+      const q = E.dip, g0 = gAt, base = g0(q.tn);
+      gAt = (t) => { const tt = ((t % 24) + 24) % 24, x = tt - q.tn, b = Math.exp(-Math.pow(x / (x < 0 ? q.fall : q.rise), 2)); return Math.max(0.2, g0(tt) - (base - q.g) * b); };
+    }
     for (let i = 0; i < 288; i++) {
       const t = i * DT;
       for (let m = 0; m < 3; m++) if (t <= dp.tm[m] && t + DT > dp.tm[m]) Qs += carbs[m];
@@ -139,10 +153,15 @@
       const glu = Math.max(0.15, (1 + 2 * Math.max(0, 0.9 - G)) / (1 + 0.45 * portal) * (1 - gluSup) * (1 + 0.5 * Math.min(1, ra / 30)));
       let egp = E.egpF(t) * egp0 * (0.4 + 0.6 * glu) * (1 - metK) / (1 + 0.35 * portal * si);
       const ren = renK * Math.max(0, G - tm);
+      // Contre-régulation de l'hypoglycémie (seuils du module : 0,70 g/L) : l'hypothalamus active le système
+      // sympathique, la médullosurrénale libère l'adrénaline (glycogénolyse, lipolyse, signes adrénergiques) et
+      // la corticosurrénale le cortisol (néoglucogenèse, plus lent) ; souvent émoussée sous insuline.
+      const adr = 1 + 7 * Math.min(1, Math.max(0, (0.7 - G) / 0.4));
+      egp *= 1 + 0.06 * (adr - 1);
       // Lipolyse (tissu adipeux, relatif au jeûne normal) : très sensible à l'insuline (freinée dès des taux bas),
       // accrue par le glucagon et l'insulinorésistance du tissu adipeux, par un régime très pauvre en glucides.
       const insAd = (isec * 0.6 + iexo) * Math.min(1.2, si * 1.4);
-      const lip = (0.4 + 0.6 * glu) * (1 + 0.8 * Math.max(0, 1 - si)) * (p.lowcarb ? 1.3 : 1) / (1 + 0.5 * insAd);
+      const lip = (0.4 + 0.6 * glu) * (1 + 0.8 * Math.max(0, 1 - si)) * (p.lowcarb ? 1.3 : 1) * (1 + 0.08 * (adr - 1)) / (1 + 0.5 * insAd);
       // Cétogenèse hépatique : acides gras disponibles × rapport glucagon / insuline portale ; iSGLT2 : moins
       // d'insuline, plus de glucagon, cétogenèse accrue (acidocétose possible à glycémie peu élevée).
       const kss = 0.06 + 2.0 * Math.max(0, lip - 0.25) * glu / (1 + 0.4 * portal) * (e.sglt > 0 ? 1.8 : 1) * (p.lowcarb ? 1.8 : 1) * E.ketF;
@@ -152,12 +171,15 @@
       // Ingestion (bol alimentaire dans l'œsophage) : glucides du repas avalés en 20 minutes.
       let eat = 0; for (let m = 0; m < 3; m++) if (t >= dp.tm[m] && t < dp.tm[m] + 1 / 3) eat += carbs[m] * 3;
       if (dp.snacks) dp.snacks.forEach((sn) => { if (t >= sn.t && t < sn.t + 1 / 6) eat += 30 * 6; });
-      pts.push({ t, G, ra, ge, eat, egp, up, ren, isec, iexo, glu, inc: incE + incP, incE, incP, Qs, su, lip, kss });
+      pts.push({ t, G, ra, ge, eat, egp, up, ren, isec, iexo, glu, inc: incE + incP, incE, incP, Qs, su, lip, kss, adr });
     }
     // Cétonémie (β-hydroxybutyrate, mmol/L) : suit la cétogenèse avec une constante de temps d'environ 2 h
     // (deux passages pour partir d'un état périodique sur 24 h).
     let ket = pts.reduce((a, q) => a + q.kss, 0) / 288;
     for (let pass = 0; pass < 2; pass++) pts.forEach((q) => { ket += (q.kss - ket) * (1 - Math.exp(-DT / 2)); q.ket = Math.min(8, ket); });
+    // Cortisol : réponse plus lente (constante de temps ≈ 1 h), relative au niveau de base.
+    let co = 1;
+    for (let pass = 0; pass < 2; pass++) pts.forEach((q) => { co += (1 + 0.4 * (q.adr - 1) - co) * (1 - Math.exp(-DT / 1)); q.cort = co; });
     tot.ketMax = Math.max(...pts.map((q) => q.ket)); tot.ketMean = pts.reduce((a, q) => a + q.ket, 0) / 288;
     tot.lip = pts.reduce((a, q) => a + q.lip, 0) / 288;
     tot.gMin = Math.min(...pts.map((q) => q.G)); tot.gMax = Math.max(...pts.map((q) => q.G));
@@ -168,12 +190,13 @@
   const fmt = (v, d) => (v == null || isNaN(v) ? '—' : v.toFixed(d).replace('.', ','));
   // Étiquettes (cartes latérales) et point anatomique visé, en coordonnées du corps de l'atlas (cou en y ≈ − 285).
   const ORG = {
-    brain: { x: -330, y: -392, w: 190, h: 66, t: 'Centre de la faim', a: [0, -372] },
+    brain: { x: -330, y: -392, w: 190, h: 66, t: 'Hypothalamus', a: [0, -372] },
+    adrenal: { x: -330, y: -282, w: 190, h: 66, t: 'Surrénales', a: [-62, -86] },
     liver: { x: -330, y: -170, w: 190, h: 66, t: 'Foie', a: [-50, -118] },
     fat: { x: -330, y: -62, w: 190, h: 66, t: 'Tissu adipeux', a: [-72, -32] },
     keto: { x: -330, y: 52, w: 190, h: 66, t: 'Corps cétoniques', a: [-58, -132] },
     pen: { x: -330, y: 166, w: 190, h: 52, t: 'Insuline injectée', a: [74, 30] },
-    blood: { x: 330, y: -268, w: 190, h: 66, t: 'Glycémie (sang)', a: [14, -180] },
+    blood: { x: 330, y: -268, w: 190, h: 66, t: 'Glycémie (sang)', a: [2, -206] },
     stomach: { x: 330, y: -168, w: 190, h: 52, t: 'Estomac', a: [56, -124] },
     beta: { x: 330, y: -98, w: 190, h: 52, t: 'Cellules β (pancréas)', a: [16, -70] },
     alpha: { x: 330, y: -36, w: 190, h: 52, t: 'Cellules α (pancréas)', a: [34, -72] },
@@ -186,27 +209,31 @@
     hunger: 'M-8,-350 C-22,-300 -12,-214 36,-152',
     eat: 'M0,-350 C0,-300 6,-232 24,-182 C32,-162 40,-150 48,-142',
     ge: 'M70,-108 C80,-88 62,-68 42,-50 C32,-42 24,-36 16,-28',
-    ra: 'M-4,-18 C-22,-58 -44,-88 -46,-118 C-46,-150 -14,-172 4,-180',
+    ra: 'M-4,-18 C-22,-58 -44,-88 -46,-118 C-46,-150 -24,-166 -12,-170',
     inc: 'M16,-24 C28,-40 28,-54 20,-64',
     insL: 'M2,-72 C-12,-82 -26,-96 -36,-110',
     insM: 'M30,-64 C96,-36 98,64 62,132',
     glu: 'M30,-80 C4,-104 -20,-122 -32,-128',
-    egp: 'M-34,-138 C-20,-160 -8,-172 4,-180',
-    upM: 'M22,-168 C112,-120 104,52 64,132',
-    upF: 'M2,-170 C-58,-132 -82,-86 -74,-46',
-    ren: 'M26,-164 C70,-130 78,-92 66,-72',
+    egp: 'M-34,-138 C-26,-150 -18,-158 -12,-162',
+    upM: 'M14,-150 C104,-112 104,52 64,132',
+    upF: 'M10,-150 C-58,-124 -82,-86 -74,-46',
+    ren: 'M14,-130 C56,-116 70,-92 66,-72',
     exoL: 'M70,24 C20,44 -42,6 -48,-96',
     exoM: 'M78,40 C88,80 72,110 60,138',
     ffa: 'M-74,-48 C-84,-84 -68,-108 -58,-114',
-    ket: 'M-52,-136 C-60,-170 -22,-196 -2,-190'
+    ket: 'M-52,-136 C-60,-170 -30,-196 -12,-196',
+    symp: 'M-6,-366 C-34,-300 -40,-190 -60,-94',
+    adr: 'M-62,-92 C-62,-102 -54,-110 -48,-114',
+    cort: 'M-56,-88 C-40,-98 -24,-104 -12,-110'
   };
   const INFO = {
-    brain: (k) => 'Centre de la faim (hypothalamus). Les aGLP1 et le tirzépatide augmentent la satiété : repas plus petits, perte de poids' + (k.satiety > 0.01 ? ' (glucides du jour réduits d\'environ ' + Math.round(k.satiety * 50) + ' % ici)' : '') + '. Le suivi diététique agit aussi ici.',
+    adrenal: () => 'Surrénales : sous la commande du système sympathique (hypothalamus), la médullosurrénale libère l\'adrénaline quand la glycémie passe sous 0,70 g/L : glycogénolyse hépatique, lipolyse, freinage de la sécrétion d\'insuline, et signes adrénergiques (sueurs, tremblements, palpitations, faim, anxiété). La corticosurrénale libère le cortisol (néoglucogenèse, en quelques heures). Après des hypoglycémies répétées, cette réponse s\'émousse : hypoglycémies non ressenties.',
+    brain: (k) => 'Hypothalamus : centre de la faim, et capteur de l\'hypoglycémie qui déclenche la contre-régulation (glucagon, adrénaline, cortisol). Le cerveau dépend du glucose : sous 0,50 g/L, signes neuroglucopéniques (troubles de la concentration, confusion, troubles du comportement, vision floue) ; sous 0,30 g/L dans ce module, hypoglycémie sévère (convulsions, coma). Centre de la faim : Les aGLP1 et le tirzépatide augmentent la satiété : repas plus petits, perte de poids' + (k.satiety > 0.01 ? ' (glucides du jour réduits d\'environ ' + Math.round(k.satiety * 50) + ' % ici)' : '') + '. Le suivi diététique agit aussi ici.',
     stomach: (k) => 'Vidange gastrique : le glucose du repas n\'arrive dans l\'intestin qu\'au rythme où l\'estomac se vide. Les aGLP1 la ralentissent (surtout le liraglutide, de courte durée ; effet qui s\'atténue avec les formes hebdomadaires) : pic post-prandial plus bas' + (k.glpF > 0.01 ? ' (vidange ' + Math.round((1 - k.kge / 1.4) * 100) + ' % plus lente)' : '') + '.',
     gut: (k) => 'Intestin : absorption des glucides. L\'acarbose inhibe les alpha-glucosidases : absorption retardée et un peu réduite (flatulences). Les cellules L (GLP-1) et K (GIP) sécrètent les incrétines au passage du repas ; l\'effet incrétine est diminué dans le DT2' + (k.dpp ? ' ; l\'iDPP4 double les incrétines actives (moins dégradées)' : '') + '.',
     beta: (k) => 'Cellules β : sécrétion d\'insuline glucodépendante, amplifiée par les incrétines. Réserve du patient : ' + Math.round(k.B * 100) + ' % d\'un sujet de référence (déclin avec les années, glucotoxicité). ' + (k.su ? 'Le sulfamide force la sécrétion même quand la glycémie est basse : risque d\'hypoglycémie. ' : '') + (k.glpF > 0.01 ? 'L\'aGLP1' + (k.isT ? ' et le GIP du tirzépatide' : '') + ' amplifient la sécrétion seulement quand la glycémie est haute (pas d\'hypoglycémie seul).' : ''),
     alpha: (k) => 'Cellules α : le glucagon fait produire du glucose au foie. Il est freiné par l\'insuline et par le GLP-1 ; dans le DT2, il reste mal freiné après les repas (hyperglucagonémie relative)' + (k.gluSup > 0.01 ? ' ; ici freiné de ' + Math.round(k.gluSup * 100) + ' % par ' + (k.glpF > 0.01 ? 'l\'aGLP1' : 'l\'iDPP4') : '') + '.',
-    blood: () => 'Glycémie : stock de glucose du sang, entre ce qui entre (absorption, foie) et ce qui sort (muscle, tissu adipeux, cerveau, rein). C\'est la courbe du carnet et du capteur du patient.',
+    blood: () => 'Glycémie : stock de glucose du sang circulant (aorte en rouge, veine cave en bleu), entre ce qui entre (absorption, foie) et ce qui sort (muscle, tissu adipeux, cerveau, rein). C\'est la courbe du carnet et du capteur du patient.',
     liver: (k) => 'Foie : production de glucose (glycogénolyse, néoglucogenèse), excessive dans le DT2 surtout la nuit (glycémie à jeun haute). Freinée par l\'insuline (portale) ' + (k.metK > 0.01 ? 'et par la metformine (− ' + Math.round(k.metK * 100) + ' %)' : '') + ', stimulée par le glucagon. L\'insuline basale agit surtout ici.',
     muscle: (k) => 'Muscle : principal site de captation du glucose après un repas, sous l\'effet de l\'insuline. Sensibilité à l\'insuline : ' + Math.round(k.si * 100) + ' % (référence 100 %), améliorée par l\'activité physique et la perte de poids, abaissée par la glucotoxicité. Le cerveau consomme environ 100 g/j sans insuline.',
     keto: (k, T) => 'Corps cétoniques (β-hydroxybutyrate) : le foie les fabrique à partir des acides gras libérés par la lipolyse quand l\'insuline manque et que le glucagon domine (jeûne, carence insulinique). Normale < 0,6 mmol/L ; cétose 0,6–3 ; acidocétose au-delà de 3 avec acidose. ' + (k.e.sglt > 0 ? 'Sous iSGLT2, moins d\'insuline et plus de glucagon : cétogenèse accrue, acidocétose possible à glycémie peu élevée (« euglycémique ») chez l\'insulinopénique (LADA, DT2 ancien), en cas de jeûne, de régime cétogène, d\'intervention ou de réduction trop forte de l\'insuline. ' : '') + 'Ici : moyenne ' + fmt(T.ketMean, 2) + ', maximum ' + fmt(T.ketMax, 2) + ' mmol/L.',
@@ -223,12 +250,14 @@
     alcohol: (k) => 'Alcool : le foie ne fait plus de néoglucogenèse. ' + (k.rx.basal + (k.rx.pump || 0) + k.rx.rapid > 0 || k.su ? 'Sous insuline ou sulfamide : hypoglycémie nocturne ou matinale possible ; collation glucidique, contrôle au coucher.' : 'Sans insuline ni sulfamide, baisse modérée.'),
     sportAdj: (k, T) => (k.rx.pump > 0 ? 'Débit temporaire − 50 % de 16 h à 18 h (1 h avant et pendant l\'effort) : moins d\'insuline pendant l\'effort, la baisse est amortie. ' : k.rx.basal + k.rx.rapid > 0 || k.su ? 'Collation de 15 g avant l\'effort (sous insuline, on peut aussi réduire de 30 à 50 % le bolus du repas pris 1 à 3 h avant) : la baisse est amortie. ' : 'Sans insuline ni sulfamide, pas d\'adaptation nécessaire. ') + 'Glycémie minimale ' + fmt(T.gMin, 2) + ' g/L.',
     illAdj: (k, T) => (k.rx.basal + (k.rx.pump || 0) + k.rx.rapid > 0 ? 'Jours de maladie : insuline augmentée (+ 20 %, débit temporaire + 30 % sous pompe), corrections toutes les 4 h, boissons, cétonémie si glycémie > 2,50 g/L ; iSGLT2 suspendu, metformine suspendue si déshydratation. ' : 'Sans insuline : glycémie haute pendant l\'infection ; suspendre iSGLT2 et metformine en cas de déshydratation, insuline transitoire si glycémies > 3 g/L ou cétose. ') + 'Cétonémie maximale ' + fmt(T.ketMax, 1) + ' mmol/L.',
+    hypo: (k, T) => 'Hypoglycémie (glycémie minimale ' + fmt(T.gMin, 2) + ' g/L) : sous 0,70 g/L, l\'hypothalamus déclenche la contre-régulation (glucagon, adrénaline des surrénales, puis cortisol) et les signes adrénergiques (sueurs, tremblements, palpitations, faim) ; sous 0,50 g/L, signes neuroglucopéniques. Resucrage : 15 g de sucre rapide (3 morceaux, 150 mL de jus), contrôle à 15 min, puis collation si le repas est loin ; chercher la cause (dose, repas, effort, alcool) et réduire la dose responsable.' + (k.rx.basal + (k.rx.pump || 0) + k.rx.rapid > 0 || k.su ? '' : ' Sans insuline ni sulfamide, une hypoglycémie est exceptionnelle : scénario théorique.'),
+    hypoSev: (k, T) => 'Hypoglycémie sévère (' + fmt(T.gMin, 2) + ' g/L ; seuil de ce module 0,30 g/L, mais elle se définit par le besoin d\'un tiers et peut survenir dès 0,50–0,55 g/L) : convulsions, coma. Pas de resucrage oral si troubles de conscience : glucagon 1 mg IM/SC ou 3 mg intranasal par l\'entourage, G30 % IV par les secours, puis apport glucidique ; surveillance prolongée sous sulfamide (hypoglycémie récidivante, hospitalisation). Ensuite : arrêt du sulfamide, baisse de l\'insuline, cible d\'HbA1c relevée, éducation de l\'entourage (kit de glucagon), déclaration pour la conduite.',
     ill: (k, T) => 'Infection : hormones de stress, insulinorésistance, production hépatique accrue, cétose. Ne jamais arrêter l\'insuline (souvent l\'augmenter), glycémies et cétonémie rapprochées, hydratation ; suspendre iSGLT2 et metformine en cas de déshydratation (cétonémie ici jusqu\'à ' + fmt(T.ketMax, 1) + ' mmol/L).'
   };
 
   /* ---------- Molécules (glyphes inspirés de l'atlas, js/molecules-axes.js) ---------- */
   // Encombrement ≈ 14 unités ; couleur portée par la classe (variables du thème).
-  const MOLS = [['food', 'aliments'], ['glc', 'glucose'], ['ins', 'insuline'], ['glu', 'glucagon'], ['inc', 'incrétines'], ['ffa', 'acides gras'], ['ket', 'cétone']];
+  const MOLS = [['food', 'aliments'], ['glc', 'glucose'], ['ins', 'insuline'], ['glu', 'glucagon'], ['inc', 'incrétines'], ['ffa', 'acides gras'], ['ket', 'cétone'], ['adr', 'adrénaline'], ['cort', 'cortisol']];
   function buildMols(defs) {
     const hexV = (r) => [-90, -30, 30, 90, 150, 210].map((a) => [r * Math.cos(a * Math.PI / 180), r * Math.sin(a * Math.PI / 180)]);
     const P = (pts) => 'M' + pts.map((q) => q[0].toFixed(2) + ',' + q[1].toFixed(2)).join(' L') + ' Z';
@@ -257,9 +286,20 @@
     g = el('g', { id: 'phm-ket', class: 'phm phm-ket' }, defs); // corps cétonique (acétoacétate, β-hydroxybutyrate)
     el('path', { d: 'M-6,2 L-3,-1 L0,2 L3,-1 L6,2', class: 'phm-zig' }, g);
     el('circle', { cx: -3, cy: -3.4, r: 1.4, class: 'phm-O' }, g); el('circle', { cx: 6.8, cy: 4, r: 1.4, class: 'phm-O' }, g);
+    g = el('g', { id: 'phm-adr', class: 'phm phm-adr' }, defs); // adrénaline : catéchol (cycle, deux OH) et chaîne aminée
+    const hv2 = hexV(4).map((q) => [q[0] - 3, q[1]]);
+    el('path', { d: P(hv2), class: 'phm-ring' }, g);
+    [4, 5].forEach((i) => { const q = hv2[i]; el('circle', { cx: q[0] * 1.5 + 1, cy: q[1] * 1.5, r: 1.2, class: 'phm-O' }, g); });
+    el('path', { d: 'M' + hv2[2][0] + ',' + hv2[2][1] + ' L4,0 L7,3 L9,1', class: 'phm-zig' }, g);
+    el('circle', { cx: 9.4, cy: 1, r: 1.3, class: 'phm-N' }, g);
+    g = el('g', { id: 'phm-cort', class: 'phm phm-cort' }, defs); // cortisol : noyau stéroïde (quatre cycles accolés)
+    const r6 = hexV(3);
+    [[-7, 1.5], [-2, -1.5], [3, 1.5]].forEach(([x, y]) => el('path', { d: P(r6.map((q) => [q[0] + x, q[1] + y])), class: 'phm-ring' }, g));
+    el('path', { d: 'M6,0 L9,-2.5 L11,0.5 L9,3.5 Z', class: 'phm-ring' }, g);
+    el('circle', { cx: -10, cy: 3, r: 1.2, class: 'phm-O' }, g);
   }
   // Molécule portée par chaque flux.
-  const FLOW_MOL = { eat: 'food', ge: 'food', ra: 'glc', inc: 'inc', insL: 'ins', insM: 'ins', glu: 'glu', egp: 'glc', upM: 'glc', upF: 'glc', ren: 'glc', exoL: 'ins', exoM: 'ins', ffa: 'ffa', ket: 'ket' }; // la faim (cerveau → estomac) n'est pas un flux de molécules
+  const FLOW_MOL = { eat: 'food', ge: 'food', ra: 'glc', inc: 'inc', insL: 'ins', insM: 'ins', glu: 'glu', egp: 'glc', upM: 'glc', upF: 'glc', ren: 'glc', exoL: 'ins', exoM: 'ins', ffa: 'ffa', ket: 'ket', adr: 'adr', cort: 'cort' }; // la faim (cerveau → estomac) n'est pas un flux de molécules
 
   function el(tag, a, par) { const n = document.createElementNS(NS, tag); for (const k in a) n.setAttribute(k, a[k]); if (par) par.appendChild(n); return n; }
 
@@ -293,18 +333,23 @@
       el('path', { d: 'M -30,8 C -14,0 4,2 18,-6 M 4,-38 C -2,-24 8,-14 2,-2 M -30,-24 C -20,-18 -24,-8 -14,-6 M 20,-30 C 28,-22 22,-12 32,-8', class: 'phb-gyrus' }, gg);
       el('ellipse', { cx: -2, cy: 14, rx: 9, ry: 5, class: 'phb-org o-hypo' }, gg);
     });
-    // Poumons (discrets), cœur.
+    // Poumons (discrets), gros vaisseaux.
     const lung = 'M -8,-40 C -26,-40 -40,-10 -42,22 C -44,40 -30,46 -14,40 C -4,36 -2,20 -4,0 C -4,-20 0,-40 -8,-40 Z';
     L(-44, -186, 1.15, (gg) => solid(gg, lung, 'o-lung'));
     L(44, -186, 1.15, (gg) => solid(gg, mirrorX(lung), 'o-lung'));
-    L(12, -180, 0.85, (gg) => {
-      solid(gg, 'M -2,-22 C -4,-36 4,-46 16,-46 C 30,-46 34,-36 32,-28 L 25,-28 C 25,-35 20,-39 15,-39 C 9,-39 7,-32 7,-22 Z', 'o-aorta');
-      solid(gg, 'M -30,-10 C -34,10 -18,32 6,42 C 14,46 22,40 28,30 C 38,14 40,-4 32,-16 C 24,-26 6,-26 -4,-20 C -14,-24 -26,-20 -30,-10 Z', 'o-heart');
-    });
+    // Aorte (rouge : crosse, carotides, artères rénales, iliaques) et veine cave inférieure (bleu : veines
+    // hépatiques, rénales, iliaques) ; en arrière des viscères, visibles dans le thorax et le bas de l'abdomen.
+    const ves = (d, cls) => { el('path', { d, class: 'phb-ves ' + cls }, bodyG); el('path', { d, class: 'phb-ves-in ' + cls }, bodyG); };
+    ves('M-10,-252 L-10,48 M-10,48 C-20,80 -40,112 -54,146 M-10,48 C0,80 32,112 44,146 M-10,-64 L-54,-64 M-10,-150 L-30,-140', 'phb-vein');
+    ves('M4,-292 L4,-240 M20,-292 L20,-244 M-2,-236 C2,-256 24,-254 24,-234 C24,-222 12,-218 12,-204 L12,52 M12,52 C24,82 44,112 52,146 M12,52 C0,82 -30,112 -46,146 M12,-60 L54,-60', 'phb-artery');
     // Reins (en arrière), foie, estomac, pancréas, intestin.
     const kid = 'M -6,-14 C 4,-16 10,-6 10,2 C 10,12 4,18 -4,16 C -10,14 -6,6 -2,2 C -6,-2 -12,-10 -6,-14 Z';
     L(-64, -62, 1.6, (gg) => solid(gg, mirrorX(kid), 'o-kidney'));
     L(64, -62, 1.6, (gg) => solid(gg, kid, 'o-kidney'));
+    // Surrénales, coiffant le pôle supérieur des reins.
+    const adr = 'M -9,4 C -8,-4 -2,-10 2,-10 C 6,-8 10,0 9,5 C 4,3 -4,3 -9,4 Z';
+    L(-62, -86, 1.1, (gg) => solid(gg, adr, 'o-adrenal'));
+    L(62, -86, 1.1, (gg) => solid(gg, mirrorX(adr), 'o-adrenal'));
     L(-40, -122, 1.3, (gg) => { solid(gg, 'M -50,-6 C -48,-26 -18,-34 10,-30 C 30,-28 48,-22 52,-14 C 54,-8 42,-4 28,2 C 12,10 -6,22 -22,26 C -38,30 -50,18 -50,-6 Z', 'o-liver'); solid(gg, 'M -16,16 C -14,30 -2,32 0,24 C 0,18 -8,13 -16,16 Z', 'o-gall'); });
     L(56, -124, 1.8, (gg) => solid(gg, 'M -10,-14 C 0,-20 14,-14 14,-2 C 14,12 2,18 -10,16 C -4,8 -4,0 -10,-14 Z', 'o-stomach'));
     L(22, -72, 1.55, (gg) => { solid(gg, 'M -22,2 C -22,-6 -10,-6 0,-4 C 12,-2 22,-6 26,-2 C 28,2 20,6 8,6 C -4,6 -14,10 -22,2 Z', 'o-pancreas'); [[-8, 0, 'b'], [4, -1, 'a'], [14, 1, 'b']].forEach(([x, y, t]) => el('circle', { cx: x, cy: y, r: 2.2, class: 'phb-islet-' + t }, gg)); });
@@ -400,6 +445,7 @@
     const slider = h('input', { type: 'range', min: 0, max: 23.9, step: 0.1, value: st.t, class: 'sv-range', id: 'dtPhT', 'aria-label': 'Heure de la journée', oninput: (e) => { st.t = +e.target.value; frame(); } });
     const playBtn = h('button', { type: 'button', class: 'sv-secondary', id: 'dtPhPlay', onclick: () => { st.play = !st.play; playBtn.textContent = st.play ? '⏸ Pause' : '▶ Lecture'; if (st.play) requestAnimationFrame(loop); } }, st.play ? '⏸ Pause' : '▶ Lecture');
     const sum = h('div', { class: 'ph-sum', id: 'dtPhSum' });
+    const symBox = h('div', { class: 'ph-sym', id: 'dtPhSym', role: 'status' });
     const pred = h('div', { class: 'ph-pred', id: 'dtPhPredBox', hidden: true });
     // Prédiction indicative : le traitement essayé (copie) contre le traitement du dossier, 6 mois, titration comprise.
     function project(rx) {
@@ -429,7 +475,8 @@
     }
     const trend = el('svg', { viewBox: '0 0 300 70', class: 'ph-trend' });
     const legend = el('svg', { viewBox: '0 0 830 36', class: 'ph-legend', role: 'img', 'aria-label': 'Légende des molécules' });
-    let lx = 22; MOLS.forEach(([m, t]) => { const x = lx; lx += 40 + 8.2 * t.length; el('use', { href: '#phm-' + m, transform: 'translate(' + x + ',18) scale(1.7)' }, legend); el('text', { x: x + 19, y: 23, class: 'ph-ax ph-legt' }, legend).textContent = t; });
+    let lx = 22; MOLS.forEach(([m, t]) => { const x = lx; lx += 46 + 8.4 * t.length; el('use', { href: '#phm-' + m, transform: 'translate(' + x + ',18) scale(1.7)' }, legend); el('text', { x: x + 19, y: 23, class: 'ph-ax ph-legt' }, legend).textContent = t; });
+    legend.setAttribute('viewBox', '0 0 ' + Math.round(lx) + ' 36');
     root.append(
       h('div', { class: 'sv-card-head' }, [h('h3', null, 'Physiologie du patient : ce que font les traitements'), h('div', { class: 'sv-actions' }, [fullBtn, h('button', { type: 'button', class: 'sv-secondary', onclick: () => { setFull(false); onClose(); } }, 'Fermer')])]),
       h('p', { class: 'sv-muted' }, 'Copie du patient (le dossier n\'est pas modifié). La glycémie est celle du patient simulé ; le module la décompose organe par organe. Cliquez sur un organe. Modifiez les traitements, puis faites avancer le temps.'),
@@ -446,6 +493,7 @@
           h('button', { type: 'button', class: 'sv-secondary', id: 'dtPhPred', onclick: predict }, '🔮 Prédire à 6 mois'),
           h('button', { type: 'button', class: 'sv-linkbtn', onclick: () => { reset(); compute(); ctx.rerender(); } }, 'Revenir au patient')])
       ]),
+      symBox,
       h('div', { class: 'ph-grid' }, [h('div', { class: 'ph-diag' }, [svg, legend]), h('div', { class: 'ph-side' }, [sum, pred, h('div', { class: 'ph-trendbox' }, trend), info])]),
       h('div', { class: 'ph-chartbox' }, chart),
       h('p', { class: 'sv-note' }, 'Mécanismes : modèle « glyc » de l\'atlas enrichi des effets pharmacologiques (complément) ; la captation par le muscle et le tissu adipeux est calculée par bilan de masse. Chaque journée reprend la glycémie moyenne du modèle DT2, calé sur les essais.')
@@ -457,11 +505,19 @@
       const k = st.res.k;
       const defs = el('defs', {}, svg);
       buildMols(defs);
-      ['g', 'i', 'x', 'n', 'u', 'k', 'f'].forEach((c) => { const m = el('marker', { id: 'phA' + c, viewBox: '0 0 10 10', refX: 6, refY: 5, markerWidth: 11, markerHeight: 11, markerUnits: 'userSpaceOnUse', orient: 'auto' }, defs); el('path', { d: 'M0,0 L10,5 L0,10 z', class: 'ph-ah ph-' + c }, m); });
+      ['g', 'i', 'x', 'n', 'u', 'k', 'f', 'a'].forEach((c) => { const m = el('marker', { id: 'phA' + c, viewBox: '0 0 10 10', refX: 6, refY: 5, markerWidth: 11, markerHeight: 11, markerUnits: 'userSpaceOnUse', orient: 'auto' }, defs); el('path', { d: 'M0,0 L10,5 L0,10 z', class: 'ph-ah ph-' + c }, m); });
       // Silhouette et organes, dans le style de l'atlas (js/scenes/atlas.js, js/organs.js).
       drawBody(svg);
       g.pen = drawPen(svg, k.rx);
-      Object.entries(PATHS).forEach(([id, d]) => { const cls = { eat: 'f', ge: 'f', hunger: 'n', inc: 'i', insL: 'i', insM: 'i', glu: 'n', ren: 'u', exoL: 'x', exoM: 'x', ffa: 'k', ket: 'k' }[id] || 'g'; g[id] = el('path', { d, class: 'ph-flow ph-' + cls, 'marker-end': 'url(#phA' + cls + ')' }, svg); });
+      // Signes cliniques de l'hypoglycémie sur le corps : sueurs (front), tremblements (mains), confusion, coma.
+      const sy = el('g', { class: 'ph-symG' }, svg);
+      g.sweat = el('g', { class: 'ph-sweat' }, sy);
+      [[-30, -404], [26, -410], [-38, -372], [36, -378], [0, -428]].forEach(([x, y]) => el('path', { d: 'M' + x + ',' + (y - 6) + ' C' + (x + 4) + ',' + (y - 1) + ' ' + (x + 4) + ',' + (y + 4) + ' ' + x + ',' + (y + 4) + ' C' + (x - 4) + ',' + (y + 4) + ' ' + (x - 4) + ',' + (y - 1) + ' ' + x + ',' + (y - 6) + ' Z', class: 'ph-drop' }, g.sweat));
+      g.tremor = el('g', { class: 'ph-tremor' }, sy);
+      [-1, 1].forEach((sx) => el('path', { d: 'M' + sx * 198 + ',120 l' + sx * 6 + ',6 l' + -sx * 6 + ',6 l' + sx * 6 + ',6 M' + sx * 206 + ',112 l' + sx * 6 + ',6 l' + -sx * 6 + ',6 l' + sx * 6 + ',6', class: 'ph-trem' }, g.tremor));
+      g.neuro = el('text', { x: 62, y: -414, class: 'ph-neuro' }, sy); g.neuro.textContent = '?';
+      g.coma = el('text', { x: -70, y: -430, class: 'ph-coma' }, sy); g.coma.textContent = 'z z';
+      Object.entries(PATHS).forEach(([id, d]) => { const cls = { eat: 'f', ge: 'f', hunger: 'n', inc: 'i', insL: 'i', insM: 'i', glu: 'n', ren: 'u', exoL: 'x', exoM: 'x', ffa: 'k', ket: 'k', symp: 'n', adr: 'a', cort: 'a' }[id] || 'g'; g[id] = el('path', { d, class: 'ph-flow ph-' + cls, 'marker-end': 'url(#phA' + cls + ')' }, svg); });
       g.mols = el('g', { class: 'ph-mols' }, svg);
       // Cartes latérales (valeurs) reliées à leur organe.
       Object.entries(ORG).forEach(([id, o]) => {
@@ -499,7 +555,7 @@
     function drawChart() {
       const P = st.res.pts, L = 44, R = 50, T = 14, H = 150, Wc = 760;
       const X = (t) => L + (Wc - L - R) * t / 24;
-      const gmax = Math.max(2.6, ...P.map((q) => q.G)) + 0.2, Yg = (v) => T + H * (1 - (v - 0.4) / (gmax - 0.4));
+      const gmin = Math.min(0.4, ...P.map((q) => q.G - 0.05)), gmax = Math.max(2.6, ...P.map((q) => q.G)) + 0.2, Yg = (v) => T + H * (1 - (v - gmin) / (gmax - gmin));
       const imax = Math.max(4, ...P.map((q) => q.isec + q.iexo)) * 1.1, Yi = (v) => T + H * (1 - v / imax);
       el('rect', { x: L, y: Yg(1.8), width: Wc - L - R, height: Yg(0.7) - Yg(1.8), class: 'ph-band' }, chart);
       for (let hh = 0; hh <= 24; hh += 3) { el('line', { x1: X(hh), x2: X(hh), y1: T, y2: T + H, class: 'ph-gl' }, chart); el('text', { x: X(hh), y: T + H + 14, class: 'ph-ax', 'text-anchor': 'middle' }, chart).textContent = hh + ' h'; }
@@ -517,6 +573,8 @@
       dpe.tm.forEach((t, m) => { if (!dpe.skip[m]) el('text', { x: X(t), y: T + 10, class: 'ph-meal', 'text-anchor': 'middle' }, chart).textContent = m === 2 && st.ev === 'big' ? '🍽🍽' : '🍽'; });
       if (dpe.snacks) dpe.snacks.forEach((sn) => { el('text', { x: X(sn.t), y: T + 10, class: 'ph-meal', 'text-anchor': 'middle' }, chart).textContent = '🍬'; });
       if (st.ev === 'sport') el('rect', { x: X(17), y: T, width: X(17.75) - X(17), height: H, class: 'ph-evband' }, chart);
+      [0.5, 0.3].forEach((v) => { if (P.some((q) => q.G < v + 0.1)) { el('line', { x1: L, x2: Wc - R, y1: Yg(v), y2: Yg(v), class: 'ph-thr' }, chart); el('text', { x: L - 5, y: Yg(v) + 4, class: 'ph-ax', 'text-anchor': 'end' }, chart).textContent = fmt(v, 1); } });
+      if (st.ev === 'hypoSev') el('text', { x: X(15.3), y: T + 24, class: 'ph-meal', 'text-anchor': 'middle' }, chart).textContent = '💉';
       if (st.ev === 'alcohol') el('text', { x: X(19.8), y: T + 24, class: 'ph-meal', 'text-anchor': 'middle' }, chart).textContent = '🍷';
       g.cursor = el('line', { x1: X(st.t), x2: X(st.t), y1: T, y2: T + H + 30, class: 'ph-cur' }, chart);
       g.X = X;
@@ -558,13 +616,23 @@
       const hh = Math.floor(st.t), mm = Math.round((st.t - hh) * 60);
       tLab.textContent = hh + ' h ' + String(mm === 60 ? 0 : mm).padStart(2, '0');
       slider.value = st.t;
+      const txt0 = (id, v) => { if (g[id]) g[id].textContent = v; };
       const Wd = (v, max) => Math.max(1, Math.min(14, 1 + 13 * v / max));
       const set = (id, v, max) => { const p = g[id]; if (!p) return; p.setAttribute('stroke-width', Wd(v, max).toFixed(1)); p.style.animationDuration = Math.max(0.35, 2.4 / Math.max(0.15, v / max)).toFixed(2) + 's'; p.classList.toggle('idle', v < max * 0.03); st.flux = st.flux || {}; st.flux[id] = v < max * 0.03 ? 0 : Math.min(1.5, v / max); };
       set('eat', q.eat, 150); set('ge', q.ge, 40); set('ra', q.ra, 40); set('inc', q.inc, 1.5); set('insL', q.isec, 6); set('insM', q.isec, 6); set('glu', q.glu, 2);
-      set('egp', q.egp, 25); set('upM', q.up * 0.75, 30); set('upF', q.up * 0.25, 30); set('ren', q.ren, 6); set('exoL', q.iexo, 4); set('exoM', q.iexo, 4); set('ffa', q.lip, 1); set('ket', q.ket, 1.5); set('hunger', 0.25 * (1 - k.satiety), 1);
+      set('egp', q.egp, 25); set('upM', q.up * 0.75, 30); set('upF', q.up * 0.25, 30); set('ren', q.ren, 6); set('exoL', q.iexo, 4); set('exoM', q.iexo, 4); set('ffa', q.lip, 1); set('ket', q.ket, 1.5); set('hunger', 0.25 * (1 - k.satiety) + (q.G < 0.7 ? 0.5 : 0), 1);
+      set('symp', q.adr - 1, 4); set('adr', q.adr - 1, 4); set('cort', q.cort - 1, 1.5);
+      txt0('v_adrenal', 'adrénaline × ' + fmt(q.adr, 1)); txt0('s_adrenal', 'cortisol × ' + fmt(q.cort, 1));
+      // Seuils du module : < 0,70 g/L adrénergique ; < 0,50 neuroglucopénique ; < 0,30 sévère.
+      const lv = q.G < 0.3 ? 3 : q.G < 0.5 ? 2 : q.G < 0.7 ? 1 : 0;
+      if (g.sweat) { g.sweat.classList.toggle('on', lv >= 1); g.tremor.classList.toggle('on', lv >= 1 && lv < 3); g.neuro.classList.toggle('on', lv === 2); g.coma.classList.toggle('on', lv === 3); }
+      svg.classList.toggle('ph-hypo1', lv === 1); svg.classList.toggle('ph-hypo2', lv === 2); svg.classList.toggle('ph-hypo3', lv === 3);
+      symBox.className = 'ph-sym lv' + lv; symBox.textContent = '';
+      if (lv) symBox.append(h('strong', null, ['', 'Hypoglycémie : signes adrénergiques', 'Hypoglycémie : signes neuroglucopéniques', 'Hypoglycémie sévère'][lv] + ' · ' + fmt(q.G, 2) + ' g/L'), h('span', null, ['', 'sueurs, tremblements, palpitations, faim, anxiété, pâleur (adrénaline) → resucrage 15 g', 'sueurs, tremblements, puis troubles de la concentration, confusion, troubles du comportement, vision floue, parole difficile → resucrage si le patient peut avaler, sinon glucagon', 'convulsions, coma : tierce personne → glucagon 1 mg IM ou 3 mg intranasal, G30 % IV ; jamais de resucrage oral'][lv]));
+      else symBox.append(h('span', null, 'Pas d\'hypoglycémie à cette heure (seuils du module : 0,70 · 0,50 · 0,30 g/L).'));
       const txt = (id, v) => { if (g[id]) g[id].textContent = v; };
       txt('v_brain', 'satiété ' + (k.satiety > 0.01 ? '+' + Math.round(k.satiety * 100) + ' %' : 'normale'));
-      txt('s_brain', fmt(st.res.tot.carbs, 0) + ' g de glucides/j');
+      txt('s_brain', q.G < 0.7 ? 'alerte : hypoglycémie' : fmt(st.res.tot.carbs, 0) + ' g de glucides/j');
       txt('v_stomach', fmt(q.Qs, 0) + ' g à vider');
       txt('v_gut', 'absorption ' + fmt(q.ra, 1) + ' g/h');
       txt('s_gut', 'incrétines ' + fmt(q.incE, 2) + (q.incP > 0.01 ? ' + pharmaco ' + fmt(q.incP, 2) : ''));
@@ -580,7 +648,7 @@
       txt('v_kidney', 'glycosurie ' + fmt(q.ren, 2) + ' g/h');
       txt('s_kidney', 'seuil rénal ' + fmt(k.tm, 2) + ' g/L');
       txt('v_pen', fmt(q.iexo, 2) + ' U/h');
-      txt('v_blood', fmt(q.G, 2) + ' g/L'); txt('s_blood', q.G < 0.7 ? 'hypoglycémie' : q.G > 1.8 ? 'au-dessus de 1,80' : 'dans la cible 0,70–1,80');
+      txt('v_blood', fmt(q.G, 2) + ' g/L'); txt('s_blood', q.G < 0.3 ? 'hypoglycémie sévère' : q.G < 0.5 ? 'neuroglucopénie' : q.G < 0.7 ? 'hypoglycémie' : q.G > 1.8 ? 'au-dessus de 1,80' : 'dans la cible 0,70–1,80');
       if (g.bloodC) g.bloodC.setAttribute('class', 'ph-box ph-box-blood ' + (q.G < 0.7 ? 'low' : q.G > 1.8 ? 'high' : 'ok'));
       // Injection : bolus 10 min avant chaque repas, basale à 22 h ; la pompe délivre les bolus au repas.
       if (g.pen) {

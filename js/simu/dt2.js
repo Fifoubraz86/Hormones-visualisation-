@@ -1406,5 +1406,44 @@
     return h('details', { class: 'sv-card sv-det' }, [h('summary', null, 'Révéler le patient'), h('ul', { class: 'sv-keys' }, items.map((t) => h('li', null, t)))]);
   }
 
-  S.dt2ui = { setup };
+  /* ---------- Schéma dynamique seul (onglet Physiologie, #physio) ---------- */
+  // Patient type choisi parmi les situations de départ et les diabètes atypiques ; pas de dossier, pas de consultation.
+  let PH = null, phPick = 'basal_bolus';
+  function physio() {
+    G = null;
+    statusEl.hidden = true;
+    main.textContent = '';
+    main.className = 'sv-main sv-home ph-standalone';
+    const opts = STAGES.map((x) => ({ id: x.id, label: x.label, cfg: { stage: x.id, a1c: x.a1c, duration: x.dur }, rx: x.rx })).concat(PRESETS.map((p, i) => ({ id: 'pre' + i, label: p.label, cfg: p.cfg, rx: () => null })));
+    const o = opts.find((x) => x.id === phPick) || opts[0];
+    if (!PH || PH.pick !== o.id) {
+      const c = Object.assign({}, BASE, o.cfg);
+      c.rx0 = o.rx(c.weight);
+      const pt = D.create(c);
+      const r0 = Object.assign({}, D.RX0, o.rx(c.weight) || {});
+      r0.rapidM = (r0.rapidM || [0, 0, 0]).slice(); r0.rapid = r0.rapidM.reduce((a, x) => a + x, 0);
+      Object.assign(pt.rx, r0);
+      const onIns = r0.basal > 0 || r0.rapid > 0;
+      PH = { pick: o.id, cfg: c, pt, history: [], seed: 20240611, titr: { who: onIns ? 'patient' : 'none', prof: 'std', delai: 3, sfd10: false } };
+      PH.titr.obj = JSON.parse(JSON.stringify(Y.PROTO.std)); PH.titr.bolusCtl = 'next';
+    }
+    const groups = [...new Set(STAGES.map((x) => x.g))];
+    const chip = (x) => h('button', { type: 'button', class: 'sv-chip' + (x.id === PH.pick ? ' on' : ''), 'aria-pressed': String(x.id === PH.pick), onclick: () => { phPick = x.id; physio(); } }, x.label);
+    main.append(
+      h('section', { class: 'sv-intro' }, [
+        h('p', { class: 'sv-eyebrow' }, 'Physiologie du glucose · schéma dynamique'),
+        h('h1', null, 'Voir ce que font les traitements, organe par organe.'),
+        h('p', { class: 'sv-lead' }, 'Choisissez un patient type, cochez ou décochez les traitements, simulez un événement (activité, repas, alcool, infection, hypoglycémie) et faites défiler la journée. Pour suivre un patient sur des mois, utilisez l\'onglet Diabète de type 2.')
+      ]),
+      h('section', { class: 'sv-card' }, [
+        h('h3', null, 'Patient type'),
+        h('div', { class: 'sv-stages' }, groups.map((gname) => h('div', { class: 'sv-stage-g' }, [h('p', { class: 'sv-stage-h' }, gname), h('div', { class: 'sv-chips' }, opts.filter((x) => (STAGES.find((y) => y.id === x.id) || {}).g === gname).map(chip))]))
+          .concat([h('div', { class: 'sv-stage-g' }, [h('p', { class: 'sv-stage-h' }, 'Diabètes atypiques'), h('div', { class: 'sv-chips' }, opts.filter((x) => x.id.startsWith('pre')).map(chip))])])),
+        h('p', { class: 'sv-note' }, 'Homme de 56 ans, 98 kg (IMC 33), sauf diabètes atypiques ; HbA1c et ancienneté typiques de la situation.')
+      ]),
+      S.dt2physio.card({ G: PH, h, D, Y, train: false, rerender: physio, onClose: () => { PH = null; physio(); } })
+    );
+  }
+
+  S.dt2ui = { setup, physio };
 })();

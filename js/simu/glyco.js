@@ -172,7 +172,7 @@
     for (let i = 0; i < 96; i++) { const a2 = curve[(i + 95) % 96], c = curve[(i + 1) % 96]; if (curve[i] <= a2 && curve[i] <= c) minima.push(i); }
     minima.sort((x, y) => curve[x] - curve[y]);
     const used = [];
-    const add = (i, sev) => { if (used.some((j) => Math.abs(j - i) < 8)) return false; used.push(i); dp.hypos.push({ t0: i / 4 - 0.4, dur: 0.6 + 0.5 * r(), depth: sev ? 0.36 : Math.min(curve[i], 0.52 + 0.14 * r()), sev }); return true; };
+    const add = (i, sev) => { if (used.some((j) => Math.abs(j - i) < 8)) return false; used.push(i); dp.hypos.push({ t0: i / 4 - 0.4, dur: 0.6 + 0.5 * r(), depth: sev ? 0.28 : Math.min(curve[i], 0.52 + 0.14 * r()), sev }); return true; };
     minima.filter((i) => curve[i] < 0.6).forEach((i) => add(i, false));
     const native = dp.hypos.length;
     // Hypoglycémie tirée par le modèle : dans la période de l'insuline qui agit (nuit : basale ou sulfamide ;
@@ -190,7 +190,7 @@
     const nH = ctx.newHypo || 0;
     for (let k = 0; k < nH; k++) {
       const i = pickLow();
-      if (!add(i, k < (ctx.newSev || 0))) { const hy = dp.hypos.find((x) => Math.abs(x.t0 + 0.4 - i / 4) < 2); if (hy && k < (ctx.newSev || 0)) { hy.depth = 0.36; hy.sev = true; } }
+      if (!add(i, k < (ctx.newSev || 0))) { const hy = dp.hypos.find((x) => Math.abs(x.t0 + 0.4 - i / 4) < 2); if (hy && k < (ctx.newSev || 0)) { hy.depth = 0.28; hy.sev = true; } }
     }
     dp.native = Math.max(0, native - nH);
     return dp;
@@ -211,7 +211,7 @@
       const x = (t - hy.t0) / hy.dur;
       if (x > 0 && x < 1) { const b = Math.pow(Math.sin(Math.PI * x), 2); g = g - (g - hy.depth) * b; }
     }
-    return Math.max(0.35, Math.min(5.5, g));
+    return Math.max(0.2, Math.min(5.5, g));
   }
 
   // Glycémie à l'heure de l'horloge (capteur, AGP) : la journée physiologique est décalée selon le poste.
