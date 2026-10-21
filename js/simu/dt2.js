@@ -627,7 +627,7 @@
     main.textContent = '';
     main.className = 'sv-main sv-game sv-sandbox';
     const left = h('aside', { class: 'sv-dossier' }, [patientCard(), G.dead ? deathCard() : rxCard()]);
-    const right = h('section', { class: 'sv-consult' }, [journeyCard(), latestCard(), sfdCard(), chartCard(), marginCard(), historyCard(), treeCard(), guideCard(), factorsCard(), refCard(), effectsCard(), revealCard()]);
+    const right = h('section', { class: 'sv-consult' }, [journeyCard(), physioEntry(), latestCard(), sfdCard(), chartCard(), marginCard(), historyCard(), treeCard(), guideCard(), factorsCard(), refCard(), effectsCard(), revealCard()]);
     main.append(left, right);
     const box = right.querySelector('.sv-chartbox');
     if (box) requestAnimationFrame(() => chart(box));
@@ -985,6 +985,15 @@
     lab('Glycémie (g/L) · cible ' + fmt(x.lo, 2) + '–' + fmt(x.hi, 2), top + 11, '');
     lab('Débit de base (U/h, max ' + fmt(rmax / 1.1, 1) + ') · barres : bolus', rt + 10, '');
     return h('div', { class: 'sv-hosp-chart' }, svg);
+  }
+
+  // Physiologie du patient (module atlas, js/simu/dt2-physio.js) : bandeau d'ouverture ou module ouvert.
+  function physioEntry() {
+    if (G.physioOpen && S.dt2physio) return S.dt2physio.card({ G, h, D, Y, rerender: render, onClose: () => { G.physioOpen = false; if (G.physio) G.physio.play = false; render(); } });
+    return h('div', { class: 'sv-card sv-physio-entry' }, [
+      h('div', null, [h('p', { class: 'sv-eyebrow' }, 'Atlas · physiologie'), h('p', { class: 'sv-physio-lead' }, 'Voir ce que font les traitements chez ce patient : insuline, glucagon, foie, muscle, vidange gastrique, incrétines, glycosurie, centre de la faim, heure par heure et de semaine en semaine.')]),
+      h('button', { type: 'button', class: 'sv-primary', id: 'dtPhysioOpen', onclick: () => { G.physioOpen = true; render(); } }, '🫀 Ouvrir la physiologie')
+    ]);
   }
 
   // Parcours : toutes les rencontres, cliquables.

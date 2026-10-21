@@ -148,14 +148,20 @@
     return p.B0 * Math.exp(-p.rate * pt.day / 365) * rec;
   }
 
+  // Sensibilité à l'insuline (hors glucotoxicité) : profil, poids, activité.
+  function siOf(pt) {
+    const p = pt.par, s = pt.st;
+    const gW = Math.pow(p.weight0 / s.W, P.wExp) - 1, gA = fAct(actNow(pt)) / fAct(p.act0) - 1;
+    return p.Si0 * (1 + gW + gA - P.coLife * Math.max(0, Math.min(gW, gA)));
+  }
+
   function targetMG(pt, MG) {
     const p = pt.par, s = pt.st;
     if (p.gck) return (p.gckSet || 1.3) - 0.05 * Math.min(1, effects(pt, MG).iex * 3);
     const e = effects(pt, MG);
     // Perte de poids et activité : gains de sensibilité moins qu'additifs (Umpierre : conseils d'activité
     // + régime ≈ − 0,6 %, proche de Look AHEAD) [lookahead].
-    const gW = Math.pow(p.weight0 / s.W, P.wExp) - 1, gA = fAct(actNow(pt)) / fAct(p.act0) - 1;
-    const si = p.Si0 * (1 + gW + gA - P.coLife * Math.max(0, Math.min(gW, gA)));
+    const si = siOf(pt);
     // Glucotoxicité : charge GT (g/L au-dessus de 1,8) qui suit la glycémie avec retard (s.GT, constante de
     // temps gtTau) ; elle freine la sécrétion et, au-delà d'environ 10 % d'HbA1c (effet quadratique), la sensibilité
     // à l'insuline. Sans état (calage), instantanée.
@@ -375,5 +381,5 @@
     return m;
   }
 
-  S.dt2 = { P, fpgOf, eqMG, hospDay, replay, PROFILES, ETHNIC, GLP1, SGLT2, ALB, RETINO, RX0, MOTIV, SNACK, metDose, lifeAch, actNow, sodaNow, create, advance, measure, effects, glpFrac, beta, a1cOf, clamp };
+  S.dt2 = { P, fpgOf, eqMG, hospDay, siOf, replay, PROFILES, ETHNIC, GLP1, SGLT2, ALB, RETINO, RX0, MOTIV, SNACK, metDose, lifeAch, actNow, sodaNow, create, advance, measure, effects, glpFrac, beta, a1cOf, clamp };
 })();
