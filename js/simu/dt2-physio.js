@@ -364,24 +364,53 @@
     const slider = h('input', { type: 'range', min: 0, max: 23.9, step: 0.1, value: st.t, class: 'sv-range', id: 'dtPhT', 'aria-label': 'Heure de la journée', oninput: (e) => { st.t = +e.target.value; frame(); } });
     const playBtn = h('button', { type: 'button', class: 'sv-secondary', id: 'dtPhPlay', onclick: () => { st.play = !st.play; playBtn.textContent = st.play ? '⏸ Pause' : '▶ Lecture'; if (st.play) requestAnimationFrame(loop); } }, st.play ? '⏸ Pause' : '▶ Lecture');
     const sum = h('div', { class: 'ph-sum', id: 'dtPhSum' });
+    const pred = h('div', { class: 'ph-pred', id: 'dtPhPredBox', hidden: true });
+    // Prédiction indicative : le traitement essayé (copie) contre le traitement du dossier, 6 mois, titration comprise.
+    function project(rx) {
+      const c = JSON.parse(JSON.stringify(Object.assign({}, pt, { log: [] })));
+      c.rx = JSON.parse(JSON.stringify(rx)); c.rx.rapidM = (c.rx.rapidM || [0, 0, 0]).slice();
+      const tst = { above: {} }, out = [{ d: 0, a: c.st.A, w: c.st.W }], h0 = c.st.hypo;
+      for (let d = 1; d <= 182; d++) {
+        D.advance(c, 1);
+        if (st.titr.who !== 'none' && (c.rx.basal + (c.rx.pump || 0) + c.rx.rapid) > 0) { const dp = Y.makeDay(c, D, { seed: (st.seed + c.day * 7919) >>> 0 }); c.st.hypo += dp.native; Y.titrate(c.rx, Y.readings(dp), Object.assign({ cgm: true, basalMax: c.rx.pump > 0 ? null : Math.round(0.5 * c.st.W) }, st.titr), tst, true); }
+        if (d % 7 === 0) out.push({ d, a: c.st.A, w: c.st.W });
+      }
+      return { pts: out, hypo: c.st.hypo - h0, rx: c.rx };
+    }
+    function predict() {
+      const A = project(pt.rx), same = JSON.stringify(pt.rx) === JSON.stringify(st.rx0), B = same ? null : project(st.rx0);
+      pred.hidden = false; pred.textContent = '';
+      const at = (P, d) => P.pts.reduce((x, q) => (Math.abs(q.d - d) < Math.abs(x.d - d) ? q : x));
+      const line = (lab, P) => h('div', { class: 'ph-row' }, [h('span', null, lab), h('strong', null, 'M3 ' + fmt(at(P, 91).a, 1) + ' % · M6 ' + fmt(at(P, 182).a, 1) + ' % · ' + (at(P, 182).w - P.pts[0].w >= 0 ? '+' : '') + fmt(at(P, 182).w - P.pts[0].w, 1) + ' kg' + (P.hypo ? ' · ' + P.hypo + ' hypo.' : ''))]);
+      const sv = el('svg', { viewBox: '0 0 300 90', class: 'ph-trend' });
+      const all = [A].concat(B ? [B] : []).flatMap((P) => P.pts.map((q) => q.a)), amin = Math.min(...all) - 0.2, amax = Math.max(...all) + 0.2;
+      const xs = (d) => 30 + 262 * d / 182, ys = (a) => 8 + 66 * (1 - (a - amin) / (amax - amin));
+      [[A, 'ph-l-a'], [B, 'ph-l-b']].forEach(([P, c]) => { if (P) el('path', { d: P.pts.map((q, i) => (i ? 'L' : 'M') + xs(q.d).toFixed(1) + ',' + ys(q.a).toFixed(1)).join(' '), class: c }, sv); });
+      el('text', { x: 2, y: 14, class: 'ph-ax' }, sv).textContent = fmt(amax, 1); el('text', { x: 2, y: 76, class: 'ph-ax' }, sv).textContent = fmt(amin, 1);
+      el('text', { x: 292, y: 88, class: 'ph-ax', 'text-anchor': 'end' }, sv).textContent = '6 mois · HbA1c (%)';
+      pred.append(h('p', { class: 'sv-eyebrow' }, 'Prédiction indicative à 6 mois'), line('Traitement essayé', A), B ? line('Traitement du dossier', B) : h('p', { class: 'sv-note' }, 'Même traitement que le dossier.'), sv,
+        h('p', { class: 'sv-note' }, 'Modèle DT2 calé sur les essais, observance du patient, titration comprise ; à titre indicatif (chaque patient réel s\'en écarte).'));
+    }
     const trend = el('svg', { viewBox: '0 0 300 70', class: 'ph-trend' });
     const legend = el('svg', { viewBox: '0 0 760 36', class: 'ph-legend', role: 'img', 'aria-label': 'Légende des molécules' });
     MOLS.forEach(([m, t], i) => { const x = 22 + i * 124; el('use', { href: '#phm-' + m, transform: 'translate(' + x + ',18) scale(1.7)' }, legend); el('text', { x: x + 19, y: 23, class: 'ph-ax ph-legt' }, legend).textContent = t; });
     root.append(
       h('div', { class: 'sv-card-head' }, [h('h3', null, 'Physiologie du patient : ce que font les traitements'), h('div', { class: 'sv-actions' }, [fullBtn, h('button', { type: 'button', class: 'sv-secondary', onclick: () => { setFull(false); onClose(); } }, 'Fermer')])]),
       h('p', { class: 'sv-muted' }, 'Copie du patient (le dossier n\'est pas modifié). La glycémie est celle du patient simulé ; le module la décompose organe par organe. Cliquez sur un organe. Modifiez les traitements, puis faites avancer le temps.'),
-      h('div', { class: 'ph-tog' }, TOG.map(([id, lab, isOn, set]) => h('label', { class: 'sv-chipcheck' }, [h('input', { type: 'checkbox', id: 'dtPh-' + id, checked: isOn(pt.rx), onchange: (e) => { set(pt.rx, e.target.checked); if (id === 'glp' && e.target.checked) document.getElementById('dtPh-tirz').checked = false; if (id === 'tirz' && e.target.checked) document.getElementById('dtPh-glp').checked = false; compute(); draw(); } }), ' ' + lab]))),
+      ctx.train ? h('p', { class: 'sv-note ph-trainnote' }, 'Mode entraînement : le module montre la physiologie du traitement en cours ; les essais de traitements, l\'avance dans le temps et les prédictions sont masqués jusqu\'à la fin de l\'entraînement.') : h('div', { class: 'ph-tog' }, TOG.map(([id, lab, isOn, set]) => h('label', { class: 'sv-chipcheck' }, [h('input', { type: 'checkbox', id: 'dtPh-' + id, checked: isOn(pt.rx), onchange: (e) => { set(pt.rx, e.target.checked); if (id === 'glp' && e.target.checked) document.getElementById('dtPh-tirz').checked = false; if (id === 'tirz' && e.target.checked) document.getElementById('dtPh-glp').checked = false; compute(); draw(); } }), ' ' + lab]))),
       h('div', { class: 'ph-evrow' }, [h('label', { for: 'dtPhEv' }, 'Événement de la journée'), h('select', { id: 'dtPhEv', onchange: (e) => { st.ev = e.target.value; compute(); draw(); } }, EVENTS.map(([k2, t]) => h('option', { value: k2, selected: (st.ev || 'none') === k2 }, t)))]),
       h('div', { class: 'ph-ctrl' }, [playBtn,
         h('select', { id: 'dtPhSpeed', 'aria-label': 'Vitesse', onchange: (e) => { st.speed = +e.target.value; } }, [[1, '1 h/s'], [2, '2 h/s'], [6, '6 h/s']].map(([v, t]) => h('option', { value: v, selected: st.speed === v }, t))),
         slider, tLab,
         h('span', { class: 'ph-sep' }),
-        h('button', { type: 'button', class: 'sv-secondary', id: 'dtPhD1', onclick: () => advance(1) }, '+1 jour'),
-        h('button', { type: 'button', class: 'sv-secondary', id: 'dtPhW1', onclick: () => advance(7) }, '+1 semaine'),
-        h('button', { type: 'button', class: 'sv-secondary', id: 'dtPhW4', onclick: () => advance(28) }, '+4 semaines'),
-        h('button', { type: 'button', class: 'sv-linkbtn', onclick: () => { reset(); compute(); ctx.rerender(); } }, 'Revenir au patient')
+        ...(ctx.train ? [] : [
+          h('button', { type: 'button', class: 'sv-secondary', id: 'dtPhD1', onclick: () => advance(1) }, '+1 jour'),
+          h('button', { type: 'button', class: 'sv-secondary', id: 'dtPhW1', onclick: () => advance(7) }, '+1 semaine'),
+          h('button', { type: 'button', class: 'sv-secondary', id: 'dtPhW4', onclick: () => advance(28) }, '+4 semaines'),
+          h('button', { type: 'button', class: 'sv-secondary', id: 'dtPhPred', onclick: predict }, '🔮 Prédire à 6 mois'),
+          h('button', { type: 'button', class: 'sv-linkbtn', onclick: () => { reset(); compute(); ctx.rerender(); } }, 'Revenir au patient')])
       ]),
-      h('div', { class: 'ph-grid' }, [h('div', { class: 'ph-diag' }, [svg, legend]), h('div', { class: 'ph-side' }, [sum, h('div', { class: 'ph-trendbox' }, trend), info])]),
+      h('div', { class: 'ph-grid' }, [h('div', { class: 'ph-diag' }, [svg, legend]), h('div', { class: 'ph-side' }, [sum, pred, h('div', { class: 'ph-trendbox' }, trend), info])]),
       h('div', { class: 'ph-chartbox' }, chart),
       h('p', { class: 'sv-note' }, 'Mécanismes : modèle « glyc » de l\'atlas enrichi des effets pharmacologiques (complément) ; la captation par le muscle et le tissu adipeux est calculée par bilan de masse. Chaque journée reprend la glycémie moyenne du modèle DT2, calé sur les essais.')
     );
@@ -472,7 +501,7 @@
         row('Insuline sécrétée / injectée', fmt(T.isec, 0) + ' / ' + fmt(T.exo, 0) + ' U'),
         row('Sensibilité · réserve β', Math.round(k.si * 100) + ' % · ' + Math.round(k.B * 100) + ' %'),
         row('HbA1c · poids', fmt(pt.st.A, 1) + ' % · ' + fmt(pt.st.W, 1) + ' kg'),
-        row('HbA1c attendue à l\'équilibre', fmt((D.eqMG(pt, {}) * 100 + 46.7) / 28.7, 1) + ' %')
+        ctx.train ? null : row('HbA1c attendue à l\'équilibre', fmt((D.eqMG(pt, {}) * 100 + 46.7) / 28.7, 1) + ' %')
       );
       trend.textContent = '';
       const H2 = st.hist, n = H2.length;
@@ -495,7 +524,7 @@
       const Wd = (v, max) => Math.max(1, Math.min(14, 1 + 13 * v / max));
       const set = (id, v, max) => { const p = g[id]; if (!p) return; p.setAttribute('stroke-width', Wd(v, max).toFixed(1)); p.style.animationDuration = Math.max(0.35, 2.4 / Math.max(0.15, v / max)).toFixed(2) + 's'; p.classList.toggle('idle', v < max * 0.03); st.flux = st.flux || {}; st.flux[id] = v < max * 0.03 ? 0 : Math.min(1.5, v / max); };
       set('ge', q.ge, 40); set('ra', q.ra, 40); set('inc', q.inc, 1.5); set('insL', q.isec, 6); set('insM', q.isec, 6); set('glu', q.glu, 2);
-      set('egp', q.egp, 25); set('upM', q.up * 0.75, 30); set('upF', q.up * 0.25, 30); set('ren', q.ren, 6); set('exoL', q.iexo, 4); set('exoM', q.iexo, 4); set('ffa', q.lip, 1); set('ket', q.ket, 1.5); set('hunger', 1 - k.satiety, 1);
+      set('egp', q.egp, 25); set('upM', q.up * 0.75, 30); set('upF', q.up * 0.25, 30); set('ren', q.ren, 6); set('exoL', q.iexo, 4); set('exoM', q.iexo, 4); set('ffa', q.lip, 1); set('ket', q.ket, 1.5); set('hunger', 0.25 * (1 - k.satiety), 1);
       const txt = (id, v) => { if (g[id]) g[id].textContent = v; };
       txt('v_brain', 'satiété ' + (k.satiety > 0.01 ? '+' + Math.round(k.satiety * 100) + ' %' : 'normale'));
       txt('s_brain', fmt(st.res.tot.carbs, 0) + ' g de glucides/j');

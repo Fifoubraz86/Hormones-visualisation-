@@ -544,5 +544,13 @@ body.ph-noscroll { overflow: hidden; }
 .ph-full .ph-svg { max-height: 76vh; }
 .ph-full .ph-chart { max-height: 30vh; }
 @media (max-width: 900px) { .ph-full .ph-grid { grid-template-columns: 1fr; } }
-.ph-full .ph-svg { height: 72vh; max-height: none; width: 100%; }
+.ph-full .ph-svg { height: calc(100vh - 330px); min-height: 460px; max-height: none; width: 100%; }
 .ph-flow.ph-n { stroke-dasharray: 2 6; }
+.ph-pred { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; background: var(--bg-2); font-size: 13px; display: flex; flex-direction: column; gap: 3px; }
+.ph-l-b { fill: none; stroke: var(--muted); stroke-width: 2; stroke-dasharray: 5 4; }
+.sv-score { margin: 0; font-size: 13px; font-weight: 600; color: var(--accent); }
+.sv-debrief { border: 1px solid var(--line-2); border-left: 4px solid var(--info); border-radius: 10px; padding: 8px 12px; background: var(--panel-2); font-size: 13.5px; }
+.sv-debrief > summary { cursor: pointer; font-weight: 700; }
+.sv-debrief p { margin: 6px 0 0; } .sv-debrief-l { margin: 4px 0 0; padding-left: 20px; }
+.sv-debrief-good { border-left-color: var(--good); } .sv-debrief-ok { border-left-color: var(--info); } .sv-debrief-warn { border-left-color: var(--warn); } .sv-debrief-bad { border-left-color: var(--bad); }
+.ph-trainnote { margin: 0; }

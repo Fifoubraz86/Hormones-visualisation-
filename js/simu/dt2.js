@@ -63,7 +63,7 @@
   ];
   const WORK = { jour: 'De jour, horaires réguliers', nuit: 'De nuit, en poste fixe', '2x8': 'En 2 × 8 alternés (matin / après-midi, par semaine)', '3x8': 'En 3 × 8 alternés (matin / après-midi / nuit, par semaine)' };
   const ADH = { bonne: 'Bonne', moyenne: 'Oublis fréquents', peur: 'Peur de l\'hypoglycémie', detresse: 'Détresse psychologique, syndrome dépressif', cachee: 'Inconnue (cachée)' };
-  const BASE = { profile: 'sird', sex: 'M', age: 56, weight: 98, height: 172, a1c: 8.5, duration: 1, dfg: 85, alb: 'normo', ethnic: 'eur', sbp: 142, retino: 'none', hfail: false, cvd: false, hcvr: false, masld: false, severe: false, driver: false, geria: 'bonne', panc: false, mtc: false, myco: false, irregular: false, lowcarb: false, adh: 'bonne', work: 'jour', stage: 'diag', variab: 'moyen', rx0: null, act0: 30, soda0: 1, snack0: 'modere', motiv: 'moyenne' };
+  const BASE = { profile: 'sird', sex: 'M', age: 56, weight: 98, height: 172, a1c: 8.5, duration: 1, dfg: 85, alb: 'normo', ethnic: 'eur', sbp: 142, retino: 'none', hfail: false, cvd: false, hcvr: false, masld: false, severe: false, driver: false, geria: 'bonne', panc: false, mtc: false, myco: false, irregular: false, lowcarb: false, adh: 'bonne', work: 'jour', stage: 'diag', mode: 'decouverte', variab: 'moyen', rx0: null, act0: 30, soda0: 1, snack0: 'modere', motiv: 'moyenne' };
   let cfg = Object.assign({}, BASE);
   let G = null;
 
@@ -98,6 +98,9 @@
   const rangBadge = (r) => (r ? h('span', { class: 'sv-rang sv-rang-' + r }, 'Rang ' + r) : null);
 
   const INS0 = (r) => !!r && ((r.basal || 0) + (r.rapidM || [0, 0, 0]).reduce((a, x) => a + x, 0) + (r.rapid || 0)) > 0;
+
+  // Mode entraînement : aides masquées jusqu'à la fin ; correction de chaque décision au bilan suivant.
+  const TRAIN = () => G && G.cfg.mode === 'entrainement' && !G.trainDone;
 
   /* ---------- Configuration ---------- */
   function setup(keep) {
@@ -150,6 +153,7 @@
           cfg.age >= 75 ? field('Statut gériatrique (≥ 75 ans)', sel('dtGer', cfg.geria, [['bonne', 'En bonne santé, autonome'], ['fragile', 'Fragile'], ['dependant', 'Dépendant(e), santé très altérée']], (v) => { cfg.geria = v; }), 'dtGer') : null,
           field('Rythme de travail', sel('dtWork', cfg.work, Object.entries(WORK), (v) => { cfg.work = v; }), 'dtWork'),
           field('Observance et situation psychologique', sel('dtAdh', cfg.adh, Object.entries(ADH), (v) => { cfg.adh = v; }), 'dtAdh'),
+          field('Mode', sel('dtMode', cfg.mode || 'decouverte', [['decouverte', 'Découverte (aides visibles)'], ['entrainement', 'Entraînement (internes : aides masquées, correction après chaque décision)']], (v) => { cfg.mode = v; }), 'dtMode'),
           field('Variabilité', sel('dtVar', cfg.variab, [['moyen', 'Patient moyen (reproductible)'], ['reel', 'Patient réel (réponses cachées)']], (v) => { cfg.variab = v; }), 'dtVar')
         ]),
         h('p', { class: 'sv-note', id: 'dtBmi' }, 'IMC : ' + fmt(bmi, 1) + ' kg/m².'),
@@ -569,6 +573,8 @@
     if (onInsD && d.titr.who !== 'none' && d.asg === '0' && !d.cgm) block.push('Titration de l\'insuline sans autosurveillance ni capteur : impossible ; il faut au moins la glycémie du réveil chaque jour.');
     if (onInsD && d.titr.who !== 'none' && d.rapid > 0 && d.titr.bolusCtl === 'pp' && d.asg !== '6' && !d.cgm) block.push('Bolus adaptés sur la glycémie post-prandiale : prescrire l\'autosurveillance 6 fois par jour (avant et 2 h après les repas) ou un capteur.');
     if (block.length) { say(block); return; }
+    // Entraînement : arbre des décisions au moment de la décision (avant l'ordonnance), pour la correction.
+    const treeAt = G.cfg.mode === 'entrainement' && S.dt2tree ? S.dt2tree.build(pt, G.cfg) : null;
     G.undo.push(snapshot());
     const prev = Object.assign({}, pt.rx, { rapidM: pt.rx.rapidM.slice() });
     const metBefore = D.metDose(pt);
@@ -580,6 +586,7 @@
     if (pt.rx.bolusMode === 'if') { pt.rx.ratio = d.ratio; pt.rx.isf = d.isf; pt.rx.rapidM = Y.CARBS.map((c, m) => Math.round(c * [0.8, 1.1, 1][m] / d.ratio)); pt.rx.rapid = pt.rx.rapidM.reduce((a, x) => a + x, 0); }
     else { pt.rx.ratio = 0; pt.rx.isf = 0; }
     d.titr.segCap = pt.rx.pumpSeg ? pt.rx.pumpSeg.map((x) => x * 1.5) : null;
+    const debrief = treeAt ? makeDebrief(treeAt, prev, pt.rx, lastA1c()) : null;
     if (d.cgm && !G.cgm) G.cgmStart = pt.day; // le capteur n'enregistre qu'à partir de sa pose
     // Dose maximale sans avis médical : + 50 % de la dose prescrite (au moins + 6 U), comme dans les protocoles écrits.
     d.titr.caps = { basal: d.basal > 0 ? Math.max(d.basal + 6, Math.round(d.basal * 1.5)) : null };
@@ -618,7 +625,7 @@
     // Sous capteur, le rapport AGP des 14 derniers jours est joint à chaque bilan.
     if (G.cgm) tests = new Set([...tests, 'agp']);
     G.view = null;
-    doLabs(tests, note, interrupt && interrupt.text, { mode: interrupt ? 'consult' : d.mode === 'tele' ? 'tele' : 'consult' });
+    doLabs(tests, note, interrupt && interrupt.text, { mode: interrupt ? 'consult' : d.mode === 'tele' ? 'tele' : 'consult', debrief });
     render();
     const res = main.querySelector('.sv-latest');
     if (res && window.innerWidth < 860) res.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -634,7 +641,7 @@
     main.textContent = '';
     main.className = 'sv-main sv-game sv-sandbox';
     const left = h('aside', { class: 'sv-dossier' }, [patientCard(), G.dead ? deathCard() : rxCard()]);
-    const right = h('section', { class: 'sv-consult' }, [journeyCard(), physioEntry(), latestCard(), sfdCard(), chartCard(), marginCard(), historyCard(), treeCard(), guideCard(), factorsCard(), refCard(), effectsCard(), revealCard()]);
+    const right = h('section', { class: 'sv-consult' }, TRAIN() ? [journeyCard(), physioEntry(), latestCard(), chartCard(), historyCard(), refCard()] : [journeyCard(), physioEntry(), latestCard(), sfdCard(), chartCard(), marginCard(), historyCard(), treeCard(), guideCard(), factorsCard(), refCard(), effectsCard(), revealCard()]);
     main.append(left, right);
     const box = right.querySelector('.sv-chartbox');
     if (box) requestAnimationFrame(() => chart(box));
@@ -653,6 +660,7 @@
       h('div', { class: 'sv-actions' }, [
         h('button', { type: 'button', class: 'sv-secondary', onclick: undo, disabled: !G.undo.length }, '↶ Annuler la dernière étape'),
         h('button', { type: 'button', class: 'sv-secondary', onclick: setup }, 'Nouveau patient'),
+        G.cfg.mode === 'entrainement' && !G.trainDone ? h('button', { type: 'button', class: 'sv-primary', id: 'dtTrainEnd', onclick: () => { G.trainDone = true; render(); } }, 'Terminer l\'entraînement : voir toutes les aides') : null,
         h('button', { type: 'button', class: 'sv-secondary', id: 'dtExport', onclick: exportReport }, '⇩ Exporter le suivi')
       ]),
       h('div', { id: 'dtExportBox', hidden: true })
@@ -998,10 +1006,52 @@
 
   // Physiologie du patient (module atlas, js/simu/dt2-physio.js) : bandeau d'ouverture ou module ouvert.
   function physioEntry() {
-    if (G.physioOpen && S.dt2physio) return S.dt2physio.card({ G, h, D, Y, rerender: render, onClose: () => { G.physioOpen = false; if (G.physio) G.physio.play = false; render(); } });
+    if (G.physioOpen && S.dt2physio) return S.dt2physio.card({ G, h, D, Y, train: TRAIN(), rerender: render, onClose: () => { G.physioOpen = false; if (G.physio) G.physio.play = false; render(); } });
     return h('div', { class: 'sv-card sv-physio-entry' }, [
       h('div', null, [h('p', { class: 'sv-eyebrow' }, 'Atlas · physiologie'), h('p', { class: 'sv-physio-lead' }, 'Voir ce que font les traitements chez ce patient : insuline, glucagon, foie, muscle, vidange gastrique, incrétines, glycosurie, centre de la faim, heure par heure et de semaine en semaine.')]),
       h('button', { type: 'button', class: 'sv-primary', id: 'dtPhysioOpen', onclick: () => { G.physioOpen = true; render(); } }, '🫀 Ouvrir la physiologie')
+    ]);
+  }
+
+  // Correction d'une décision (mode entraînement) : rang du choix dans l'arbre SFD du jour, lecture SFD de
+  // l'ordonnance, meilleures options et leur résultat prévu.
+  function makeDebrief(T, prev, rx, a1c) {
+    const ids = [];
+    const on = (r, k) => (k === 'glp' ? r.glp !== 'none' : k === 'sglt2' ? r.sglt2 !== 'none' : (r[k] || 0) > 0);
+    if (!on(prev, 'sglt2') && on(rx, 'sglt2')) ids.push(prev.met === 0 && rx.met > 0 ? 'metSglt2' : 'sglt2');
+    if (rx.glp === 'tirz' && prev.glp !== 'tirz') ids.push('tirz');
+    else if (!on(prev, 'glp') && on(rx, 'glp')) ids.push(prev.met === 0 && rx.met > 0 ? 'metGlp' : 'sema');
+    if (!on(prev, 'dpp4') && on(rx, 'dpp4')) ids.push('dpp4');
+    if (!on(prev, 'su') && on(rx, 'su')) ids.push('su');
+    if (rx.met > prev.met) ids.push(prev.met >= 2000 ? 'met3' : 'met');
+    if (!(bas(prev) > 0) && bas(rx) > 0) ids.push('basal'); else if (bas(rx) > bas(prev)) ids.push('basalUp');
+    const nb = (r) => (r.rapidM || []).filter((u) => u > 0).length;
+    if (nb(rx) > nb(prev)) ids.push(nb(rx) >= 3 && nb(prev) === 0 ? 'bb' : 'bolus');
+    const rhd = ['act', 'sodaStop', 'wtGoal', 'diet'].some((k) => rx[k] && rx[k] !== prev[k]);
+    if (!ids.length && rhd) ids.push('rhd');
+    const same = rxLabel(prev) === rxLabel(rx);
+    if (same) ids.push('none');
+    const match = T.branches.filter((b) => ids.includes(b.o.id)).sort((a2, b2) => a2.r - b2.r)[0] || null;
+    const A = SFD.advise({ c: G.cfg, rx, dfg: G.pt.st.dfg, a1c, W: G.pt.st.W, hypos: G.pt.st.hypo, sevHypo: G.pt.st.hypoSev > 0, starts: G.starts, day: G.pt.day, ppr: G.ev.ppr != null, cgm: G.draft.cgm, titr: G.draft.titr, goal: G.goal, asg: G.draft.asg, fpg: null });
+    const stops = A.items.filter((x) => x.lvl === 'stop'), warns = A.items.filter((x) => x.lvl === 'warn');
+    const r = match ? match.r : null;
+    const v = stops.length ? ['bad', 'Erreur'] : r === 1 ? ['good', 'Conforme (rang 1, recommandé)'] : r === 2 ? ['ok', 'Acceptable (rang 2)'] : r != null ? ['warn', 'À revoir (rang ' + r + ' : ' + S.dt2tree.RANK[r] + ')'] : warns.length ? ['warn', 'À revoir'] : ['ok', 'Hors des options de l\'arbre'];
+    const pick = (b) => ({ name: b.o.name, r: b.r, why: b.why, src: b.src, a1c: b.res.a1c, dW: b.res.dW, hypo: b.res.hypo });
+    return { day: G.pt.day, a1c, cls: v[0], label: v[1], rank: r, prev: rxLabel(prev), choice: rxLabel(rx), chosen: match ? pick(match) : null, best: T.branches.slice(0, 3).map(pick), stops: stops.map((x) => x.t), warns: warns.map((x) => x.t), target: T.T.max };
+  }
+
+  function debriefBlock(b, e) {
+    const g1 = (v) => fmt(v, 1);
+    const res = (x) => 'HbA1c ' + g1(x.a1c) + ' % à 6 mois, poids ' + (x.dW >= 0 ? '+' : '') + g1(x.dW) + ' kg' + (x.hypo ? ', ' + x.hypo + ' hypoglycémie' + (x.hypo > 1 ? 's' : '') : '');
+    return h('details', { class: 'sv-debrief sv-debrief-' + b.cls, open: true }, [
+      h('summary', null, 'Correction de votre décision du J' + b.day + ' : ' + b.label),
+      h('p', null, [h('strong', null, 'Votre ordonnance : '), b.choice + (b.prev === b.choice ? ' (inchangée)' : '') + '.']),
+      b.chosen ? h('p', null, [h('strong', null, 'Dans l\'arbre SFD de ce jour : '), b.chosen.name + ' — rang ' + b.chosen.r + ', ' + b.chosen.why + ' (prévu : ' + res(b.chosen) + ').']) : null,
+      h('p', null, h('strong', null, 'Les meilleures options ce jour-là (HbA1c ' + g1(b.a1c) + ' %, cible ≤ ' + g1(b.target) + ' %) :')),
+      h('ol', { class: 'sv-debrief-l' }, b.best.map((x) => h('li', null, x.name + ' — rang ' + x.r + ' (' + S.dt2tree.RANK[x.r] + ') : ' + x.why + ' ; prévu : ' + res(x) + '.'))),
+      b.stops.length || b.warns.length ? h('p', null, h('strong', null, 'Lecture SFD de votre ordonnance :')) : h('p', { class: 'sv-muted' }, 'Lecture SFD : pas d\'erreur ni de point d\'alerte sur cette ordonnance.'),
+      b.stops.length || b.warns.length ? h('ul', { class: 'sv-sfd-l' }, b.stops.map((t) => h('li', { class: 'sv-sfd-stop' }, '⛔ ' + t)).concat(b.warns.map((t) => h('li', { class: 'sv-sfd-warn' }, '⚠ ' + t)))) : null,
+      e.labs.a1c != null ? h('p', null, [h('strong', null, 'Résultat obtenu : '), 'HbA1c ' + g1(b.a1c) + ' → ' + g1(e.labs.a1c) + ' %.']) : null
     ]);
   }
 
@@ -1010,8 +1060,11 @@
     const list = G.history.filter((x) => !x.prescription);
     const cur = G.view != null && list[G.view] ? G.view : list.length - 1;
     const T = goalT();
+    const db = list.filter((e) => e.debrief).map((e) => e.debrief.cls);
+    const score = G.cfg.mode === 'entrainement' && db.length ? h('p', { class: 'sv-score', id: 'dtScore' }, 'Entraînement · ' + db.length + ' décision' + (db.length > 1 ? 's' : '') + ' : ' + db.filter((c) => c === 'good').length + ' conforme(s), ' + db.filter((c) => c === 'ok').length + ' acceptable(s), ' + db.filter((c) => c === 'warn').length + ' à revoir, ' + db.filter((c) => c === 'bad').length + ' erreur(s)' + (G.trainDone ? ' · aides affichées' : '')) : null;
     return h('div', { class: 'sv-card sv-journey' }, [
-      h('p', { class: 'sv-eyebrow' }, 'Parcours du patient'),
+      h('p', { class: 'sv-eyebrow' }, 'Parcours du patient' + (G.cfg.mode === 'entrainement' ? ' · mode entraînement' : '')),
+      score,
       h('div', { class: 'sv-jtrack' }, list.map((e, i) => {
         const M = MODE_OF[e.mode] || MODE_OF.consult, a = e.labs.a1c;
         return h('button', { type: 'button', class: 'sv-jitem sv-mode-' + (e.mode || 'consult') + (i === cur ? ' on' : '') + (e.event ? ' ev' : ''), 'aria-pressed': String(i === cur), title: (e.note || '') + (e.event ? ' · ' + e.event : ''), onclick: () => { G.view = i === list.length - 1 ? null : i; render(); } }, [
@@ -1037,6 +1090,7 @@
       h('div', { class: 'sv-latest-head' }, [h('span', { class: 'sv-mode-ic sv-mode-' + (e.mode || 'consult'), 'aria-hidden': 'true' }, M.icon), h('div', null, [h('p', { class: 'sv-eyebrow' }, e.note || 'Bilan'), h('h1', null, e.hosp ? 'J' + e.hospStart + ' → ' + dayLabel(e.day) : dayLabel(e.day))])]),
       old ? h('p', { class: 'sv-oldview' }, ['Rencontre antérieure. ', h('button', { type: 'button', class: 'sv-linkbtn', onclick: () => { G.view = null; render(); } }, 'Revenir à la dernière')]) : null,
       e.hosp ? hospBlock(e) : null,
+      e.debrief && G.cfg.mode === 'entrainement' ? debriefBlock(e.debrief, e) : null,
       e.event ? h('p', { class: 'sv-event' }, e.event) : null,
       e.banner ? h('p', { class: 'sv-banner' }, '⚠ ' + e.banner) : null,
       e.toon ? S.toon(e.toon, { epitaphe: e.epitaphe, titre: TOON_CAPTION[e.caption || e.toon] }) : null,
@@ -1107,7 +1161,7 @@
 
   function chartCard() {
     return h('div', { class: 'sv-card' }, [
-      h('div', { class: 'sv-card-head' }, [h('h3', null, 'Évolution'), h('label', { class: 'sv-check sv-small' }, [h('input', { type: 'checkbox', id: 'dtTruth', checked: G.truth, onchange: (e) => { G.truth = e.target.checked; render(); } }), ' Afficher la courbe réelle (entre les bilans)'])]),
+      h('div', { class: 'sv-card-head' }, [h('h3', null, 'Évolution'), TRAIN() ? null : h('label', { class: 'sv-check sv-small' }, [h('input', { type: 'checkbox', id: 'dtTruth', checked: G.truth, onchange: (e) => { G.truth = e.target.checked; render(); } }), ' Afficher la courbe réelle (entre les bilans)'])]),
       h('div', { class: 'sv-chartbox' }),
       h('p', { class: 'sv-note' }, 'Points : examens réalisés. Bande verte : cible d\'HbA1c individualisée (SFD 2025) ; glycémie à jeun 0,70–1,10 g/L.')
     ]);
