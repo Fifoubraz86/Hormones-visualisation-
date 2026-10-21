@@ -568,3 +568,4 @@ body.ph-noscroll { overflow: hidden; }
 .ph-penG.active .ph-tubing { stroke: var(--warn); stroke-width: 3; stroke-dasharray: 4 3; animation: phtube 0.6s linear infinite; }
 @keyframes phtube { to { stroke-dashoffset: -14; } }
 .ph-legend { height: 34px; width: auto; max-width: 100%; }
+.ph-pill, .ph-pt, .ph-pen-lab, .ph-flow, .ph-mols { pointer-events: none; }
