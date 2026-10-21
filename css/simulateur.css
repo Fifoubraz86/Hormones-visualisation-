@@ -597,3 +597,4 @@ body.ph-noscroll { overflow: hidden; }
 .ph-sym.lv3 { border-color: var(--bad); color: var(--fg); background: color-mix(in srgb, var(--bad) 16%, transparent); }
 .ph-thr { stroke: var(--bad); stroke-width: 1; stroke-dasharray: 3 4; opacity: 0.7; }
 .ph-standalone .sv-chips { margin-bottom: 6px; }
+.ph-slow { font-size: 0.85rem; color: var(--warn); min-width: 11em; }

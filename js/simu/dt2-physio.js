@@ -442,6 +442,7 @@
     const chart = el('svg', { viewBox: '0 0 760 230', class: 'ph-chart', role: 'img', 'aria-label': 'Courbes de 24 heures' });
     const info = h('div', { class: 'ph-info', id: 'dtPhInfo' });
     const tLab = h('strong', { class: 'ph-time' });
+    const slowLab = h('span', { class: 'ph-slow', id: 'dtPhSlowLab' });
     const slider = h('input', { type: 'range', min: 0, max: 23.9, step: 0.1, value: st.t, class: 'sv-range', id: 'dtPhT', 'aria-label': 'Heure de la journée', oninput: (e) => { st.t = +e.target.value; frame(); } });
     const playBtn = h('button', { type: 'button', class: 'sv-secondary', id: 'dtPhPlay', onclick: () => { st.play = !st.play; playBtn.textContent = st.play ? '⏸ Pause' : '▶ Lecture'; if (st.play) requestAnimationFrame(loop); } }, st.play ? '⏸ Pause' : '▶ Lecture');
     const sum = h('div', { class: 'ph-sum', id: 'dtPhSum' });
@@ -484,7 +485,8 @@
       h('div', { class: 'ph-evrow' }, [h('label', { for: 'dtPhEv' }, 'Événement de la journée'), h('select', { id: 'dtPhEv', onchange: (e) => { st.ev = e.target.value; compute(); draw(); } }, EVENTS.map(([k2, t]) => h('option', { value: k2, selected: (st.ev || 'none') === k2 }, t)))]),
       h('div', { class: 'ph-ctrl' }, [playBtn,
         h('select', { id: 'dtPhSpeed', 'aria-label': 'Vitesse', onchange: (e) => { st.speed = +e.target.value; } }, [[1, '1 h/s'], [2, '2 h/s'], [6, '6 h/s']].map(([v, t]) => h('option', { value: v, selected: st.speed === v }, t))),
-        slider, tLab,
+        slider, tLab, slowLab,
+        h('label', { class: 'sv-chipcheck', title: 'Le temps défile plus lentement pendant les 3 h qui suivent un repas et pendant une hypoglycémie' }, [h('input', { type: 'checkbox', id: 'dtPhSlow', checked: st.slow !== false, onchange: (e) => { st.slow = e.target.checked; frame(); } }), ' Ralentir aux moments clés']),
         h('span', { class: 'ph-sep' }),
         ...(ctx.train ? [] : [
           h('button', { type: 'button', class: 'sv-secondary', id: 'dtPhD1', onclick: () => advance(1) }, '+1 jour'),
@@ -615,6 +617,8 @@
       const q = P[Math.min(287, Math.max(0, Math.round(st.t / DT)))];
       const hh = Math.floor(st.t), mm = Math.round((st.t - hh) * 60);
       tLab.textContent = hh + ' h ' + String(mm === 60 ? 0 : mm).padStart(2, '0');
+      const sl = slowAt(st.t);
+      slowLab.textContent = sl < 1 ? (sl < 0.3 ? '🐢 ralenti (hypoglycémie)' : '🐢 ralenti (repas)') : '';
       slider.value = st.t;
       const txt0 = (id, v) => { if (g[id]) g[id].textContent = v; };
       const Wd = (v, max) => Math.max(1, Math.min(14, 1 + 13 * v / max));
@@ -673,10 +677,18 @@
       if (st.ev && st.ev !== 'none') info.append(h('p', { class: 'ph-evnote' }, EVNOTE[st.ev](k, st.res.tot)));
     }
 
+    // Ralenti aux moments clés : 3 h après chaque repas ou collation (× 0,4), hypoglycémie et ses abords (× 0,25).
+    function slowAt(t) {
+      if (st.slow === false) return 1;
+      const q = st.res.pts[Math.min(287, Math.max(0, Math.round(t / DT)))], dpe = st.res.dp;
+      if (q.G < 0.8) return 0.25;
+      const meals = dpe.tm.filter((x, m) => !dpe.skip[m]).concat((dpe.snacks || []).map((sn) => sn.t));
+      return meals.some((x) => t >= x - 0.25 && t < x + 3) ? 0.4 : 1;
+    }
     let lastTs = 0;
     function loop(ts) {
       if (!st.play || !root.isConnected) { lastTs = 0; return; }
-      if (lastTs) { st.t += (ts - lastTs) / 1000 * st.speed; if (st.t >= 24) st.t -= 24; frame(); }
+      if (lastTs) { st.t += (ts - lastTs) / 1000 * st.speed * slowAt(st.t); if (st.t >= 24) st.t -= 24; frame(); }
       lastTs = ts;
       requestAnimationFrame(loop);
     }
