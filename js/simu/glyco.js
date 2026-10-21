@@ -205,6 +205,7 @@
       if (dp.extra[m]) g -= dp.extra[m] * kBol(t - dp.tm[m]);
       // Queue du repas de la veille au-dessus de minuit : négligée (aire < 1 %).
     }
+    if (dp.snacks) for (const sn of dp.snacks) g += dp.sig * sn.w * kMeal(t - sn.t); // collation sans bolus (module de physiologie)
     for (const n of dp.noise) g += n.a * Math.sin(2 * Math.PI * n.f * t + n.ph);
     for (const hy of dp.hypos) {
       const x = (t - hy.t0) / hy.dur;

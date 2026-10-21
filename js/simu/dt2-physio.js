@@ -43,7 +43,49 @@
   }
 
   // Décomposition d'une journée dp (makeDay) du patient pt.
-  function decompose(pt, D, Y, dp) {
+  // Événements d'une journée (module de physiologie) : modifient la journée du patient, pas son dossier.
+  const EVENTS = [
+    ['none', 'Journée habituelle'],
+    ['sport', 'Activité physique : 45 min de marche rapide à 17 h'],
+    ['skip', 'Déjeuner sauté (sans son bolus)'],
+    ['big', 'Dîner copieux (× 1,8)'],
+    ['snack', 'Collation sucrée à 16 h (30 g, sans bolus)'],
+    ['alcohol', 'Alcool au dîner (3 verres)'],
+    ['ill', 'Infection fébrile (maladie intercurrente)']
+  ];
+  function applyEvent(pt, dp, ev) {
+    const rx = pt.rx, ins = rx.basal + (rx.pump || 0) + rx.rapid > 0 || rx.su > 0;
+    const d = Object.assign({}, dp, { w: dp.w.slice(), skip: dp.skip.slice(), cut: dp.cut.slice(), segCut: dp.segCut.slice(), extra: dp.extra.slice(), u: (dp.u || [0, 0, 0]).slice(), snacks: null });
+    let dg = () => 0, egpF = () => 1, ketF = 1, upNote = '';
+    if (ev === 'sport') {
+      // Captation musculaire sans insuline pendant l'effort, sensibilité accrue 6 à 12 h ; chute plus forte (et
+      // hypoglycémie possible) sous insuline ou sulfamide, qui ne baissent pas pendant l'effort.
+      const A = 0.3 * (ins ? 1.7 : 1), B = 0.1 * (ins ? 1.5 : 1);
+      dg = (t) => (t >= 17 && t < 17.75 ? -A * (t - 17) / 0.75 : t >= 17.75 ? -A * Math.exp(-(t - 17.75) / 1.2) - B * Math.exp(-(t - 17.75) / 8) : 0);
+      egpF = (t) => (t >= 17 && t < 18 ? 1.25 : 1);
+    } else if (ev === 'skip') {
+      d.skip[1] = true; d.u[1] = 0; d.extra[1] = 0; d.segCut[1] *= 0.3; // l'après-midi ne montre plus que le débit de base (test de jeûne)
+    } else if (ev === 'big') {
+      d.w[2] *= 1.8; if (rx.bolusMode !== 'if') d.cut[2] /= 1.8; else d.u[2] = Math.round(d.u[2] * 1.8 * 2) / 2;
+    } else if (ev === 'snack') {
+      d.snacks = [{ t: 16, w: 0.5 }];
+    } else if (ev === 'alcohol') {
+      // L'alcool bloque la néoglucogenèse : production hépatique freinée la nuit, hypoglycémie nocturne sous
+      // insuline ou sulfamide.
+      const A = ins ? 0.35 : 0.12;
+      dg = (t) => (t >= 22 || t < 8 ? -A * Math.sin(Math.PI * (((t - 22 + 24) % 24) / 10)) : 0);
+      egpF = (t) => (t >= 22 || t < 8 ? 0.6 : 1);
+    } else if (ev === 'ill') {
+      // Hormones de stress (cortisol, catécholamines, glucagon) : insulinorésistance, production hépatique accrue,
+      // cétose ; ne pas arrêter l'insuline, glycémies et cétonémie rapprochées, iSGLT2 et metformine suspendus.
+      dg = (t) => 0.35 + 0.1 * Math.sin(Math.PI * t / 24);
+      egpF = () => 1.3; ketF = 2.2;
+    }
+    return { d, dg, egpF, ketF };
+  }
+
+  function decompose(pt, D, Y, dp0, ev) {
+    const E = applyEvent(pt, dp0, ev || 'none'), dp = E.d;
     const rx = pt.rx, s = pt.st, p = pt.par;
     const e = D.effects(pt, s.MG);
     const glpF = Math.min(1.2, D.glpFrac(rx)), isT = rx.glp === 'tirz', shortA = rx.glp === 'lira';
@@ -64,10 +106,11 @@
     let Qs = 0, Qi = 0;
     const pts = [];
     const tot = { ra: 0, egp: 0, up: 0, ren: 0, isec: 0, exo: 0, carbs: carbs.reduce((a, x) => a + x, 0) };
-    const gAt = (t) => Y.glucose(dp, ((t % 24) + 24) % 24);
+    const gAt = (t) => { const tt = ((t % 24) + 24) % 24; return Math.max(0.4, Y.glucose(dp, tt) + E.dg(tt)); };
     for (let i = 0; i < 288; i++) {
       const t = i * DT;
       for (let m = 0; m < 3; m++) if (t <= dp.tm[m] && t + DT > dp.tm[m]) Qs += carbs[m];
+      if (dp.snacks) dp.snacks.forEach((sn) => { if (t <= sn.t && t + DT > sn.t) Qs += 30; });
       const ge = kge * Qs; Qs -= ge * DT; Qi += ge * DT;
       const ra0 = kabs * Qi; Qi -= ra0 * DT; const ra = ra0 * raFrac;
       const G = gAt(t), dG = (gAt(t + 0.5) - gAt(t - 0.5)); // pente lissée sur 1 h (g/L/h)
@@ -79,7 +122,7 @@
       const iexo = exoAt(rx, t, dp.u || [0, 0, 0], dp.tm);
       const portal = isec * 1.6 + iexo * 0.8;
       const glu = Math.max(0.15, (1 + 2 * Math.max(0, 0.9 - G)) / (1 + 0.45 * portal) * (1 - gluSup) * (1 + 0.5 * Math.min(1, ra / 30)));
-      let egp = egp0 * (0.4 + 0.6 * glu) * (1 - metK) / (1 + 0.35 * portal * si);
+      let egp = E.egpF(t) * egp0 * (0.4 + 0.6 * glu) * (1 - metK) / (1 + 0.35 * portal * si);
       const ren = renK * Math.max(0, G - tm);
       // Lipolyse (tissu adipeux, relatif au jeûne normal) : très sensible à l'insuline (freinée dès des taux bas),
       // accrue par le glucagon et l'insulinorésistance du tissu adipeux, par un régime très pauvre en glucides.
@@ -87,7 +130,7 @@
       const lip = (0.4 + 0.6 * glu) * (1 + 0.8 * Math.max(0, 1 - si)) * (p.lowcarb ? 1.3 : 1) / (1 + 0.5 * insAd);
       // Cétogenèse hépatique : acides gras disponibles × rapport glucagon / insuline portale ; iSGLT2 : moins
       // d'insuline, plus de glucagon, cétogenèse accrue (acidocétose possible à glycémie peu élevée).
-      const kss = 0.06 + 2.0 * Math.max(0, lip - 0.25) * glu / (1 + 0.4 * portal) * (e.sglt > 0 ? 1.8 : 1) * (p.lowcarb ? 1.8 : 1);
+      const kss = 0.06 + 2.0 * Math.max(0, lip - 0.25) * glu / (1 + 0.4 * portal) * (e.sglt > 0 ? 1.8 : 1) * (p.lowcarb ? 1.8 : 1) * E.ketF;
       let up = egp + ra - ren - V * dG;
       if (up < 4) { egp += 4 - up; up = 4; }
       tot.ra += ra * DT; tot.egp += egp * DT; tot.up += up * DT; tot.ren += ren * DT; tot.isec += isec * DT; tot.exo += iexo * DT;
@@ -99,7 +142,8 @@
     for (let pass = 0; pass < 2; pass++) pts.forEach((q) => { ket += (q.kss - ket) * (1 - Math.exp(-DT / 2)); q.ket = Math.min(8, ket); });
     tot.ketMax = Math.max(...pts.map((q) => q.ket)); tot.ketMean = pts.reduce((a, q) => a + q.ket, 0) / 288;
     tot.lip = pts.reduce((a, q) => a + q.lip, 0) / 288;
-    return { pts, tot, k: { B, si, glpF, isT, shortA, satiety, gluSup, tm, metK, dpp, kge, acarb: !!rx.acarb, su: (e.eSu || 0) > 0, egp0, e, rx, W } };
+    tot.gMin = Math.min(...pts.map((q) => q.G)); tot.gMax = Math.max(...pts.map((q) => q.G));
+    return { dp, pts, tot, k: { B, si, glpF, isT, shortA, satiety, gluSup, tm, metK, dpp, kge, acarb: !!rx.acarb, su: (e.eSu || 0) > 0, egp0, e, rx, W } };
   }
 
   /* ---------- Vue ---------- */
@@ -147,6 +191,15 @@
     pen: (k) => (k.rx.pump > 0 ? 'Pompe : débit continu d\'analogue rapide et bolus aux repas.' : k.rx.basal > 0 || k.rx.rapid > 0 ? 'Insuline injectée : la basale freine surtout le foie (nuit, jeûne), les bolus couvrent les repas (pic à 1 h, 4 à 5 h d\'action). Elle ne s\'adapte pas à la glycémie : hypoglycémie si la dose dépasse les besoins.' : 'Pas d\'insuline injectée.')
   };
 
+  const EVNOTE = {
+    sport: (k, T) => 'Activité physique : le muscle capte le glucose sans insuline pendant l\'effort, puis la sensibilité à l\'insuline reste accrue 6 à 12 h. ' + (k.rx.basal + (k.rx.pump || 0) + k.rx.rapid > 0 || k.su ? 'Sous insuline ou sulfamide, la sécrétion ou l\'injection ne baisse pas : réduire le bolus du repas précédent ou le débit de la pompe, collation si besoin.' : 'Sans insuline ni sulfamide, pas d\'hypoglycémie : la sécrétion s\'adapte.') + (T.gMin < 0.7 ? ' Ici : hypoglycémie.' : ''),
+    skip: () => 'Déjeuner sauté avec son bolus : l\'après-midi ne reflète plus que l\'insuline de fond. C\'est le principe du test de jeûne pour régler la basale ou les créneaux de la pompe.',
+    big: (k) => 'Dîner copieux : ' + (k.rx.bolusMode === 'if' ? 'en insulinothérapie fonctionnelle, le bolus suit les glucides.' : k.rx.rapid > 0 ? 'avec un bolus fixe, l\'excursion post-prandiale n\'est pas couverte.' : 'la sécrétion résiduelle ne suffit pas : pic post-prandial et glycosurie.'),
+    snack: () => 'Collation sucrée sans bolus : pic de l\'après-midi, glycémie avant le dîner plus haute (bolus du dîner faussement augmenté si on le juge sur elle).',
+    alcohol: (k) => 'Alcool : le foie ne fait plus de néoglucogenèse. ' + (k.rx.basal + (k.rx.pump || 0) + k.rx.rapid > 0 || k.su ? 'Sous insuline ou sulfamide : hypoglycémie nocturne ou matinale possible ; collation glucidique, contrôle au coucher.' : 'Sans insuline ni sulfamide, baisse modérée.'),
+    ill: (k, T) => 'Infection : hormones de stress, insulinorésistance, production hépatique accrue, cétose. Ne jamais arrêter l\'insuline (souvent l\'augmenter), glycémies et cétonémie rapprochées, hydratation ; suspendre iSGLT2 et metformine en cas de déshydratation (cétonémie ici jusqu\'à ' + fmt(T.ketMax, 1) + ' mmol/L).'
+  };
+
   function el(tag, a, par) { const n = document.createElementNS(NS, tag); for (const k in a) n.setAttribute(k, a[k]); if (par) par.appendChild(n); return n; }
 
   function card(ctx) {
@@ -165,7 +218,7 @@
     const pt = st.pt;
     const compute = () => {
       st.dp = Y.makeDay(pt, D, { seed: (st.seed + pt.day * 7919) >>> 0, work: G.cfg.work });
-      st.res = decompose(pt, D, Y, st.dp);
+      st.res = decompose(pt, D, Y, st.dp, st.ev);
     };
     if (!st.dp) compute();
     const advance = (n) => {
@@ -204,6 +257,7 @@
       h('div', { class: 'sv-card-head' }, [h('h3', null, 'Physiologie du patient : ce que font les traitements'), h('button', { type: 'button', class: 'sv-secondary', onclick: onClose }, 'Fermer')]),
       h('p', { class: 'sv-muted' }, 'Copie du patient (le dossier n\'est pas modifié). La glycémie est celle du patient simulé ; le module la décompose organe par organe. Cliquez sur un organe. Modifiez les traitements, puis faites avancer le temps.'),
       h('div', { class: 'ph-tog' }, TOG.map(([id, lab, isOn, set]) => h('label', { class: 'sv-chipcheck' }, [h('input', { type: 'checkbox', id: 'dtPh-' + id, checked: isOn(pt.rx), onchange: (e) => { set(pt.rx, e.target.checked); if (id === 'glp' && e.target.checked) document.getElementById('dtPh-tirz').checked = false; if (id === 'tirz' && e.target.checked) document.getElementById('dtPh-glp').checked = false; compute(); draw(); } }), ' ' + lab]))),
+      h('div', { class: 'ph-evrow' }, [h('label', { for: 'dtPhEv' }, 'Événement de la journée'), h('select', { id: 'dtPhEv', onchange: (e) => { st.ev = e.target.value; compute(); draw(); } }, EVENTS.map(([k2, t]) => h('option', { value: k2, selected: (st.ev || 'none') === k2 }, t)))]),
       h('div', { class: 'ph-ctrl' }, [playBtn,
         h('select', { id: 'dtPhSpeed', 'aria-label': 'Vitesse', onchange: (e) => { st.speed = +e.target.value; } }, [[1, '1 h/s'], [2, '2 h/s'], [6, '6 h/s']].map(([v, t]) => h('option', { value: v, selected: st.speed === v }, t))),
         slider, tLab,
@@ -291,7 +345,11 @@
       el('path', { d: P.map((q, i) => (i ? 'L' : 'M') + X(q.t).toFixed(1) + ',' + (T + H - H * Math.min(3, q.ket) / 3).toFixed(1)).join(' '), class: 'ph-l-ket' }, chart);
       el('text', { x: Wc - 2, y: T + 22, class: 'ph-ax ph-ax-ket', 'text-anchor': 'end' }, chart).textContent = 'cét. 0–3';
       P.forEach((q, i) => { if (i % 3 === 0 && q.ren > 0.05) el('rect', { x: X(q.t), y: T + H + 18, width: 3, height: Math.min(12, q.ren * 2), class: 'ph-b-ren' }, chart); });
-      st.dp.tm.forEach((t, m) => { if (!st.dp.skip[m]) el('text', { x: X(t), y: T + 10, class: 'ph-meal', 'text-anchor': 'middle' }, chart).textContent = '🍽'; });
+      const dpe = st.res.dp;
+      dpe.tm.forEach((t, m) => { if (!dpe.skip[m]) el('text', { x: X(t), y: T + 10, class: 'ph-meal', 'text-anchor': 'middle' }, chart).textContent = m === 2 && st.ev === 'big' ? '🍽🍽' : '🍽'; });
+      if (dpe.snacks) dpe.snacks.forEach((sn) => { el('text', { x: X(sn.t), y: T + 10, class: 'ph-meal', 'text-anchor': 'middle' }, chart).textContent = '🍬'; });
+      if (st.ev === 'sport') el('rect', { x: X(17), y: T, width: X(17.75) - X(17), height: H, class: 'ph-evband' }, chart);
+      if (st.ev === 'alcohol') el('text', { x: X(19.8), y: T + 24, class: 'ph-meal', 'text-anchor': 'middle' }, chart).textContent = '🍷';
       g.cursor = el('line', { x1: X(st.t), x2: X(st.t), y1: T, y2: T + H + 30, class: 'ph-cur' }, chart);
       g.X = X;
       [['ph-l-g', 'glycémie'], ['ph-a-endo', 'insuline sécrétée'], ['ph-a-exo', 'injectée'], ['ph-l-glu', 'glucagon'], ['ph-b-ren', 'glycosurie'], ['ph-l-ket', 'cétones']].forEach(([c, t], i) => { const x0 = L + [0, 90, 225, 315, 405, 505][i]; el('rect', { x: x0, y: 214, width: 12, height: 8, class: c + ' ph-lg' }, chart); el('text', { x: x0 + 16, y: 222, class: 'ph-ax' }, chart).textContent = t; });
@@ -303,6 +361,7 @@
       const row = (a, b) => h('div', { class: 'ph-row' }, [h('span', null, a), h('strong', null, b)]);
       sum.append(
         h('p', { class: 'sv-eyebrow' }, (last.d ? 'Copie à J+' + last.d : 'Aujourd\'hui') + ' · bilan des 24 h'),
+        row('Glycémie min – max', fmt(T.gMin, 2) + ' – ' + fmt(T.gMax, 2) + ' g/L' + (T.gMin < 0.7 ? ' ⚠ hypoglycémie' : '')),
         row('Glucides absorbés', fmt(T.ra, 0) + ' g'),
         row('Production hépatique', fmt(T.egp, 0) + ' g'),
         row('Captation (muscle, graisse, cerveau)', fmt(T.up, 0) + ' g'),
@@ -357,6 +416,7 @@
       if (st.infoSel !== st.sel) { st.infoSel = st.sel; }
       info.textContent = '';
       info.append(h('h4', null, ORG[st.sel].t), h('p', null, INFO[st.sel](k, st.res.tot)));
+      if (st.ev && st.ev !== 'none') info.append(h('p', { class: 'ph-evnote' }, EVNOTE[st.ev](k, st.res.tot)));
     }
 
     let lastTs = 0;
@@ -371,5 +431,5 @@
     return root;
   }
 
-  S.dt2physio = { decompose, card, exoAt };
+  S.dt2physio = { decompose, card, exoAt, EVENTS };
 })();

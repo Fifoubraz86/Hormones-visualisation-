@@ -496,3 +496,7 @@ select { background: var(--panel-2); border: 1px solid var(--line-2); border-rad
 .ph-pill-ket { fill: color-mix(in srgb, var(--bad) 30%, var(--panel)); stroke: var(--bad); }
 .ph-l-ket { fill: none; stroke: var(--t3); stroke-width: 1.6; stroke-dasharray: 1 3; stroke-linecap: round; }
 .ph-lg.ph-l-ket { fill: var(--t3); } .ph-ax-ket { fill: var(--t3); }
+.ph-evrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13.5px; }
+.ph-evrow select { max-width: 100%; }
+.ph-evband { fill: color-mix(in srgb, var(--good) 22%, transparent); }
+.ph-evnote { margin-top: 6px !important; padding-top: 6px; border-top: 1px dashed var(--line); font-weight: 500; }
