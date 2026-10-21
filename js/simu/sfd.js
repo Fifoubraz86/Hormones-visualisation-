@@ -145,6 +145,7 @@
       else if (n >= 3 && !GLP(rx)) add('tip', 'Échec d\'une trithérapie orale : metformine + aGLP1 ou tirzépatide (± iSGLT2) de préférence, ou insuline basale en gardant la metformine. La quadrithérapie orale n\'est validée par aucune étude.', 'avis 17');
     }
     if (a1c != null && a1c >= 10) add('tip', 'HbA1c ≥ 10 % : avis diabétologique souhaitable ; bi- ou trithérapie d\'emblée ; insuline si syndrome polyuro-polydipsique ou amaigrissement ; fond d\'œil rapide et baisse graduée en cas de rétinopathie.', 'avis 8 bis');
+    if (a1c != null && a1c >= 10 && (INS(rx) || n >= 2)) add('tip', 'HbA1c ≥ 10 % malgré ' + (INS(rx) ? 'l\'insuline' : 'plusieurs antidiabétiques') + ' : la glucotoxicité freine la sécrétion et la sensibilité à l\'insuline, et l\'intensification ambulatoire « rame ». Une hospitalisation pour insulinothérapie intensive transitoire (pompe) ramène la glycémie en 4 à 6 jours et lève la glucotoxicité en 2 à 3 semaines (Weng, Lancet 2008 ; Kramer, Lancet Diabetes Endocrinol 2013 : HOMA-IR − 43 %, surtout au diagnostic). Dans le DT2 ancien, pas d\'essai randomisé : avis d\'expert.', 'complément');
 
     // Insuline (avis 18, 18 bis, 18 ter, 19, 23).
     if (INS(rx)) {

@@ -42,7 +42,10 @@
     wExp: 1.5,        // sensibilité à l'insuline ∝ (poids initial / poids)^wExp [lookahead]
     wlB: 16, wlDur: 6, // récupération de la fonction β après perte de poids si diabète récent [direct]
     coLife: 0.6,
-    gtox: 0.4,      // glucotoxicité : levée d'autant plus marquée que l'HbA1c initiale est haute [base-a1c]
+    gtox: 0.3,      // glucotoxicité : levée d'autant plus marquée que l'HbA1c initiale est haute [base-a1c]
+    gir: 0.5,       // glucotoxicité sur la sensibilité à l'insuline (Garvey 1985 ; Kramer 2013, HOMA-IR − 43 %, complément)
+    gtTau: 7,       // constante de temps (j) de la glucotoxicité : levée en 2 à 3 semaines de normoglycémie
+    gtHi: 2.4,      // levée nulle au-dessus de cette glycémie moyenne, pleine vitesse sous 1,4 g/L [base-a1c]
     glpSec: 0.1,    // part sécrétoire des aGLP1 (glucodépendante, liée à la réserve) [sema-1, lira-18]
     glpX: 0.5,      // part non sécrétoire [sema5]
     glpW: 0.055     // perte de poids sous aGLP1 à dose pleine (fraction du poids) [sema-1-w]
@@ -95,7 +98,7 @@
 
   // Metformine : effet croissant jusqu'à 2 g ; 3 g n'apporte que peu de bénéfice supplémentaire
   // (SFD 2025, avis 8) [met-500, met-2000].
-  const metCurve = (m) => Math.pow(Math.min(m, 2000) / 2000, 0.7) + 0.12 * Math.min(1, Math.max(0, m - 2000) / 1000);
+  const metCurve = (m) => Math.pow(Math.min(m, 2000) / 2000, 0.9) + 0.12 * Math.min(1, Math.max(0, m - 2000) / 1000);
   const mgOf = (IA) => (IA >= 1 ? Math.max(0.55, 0.95 - 0.3 * (IA - 1)) : 0.95 + 0.45 * Math.pow(1 / Math.max(IA, 0.02) - 1, 0.6));
   const a1cOf = (mg) => (mg * 100 + 46.7) / 28.7;
 
@@ -117,7 +120,7 @@
     const br = p.suBoost > 1 ? 1 : clamp(beta(pt) / 0.15, 0.5, 1);
     // Insuline injectée. La basale freine surtout la production hépatique de glucose : au-delà des besoins,
     // son effet sature (sur-basalisation, SFD 2025 avis 19) ; les bolus couvrent les repas.
-    const iexB = rx.basal * a / (P.insK * pt.par.weight0), iexR = rx.rapid * a / (P.insK * pt.par.weight0);
+    const iexB = rx.basal * a / (P.insK * pt.par.weight0), iexR = (rx.rapid + (rx.pump || 0)) * a / (P.insK * pt.par.weight0); // pompe : débit de base non saturé
     const iex = P.bCap * (1 - Math.exp(-iexB / P.bCap)) + iexR, iexRaw = iexB + iexR;
     const eSu = su > 0 ? P.su * Math.pow(Math.min(su, 120) / 120, P.suExp) * (p.suBoost || 1) * br / (1 + P.suIns * Math.min(1.5, iexB + iexR)) : 0;
     const eDpp = (rx.dpp4 > 0 ? P.dpp * Math.min(1, rx.dpp4 * a / 100) * p.incr : 0) * gd * br;
@@ -150,9 +153,13 @@
     // + régime ≈ − 0,6 %, proche de Look AHEAD) [lookahead].
     const gW = Math.pow(p.weight0 / s.W, P.wExp) - 1, gA = fAct(actNow(pt)) / fAct(p.act0) - 1;
     const si = p.Si0 * (1 + gW + gA - P.coLife * Math.max(0, Math.min(gW, gA)));
-    const gtox = 1 / (1 + P.gtox * Math.max(0, MG - 1.8));
+    // Glucotoxicité : charge GT (g/L au-dessus de 1,8) qui suit la glycémie avec retard (s.GT, constante de
+    // temps gtTau) ; elle freine la sécrétion et, au-delà d'environ 10 % d'HbA1c (effet quadratique), la sensibilité
+    // à l'insuline. Sans état (calage), instantanée.
+    const gt = s.GT != null ? s.GT : Math.max(0, MG - 1.8);
+    const gtox = 1 / (1 + P.gtox * gt);
     const Bf = beta(pt) * gtox * (1 + e.eSu + e.eDpp + e.eGlp);
-    const IA = (Bf + e.iex) * si * (1 + e.eMet);
+    const IA = (Bf + e.iex) * si / (1 + P.gir * gt * gt) * (1 + e.eMet);
     let m = mgOf(IA);
     if (m > 1) m = 1 + (m - 1) * (1 - e.sglt) * (1 - e.acarb) * (1 - e.eGlpX);
     // Boissons sucrées : charge glucidique directe (≈ 0,035 g/L de glycémie moyenne par verre quotidien, complément).
@@ -212,7 +219,7 @@
       } else bisect((b) => { par.B0 = b; }, 0.01, 2, false);
       fitWeight();
     }
-    st.MG = eq(1.5); st.A = a1cOf(st.MG);
+    st.MG = eq(targetMg); st.A = a1cOf(st.MG); st.GT = Math.max(0, st.MG - 1.8);
     record(pt);
     return pt;
   }
@@ -236,6 +243,7 @@
     const p = pt.par, s = pt.st;
     const tgt = targetMG(pt, s.MG);
     s.MG += (tgt - s.MG) * (1 - Math.exp(-1 / 5));
+    gtStep(s);
     s.A += (a1cOf(s.MG) - s.A) * (1 - Math.exp(-1 / 40));
     s.W += (weightTarget(pt) - s.W) * (1 - Math.exp(-1 / 75));
     s.dfg -= (p.albRate * (pt.rx.sglt2 !== 'none' ? 0.5 : 1) * (pt.rx.glp !== 'none' ? 0.8 : 1)) / 365;
@@ -252,6 +260,28 @@
     if (rng) { if (rng() < lam) s.hypo++; if (rng() < lam * sevFrac) s.hypoSev++; }
     else { s.hypoAcc += lam; s.sevAcc += lam * sevFrac; while (s.hypoAcc >= 1) { s.hypo++; s.hypoAcc -= 1; } if (s.sevAcc >= 1) { s.hypoSev++; s.sevAcc -= 1; } }
     pt.day += 1;
+  }
+
+  // Glucotoxicité : s'installe quand la glycémie moyenne dépasse 1,8 g/L ; ne se lève qu'avec une glycémie
+  // proche de la normale (pleine vitesse sous 1,4 g/L, nulle au-dessus de 1,8) : 2 à 3 semaines de normoglycémie
+  // (Weng 2008 ; Kramer 2013). D'où le cercle vicieux de l'HbA1c très haute : tant que la glycémie reste
+  // au-dessus de 1,8 g/L, les besoins en insuline restent élevés.
+  function gtStep(s) {
+    if (s.GT == null) return;
+    const tgt = Math.max(0, s.MG - 1.8), k = 1 - Math.exp(-1 / P.gtTau);
+    if (tgt >= s.GT) s.GT += (tgt - s.GT) * k;
+    else s.GT -= (s.GT - tgt) * k * clamp((P.gtHi - s.MG) / (P.gtHi - 1.4), 0, 1);
+  }
+
+  // Journée d'hospitalisation : la glycémie moyenne du jour vient de la simulation horaire (dt2-hosp.js).
+  function hospDay(pt, mg) {
+    const s = pt.st;
+    s.MG = mg;
+    s.A += (a1cOf(mg) - s.A) * (1 - Math.exp(-1 / 40));
+    gtStep(s);
+    s.W += (weightTarget(pt) - s.W) * (1 - Math.exp(-1 / 75));
+    pt.day += 1;
+    record(pt);
   }
 
   function record(pt) {
@@ -274,7 +304,7 @@
   // elle laisse une HbA1c proche de 7 % (Treat-to-Target) [basal-t2t].
   function fpgOf(pt) {
     const s = pt.st, p = pt.par;
-    const basalShare = pt.rx.basal * p.adh / (P.insK * p.weight0);
+    const basalShare = (pt.rx.basal + (pt.rx.pump || 0)) * p.adh / (P.insK * p.weight0);
     // Les bolus d'insuline rapide ne couvrent pas la nuit : la glycémie à jeun se calcule sans eux.
     // La nuit, seule la fin d'action du bolus du dîner joue : l'écart est plafonné à 0,25 g/L (sinon, sous gros
     // bolus, le réveil resterait haut quoi que fasse la basale).
@@ -292,7 +322,7 @@
     return {
       a1c: s.A * (1 + (Math.random() - 0.5) * 0.03), fpg: fpg * noise(), ppg: Math.max(fpg, ppg) * noise(), mg: s.MG,
       dfg: s.dfg * noise(), w: s.W, bmi: s.W / Math.pow(p.height / 100, 2),
-      cpep: p.gck ? 2.2 : clamp(3.2 * B / Math.sqrt(p.Si0) * (1 / (1 + P.gtox * Math.max(0, s.MG - 1.8))), 0.05, 6) * noise(),
+      cpep: p.gck ? 2.2 : clamp(3.2 * B / Math.sqrt(p.Si0) * (1 / (1 + P.gtox * (s.GT != null ? s.GT : Math.max(0, s.MG - 1.8)))), 0.05, 6) * noise(),
       sbp: s.sbp, eff: e
     };
   }
@@ -338,5 +368,5 @@
     return m;
   }
 
-  S.dt2 = { P, fpgOf, eqMG, replay, PROFILES, ETHNIC, GLP1, SGLT2, ALB, RETINO, RX0, MOTIV, SNACK, metDose, lifeAch, actNow, sodaNow, create, advance, measure, effects, glpFrac, beta, a1cOf, clamp };
+  S.dt2 = { P, fpgOf, eqMG, hospDay, replay, PROFILES, ETHNIC, GLP1, SGLT2, ALB, RETINO, RX0, MOTIV, SNACK, metDose, lifeAch, actNow, sodaNow, create, advance, measure, effects, glpFrac, beta, a1cOf, clamp };
 })();

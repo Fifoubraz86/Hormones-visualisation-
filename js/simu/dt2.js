@@ -28,7 +28,10 @@
   const SU = [0, 30, 60, 90, 120];
   const DPP4 = [0, 25, 50, 100];
   const ACARB = [0, 150, 300];
-  const Y = S.glyco, SFD = S.sfd;
+  const Y = S.glyco, SFD = S.sfd, H = S.dt2hosp;
+  // Type de la prochaine rencontre.
+  const MODES = [['consult', '🩺', 'Consultation'], ['tele', '📱', 'Téléconsultation'], ['hosp', '🏥', 'Hospitalisation']];
+  const MODE_OF = Object.fromEntries(MODES.map(([k, i, t]) => [k, { icon: i, label: t }]));
   const TESTS = [['a1c', 'HbA1c'], ['fpg', 'Glycémie à jeun'], ['carnet', 'Carnet glycémique'], ['agp', 'Rapport AGP (capteur)'], ['creat', 'Créatinine (DFG)'], ['alb', 'Albuminurie'], ['cpep', 'Peptide C'], ['gad', 'Anti-GAD'], ['cetone', 'Cétonémie'], ['lipase', 'Lipase'], ['fo', 'Fond d\'œil']];
   // Situations de départ : les étapes des arbres de la prise de position SFD 2025 (doses selon le poids).
   const STAGES = [
@@ -204,7 +207,7 @@
       titr: { who: onIns ? 'patient' : 'none', prof: c.age >= 75 && c.geria !== 'bonne' ? (c.geria === 'dependant' ? 'dep' : 'fra') : 'std', delai: 3, sfd10: false },
       cgm: false, asg: onIns ? '2' : r0.su > 0 ? 'w4' : '0', goal: null,
       ev: { metGI: null, glpGI: null, myco: null, sglt2Start: null, keto: false, panc: false, retinoDone: false, lactic: false, ketosis: -999, hyperosm: false, a1cHist: [], lastGlpChange: -999, sevSeen: 0, notes: [], ppr: null },
-      draft: Object.assign({}, r0, { metProg: true, wait: 12, unit: 'sem', tests: new Set(['a1c', 'fpg']), ppr: false })
+      draft: Object.assign({}, r0, { metProg: true, wait: 12, unit: 'sem', tests: new Set(['a1c', 'fpg']), ppr: false, mode: 'consult', hosp: Object.assign({}, H.DEFAULTS) })
     };
     G.titr.obj = JSON.parse(JSON.stringify(Y.PROTO[G.titr.prof])); G.titr.bolusCtl = 'next';
     G.draft.titr = JSON.parse(JSON.stringify(G.titr)); G.draft.cgm = G.cgm; G.draft.asg = G.asg; G.draft.goal = null;
@@ -407,7 +410,7 @@
     return '';
   }
 
-  function doLabs(tests, note, event) {
+  function doLabs(tests, note, event, extra) {
     const pt = G.pt;
     const m = D.measure(pt);
     const labs = {}, q = [];
@@ -443,7 +446,7 @@
     if (!toon && labs.a1c != null && labs.a1c < target && nHypo === 0 && !G.ev.trophy && G.history.length && G.history[0].labs.a1c >= target) { toon = 'trophy'; G.ev.trophy = true; }
     if (labs.a1c != null && labs.a1c > 8 && pt.rx.basal + pt.rx.rapid > 0) G.cgmAcquired = true;
     if ((pt.rx.basal > 0 ? 1 : 0) + (pt.rx.rapidM || []).filter((x) => x > 0).length >= 3) G.cgmAcquired = true;
-    G.history.push({ day: pt.day, labs, q, w: m.w, bmi: m.bmi, sbp: Math.round(m.sbp), symptoms: sy, rx: rxLabel(pt.rx), note, event: event || null, toon, caption: G.ev.caption || toon, banner: G.ev.banner || null, epitaphe: G.ev.epitaphe || null, carnet, agp, titr, T, a1cTrue: pt.st.A, ukg: pt.rx.basal / pt.st.W });
+    G.history.push(Object.assign({ day: pt.day, labs, q, w: m.w, bmi: m.bmi, sbp: Math.round(m.sbp), symptoms: sy, rx: rxLabel(pt.rx), note, event: event || null, toon, caption: G.ev.caption || toon, banner: G.ev.banner || null, epitaphe: G.ev.epitaphe || null, carnet, agp, titr, T, a1cTrue: pt.st.A, ukg: pt.rx.basal / pt.st.W, mode: 'consult' }, extra || {}));
     G.ev.eventToon = null; G.ev.toonNext = null; G.ev.banner = null; G.ev.epitaphe = null; G.ev.caption = null;
     G.visits.push({ day: pt.day, labs });
     G.lastHypo = pt.st.hypo;
@@ -513,7 +516,10 @@
     // Indication au capteur : acquise dès qu'elle a existé (insuline avec HbA1c > 8 %, ou ≥ 3 injections/j),
     // même si le capteur n'avait pas été prescrit ce jour-là ; elle ne se perd pas quand l'HbA1c baisse.
     if (d.basal + d.rapid > 0 && lastA1c() > 8) G.cgmAcquired = true;
-    const block = SFD.insulinInit(pt.rx, d, pt.st.W).concat(SFD.monitoring(d, d.asg, d.cgm, lastA1c(), G.cgmAcquired));
+    // Au sortir d'une hospitalisation, l'insuline a déjà été instaurée (pompe) : pas de règle d'initiation.
+    const lastE = G.history[G.history.length - 1];
+    const fromHosp = lastE && lastE.hosp ? { basal: lastE.hosp.relay.basal || 1, rapidM: lastE.hosp.relay.rapidM.map((u) => u || 1) } : null;
+    const block = SFD.insulinInit(fromHosp || pt.rx, d, pt.st.W).concat(SFD.monitoring(d, d.asg, d.cgm, lastA1c(), G.cgmAcquired));
     const onInsD = d.basal + d.rapid > 0;
     if (onInsD && d.titr.who !== 'none' && d.asg === '0' && !d.cgm) block.push('Titration de l\'insuline sans autosurveillance ni capteur : impossible ; il faut au moins la glycémie du réveil chaque jour.');
     if (onInsD && d.titr.who !== 'none' && d.rapid > 0 && d.titr.bolusCtl === 'pp' && d.asg !== '6' && !d.cgm) block.push('Bolus adaptés sur la glycémie post-prandiale : prescrire l\'autosurveillance 6 fois par jour (avant et 2 h après les repas) ou un capteur.');
@@ -543,7 +549,7 @@
     D.advance(pt, days, () => { recordDay(true); const e = daily(); if (e) { interrupt = e; return false; } return true; }, rng);
     // Doses atteintes par la titration : point de départ de la prochaine ordonnance.
     d.basal = pt.rx.basal; d.rapidM = pt.rx.rapidM.slice(); d.rapid = pt.rx.rapid;
-    let note = 'Bilan à ' + (d.unit === 'sem' ? d.wait + ' semaine' + (d.wait > 1 ? 's' : '') : days + ' jour' + (days > 1 ? 's' : ''));
+    let note = (d.mode === 'tele' ? 'Téléconsultation à ' : 'Consultation à ') + (d.unit === 'sem' ? d.wait + ' semaine' + (d.wait > 1 ? 's' : '') : days + ' jour' + (days > 1 ? 's' : ''));
     let tests = d.tests;
     if (interrupt) {
       note = interrupt.death ? 'Décès' : 'Consultation non programmée (bilan prévu annulé)';
@@ -558,13 +564,14 @@
     }
     // Sous capteur, le rapport AGP des 14 derniers jours est joint à chaque bilan.
     if (G.cgm) tests = new Set([...tests, 'agp']);
-    doLabs(tests, note, interrupt && interrupt.text);
+    G.view = null;
+    doLabs(tests, note, interrupt && interrupt.text, { mode: interrupt ? 'consult' : d.mode === 'tele' ? 'tele' : 'consult' });
     render();
     const res = main.querySelector('.sv-latest');
     if (res && window.innerWidth < 860) res.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  function undo() { const s = G.undo.pop(); if (!s) return; restore(s); G.dead = null; render(); }
+  function undo() { const s = G.undo.pop(); if (!s) return; restore(s); G.dead = null; G.view = null; render(); }
 
   /* ---------- Rendu ---------- */
   function render() {
@@ -574,7 +581,7 @@
     main.textContent = '';
     main.className = 'sv-main sv-game sv-sandbox';
     const left = h('aside', { class: 'sv-dossier' }, [patientCard(), G.dead ? deathCard() : rxCard()]);
-    const right = h('section', { class: 'sv-consult' }, [latestCard(), sfdCard(), chartCard(), marginCard(), historyCard(), treeCard(), guideCard(), factorsCard(), refCard(), effectsCard(), revealCard()]);
+    const right = h('section', { class: 'sv-consult' }, [journeyCard(), latestCard(), sfdCard(), chartCard(), marginCard(), historyCard(), treeCard(), guideCard(), factorsCard(), refCard(), effectsCard(), revealCard()]);
     main.append(left, right);
     const box = right.querySelector('.sv-chartbox');
     if (box) requestAnimationFrame(() => chart(box));
@@ -607,6 +614,7 @@
       jour: e.day, note: e.note, evenement: e.event, labo: Object.fromEntries(Object.entries(e.labs).map(([k, v]) => [k, r2(v)])), autres: e.q, poids: r2(e.w), pa: e.sbp,
       plaintes: e.symptoms, traitement: e.rx, titration: e.titr, cible: e.T && { max: e.T.max, plancher: e.T.floor, fixeeParLePrescripteur: !!e.T.chosen },
       carnet: e.carnet && e.carnet.map((x) => ({ jour: x.d, basale: x.basal, bolus: x.u, glycemies: Object.fromEntries(Object.entries(x.v).map(([k, v]) => [k, r2(v)])), remarques: x.rem })),
+      type: e.mode || 'consult', hospitalisation: e.hosp && { reglages: e.hosp.o, jours: e.hosp.days, hypoglycemies: e.hosp.hypos, relais: e.hosp.relay, controles: e.hosp.checks },
       agp: e.agp && { jours: e.agp.st.days, capturepc: r2(e.agp.st.capture), moyenne: r2(e.agp.st.mean), gmi: r2(e.agp.st.gmi), cv: r2(e.agp.st.cv), tirPc: r2(e.agp.st.tir), sous070Pc: r2(e.agp.st.low + e.agp.st.vlow), sous054Pc: r2(e.agp.st.vlow), sup180Pc: r2(e.agp.st.high + e.agp.st.vhigh), sup250Pc: r2(e.agp.st.vhigh), medianeParHeure: e.agp.st.prof.filter((q) => q.i % 4 === 0).map((q) => r2(q.p50)) }
     });
     return {
@@ -648,7 +656,10 @@
     const sel = (id, label, val, opts, on, rerender) => h('div', { class: 'sv-field' }, [h('label', { for: id }, label), h('select', { id, onchange: (e) => { on(e.target.value); if (rerender) re(); } }, opts.map(([k, t]) => h('option', { value: k, selected: String(val) === String(k) }, t)))]);
     const num = (id, label, val, on) => h('div', { class: 'sv-field' }, [h('label', { for: id }, label), h('span', { class: 'sv-numwrap' }, [h('input', { type: 'number', id, class: 'sv-num', value: val, min: 0, max: 300, step: 1, inputmode: 'numeric', oninput: (e) => on(Math.max(0, Math.round(parseFloat(e.target.value) || 0))) }), ' U/j'])]);
     const Gp = D.GLP1[d.glp];
+    const tabs = h('div', { class: 'sv-modes' }, [h('p', { class: 'sv-eyebrow' }, 'Prochaine étape'), h('div', { class: 'sv-tabs', role: 'tablist' }, MODES.map(([k, ic, t]) => h('button', { type: 'button', role: 'tab', id: 'dtMode-' + k, 'aria-selected': String(d.mode === k), class: 'sv-tab' + (d.mode === k ? ' on' : ''), onclick: () => { d.mode = k; re(); } }, [h('span', { class: 'sv-tab-ic', 'aria-hidden': 'true' }, ic), h('span', null, t)])))]);
+    if (d.mode === 'hosp') return h('div', { class: 'sv-card sv-ordo' }, [tabs, hospForm(d, re)]);
     return h('div', { class: 'sv-card sv-ordo' }, [
+      tabs,
       h('h3', null, 'Ordonnance'),
       h('h4', null, 'Règles hygiéno-diététiques'),
       h('div', { class: 'sv-form' }, [
@@ -672,14 +683,14 @@
       insulinBlock(d, re),
       h('h4', null, 'Objectif d\'HbA1c'),
       (() => { const T = SFD.target(G.cfg, G.pt.rx, G.pt.st.dfg); return h('div', { class: 'sv-form' }, [h('div', { class: 'sv-field' }, [h('label', { for: 'dtGoal' }, 'Fixé avec le patient'), h('select', { id: 'dtGoal', onchange: (e) => { d.goal = e.target.value === '' ? null : +e.target.value; } }, [['', 'Cible SFD 2025 calculée (≤ ' + fmt(T.max, 1) + ' %)']].concat([6.5, 7, 7.5, 8, 8.5, 9].map((x) => [x, '≤ ' + fmt(x, 1) + ' %'])).map(([k, v]) => h('option', { value: k, selected: String(d.goal == null ? '' : d.goal) === String(k) }, v)))])]); })(),
-      h('h3', null, 'Prochain bilan'),
+      h('h3', null, d.mode === 'tele' ? 'Prochaine téléconsultation' : 'Prochaine consultation'),
       h('div', { class: 'sv-inline' }, ['dans',
         h('input', { type: 'number', id: 'dtWait', class: 'sv-num', value: d.wait, min: 1, max: d.unit === 'sem' ? 156 : 1095, step: 1, inputmode: 'numeric', 'aria-label': 'Délai', oninput: (e) => { d.wait = parseFloat(e.target.value) || 0; } }),
         h('select', { id: 'dtUnit', 'aria-label': 'Unité', onchange: (e) => { d.unit = e.target.value; } }, [h('option', { value: 'sem', selected: d.unit === 'sem' }, 'semaines'), h('option', { value: 'j', selected: d.unit === 'j' }, 'jours')])
       ]),
       h('div', { class: 'sv-chips' }, TESTS.map(([k, t]) => h('label', { class: 'sv-chipcheck' }, [h('input', { type: 'checkbox', id: 'dtT' + k, checked: d.tests.has(k), onchange: (e) => { e.target.checked ? d.tests.add(k) : d.tests.delete(k); } }), ' ' + t]))),
       h('p', { class: 'sv-alert', hidden: true }),
-      h('div', { class: 'sv-actions' }, h('button', { type: 'button', class: 'sv-primary', onclick: submit }, 'Prescrire et voir le bilan →'))
+      h('div', { class: 'sv-actions' }, h('button', { type: 'button', class: 'sv-primary', onclick: submit }, d.mode === 'tele' ? 'Prescrire et voir la téléconsultation →' : 'Prescrire et voir le bilan →'))
     ]);
   }
 
@@ -769,21 +780,146 @@
     ]);
   }
 
+  /* ---------- Hospitalisation ---------- */
+  function hospForm(d, re) {
+    const o = d.hosp, pt = G.pt, W = pt.st.W;
+    const sel = (id, label, val, opts, on) => h('div', { class: 'sv-field' }, [h('label', { for: id }, label), h('select', { id, onchange: (e) => { on(e.target.value); } }, opts.map(([k, t]) => h('option', { value: k, selected: String(val) === String(k) }, t)))]);
+    const a1c = lastA1c();
+    return h('div', { class: 'sv-hospform' }, [
+      h('h3', null, 'Hospitalisation en diabétologie'),
+      h('p', { class: 'sv-muted' }, 'Insulinothérapie intensive transitoire par pompe (protocole du service) : débit de base contrôlé toutes les 4 h, augmenté de 20 à 30 % hors de la cible (− 20 % sous la cible, − 30 % et resucrage si hypoglycémie) ; bolus de départ par repas adaptés chaque jour selon le protocole d\'adaptation des doses. À la sortie, relais sous-cutané prérempli dans l\'ordonnance.'),
+      a1c >= 10 ? h('p', { class: 'sv-hospwhy' }, 'HbA1c ' + fmt(a1c, 1) + ' % : glucotoxicité probable (sécrétion et sensibilité à l\'insuline freinées). La pompe ramène la glycémie en 4 à 6 jours et lève la glucotoxicité en 2 à 3 semaines, ce que la titration ambulatoire fait en plusieurs mois (Weng 2008 ; Kramer 2013 ; avis d\'expert dans le DT2 ancien).') : h('p', { class: 'sv-muted' }, 'HbA1c ' + fmt(a1c, 1) + ' % : l\'hospitalisation se discute surtout au-delà de 10 %, en cas de catabolisme, ou après un échec de l\'intensification ambulatoire.'),
+      h('div', { class: 'sv-form' }, [
+        sel('dtHDays', 'Durée du séjour', o.days, [5, 7, 10, 14].map((x) => [x, x + ' jours']), (v) => { o.days = +v; }),
+        sel('dtHRate', 'Débit de base initial', o.rate0, [0.5, 0.8, 1, 1.2, 1.5].map((x) => [x, fmt(x, 1) + ' U/h (' + fmt(x * 24, 0) + ' U/24 h)']), (v) => { o.rate0 = +v; }),
+        sel('dtHIncr', 'Hausse si au-dessus de la cible (toutes les 4 h)', o.incr, [[0.2, '+ 20 %'], [0.25, '+ 25 %'], [0.3, '+ 30 %']], (v) => { o.incr = +v; }),
+        sel('dtHTarget', 'Cible glycémique', o.target, Object.entries(H.TARGETS).map(([k, [a, b]]) => [k, fmt(a, 2) + '–' + fmt(b, 2) + ' g/L' + (k === 'b' ? ' (service)' : '')]), (v) => { o.target = v; }),
+        sel('dtHBol', 'Bolus de départ', o.bolusKg, [[0.05, '0,05 U/kg/repas (' + Math.round(0.05 * W) + ' U)'], [0.1, '0,1 U/kg/repas (' + Math.round(0.1 * W) + ' U)'], [0.15, '0,15 U/kg/repas (' + Math.round(0.15 * W) + ' U)']], (v) => { o.bolusKg = +v; })
+      ]),
+      pt.rx.su ? h('label', { class: 'sv-check' }, [h('input', { type: 'checkbox', id: 'dtHSu', checked: o.stopSu, onchange: (e) => { o.stopSu = e.target.checked; } }), ' Arrêt du sulfamide à l\'entrée']) : null,
+      h('label', { class: 'sv-check' }, [h('input', { type: 'checkbox', id: 'dtHCgm', checked: o.cgm, onchange: (e) => { o.cgm = e.target.checked; } }), ' Pose d\'un capteur de glucose, gardé à la sortie (≥ 3 injections/j : remboursé)']),
+      h('div', { class: 'sv-actions' }, h('button', { type: 'button', class: 'sv-primary', id: 'dtHosp', onclick: hospitalise }, 'Hospitaliser →'))
+    ]);
+  }
+
+  function hospitalise() {
+    const d = G.draft, pt = G.pt, o = Object.assign({}, d.hosp);
+    G.undo.push(snapshot());
+    const start = pt.day;
+    G.history.push({ day: pt.day, prescription: true, rx: 'hospitalisation : pompe à insuline (' + fmt(o.rate0, 1) + ' U/h au départ)' });
+    G.visitStart = pt.day;
+    const r = H.run(pt, D, Y, o, G.seed);
+    const hosp = { start, o: r.o, lo: r.lo, hi: r.hi, hypos: r.hypos, relay: r.relay, W: r.W,
+      hours: r.hours.filter((x) => Math.abs(x.t % 0.5) < 1e-9).map((x) => ({ d: x.d, t: x.t, g: Math.round(x.g * 100) / 100, r: x.rate })),
+      checks: r.checks.map((c) => ({ d: c.d, t: c.t, label: c.label, g: Math.round(c.g * 100) / 100, rate: c.rate, newRate: c.newRate, act: c.act })),
+      days: r.days.map((x) => ({ d: x.d, mg: x.mg, min: x.min, max: x.max, basal24: x.basal24, bol: x.bol, hypo: x.hypo, bolLog: x.bolLog })) };
+    // Relais prérempli : basale = 80 % du débit de base des dernières 24 h, bolus atteints, protocole et capteur.
+    if (o.stopSu) { pt.rx.su = 0; d.su = 0; }
+    d.basal = r.relay.basal; d.rapidM = r.relay.rapidM.slice(); d.rapid = d.rapidM.reduce((a, x) => a + x, 0);
+    if (d.basalType === 'nph') d.basalType = 'g100';
+    if (d.titr.who === 'none') d.titr.who = 'patient';
+    if (o.cgm) { d.cgm = true; d.asg = '0'; G.cgmAcquired = true; }
+    d.mode = 'consult'; d.wait = 4; d.unit = 'sem';
+    G.glyDays = []; G.titrState = { above: {} }; G.cgmStart = pt.day;
+    G.lastHypo = pt.st.hypo; // hypoglycémies du séjour : dans le compte rendu, pas dans les plaintes
+    G.view = null;
+    doLabs(new Set(['a1c', 'fpg', 'creat']), 'Hospitalisation en diabétologie · ' + o.days + ' jours', null, { mode: 'hosp', hosp, hospStart: start });
+    render();
+  }
+
+  // Compte rendu d'hospitalisation : courbe glycémique du séjour, débit de base, bolus, tableau par jour.
+  function hospBlock(e) {
+    const x = e.hosp, W = x.W;
+    const first = x.days.findIndex((q) => q.mg < 1.4);
+    const last = x.days[x.days.length - 1];
+    const tot = Math.round(last.basal24 + last.bol.reduce((a, b) => a + b, 0));
+    return h('div', { class: 'sv-hosp' }, [
+      h('div', { class: 'sv-kpis' }, [
+        kpi('Séjour', x.o.days + ' j', 'J' + x.start + ' → J' + e.day),
+        kpi('Glycémie < 1,40 g/L', first >= 0 ? 'J' + (first + 1) : '—', 'moyenne du jour'),
+        kpi('Insuline à la sortie', tot + ' U/j', fmt(tot / W, 2) + ' U/kg/j'),
+        kpi('Hypoglycémies', String(x.hypos), x.hypos ? 'resucrées, débit baissé' : 'aucune', x.hypos > 2)
+      ]),
+      hospChart(x),
+      h('div', { class: 'sv-scroll' }, h('table', { class: 'sv-res sv-hosp-t' }, [
+        h('thead', null, h('tr', null, ['Jour', 'Débit de base', 'Bolus (P/D/D)', 'Glycémie moyenne', 'Min – max', 'Adaptation des bolus'].map((t) => h('th', null, t)))),
+        h('tbody', null, x.days.map((q) => h('tr', { class: q.hypo ? 'sv-row-low' : '' }, [h('td', null, 'J' + (q.d + 1)), h('td', { class: 'sv-v' }, fmt(q.basal24, 0) + ' U/24 h'), h('td', { class: 'sv-v' }, q.bol.join(' / ')), h('td', { class: 'sv-v' }, g2(q.mg)), h('td', { class: 'sv-v' }, fmt(q.min, 2) + ' – ' + fmt(q.max, 2)), h('td', null, (q.hypo ? '⚠ hypoglycémie · ' : '') + (q.bolLog && q.bolLog.length ? q.bolLog.join(', ') : '—'))])))
+      ])),
+      h('div', { class: 'sv-relay' }, [
+        h('h4', null, 'Relais sous-cutané (prérempli dans l\'ordonnance)'),
+        h('p', null, 'Basale ' + x.relay.basal + ' U/j (80 % du débit de base des dernières 24 h, ' + fmt(last.basal24, 0) + ' U) · bolus ' + x.relay.rapidM.join(' / ') + ' U' + (x.o.cgm ? ' · capteur de glucose' : '') + ' · protocole d\'adaptation des doses par le patient.'),
+        h('p', { class: 'sv-muted' }, 'La glucotoxicité finit de se lever dans les 2 à 3 semaines qui suivent : les besoins en insuline baissent, attention aux hypoglycémies (revoir à 2–4 semaines, en téléconsultation avec le rapport du capteur si possible).')
+      ])
+    ]);
+  }
+
+  function kpi(label, value, sub, warn) {
+    return h('div', { class: 'sv-kpi' + (warn ? ' warn' : '') }, [h('span', { class: 'sv-kpi-l' }, label), h('strong', { class: 'sv-kpi-v' }, value), h('span', { class: 'sv-kpi-s' }, sub)]);
+  }
+
+  function hospChart(x) {
+    const el = (tag, a, par) => { const n = document.createElementNS(NS, tag); for (const k in a) n.setAttribute(k, a[k]); if (par) par.appendChild(n); return n; };
+    const days = x.days.length, Wd = 720, L = 44, R = 10, top = 14, gh = 170, rt = 212, rh = 64;
+    const X = (d, t) => L + (Wd - L - R) * (d * 24 + t) / (days * 24);
+    const gmax = Math.max(3, ...x.hours.map((q) => q.g)), Yg = (g) => top + gh * (1 - (g - 0.4) / (gmax - 0.4));
+    const rmax = Math.max(2, ...x.hours.map((q) => q.r)) * 1.1, Yr = (r) => rt + rh * (1 - r / rmax);
+    const svg = el('svg', { viewBox: '0 0 ' + Wd + ' ' + (rt + rh + 26), class: 'sv-hosp-svg', role: 'img', 'aria-label': 'Glycémies et débit de la pompe pendant le séjour' });
+    el('rect', { x: L, y: Yg(x.hi), width: Wd - L - R, height: Yg(x.lo) - Yg(x.hi), class: 'hz-band' }, svg);
+    el('line', { x1: L, x2: Wd - R, y1: Yg(0.7), y2: Yg(0.7), class: 'hz-low' }, svg);
+    [0.7, 1, 1.8, 2.5].filter((g) => g < gmax).forEach((g) => { const t = el('text', { x: L - 6, y: Yg(g) + 4, class: 'hz-ax', 'text-anchor': 'end' }, svg); t.textContent = fmt(g, g % 1 ? 1 : 0); });
+    for (let d = 0; d <= days; d++) {
+      el('line', { x1: X(d, 0), x2: X(d, 0), y1: top, y2: rt + rh, class: 'hz-day' }, svg);
+      if (d < days) { const t = el('text', { x: X(d, 12), y: rt + rh + 18, class: 'hz-ax', 'text-anchor': 'middle' }, svg); t.textContent = 'J' + (d + 1); }
+    }
+    el('path', { d: x.hours.map((q, i) => (i ? 'L' : 'M') + X(q.d, q.t).toFixed(1) + ' ' + Yg(q.g).toFixed(1)).join(' '), class: 'hz-g' }, svg);
+    x.checks.forEach((c) => { const cl = c.g < 0.7 ? 'low' : c.g < x.lo ? 'under' : c.g > x.hi + (c.t === 15.5 || c.t === 23 ? 0.4 : 0) ? 'high' : 'ok'; const ci = el('circle', { cx: X(c.d, c.t), cy: Yg(c.g), r: 3.4, class: 'hz-ck ' + cl }, svg); const ti = el('title', {}, ci); ti.textContent = 'J' + (c.d + 1) + ' ' + c.label + ' : ' + fmt(c.g, 2) + ' g/L' + (c.act ? ' · ' + c.act : ''); });
+    let dr = ''; x.hours.forEach((q, i) => { dr += (i ? 'L' + X(q.d, q.t).toFixed(1) + ' ' + Yr(x.hours[i - 1].r).toFixed(1) + ' L' : 'M') + X(q.d, q.t).toFixed(1) + ' ' + Yr(q.r).toFixed(1) + ' '; });
+    el('path', { d: dr, class: 'hz-rate' }, svg);
+    x.days.forEach((q) => q.bol.forEach((u, m) => { const t0 = [7.5, 12.5, 19.5][m], bh = Math.min(rh, u * 1.6); el('rect', { x: X(q.d, t0) - 2, y: rt + rh - bh, width: 4, height: bh, class: 'hz-bol' }, svg); }));
+    const lab = (t, y, c) => { const n = el('text', { x: L + 4, y, class: 'hz-lab ' + c }, svg); n.textContent = t; };
+    lab('Glycémie (g/L) · cible ' + fmt(x.lo, 2) + '–' + fmt(x.hi, 2), top + 11, '');
+    lab('Débit de base (U/h, max ' + fmt(rmax / 1.1, 1) + ') · barres : bolus', rt + 10, '');
+    return h('div', { class: 'sv-hosp-chart' }, svg);
+  }
+
+  // Parcours : toutes les rencontres, cliquables.
+  function journeyCard() {
+    const list = G.history.filter((x) => !x.prescription);
+    const cur = G.view != null && list[G.view] ? G.view : list.length - 1;
+    const T = goalT();
+    return h('div', { class: 'sv-card sv-journey' }, [
+      h('p', { class: 'sv-eyebrow' }, 'Parcours du patient'),
+      h('div', { class: 'sv-jtrack' }, list.map((e, i) => {
+        const M = MODE_OF[e.mode] || MODE_OF.consult, a = e.labs.a1c;
+        return h('button', { type: 'button', class: 'sv-jitem sv-mode-' + (e.mode || 'consult') + (i === cur ? ' on' : '') + (e.event ? ' ev' : ''), 'aria-pressed': String(i === cur), title: (e.note || '') + (e.event ? ' · ' + e.event : ''), onclick: () => { G.view = i === list.length - 1 ? null : i; render(); } }, [
+          h('span', { class: 'sv-jic', 'aria-hidden': 'true' }, e.event ? '⚠' : M.icon),
+          h('span', { class: 'sv-jday' }, 'J' + e.day),
+          h('span', { class: 'sv-ja1c' + (a != null && a > T.max ? ' hi' : '') }, a != null ? fmt(a, 1) + ' %' : '—')
+        ]);
+      }))
+    ]);
+  }
+
   function latestCard() {
-    const e = [...G.history].reverse().find((x) => !x.prescription);
+    const list = G.history.filter((x) => !x.prescription);
+    const e = G.view != null && list[G.view] ? list[G.view] : list[list.length - 1];
+    const old = e !== list[list.length - 1];
+    const M = MODE_OF[e.mode] || MODE_OF.consult;
     const rows = [];
     const T = e.T;
     if (e.labs.a1c != null) rows.push(['HbA1c', fmt(e.labs.a1c, 1) + ' %', (T.chosen ? 'objectif fixé ≤ ' : 'cible ≤ ') + fmt(T.max, 1) + ' %' + (T.floor ? ', > ' + fmt(T.floor, 1) + ' %' : '') + (T.chosen ? '' : ' (SFD 2025)'), e.labs.a1c > T.max || (T.floor && e.labs.a1c < T.floor)]);
     if (e.labs.fpg != null) rows.push(['Glycémie à jeun', g2(e.labs.fpg), '0,70–1,10 g/L', e.labs.fpg > 1.26 || e.labs.fpg < 0.7]);
     if (e.labs.dfg != null) rows.push(['DFG (CKD-EPI)', fmt(e.labs.dfg, 0) + ' mL/min/1,73 m²', '> 60', e.labs.dfg < 60]);
     return h('div', { class: 'sv-card sv-latest' }, [
-      h('div', { class: 'sv-latest-head' }, [h('p', { class: 'sv-eyebrow' }, e.note || 'Bilan'), h('h1', null, dayLabel(e.day))]),
+      h('div', { class: 'sv-latest-head' }, [h('span', { class: 'sv-mode-ic sv-mode-' + (e.mode || 'consult'), 'aria-hidden': 'true' }, M.icon), h('div', null, [h('p', { class: 'sv-eyebrow' }, e.note || 'Bilan'), h('h1', null, e.hosp ? 'J' + e.hospStart + ' → ' + dayLabel(e.day) : dayLabel(e.day))])]),
+      old ? h('p', { class: 'sv-oldview' }, ['Rencontre antérieure. ', h('button', { type: 'button', class: 'sv-linkbtn', onclick: () => { G.view = null; render(); } }, 'Revenir à la dernière')]) : null,
+      e.hosp ? hospBlock(e) : null,
       e.event ? h('p', { class: 'sv-event' }, e.event) : null,
       e.banner ? h('p', { class: 'sv-banner' }, '⚠ ' + e.banner) : null,
       e.toon ? S.toon(e.toon, { epitaphe: e.epitaphe, titre: TOON_CAPTION[e.caption || e.toon] }) : null,
       rows.length ? h('table', { class: 'sv-res sv-big' }, [h('thead', null, h('tr', null, [h('th', null, 'Examen'), h('th', null, 'Résultat'), h('th', null, 'Référence')])), h('tbody', null, rows.map(([a, b, c2, flag]) => h('tr', null, [h('td', null, a), h('td', { class: 'sv-v' + (flag ? ' hi' : '') }, b), h('td', { class: 'sv-ref' }, c2)])))]) : null,
       e.q.length ? h('dl', { class: 'sv-exam sv-qual' }, e.q.flatMap(([k, v]) => [h('dt', null, k), h('dd', null, v)])) : null,
-      h('p', { class: 'sv-clin' }, 'Poids ' + fmt(e.w, 1) + ' kg (IMC ' + fmt(e.bmi, 1) + ') · PA ' + e.sbp + ' mmHg · ' + (e.symptoms.length ? e.symptoms.join(' ; ') : 'pas de plainte particulière') + '.'),
+      h('p', { class: 'sv-clin' }, (e.mode === 'tele' ? 'Téléconsultation (vidéo) : poids déclaré ' + fmt(Math.round(e.w), 0) + ' kg, pas d\'examen clinique, PA non mesurée · ' : 'Poids ' + fmt(e.w, 1) + ' kg (IMC ' + fmt(e.bmi, 1) + ') · PA ' + e.sbp + ' mmHg · ') + (e.symptoms.length ? e.symptoms.join(' ; ') : 'pas de plainte particulière') + '.'),
       e.titr ? h('p', { class: 'sv-titr' }, '↻ ' + e.titr) : null,
       e.agp ? agpBlock(e) : null,
       e.carnet ? carnetBlock(e) : null,
