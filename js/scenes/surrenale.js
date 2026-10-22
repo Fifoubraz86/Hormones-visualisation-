@@ -165,7 +165,8 @@
     };
     // Méthyles angulaires C19 et C18
     bonds.push([10, [0.866, -1.4]]);
-    if (m.c18) { bonds.push([13, [3.464, -2.85]]); labels.push([3.33, -2.78, 'OHC', 'end']); } else bonds.push([13, [3.464, -2.9]]);
+    // Aldostérone : aldéhyde porté par C18 (méthyle de C13), étiquette au bout de la liaison, au-dessus du cycle C
+    if (m.c18) { bonds.push([13, [3.0, -2.75]]); labels.push([2.98, -2.95, 'OHC', 'end']); } else bonds.push([13, [3.464, -2.9]]);
     // Carbone 3
     if (m.c3 === 'O') { exo(3, [-1.6, 0.95]); labels.push([-1.83, 1.24, 'O', 'middle']); }
     else { bonds.push([3, [-1.6, 0.95]]); labels.push([-1.62, 1.28, m.c3 === 'OS' ? '⁻O₃SO' : 'HO', 'end']); }
@@ -270,7 +271,7 @@
         const m = MOL[id];
         const L = id === 'chol' ? 11.5 : 13.2;
         const mg = drawSteroid(a, ng, m, L);
-        mg.setAttribute('transform', `translate(${(-w / 2 + (id === 'chol' ? 44 : 50)).toFixed(0)} ${(h / 2 - 22).toFixed(0)})`);
+        mg.setAttribute('transform', `translate(${(-w / 2 + (id === 'chol' ? 44 : id === 'dheas' ? 64 : 50)).toFixed(0)} ${(h / 2 - 22).toFixed(0)})`);
         const tx = -w / 2 + (id === 'chol' ? 150 : 152);
         a.text(tx, -h / 2 + 26, name, 'sr-name' + (name.length > 17 ? ' sr-name-s' : ''), null, ng);
         a.text(tx, -h / 2 + 46, m.f, 'sr-formula', null, ng);
