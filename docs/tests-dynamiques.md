@@ -20,6 +20,7 @@ Chaque test se lance depuis la carte « Tests dynamiques » du panneau, sur le s
 | Glycémie | HGPO à 75 g (P) | sain, intolérance (curseurs) ; non indiquée quand la glycémie à jeun est déjà ≥ 1,26 g/L (DT2, DT1) |
 | Glycémie | Épreuve de jeûne de 72 h | sain, insulinome (non indiquée chez le diabétique traité) |
 | Posthypophyse | Restriction hydrique + desmopressine (P ; desmopressine en complément) | sain, diabète insipide central, néphrogénique ; SIADH : restriction partielle, sans desmopressine, correction lente |
+| Posthypophyse | Charge en eau, marche dans le désert (situations physiologiques, complément) | sain, diabète insipide, SIADH |
 
 ## Axe corticotrope et corticosurrénale
 
@@ -69,8 +70,8 @@ Chaque test se lance depuis la carte « Tests dynamiques » du panneau, sur le s
 
 | Test | Principe | Ce que l'on cherche | Réponse normale / pathologique |
 | --- | --- | --- | --- |
-| **Prolactine au repos** (P) | Prélèvement sans stress, après avoir écarté grossesse et médicaments | Hyperprolactinémie | > 200 ng/mL : macroadénome. < 200 avec tumeur volumineuse : déconnexion |
-| **Recherche de macroprolactine** (P) | Précipitation au PEG | Fausse hyperprolactinémie (big-big prolactine) | Macroprolactinémie : sans conséquence clinique |
+| **Prolactine au repos** (P) | Prélèvement sans stress, après avoir écarté grossesse et médicaments | Hyperprolactinémie | Avec une IRM compatible : < 100 ng/mL plutôt microadénome ; > 200 ng/mL : macroadénome ; < 200 avec tumeur supracentimétrique : déconnexion (P1 p. 56) |
+| **Recherche de macroprolactine** (P) | Précipitation au PEG (complément) | Fausse hyperprolactinémie (big-big prolactine) | Macroprolactinémie : sans conséquence clinique |
 | Test au TRH | Historique | Ancienne exploration lactotrope et thyréotrope | Quasi abandonné |
 
 ## Axe gonadotrope
@@ -91,7 +92,7 @@ Chaque test se lance depuis la carte « Tests dynamiques » du panneau, sur le s
 | --- | --- | --- | --- |
 | **Épreuve de restriction hydrique** (P) | Arrêt des boissons en milieu hospitalier ; poids, diurèse, osmolalités, natrémie (après imagerie) | Diabète insipide | Normal : urines concentrées (> 600 mosmol/kg, complément). Diabète insipide : diurèse qui baisse insuffisamment, urines non concentrées. Dans le SIADH (P), la restriction (partielle, 500 à 800 mL/j, complément) est aussi le traitement, sans desmopressine, avec une correction ≤ 8 à 10 mmol/L par 24 h (complément) |
 | Test à la desmopressine | En fin de restriction | Distinguer DI central et néphrogénique | Concentration des urines : central. Pas de réponse : néphrogénique |
-| Copeptine stimulée (sérum salé hypertonique ou arginine) | Copeptine, marqueur stable de l'ADH | Diabète insipide et polydipsie primaire | Copeptine de base > 21,4 pmol/L : DI néphrogénique. Après sérum salé hypertonique (natrémie ≥ 150 mmol/L), copeptine > 4,9 pmol/L : polydipsie primaire, ≤ 4,9 : DI central (Fenske, NEJM 2018). Après arginine, ≤ 3,8 pmol/L : DI central (Winzeler, Lancet 2019). Complément |
+| Copeptine stimulée (sérum salé hypertonique ou arginine) | Copeptine, marqueur stable de l'ADH | Diabète insipide et polydipsie primaire | Copeptine de base > 21,4 pmol/L, sans restriction préalable : DI néphrogénique (Timper, JCEM 2015). Après sérum salé hypertonique (natrémie ≥ 150 mmol/L), copeptine > 4,9 pmol/L : polydipsie primaire, ≤ 4,9 : DI central (Fenske, NEJM 2018). Après arginine, ≤ 3,8 pmol/L : DI central (Winzeler, Lancet 2019). Complément |
 
 ## Métabolisme phosphocalcique
 

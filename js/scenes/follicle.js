@@ -15,8 +15,8 @@
     level: 'Organe',
     lead: 'Le thyréocyte capte l\'iodure, l\'incorpore à la thyroglobuline dans la colloïde, puis libère T4 et T3 après protéolyse. Les étapes sont numérotées dans l\'ordre de la synthèse.',
     points: [
-      'La TSH, via son récepteur couplé à Gs et l\'AMPc, stimule chaque étape ainsi que la croissance de la glande.',
-      'Le NIS est inhibé par le perchlorate. La TPO est inhibée par les antithyroïdiens de synthèse (carbimazole, PTU).',
+      'La TSH stimule chaque étape ainsi que la croissance de la glande (polycopié p. 7), via son récepteur couplé à Gs et l\'AMPc (complément).',
+      'Le NIS est inhibé par le perchlorate. La TPO est inhibée par les antithyroïdiens de synthèse (carbimazole, PTU) (complément).',
       'Dans la maladie de Basedow, les TRAb activent le récepteur de la TSH. Dans la thyroïdite de Hashimoto, la glande est détruite (anti-TPO).',
       'En carence iodée, la thyroïde augmente de volume (goitre) et privilégie la T3, moins coûteuse en iode (complément).'
     ],

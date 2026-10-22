@@ -298,7 +298,7 @@
         keepAlive(dt);
         const s = S(), p = P();
         const occ = clamp(s.ins / 3, 0, 1);
-        sig = clamp((s.ins * p.sens) / 3, 0, 1);
+        sig = clamp((s.ins * p.sens) / 1.3, 0, 1);
         const n = Math.round(1 + sig * (NG - 1) * 1.05);
         const k1 = dt > 0 ? 1 - Math.exp(-dt * 2.2) : 1;
         vesicles.forEach((V, k) => {
@@ -470,13 +470,13 @@
           keto = [0.02, 0.05, 0.25, 0.55, 1][k];
         } else {
           const eff = s.ins * p.sens;
-          const fed = clamp((eff - 1.1) / 1.5, 0, 1);
+          const fed = clamp((eff - 0.85) / 0.3, 0, 1); // calé sur l'insuline post-prandiale du modèle (sujet sain)
           const target = p.long > 0.3 ? 0.05 : fed > 0.2 ? 1 : 0.1;
           const rate = fed > 0.2 ? 0.25 : 0.045 + 0.2 * p.long;
           if (dt > 0) gly += (target - gly) * (1 - Math.exp(-dt * rate));
           act.ins = s.ins; act.glu = s.glu;
           keto = clamp(s.ket / 2.5, 0, 1);
-          ph = eff < 0.3 && (s.ket > 1.2 || (s.g > 1.6 && p.fast < 0.02)) ? 4 : fed > 0.35 ? 0 : (p.long > 0.3 || s.ket > 0.4) ? 3 : gly > 0.45 ? 1 : 2;
+          ph = eff < 0.3 && s.ket > 0.6 ? 4 : fed > 0.35 ? 0 : (p.long > 0.3 || s.ket > 0.4) ? 3 : gly > 0.45 ? 1 : 2;
         }
         const fed = ph === 0 ? 1 : 0;
         const fast = 1 - fed;

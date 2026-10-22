@@ -11,14 +11,14 @@
 
   HV.ORGAN_SHEETS = {
     thyroid: { title: 'Thyroïde', cls: 'Glande endocrine', organ: 'thyroidSmall', rows: [
-      ['Situation', 'Base du cou, en avant de la trachée, sous le cartilage cricoïde ; monte à la déglutition'],
+      ['Situation', 'Base du cou, en avant de la trachée, sous le cartilage cricoïde (complément) ; monte à la déglutition'],
       ['Forme', 'Deux lobes latéraux réunis par un isthme, parfois une pyramide de Lalouette (vestige embryonnaire)'],
       ['Poids', '15 à 20 g chez l\'adulte (complément)'],
       ['Vascularisation', 'Artères thyroïdiennes supérieures (carotide externe) et inférieures (tronc thyro-cervical) (complément)'],
-      ['Rapports', 'Parathyroïdes à la face postérieure ; nerfs laryngés récurrents, carotides et jugulaires en dehors (complément)'],
+      ['Rapports', 'Parathyroïdes à la face postérieure ; nerfs laryngés récurrents en arrière et en dedans (angle trachéo-œsophagien) ; carotides et jugulaires en dehors (complément)'],
       ['Histologie', 'Follicules (thyréocytes autour de la colloïde) ; cellules C parafolliculaires (calcitonine)'],
       ['Hormones', 'T4 (réserve, exclusivement thyroïdienne), T3 (25 % de la T3 circulante), calcitonine'],
-      ['Sémiologie', 'Palpation : volume, consistance, nodules, souffle (Basedow) ; un goitre déborde le cou ou plonge dans le médiastin']
+      ['Sémiologie', 'Palpation : volume, consistance, nodules, souffle (Basedow). Goitre : surface de chaque lobe > dernière phalange du pouce (OMS) ; à l\'échographie, volume > 16 mL (adolescent), > 18 mL (femme), > 20 mL (homme) ; parfois plongeant (polycopié p. 11-13)']
     ], imaging: ['thyroid-echo', 'thyroid-scinti', 'thyroid-histo'],
     figs: [fig(1, 6, '1', 'Histologie normale de la thyroïde'), fig(1, 8, '3', 'Synthèse des hormones thyroïdiennes'), fig(1, 12, '4', 'Goitre thyroïdien'), fig(1, 13, '5', 'Scanner cervico-thoracique d\'un goitre'), fig(1, 15, '6', 'Échographie thyroïdienne normale'), fig(1, 16, '7A', 'Aspects échographiques de nodules thyroïdiens'), fig(1, 17, '7B–7C', 'Aspects échographiques de nodules thyroïdiens'), fig(1, 18, '7D', 'Aspects échographiques de nodules thyroïdiens'), fig(1, 27, '8', 'Orbitopathie basedowienne'), fig(1, 29, '9A', 'Scintigraphie : nodule toxique'), fig(1, 29, '9B', 'Scintigraphie : maladie de Basedow')],
     links: [rp('thyroid ultrasound'), rp('toxic adenoma thyroid'), wc('thyroid histology')] },
@@ -50,7 +50,7 @@
 
     hypothalamus: { title: 'Hypothalamus', cls: 'Centre neuro-endocrine', organ: 'hypothalamusIcon', rows: [
       ['Situation', 'Plancher et parois du 3ᵉ ventricule, sous le thalamus, au-dessus de l\'hypophyse'],
-      ['Noyaux', 'Paraventriculaire (TRH, CRH, ADH, ocytocine), supraoptique (ADH, ocytocine) ; arqué (GHRH, dopamine, kisspeptine), aire préoptique (GnRH) : complément'],
+      ['Noyaux', 'Supraoptique et paraventriculaire : ADH, ocytocine (polycopié p. 47) ; paraventriculaire : TRH, CRH ; arqué : GHRH, dopamine, kisspeptine ; périventriculaire : somatostatine ; aire préoptique : GnRH (complément)'],
       ['Éminence médiane', 'Hors barrière hématoencéphalique : libération des facteurs dans le plexus porte'],
       ['Intégration', 'Température, faim et satiété (leptine), stress, rythmes circadiens, osmolalité'],
       ['Pathologie', 'Craniopharyngiome, hypophysite, gliome, pathologies infiltratives ; aménorrhée hypothalamique']
@@ -100,8 +100,8 @@
     links: [rp('Klinefelter syndrome'), wc('testis histology')] },
 
     kidney: { title: 'Rein', cls: 'Organe cible et endocrine', organ: 'kidney', rows: [
-      ['Fonctions endocrines', 'Rénine (appareil juxtaglomérulaire), 1α-hydroxylation de la vitamine D, érythropoïétine'],
-      ['Cible', 'ADH (V2, tubule rénal), aldostérone (tube distal, canal collecteur), PTH (tube proximal : 1α-hydroxylation de la 25-OH-vitamine D, phosphaturie en complément ; anse de Henlé et tube distal : réabsorption du calcium)'],
+      ['Fonctions endocrines', 'Rénine (appareil juxtaglomérulaire), 1α-hydroxylation de la vitamine D, érythropoïétine (complément)'],
+      ['Cible', 'ADH (V2, tubule rénal), aldostérone (tube distal, canal collecteur), PTH (tube proximal : 1α-hydroxylation de la 25-OH-vitamine D, phosphaturie (P1 p. 41) ; anse de Henlé et tube distal : réabsorption du calcium)'],
       ['Calcium', '65 % réabsorbés au tube proximal, 25 % dans l\'anse de Henlé, complément au tube distal'],
       ['Glucose', 'Réabsorbé par SGLT2 au tube proximal ; glycosurie au-delà de ≈ 1,80 g/L']
     ], imaging: [], figs: [fig(1, 37, '12', 'Principaux mécanismes de régulation de la calcémie'), fig(1, 75, '29', 'Action de l\'aldostérone'), fig(2, 46, '48', 'Néphropathie diabétique')], links: [] },
@@ -113,14 +113,14 @@
       ['Lipides', 'VLDL, HDL naissantes, captation des LDL (70 % des récepteurs), acides biliaires']
     ], imaging: [], figs: [fig(2, 19, '39', 'Métabolisme des lipides'), fig(2, 21, '40', 'Arc cornéen'), fig(2, 22, '41–43', 'Xanthélasma, xanthomes tendineux'), fig(2, 23, '44', 'Xanthome tubéreux')], links: [] },
 
-    bone: { title: 'Os', cls: 'Organe cible', organ: 'bone', rows: [['Réservoir', '99 % du calcium de l\'organisme'], ['Hormones', 'PTH (ostéocytes, résorption), calcitriol, calcitonine, T3 (remodelage), œstrogènes et testostérone (masse osseuse), GH et IGF-1 (croissance)']], imaging: [], figs: [fig(1, 36, '11', 'Bilan du calcium')], links: [] },
+    bone: { title: 'Os', cls: 'Organe cible', organ: 'bone', rows: [['Réservoir', '99 % du calcium de l\'organisme (complément)'], ['Hormones', 'PTH (ostéocytes, résorption), calcitriol, calcitonine, T3 (remodelage), œstrogènes et testostérone (masse osseuse), GH et IGF-1 (croissance)']], imaging: [], figs: [fig(1, 36, '11', 'Bilan du calcium')], links: [] },
     muscle: { title: 'Muscle squelettique', cls: 'Organe cible', organ: 'muscle', rows: [['Hormones', 'Insuline (GLUT4), T3 (thermogenèse), cortisol (catabolisme), testostérone et GH (anabolisme)'], ['Sémiologie', 'Amyotrophie proximale (Cushing, hyperthyroïdie), crampes (hypothyroïdie, hypocalcémie)']], imaging: [], figs: [], links: [] },
     fat: { title: 'Tissu adipeux', cls: 'Organe cible et endocrine', organ: 'fat', rows: [['Hormones produites', 'Leptine (effet permissif sur la GnRH), aromatisation des androgènes'], ['Cible', 'Insuline (stockage, frein de la lipolyse), cortisol (répartition facio-tronculaire), catécholamines, T3']], imaging: [], figs: [], links: [] },
     heart: { title: 'Cœur', cls: 'Organe cible', organ: 'heart', rows: [['Hormones thyroïdiennes', 'Effets chronotrope, inotrope, dromotrope ; fibrillation atriale dans l\'hyperthyroïdie'], ['Catécholamines', 'Tachycardie, hypertension'], ['Calcium', 'QT allongé dans l\'hypocalcémie']], imaging: [], figs: [fig(1, 45, '16', 'QT long de l\'hypocalcémie')], links: [] },
     brain: { title: 'Encéphale', cls: 'Organe cible', organ: 'brainLateral', rows: [['Hormones thyroïdiennes', 'Développement et maturation du système nerveux, myélinisation'], ['Glucose', 'Principal consommateur : neuroglucopénie en cas d\'hypoglycémie'], ['Sodium', 'Œdème cérébral et confusion dans les hyponatrémies sévères']], imaging: [], figs: [], links: [] },
     breast: { title: 'Glande mammaire', cls: 'Organe cible', organ: 'breast', rows: [['Hormones', 'Œstrogènes (canaux) et progestérone (acini) (complément), prolactine (lactation), ocytocine (éjection, complément)'], ['Sémiologie', 'Galactorrhée (hyperprolactinémie), gynécomastie chez l\'homme']], imaging: [], figs: [fig(1, 56, '20', 'Gynécomastie bilatérale')], links: [] },
     uterus: { title: 'Utérus', cls: 'Organe cible', organ: 'uterus', rows: [['Endomètre', 'Prolifératif sous estradiol, sécrétoire sous progestérone'], ['Myomètre', 'Contractilité augmentée par l\'estradiol et l\'ocytocine, diminuée par la progestérone']], imaging: [], figs: [fig(2, 6, '35', 'Cycle menstruel')], links: [] },
-    intestine: { title: 'Intestin', cls: 'Organe cible et endocrine', organ: 'intestine', rows: [['Calcium', 'Absorption active (calcitriol) et passive ; 30 à 35 % des apports absorbés'], ['Glucose et lipides', 'Absorption ; chylomicrons'], ['Hormones produites', 'Incrétines (GLP-1, GIP), ghréline (estomac)']], imaging: [], figs: [fig(1, 36, '11', 'Bilan du calcium')], links: [] },
+    intestine: { title: 'Intestin', cls: 'Organe cible et endocrine', organ: 'intestine', rows: [['Calcium', 'Absorption active (calcitriol) et passive ; 30 à 35 % des apports absorbés'], ['Glucose et lipides', 'Absorption ; chylomicrons'], ['Hormones produites', 'Incrétines (GLP-1, GIP), ghréline (estomac) (complément)']], imaging: [], figs: [fig(1, 36, '11', 'Bilan du calcium')], links: [] },
     lungs: { title: 'Poumons', cls: 'Organe', organ: 'lungs', rows: [['Endocrinologie', 'Enzyme de conversion de l\'angiotensine (endothélium pulmonaire) ; tumeurs neuroendocrines bronchiques (ACTH ectopique, SIADH)']], imaging: [], figs: [], links: [] }
   };
 

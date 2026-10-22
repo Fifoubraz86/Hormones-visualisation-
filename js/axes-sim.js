@@ -79,7 +79,9 @@
       // Trophicité du cortex : s'atrophie lentement sans ACTH (insuffisance corticotrope, corticothérapie).
       // Elle évolue sur des jours : elle reste figée pendant un test dynamique (60 min à 48 h).
       const testing = p.syn > 0 || p.dxm > 0 || p.ith > 0;
-      const troph = testing ? s.troph : clamp(pw(Math.max(acth, 0.01), 0.8), 0.15, 1.6);
+      // Privation prolongée d'ACTH : atrophie suffisante pour que le Synacthène ne donne plus de réponse normale
+      // (polycopié p. 61 et 85).
+      const troph = testing ? s.troph : clamp(pw(Math.max(acth, 0.01), 1.3), 0.08, 1.6);
       // Réponse surrénalienne saturable ; le Synacthène (ACTH 1-24) s'ajoute à l'ACTH endogène.
       const drive = Math.max(acth, 0) + p.syn;
       // Bloc en 21-hydroxylase (HCS, figure 26) : le cortisol baisse, l'ACTH monte et la 17-OHP accumulée
@@ -119,11 +121,11 @@
       { id: 'eu', name: 'Axe normal', note: 'Cortisol élevé le matin, bas le soir.', p: {} },
       { id: 'cushing', name: 'Maladie de Cushing', note: 'Adénome corticotrope : ACTH normale ou élevée, cortisol élevé, rythme aboli.', p: { autoPit: 2.3 } },
       { id: 'adeno', name: 'Adénome surrénalien cortisolique', note: 'Cushing ACTH-indépendant : ACTH effondrée, cortisol élevé non freinable.', p: { autoAdr: 1.6 } },
-      { id: 'ecto', name: 'Sécrétion ectopique d\'ACTH', note: 'Tumeur (bronches, pancréas…) : ACTH et cortisol très élevés.', p: { ecto: 5 } },
+      { id: 'ecto', name: 'Sécrétion ectopique d\'ACTH', note: 'Tumeur (bronches, pancréas…) : ACTH et cortisol très élevés.', p: { ecto: 7 } },
       { id: 'addison', name: 'Insuffisance surrénale périphérique', note: 'Cortisol bas, ACTH très élevée (mélanodermie par excès de POMC/α-MSH).', p: { adr: 0.06 } },
       { id: 'corticotrope', name: 'Insuffisance corticotrope', note: 'Atteinte hypophysaire : cortisol bas avec ACTH basse ou normale.', p: { pit: 0.03 } },
       { id: 'hcs', name: 'Bloc en 21-hydroxylase, forme classique', note: 'HCS (CYP21A2, 95 % des cas) : cortisol bas, ACTH élevée, 17-OHP très élevée, androgènes surrénaliens en excès ; perte de sel possible (aldostérone non simulée ici). Dépistage néonatal à J3 (17-OHP).', p: { cyp21: 0.03 } },
-      { id: 'hcsnc', name: 'Bloc en 21-hydroxylase, forme non classique', note: 'L\'ACTH compense : cortisol conservé, 17-OHP et androgènes modérément élevés ; 17-OHP de base ou après test au Synacthène.', p: { cyp21: 0.4 } },
+      { id: 'hcsnc', name: 'Bloc en 21-hydroxylase, forme non classique', note: 'Cortisol conservé avec une ACTH normale ou discrètement augmentée ; 17-OHP et androgènes modérément élevés ; 17-OHP de base ou après test au Synacthène (polycopié p. 82).', p: { cyp21: 0.4 } },
       { id: 'cortico', name: 'Corticothérapie prolongée', note: 'Les corticoïdes freinent l\'axe : ACTH et cortisol endogène bas, risque d\'insuffisance surrénale à l\'arrêt (complément).', p: { exo: 1.6 } }
     ],
     interpret(s, p, L) {
@@ -131,7 +133,7 @@
       // Hyperplasie congénitale des surrénales (polycopié p. 80–82, figure 26).
       if (oh > 3 && p.cyp21 < 0.9) {
         if (c < 275) return { tone: 'bad', label: 'Bloc en 21-hydroxylase, forme classique', text: 'Cortisol bas, ACTH élevée, 17-OHP très élevée et androgènes surrénaliens en excès : hyperplasie congénitale des surrénales. Fille : virilisation des organes génitaux externes ; perte de sel (hyponatrémie, hyperkaliémie, déshydratation) si l\'aldostérone est aussi touchée. Dépistage néonatal : 17-OHP à J3.' };
-        return { tone: 'warn', label: 'Bloc en 21-hydroxylase, forme non classique', text: 'Cortisol maintenu au prix d\'une ACTH élevée ; 17-OHP et androgènes surrénaliens augmentés : pubarche précoce, âge osseux avancé, hyperandrogénie de l\'adolescente (acné, hirsutisme, troubles des règles). Diagnostic : 17-OHP de base ou après test au Synacthène.' };
+        return { tone: 'warn', label: 'Bloc en 21-hydroxylase, forme non classique', text: 'Cortisol conservé, ACTH normale ou discrètement augmentée ; 17-OHP et androgènes surrénaliens augmentés : pubarche précoce, âge osseux avancé, hyperandrogénie de l\'adolescente (acné, hirsutisme, troubles des règles). Diagnostic : 17-OHP de base ou après test au Synacthène.' };
       }
       // Cortisol à 8 h (polycopié) : < 5 µg/dL (≈ 138 nmol/L) très évocateur d'insuffisance surrénale,
       // > 18 µg/dL (500 nmol/L) l'exclut ; entre les deux, zone grise : test au Synacthène.
@@ -388,11 +390,11 @@
     tau: { A: 0.4, N: 0.8, D: 0.8 },
     targets(p, s, T) {
       const parox = 0.35 + 1.65 * G(T.h % 6, 1.2, 0.35); // paroxysmes
-      return { A: p.sym + 3 * p.pheoA * parox, N: p.sym + 2.4 * p.pheoN * (0.7 + 0.3 * parox), D: 1 + 3 * p.pheoD };
+      return { A: p.sym + 3 * p.pheoA * parox, N: p.sym + 2.4 * (p.pheoN + 0.4 * p.pheoA) * (0.7 + 0.3 * parox), D: 1 + 3 * p.pheoD };
     },
     labs: [
       { key: 'mn', name: 'Métanéphrine', unit: '× limite sup.', range: '< 1 × LSN', lo: 0, hi: 1, min: 0, max: 15, dec: 1, fn: (s, p) => 0.45 * p.sym + 2.4 * p.pheoA },
-      { key: 'nmn', name: 'Normétanéphrine', unit: '× limite sup.', range: '< 1 × LSN', lo: 0, hi: 1, min: 0, max: 15, dec: 1, fn: (s, p) => 0.45 * p.sym + 2.4 * p.pheoN },
+      { key: 'nmn', name: 'Normétanéphrine', unit: '× limite sup.', range: '< 1 × LSN', lo: 0, hi: 1, min: 0, max: 15, dec: 1, fn: (s, p) => 0.45 * p.sym + 2.4 * (p.pheoN + 0.4 * p.pheoA) },
       { key: 'mt', name: '3-méthoxytyramine', unit: '× limite sup.', range: '< 1 × LSN', lo: 0, hi: 1, min: 0, max: 15, dec: 1, fn: (s, p) => 0.5 + 2.4 * p.pheoD },
       { key: 'fc', name: 'Fréquence cardiaque', unit: '/min', range: '60–100 /min (indicatif, complément)', lo: 60, hi: 100, min: 40, max: 180, dec: 0, fn: (s) => clamp(70 + 22 * ln(Math.max(s.A, 0.2)) + 6 * ln(Math.max(s.N, 0.2)), 45, 170) },
       { key: 'pas', name: 'PA systolique', unit: 'mmHg', range: '100–140 mmHg (indicatif, complément)', lo: 100, hi: 140, min: 80, max: 260, dec: 0, fn: (s) => clamp(120 + 10 * ln(Math.max(s.A, 0.2)) + 22 * ln(Math.max(s.N, 0.2)), 85, 250) },
@@ -407,7 +409,7 @@
     scenarios: [
       { id: 'eu', name: 'Repos', note: 'Faible sécrétion basale.', p: {} },
       { id: 'stress', name: 'Stress aigu', note: 'Réaction de combat ou de fuite : FC et PA ↑, glycémie ↑ ; métanéphrines au plus discrètement augmentées.', p: { sym: 3 } },
-      { id: 'pheoA', name: 'Phéochromocytome à adrénaline', note: 'Triade de Ménard (céphalées, sueurs, palpitations), HTA généralement permanente avec parfois des crises paroxystiques ; profil adrénergique (complément) : tachycardie, hyperglycémie, métanéphrine très élevée.', p: { pheoA: 2.6 } },
+      { id: 'pheoA', name: 'Phéochromocytome à adrénaline', note: 'Triade de Ménard (céphalées, sueurs, palpitations), HTA généralement permanente avec parfois des crises paroxystiques ; profil adrénergique (complément) : tachycardie, hyperglycémie, métanéphrine très élevée, normétanéphrine souvent aussi augmentée (sécrétion mixte).', p: { pheoA: 2.6 } },
       { id: 'pheoN', name: 'Phéochromocytome à noradrénaline', note: 'Profil noradrénergique : HTA plus permanente, moins de tachycardie ; normétanéphrine très élevée. Profil aussi des paragangliomes (complément).', p: { pheoN: 2.6 } },
       { id: 'pheoD', name: 'Tumeur à dopamine', note: 'Rare, surtout paragangliome (souvent SDHB, risque de malignité) : peu ou pas d\'HTA ; 3-méthoxytyramine élevée (complément).', p: { pheoD: 2.6 } }
     ],
@@ -415,15 +417,15 @@
       const mn = L('mn'), nmn = L('nmn'), mt = L('mt'), top = Math.max(mn, nmn, mt);
       if (top >= 3) {
         const kind = mt === top ? 'dopaminergique (3-méthoxytyramine) : penser à un paragangliome, rechercher une mutation SDHB' : mn === top ? 'adrénergique (métanéphrine) : origine surrénalienne quasi certaine' : 'noradrénergique (normétanéphrine) : surrénale ou paragangliome';
-        return { tone: 'bad', label: 'Métanéphrines ≥ 3 × LSN', text: `Évoquer un phéochromocytome ou un paragangliome : HTA généralement permanente, parfois paroxystique ; céphalées, sueurs, palpitations. Profil ${kind} (seuil de 3 × LSN indicatif ; complément). Imagerie ensuite (scanner, IRM, imagerie fonctionnelle ; complément).` };
+        return { tone: 'bad', label: 'Métanéphrines ≥ 3 × LSN', text: `Évoquer un phéochromocytome ou un paragangliome : HTA généralement permanente, parfois paroxystique ; céphalées, sueurs, palpitations. Profil ${kind} (complément ; seuil de 3 × LSN indicatif). Imagerie ensuite : scanner ou IRM, puis imagerie fonctionnelle (polycopié p. 79).` };
       }
-      if (top > 1) return { tone: 'warn', label: 'Élévation modérée des métanéphrines', text: 'Élévation discrète (< 3 × LSN) : faux positif fréquent (stress, médicaments, prélèvement non couché). Contrôler au repos avant de conclure.' };
+      if (top > 1) return { tone: 'warn', label: 'Élévation modérée des métanéphrines', text: 'Élévation discrète (< 3 × LSN) : faux positifs (stress, affection aiguë grave, médicaments, alimentation ; polycopié p. 79 ; prélèvement en position assise : complément). Contrôler au repos avant de conclure.' };
       if (L('fc') > 100) return { tone: 'warn', label: 'Activation adrénergique', text: 'Tachycardie et HTA réactionnelles au stress, sans excès de métanéphrines.' };
       return { tone: 'good', label: 'Normal', text: 'Pas d\'excès de catécholamines.' };
     },
     hooks: {
       links: { 'med>heart>adre': 'A', 'med>vessel>nora': 'N', 'med>liver>adre': 'A', 'med>assay>adre': 'mnRate', 'med>assay>nora': 'nmnRate', 'med>assay>dopa': 'mtRate' },
-      rates: { mnRate: (s, p) => 0.45 * p.sym + 2.4 * p.pheoA, nmnRate: (s, p) => 0.45 * p.sym + 2.4 * p.pheoN, mtRate: (s, p) => 0.5 + 2.4 * p.pheoD },
+      rates: { mnRate: (s, p) => 0.45 * p.sym + 2.4 * p.pheoA, nmnRate: (s, p) => 0.45 * p.sym + 2.4 * (p.pheoN + 0.4 * p.pheoA), mtRate: (s, p) => 0.5 + 2.4 * p.pheoD },
       lesions: [
         { node: 'med', kind: 'mass', tone: 'brown', dx: -6, dy: -28, show: (p) => p.pheoA + p.pheoN > 0.02, size: (p) => clamp(0.6 + 0.08 * (p.pheoA + p.pheoN), 0.6, 1.2), label: 'phéochromocytome', ly: -42, title: 'Phéochromocytome', text: 'Tumeur des cellules chromaffines de la médullosurrénale. Le profil sécrétoire (adrénaline, noradrénaline, dopamine) oriente la clinique et le bilan.' },
         { node: 'nerve', kind: 'mass', tone: 'brown', dx: 30, dy: 40, show: (p) => p.pheoD > 0.02, size: () => 0.8, label: 'paragangliome', ly: 50, title: 'Paragangliome', text: 'Tumeur chromaffine extra-surrénalienne (chaîne sympathique abdominale, thorax, tête et cou). Les formes dopaminergiques sont souvent liées à SDHB (complément).' }
@@ -475,7 +477,7 @@
     interpret(s, p, L, T) {
       const f = L('fsh'), e = L('e2'), prl = L('prl');
       // SOPK : 2 critères de Rotterdam sur 3, après exclusion des autres diagnostics (polycopié, partie 2, p. 15).
-      if (p.sopk >= 0.5 && prl <= 25 && p.ovary > 0.3) return { tone: 'bad', label: 'Anovulation avec hyperandrogénie : SOPK ?', text: 'Critères de Rotterdam (2 sur 3) : troubles du cycle (spanioménorrhée, aménorrhée, infertilité) ; hyperandrogénie clinique ou biologique ; ovaires > 10 mL avec au moins 20 follicules antraux de 2 à 9 mm par ovaire à l\'échographie (« pré-antraux » dans le polycopié ; critères actualisés, complément). Diagnostic d\'exclusion : éliminer un bloc en 21-hydroxylase non classique (17-OHP), un syndrome de Cushing, une tumeur virilisante, une hyperprolactinémie. Rechercher l\'insulinorésistance (obésité, acanthosis nigricans).' };
+      if (p.sopk >= 0.5 && prl <= 25 && p.ovary > 0.3) return { tone: 'bad', label: 'Anovulation avec hyperandrogénie : SOPK ?', text: 'Critères de Rotterdam (2 sur 3) : troubles du cycle (spanioménorrhée, aménorrhée, infertilité) ; hyperandrogénie clinique ou biologique ; ovaires ≥ 10 mL ou au moins 20 follicules antraux de 2 à 9 mm dans un ovaire à l\'échographie (polycopié, partie 2, p. 15 : volume > 10 mL « avec » plus de 20 follicules « pré-antraux » ; critères actualisés, complément ; l\'AMH peut remplacer l\'échographie chez l\'adulte, Teede 2023). Diagnostic d\'exclusion : éliminer un bloc en 21-hydroxylase non classique (17-OHP), un syndrome de Cushing, une tumeur virilisante, une hyperprolactinémie. Rechercher l\'insulinorésistance (obésité, acanthosis nigricans).' };
       // « Ovulatoire » seulement si le cycle simulé comporte un pic de LH et une phase lutéale (progestérone > 5 ng/mL vers J21).
       if (s.cyc > 0.5) {
         if (T && T.d < 6 && f > 12) return { tone: 'warn', label: 'Cycle ovulatoire, FSH élevée', text: 'Pic de LH et phase lutéale conservés, mais FSH élevée en début de phase folliculaire : baisse de la réserve ovarienne (seuil indicatif ; complément).' };
@@ -494,8 +496,8 @@
       scale: { ovary: (p) => 0.7 + 0.3 * Math.min(1, p.ovary), uterus: (p, s) => 0.8 + 0.2 * Math.min(1, s.e2) },
       lesions: [
         { node: 'ovary', kind: 'label', show: (p) => p.ovary < 0.3, label: 'ovaire sans follicules', ly: -84, title: 'Épuisement folliculaire', text: 'Ménopause ou insuffisance ovarienne précoce (avant 40 ans) : plus de follicules, donc plus d\'estradiol ni d\'inhibine.' },
-        { node: 'hypo', kind: 'label', show: (p) => p.hypo < 0.5, label: 'GnRH freinée', ly: -76, title: 'Aménorrhée hypothalamique', text: 'Baisse de la pulsatilité de la GnRH : insuffisance gonadotrope fonctionnelle. Causes (complément) : anorexie mentale, activité physique intense, stress (baisse de la leptine).' },
-        { node: 'ovary', kind: 'label', show: (p) => p.sopk >= 0.5, label: 'ovaires multifolliculaires', ly: -96, title: 'Aspect échographique du SOPK', text: 'Ovaires augmentés de volume (> 10 mL) avec au moins 20 follicules par ovaire (critère de Rotterdam). Le polycopié (partie 2, p. 15) écrit « pré-antraux » ; les critères actualisés (Teede 2018, 2023) parlent de follicules antraux de 2 à 9 mm (complément). La thèque produit les androgènes sous LH.' },
+        { node: 'hypo', kind: 'label', show: (p) => p.hypo < 0.5, label: 'GnRH freinée', ly: -76, title: 'Aménorrhée hypothalamique', text: 'Baisse de la pulsatilité de la GnRH : insuffisance gonadotrope fonctionnelle. Causes (complément) : anorexie mentale et activité physique intense (déficit énergétique, baisse de la leptine), stress.' },
+        { node: 'ovary', kind: 'label', show: (p) => p.sopk >= 0.5, label: 'ovaires multifolliculaires', ly: -96, title: 'Aspect échographique du SOPK', text: 'Ovaires augmentés de volume (≥ 10 mL) ou au moins 20 follicules par ovaire (critère de Rotterdam actualisé). Le polycopié (partie 2, p. 15) écrit « > 10 mL avec plus de 20 follicules pré-antraux » ; les critères actualisés (Teede 2018, 2023) retiennent l\'un ou l\'autre, avec des follicules antraux de 2 à 9 mm (complément). La thèque produit les androgènes sous LH.' },
         { node: 'pit', kind: 'nodule', tone: 'magenta', dx: 30, dy: -26, show: (p) => p.prl > 0.3, label: 'prolactinome', title: 'Adénome à prolactine', text: 'La prolactine en excès inhibe la pulsatilité de la GnRH.' }
       ],
       extraNodes: [
@@ -548,7 +550,7 @@
       const t = L('tt'), lh = L('lh'), fsh = L('fsh'), inh = L('inh');
       if (p.exoT > 0.05) return { tone: 'warn', label: 'Axe freiné par les androgènes', text: 'LH, FSH et inhibine B effondrées malgré une testostérone normale ou haute : la testostérone intratesticulaire chute et la spermatogenèse s\'arrête (complément).' };
       if (t < 10 && (lh > 9 || fsh > 12)) return { tone: 'bad', label: 'Hypogonadisme hypergonadotrope', text: 'Testostérone basse avec gonadotrophines élevées : atteinte testiculaire.' };
-      if (t < 10) return { tone: 'bad', label: 'Hypogonadisme hypogonadotrope', text: 'Testostérone basse avec gonadotrophines basses ou inadaptées : atteinte hypothalamo-hypophysaire.' };
+      if (t < 10) return { tone: 'bad', label: 'Hypogonadisme hypogonadotrope', text: 'Testostérone basse avec gonadotrophines basses ou inadaptées : atteinte hypothalamo-hypophysaire. Doser la prolactine : une hyperprolactinémie freine la GnRH (polycopié, partie 1, p. 62) ; contrôler la testostérone sur un second prélèvement matinal (complément).' };
       if (inh < 80) return { tone: 'warn', label: 'Atteinte tubulaire isolée', text: 'Inhibine B basse avec une testostérone normale (FSH ' + (fsh > 12 ? 'élevée' : 'normale haute') + ') : atteinte de la spermatogenèse (cellules de Sertoli) ; spermogramme.' };
       return { tone: 'good', label: 'Axe gonadotrope normal', text: 'Testostérone et gonadotrophines dans les normes.' };
     },
@@ -559,7 +561,7 @@
       lesions: [
         { node: 'testis', kind: 'label', show: (p) => p.sertoli < 0.5, label: 'petits testicules fermes', ly: -84, title: 'Syndrome de Klinefelter', text: 'Caryotype 47,XXY : atrophie testiculaire (volume < 4 mL), azoospermie ; hyalinisation des tubes séminifères (complément).' },
         { node: 'testis', kind: 'label', show: (p) => p.exoT > 0.05, label: 'atrophie testiculaire', ly: -84, title: 'Atrophie sous androgènes', text: 'Sans LH ni FSH, les testicules s\'atrophient et la spermatogenèse s\'arrête.' },
-        { node: 'hypo', kind: 'label', show: (p) => p.hypo < 0.5, label: 'défaut de GnRH (± anosmie)', ly: -76, title: 'Syndrome de Kallmann', text: 'Défaut de migration des neurones à GnRH, souvent associé à une anosmie (complément).' }
+        { node: 'hypo', kind: 'label', show: (p) => p.hypo < 0.5, label: 'défaut de GnRH (± anosmie)', ly: -76, title: 'Syndrome de Kallmann', text: 'Défaut de migration des neurones à GnRH (et olfactifs) : déficit gonadotrope congénital avec anosmie ou hyposmie ; sans trouble de l\'odorat, on parle de forme normosmique (complément).' }
       ],
       extraNodes: [{ id: 'exo', x: 920, y: 760, label: 'Testostérone exogène', w: 260, color: 'p-blue', show: (p) => p.exoT > 0.02, info: 'Les androgènes exogènes freinent LH et FSH.' }],
       extraLinks: [{ from: 'exo', to: 'pit', kind: 'inhib', mol: 'testo', v: 'exoRate', label: '' }],
@@ -642,7 +644,7 @@
     init: { renin: 1, aldo: 1, k: 4.2, vol: 1 },
     tau: { k: 2, vol: 2 },
     targets(p, s) {
-      const renin = clamp((1 + 3 * p.sten) * ex(-8 * (s.vol - 1) - 2.2 * p.salt), 0.02, 20); // la charge sodée freine la rénine (macula densa, volémie)
+      const renin = clamp((1 + 3 * p.sten) * ex(-10 * (s.vol - 1) - 2.2 * p.salt), 0.02, 20); // la charge sodée freine la rénine (macula densa, volémie)
       const aldo = clamp(p.adr * pw(renin, 0.8) * ex(1.2 * (s.k - 4.2)), 0, 20) + p.conn;
       const vol = 1 + 0.1 * ln(Math.max(aldo, 0.05)) + 0.04 * p.salt; // charge sodée : expansion volémique
       const k = clamp(4.2 - 0.55 * ln(Math.max(aldo, 0.05)), 2.2, 7);
@@ -651,7 +653,7 @@
     labs: [
       { key: 'renin', name: 'Rénine active', unit: 'mUI/L', range: '5–40 mUI/L (complément ; variable selon le laboratoire et la position)', k: 15, lo: 5, hi: 40, min: 0.2, max: 400, log: true, dec: 1 },
       { key: 'aldo', name: 'Aldostérone', unit: 'pmol/L', range: '100–550 pmol/L (complément ; variable selon le laboratoire et la position)', k: 300, lo: 100, hi: 550, min: 10, max: 4000, log: true, dec: 0 },
-      { key: 'k', name: 'Kaliémie', unit: 'mmol/L', k: 1, lo: 3.5, hi: 5, min: 2, max: 7, dec: 1 },
+      { key: 'k', name: 'Kaliémie', unit: 'mmol/L', range: '3,5–5,0 mmol/L', k: 1, lo: 3.5, hi: 5, min: 2, max: 7, dec: 1 },
       { key: 'na', name: 'Natrémie', unit: 'mmol/L', range: '135–145 mmol/L', lo: 135, hi: 145, min: 120, max: 150, dec: 0, fn: (s) => clamp(140 + 3 * ln(Math.max(s.aldo, 0.05)), 122, 148) },
       { key: 'pas', name: 'PA systolique', unit: 'mmHg', range: '100–140 mmHg (indicatif, complément)', lo: 100, hi: 140, min: 70, max: 220, dec: 0, fn: (s, p) => clamp(120 + 250 * (s.vol - 1) + 18 * p.sten, 75, 210) }
     ],
@@ -771,7 +773,10 @@
     tau: { ldl: 2.5 },
     targets(p, s) {
       // Récepteurs fonctionnels : mutation du récepteur (ldlr), de l'apoB (apob : LDL mal reconnues) ou gain de fonction de PCSK9 (pcsk9g).
-      const rec = p.ldlr * p.apob * (1 + 0.9 * p.statin) * (1 + 1.4 * p.pcsk9i) / (1 + p.pcsk9g * (1 - 0.8 * p.pcsk9i));
+      // Statine et anti-PCSK9 agissent en augmentant les récepteurs : leur effet s'atténue quand il reste peu de récepteurs
+      // (hypercholestérolémie familiale homozygote ; complément, essai TESLA).
+      const resid = Math.min(1, p.ldlr / 0.5);
+      const rec = p.ldlr * p.apob * (1 + 0.9 * p.statin * resid) * (1 + 1.4 * p.pcsk9i * resid) / (1 + p.pcsk9g * (1 - 0.8 * p.pcsk9i));
       return { rec, ldl: clamp(1 / Math.max(rec, 0.05), 0.15, 12) };
     },
     labs: [
@@ -789,8 +794,8 @@
     ],
     scenarios: [
       { id: 'eu', name: 'Profil normal', note: 'LDL captées par leurs récepteurs.', p: {} },
-      { id: 'hfhe', name: 'Hypercholestérolémie familiale hétérozygote', note: 'Moitié des récepteurs des LDL : LDL-c doublé (complément), xanthomes tendineux, arc cornéen précoce.', p: { ldlr: 0.5 } },
-      { id: 'hfho', name: 'Hypercholestérolémie familiale homozygote', note: 'Récepteurs quasi absents : LDL-c très élevé dès l\'enfance.', p: { ldlr: 0.15 } },
+      { id: 'hfhe', name: 'Hypercholestérolémie familiale hétérozygote', note: 'Moitié des récepteurs des LDL (complément) : LDL-c doublé, xanthomes tendineux, arc cornéen précoce.', p: { ldlr: 0.5 } },
+      { id: 'hfho', name: 'Hypercholestérolémie familiale homozygote', note: 'Récepteurs quasi absents : LDL-c très élevé dès l\'enfance (complément).', p: { ldlr: 0.15 } },
       { id: 'apob', name: 'HF par mutation de l\'apoB (complément)', note: 'Récepteurs normaux mais LDL mal reconnues (apoB100 mutée) : LDL-c élevé (complément ; le polycopié ne détaille pas les gènes).', p: { apob: 0.5 } },
       { id: 'pcsk9g', name: 'HF par gain de fonction de PCSK9 (complément)', note: 'PCSK9 trop active : récepteurs dégradés en excès, peu de LDL internalisées (complément ; le polycopié ne détaille pas les gènes).', p: { pcsk9g: 1 } },
       { id: 'statin', name: 'HF hétérozygote sous statine', note: 'La statine (complément) freine l\'HMG-CoA réductase : plus de récepteurs des LDL. Risque d\'emblée élevé : objectif LDL-c < 0,70 g/L.', p: { ldlr: 0.5, statin: 1 } },

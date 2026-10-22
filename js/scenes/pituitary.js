@@ -13,12 +13,12 @@
     scale: 0.15,
     title: 'Antéhypophyse · cellule thyréotrope',
     level: 'Organe',
-    lead: 'La TRH se fixe sur son récepteur couplé à Gq. La cellule thyréotrope synthétise alors la TSH, la glycosyle et la sécrète dans la circulation générale.',
+    lead: 'La TRH se fixe sur son récepteur couplé à Gq (complément).La cellule thyréotrope synthétise alors la TSH, la glycosyle et la sécrète dans la circulation générale.',
     points: [
       'TSH : glycoprotéine formée d\'une sous-unité α commune (avec LH, FSH et hCG) et d\'une sous-unité β spécifique.',
-      'La glycosylation conditionne l\'activité biologique de la TSH.',
-      'La T4 entre par MCT8, la D2 la convertit en T3, qui réprime TSHβ et αGSU via TRβ2.',
-      'Somatostatine, dopamine et glucocorticoïdes freinent la sécrétion de TSH.'
+      'La glycosylation conditionne l\'activité biologique de la TSH (complément).',
+      'La T4 entre par MCT8, la D2 la convertit en T3, qui réprime TSHβ et αGSU via TRβ2 (complément).',
+      'La somatostatine freine la TSH (polycopié p. 7) ; la dopamine et les glucocorticoïdes aussi (complément).'
     ],
     build(g, a) {
       a.frame('Antéhypophyse · cellule thyréotrope', 'TRH → récepteur → synthèse et sécrétion de TSH');

@@ -57,21 +57,21 @@
   ];
 
   S.gonadoF = [
-    { t: 'La GnRH est pulsatile', d: 'Les neurones à GnRH, sous l\'influence des kisspeptines, libèrent la GnRH par pulses. La pulsatilité est indispensable : une GnRH continue mettrait l\'hypophyse au repos.', on: ['hypo', 'kiss', 'kiss>hypo'] },
+    { t: 'La GnRH est pulsatile', d: 'Les neurones à GnRH, sous l\'influence des kisspeptines, libèrent la GnRH par pulses. La pulsatilité est indispensable (polycopié, partie 2, p. 4) : une GnRH continue désensibiliserait l\'hypophyse (complément).', on: ['hypo', 'kiss', 'kiss>hypo'] },
     { t: 'LH et FSH', d: 'Les cellules gonadotropes répondent par la sécrétion de LH et de FSH.', on: ['hypo>pit', 'pit'] },
     { t: 'L\'ovaire : deux cellules, deux hormones', d: 'La LH fait produire des androgènes par la thèque interne ; la FSH fait croître le follicule et aromatiser ces androgènes en estradiol dans la granulosa.', on: ['pit>ovary', 'ovary'] },
     { t: 'Effets de l\'estradiol et de la progestérone', d: 'Endomètre, glaire, seins, os. Après l\'ovulation, le corps jaune sécrète la progestérone qui prépare l\'endomètre à la nidation.', on: ['ovary>uterus', 'uterus', 'ovary>breast', 'breast'] },
     { t: 'Un rétrocontrôle qui change de signe', d: 'L\'estradiol freine la LH et la FSH la plus grande partie du cycle. En milieu de cycle, une élévation franche et prolongée de l\'estradiol devient stimulante : c\'est le pic de LH qui déclenche l\'ovulation. Observez le signe passer de − à + vers J12–J14.', on: ['ovary>pit>e2', 'ovary>hypo'] },
-    { t: 'Inhibine B et leptine', d: 'L\'inhibine B freine sélectivement la FSH. La leptine du tissu adipeux a un effet permissif : une maigreur importante éteint la GnRH (aménorrhée hypothalamique).', on: ['ovary>pit>inhib', 'lep', 'lep>hypo'] }
+    { t: 'Inhibine B et leptine', d: 'L\'inhibine B freine sélectivement la FSH. La leptine du tissu adipeux a un effet permissif : une maigreur importante éteint la GnRH (aménorrhée hypothalamique, complément).', on: ['ovary>pit>inhib', 'lep', 'lep>hypo'] }
   ];
 
   S.gonadoM = [
-    { t: 'La GnRH est pulsatile', d: 'Environ un pulse toutes les 90 minutes, sous l\'influence des kisspeptines.', on: ['hypo', 'kiss', 'kiss>hypo'] },
-    { t: 'LH et FSH', d: 'Chaque pulse de GnRH déclenche un pulse de LH ; la FSH est plus stable.', on: ['hypo>pit', 'pit'] },
+    { t: 'La GnRH est pulsatile', d: 'Environ un pulse toutes les 90 minutes (complément), sous l\'influence des kisspeptines.', on: ['hypo', 'kiss', 'kiss>hypo'] },
+    { t: 'LH et FSH', d: 'Chaque pulse de GnRH déclenche un pulse de LH ; la FSH est plus stable (complément).', on: ['hypo>pit', 'pit'] },
     { t: 'Le testicule : Leydig et Sertoli', d: 'La LH stimule la testostérone des cellules de Leydig ; la FSH stimule les cellules de Sertoli, qui soutiennent la spermatogenèse avec la testostérone intratesticulaire.', on: ['pit>testis', 'testis'] },
     { t: 'Effets de la testostérone', d: 'Muscle, os, érythropoïèse, libido, pilosité. Une partie est aromatisée en estradiol ou réduite en DHT (complément).', on: ['testis>muscle', 'muscle', 'testis>bone', 'bone', 'testis>brain', 'brain'] },
     { t: 'Rétrocontrôles', d: 'La testostérone freine la GnRH et la LH ; l\'inhibine B freine la FSH. Une testostérone exogène éteint donc LH, FSH et spermatogenèse.', on: ['testis>pit>testo', 'testis>hypo', 'testis>pit>inhib'] },
-    { t: 'Le métabolisme compte', d: 'La leptine a un effet permissif sur la GnRH ; dénutrition, obésité sévère ou hyperprolactinémie peuvent freiner l\'axe.', on: ['lep', 'lep>hypo'] }
+    { t: 'Le métabolisme compte', d: 'La leptine a un effet permissif sur la GnRH ; dénutrition, obésité sévère (complément) ou hyperprolactinémie (polycopié, partie 1, p. 62) peuvent freiner l\'axe.', on: ['lep', 'lep>hypo'] }
   ];
 
   S.phospho = [
@@ -80,7 +80,7 @@
     { t: 'Rein et os', d: 'Au rein, la PTH fait réabsorber le calcium (anse de Henlé, tube distal), excréter le phosphate et activer la 1α-hydroxylase. À l\'os, elle libère rapidement le calcium.', on: ['kidney', 'bone'] },
     { t: 'Le calcitriol et l\'intestin', d: 'Le calcitriol (1,25-(OH)₂-vitamine D) fait absorber activement le calcium par l\'intestin grêle.', on: ['kidney>gut', 'gut'] },
     { t: 'Retour à la consigne', d: 'Le calcium remonte, active le CaSR et freine la PTH : rétrocontrôle négatif.', on: ['kidney>ca', 'bone>ca', 'gut>ca'] },
-    { t: 'La calcitonine, rôle mineur', d: 'Les cellules C de la thyroïde sécrètent la calcitonine, qui favorise la fixation du calcium sur l\'os ; son rôle chez l\'adulte est mineur, mais c\'est le marqueur du cancer médullaire.', on: ['ccell', 'ccell>bone'] }
+    { t: 'La calcitonine, rôle mineur', d: 'Les cellules C de la thyroïde sécrètent la calcitonine, qui freine la résorption osseuse par les ostéoclastes ; son rôle chez l\'adulte est mineur (complément). Son dosage dépiste le cancer médullaire de la thyroïde.', on: ['ccell', 'ccell>bone'] }
   ];
 
   S.raa = [
@@ -88,12 +88,12 @@
     { t: 'De l\'angiotensinogène à l\'angiotensine II', d: 'La rénine coupe l\'angiotensinogène hépatique en angiotensine I, que l\'enzyme de conversion (poumon) transforme en angiotensine II.', on: ['jga>liver', 'liver', 'liver>lung', 'lung'] },
     { t: 'L\'aldostérone est sécrétée', d: 'L\'angiotensine II stimule la zone glomérulée ; la kaliémie aussi.', on: ['lung>adr', 'adr', 'k', 'k>adr'] },
     { t: 'Action au tube distal', d: 'L\'aldostérone fait réabsorber le sodium et excréter le potassium et les ions H⁺.', on: ['adr>tub', 'tub', 'tub>k', 'k'] },
-    { t: 'Rétrocontrôle par la volémie', d: 'La rétention de sodium restaure la volémie et la pression artérielle, ce qui freine la rénine. Dans l\'hyperaldostéronisme primaire, l\'aldostérone est autonome : la rénine est effondrée.', on: ['tub>ecf', 'ecf', 'ecf>vol', 'vol', 'vol>jga'] }
+    { t: 'Rétrocontrôle par la volémie', d: 'La rétention de sodium restaure la volémie et la pression artérielle, ce qui freine la rénine. Dans l\'hyperaldostéronisme primaire, l\'aldostérone est autonome : la rénine est freinée, basse (polycopié p. 75 et 77).', on: ['tub>ecf', 'ecf', 'ecf>vol', 'vol', 'vol>jga'] }
   ];
 
   S.glyc = [
     { t: 'La glycémie, variable réglée', d: 'Elle résulte des apports (repas), de la production hépatique (glycogénolyse, néoglucogenèse) et de la consommation par les tissus.', on: ['glc', 'gut', 'gut>glc', 'liver>glc'] },
-    { t: 'Les îlots détectent le glucose', d: 'Après un repas, la glycémie monte : les cellules β sécrètent l\'insuline, les cellules α freinent le glucagon.', on: ['islet', 'glc>islet'] },
+    { t: 'Les îlots détectent le glucose', d: 'Après un repas, la glycémie monte : les cellules β sécrètent l\'insuline ; la sécrétion de glucagon par les cellules α diminue.', on: ['islet', 'glc>islet'] },
     { t: 'L\'insuline fait entrer et stocker le glucose', d: 'Muscle et tissu adipeux captent le glucose (GLUT4) ; le foie freine sa production. L\'insuline freine aussi la lipolyse.', on: ['islet>liver>insulin', 'islet>muscle', 'islet>fat', 'liver', 'muscle', 'fat'] },
     { t: 'Au jeûne, le glucagon prend le relais', d: 'Quand la glycémie baisse, le glucagon mobilise le glycogène et la néoglucogenèse ; adrénaline, GH et cortisol complètent la contre-régulation.', on: ['islet>liver>glucagon', 'contre', 'contre>liver'] },
     { t: 'Si l\'insuline manque', d: 'La lipolyse libère des acides gras que le foie transforme en corps cétoniques : c\'est le mécanisme de l\'acidocétose.', on: ['fat>liver', 'liver>keto', 'keto'] },

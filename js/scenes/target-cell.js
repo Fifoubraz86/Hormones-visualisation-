@@ -15,10 +15,10 @@
     level: 'Cellule',
     lead: 'La T3 se lie à son récepteur nucléaire (TRα ou TRβ), associé à RXR sur les éléments de réponse (TRE) de l\'ADN, et module la transcription de nombreux gènes.',
     points: [
-      'Les transporteurs MCT8, MCT10 et OATP1C1 font entrer T4 et T3. Une mutation de MCT8 cause le syndrome d\'Allan-Herndon-Dudley.',
-      'D1 et D2 activent (T4 → T3). D3 inactive (T4 → T3 reverse, T3 → T2).',
-      'Sans T3, le récepteur recrute des corépresseurs. La T3 les remplace par des coactivateurs.',
-      'Effets : thermogenèse, métabolisme basal, fréquence cardiaque, développement cérébral, remodelage osseux.'
+      'Les transporteurs MCT8, MCT10 et OATP1C1 font entrer T4 et T3. Une mutation de MCT8 cause le syndrome d\'Allan-Herndon-Dudley (complément).',
+      'D1 et D2 activent (T4 → T3). D3 inactive (T4 → T3 reverse, T3 → T2) (complément).',
+      'Sans T3, le récepteur recrute des corépresseurs. La T3 les remplace par des coactivateurs (complément).',
+      'Effets : thermogenèse, métabolisme basal, fréquence cardiaque, développement cérébral, remodelage osseux (polycopié p. 9-10).'
     ],
     build(g, a) {
       a.frame('Cellule cible · action de la T3', 'Entrée → activation / inactivation → récepteur nucléaire → transcription');

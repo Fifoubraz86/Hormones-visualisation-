@@ -266,11 +266,11 @@
   const gauss = (h, c, w) => { let d = Math.abs(h - c); d = Math.min(d, 24 - d); return Math.exp(-(d * d) / (2 * w * w)); };
   const MEALS = [8, 12.5, 19.5];
   const LANES = [
-    { k: 'cortisol', n: 'Cortisol', c: 'p-orange', f: prof([[0, 0.08], [2, 0.12], [4, 0.4], [6, 0.85], [7.5, 1], [9, 0.85], [12, 0.55], [13, 0.6], [16, 0.38], [20, 0.18], [23, 0.08], [24, 0.08]]), info: { t: 'Cortisol', k: 'Pic en début de matinée, nadir vers minuit (p. 73, 88)', d: 'Rythme circadien de l\'ACTH : concentrations les plus élevées en début de matinée et les plus faibles le soir (p. 73). D\'où le dosage à 8 h pour l\'insuffisance surrénale (p. 88) et le cortisol salivaire à minuit pour le Cushing (p. 59).', src: 'Polycopié p. 59, 73, 88' } },
+    { k: 'cortisol', n: 'Cortisol', c: 'p-orange', f: prof([[0, 0.08], [2, 0.12], [4, 0.4], [6, 0.85], [7.5, 1], [9, 0.85], [12, 0.55], [13, 0.6], [16, 0.38], [20, 0.18], [23, 0.08], [24, 0.08]]), info: { t: 'Cortisol', k: 'Pic en début de matinée, nadir le soir (p. 73) ; cortisol salivaire à minuit (p. 59)', d: 'Rythme circadien de l\'ACTH : concentrations les plus élevées en début de matinée et les plus faibles le soir (p. 73). D\'où le dosage à 8 h pour l\'insuffisance surrénale (p. 88) et le cortisol salivaire à minuit pour le Cushing (p. 59).', src: 'Polycopié p. 59, 73, 88' } },
     { k: 'gh', n: 'GH', c: 'p-teal', f: (h) => 0.06 + 0.94 * gauss(h, 0, 0.55) + 0.45 * gauss(h, 2.6, 0.5) + 0.2 * gauss(h, 4.6, 0.45) + 0.12 * gauss(h, 10.5, 0.4) + 0.12 * gauss(h, 16, 0.4), info: { t: 'Hormone de croissance', k: 'Pulsatile, surtout la nuit (p. 49)', d: 'La GH est sécrétée de façon pulsatile, particulièrement la nuit (p. 49) ; le plus grand pic suit l\'endormissement, en sommeil lent profond (complément). Un dosage isolé de GH n\'a donc pas de valeur ; le déficit se confirme par des tests dynamiques (p. 63).', src: 'Polycopié p. 49, 63' } },
     { k: 'mel', n: 'Mélatonine', c: 'p-violet', f: prof([[0, 0.78], [3, 1], [6, 0.5], [8, 0.04], [20, 0.04], [21.5, 0.28], [23, 0.62], [24, 0.78]]), info: { t: 'Mélatonine', k: 'Sécrétée la nuit par l\'épiphyse (complément)', d: 'Freinée par la lumière, elle s\'élève le soir, culmine au milieu de la nuit et s\'effondre au réveil. C\'est un marqueur de l\'horloge circadienne.' } },
     { k: 'tsh', n: 'TSH', c: 'tsh', f: prof([[0, 0.9], [2, 1], [4, 0.8], [7, 0.45], [12, 0.35], [17, 0.35], [20, 0.5], [22, 0.75], [24, 0.9]]), info: { t: 'TSH', k: 'Pic nocturne (complément)', d: 'La TSH s\'élève en soirée et atteint son maximum en début de nuit. Les variations restent modestes et n\'empêchent pas d\'interpréter une TSH dosée dans la journée.' } },
-    { k: 'prl', n: 'Prolactine', c: 'p-rose', f: prof([[0, 0.5], [3, 0.85], [5, 1], [7, 0.5], [9, 0.25], [12, 0.3], [15, 0.22], [22, 0.2], [23, 0.3], [24, 0.5]]), info: { t: 'Prolactine', k: 'S\'élève pendant le sommeil (complément)', d: 'La prolactine augmente après l\'endormissement. Le dosage diagnostique se fait au repos (p. 56) ; le stress l\'élève aussi (complément).', src: 'Polycopié p. 56 (dosage au repos)' } },
+    { k: 'prl', n: 'Prolactine', c: 'p-rose', f: prof([[0, 0.5], [3, 0.85], [5, 1], [7, 0.5], [9, 0.25], [12, 0.3], [15, 0.22], [22, 0.2], [23, 0.3], [24, 0.5]]), info: { t: 'Prolactine', k: 'S\'élève pendant le sommeil (complément)', d: 'La prolactine augmente après l\'endormissement. Le dosage diagnostique se fait au repos (p. 55) ; le stress l\'élève aussi (complément).', src: 'Polycopié p. 55 (dosage au repos)' } },
     { k: 'testo', n: 'Testostérone', c: 'p-blue', f: prof([[0, 0.72], [4, 0.85], [7, 1], [9, 0.95], [14, 0.8], [19, 0.7], [22, 0.68], [24, 0.72]]), info: { t: 'Testostérone', k: 'Plus élevée le matin (complément)', d: 'Chez l\'homme jeune, la testostérone est maximale le matin ; on la dose donc le matin pour ne pas conclure à tort à un déficit. Le diagnostic d\'hypogonadisme repose sur la testostéronémie totale et les gonadotrophines (p. 62).', src: 'Polycopié p. 62 (dosage) · horaire : complément' } },
     { k: 'glu', n: 'Glycémie', n2: 'Insuline', c: 'p-gold', c2: 'p-sky', f: (h) => 0.3 + MEALS.reduce((s, m) => s + 0.42 * gauss(h, m + 0.7, 0.55), 0), f2: (h) => 0.06 + MEALS.reduce((s, m) => s + 0.85 * gauss(h, m + 0.85, 0.6), 0), info: { t: 'Glycémie et insuline', k: 'Rythmées par les repas (complément)', d: 'Après chaque repas, la glycémie monte puis revient à sa valeur de jeûne ; l\'insuline suit, avec un léger décalage. La nuit, la glycémie est maintenue par la production hépatique de glucose.' } }
   ];
@@ -352,7 +352,7 @@
         ['Freinage minute', ['1 mg de dexaméthasone à 23 h,', 'cortisol plasmatique à 8 h (p. 59)']],
         ['Aldostérone et rénine', ['le matin, 2 h après le lever,', 'assis depuis 5 à 15 min (p. 77)']],
         ['GH : un dosage isolé ne suffit pas', ['sécrétion pulsatile, surtout nocturne (p. 49) ;', 'tests dynamiques pour le déficit (p. 63)']],
-        ['Prolactine : au repos', ['(p. 56)']],
+        ['Prolactine : au repos', ['(p. 55)']],
         ['Testostérone : le matin', ['pic matinal (complément)']]
       ];
       let y = 238;
@@ -376,7 +376,7 @@
       });
       const lane = (i, n) => [[40, Y0 + i * LH - 12, X1 - 20, LH * (n || 1)]];
       HV.spotlight(rhDef, a, [
-        { t: 'Cortisol : pic du matin', d: 'Le cortisol est maximal en début de matinée, en raison du rythme circadien de l\'ACTH (p. 73). Le dosage pour une insuffisance surrénale se fait à 8 h : < 5 µg/dL (80 nmol/L) est fortement évocateur, > 18 µg/dL exclut le diagnostic (p. 88).', spot: [...lane(0), [1100, 215, 450, 80]], h: 8 },
+        { t: 'Cortisol : pic du matin', d: 'Le cortisol est maximal en début de matinée, en raison du rythme circadien de l\'ACTH (p. 73). Le dosage pour une insuffisance surrénale se fait à 8 h : < 5 µg/dL (≈ 138 nmol/L) est fortement évocateur, > 18 µg/dL (≈ 500 nmol/L) exclut le diagnostic (p. 88).', spot: [...lane(0), [1100, 215, 450, 80]], h: 8 },
         { t: 'Cortisol : nadir de minuit', d: 'Le soir, le cortisol est au plus bas. Dans le syndrome de Cushing, ce nadir disparaît : d\'où le cortisol salivaire à minuit et le freinage minute (1 mg de dexaméthasone à 23 h, cortisol à 8 h) (p. 59).', spot: [...lane(0), [1100, 295, 450, 170]], h: 0 },
         { t: 'La nuit : GH, mélatonine, TSH, prolactine', d: 'La GH est pulsatile, surtout la nuit (p. 49), avec un grand pic après l\'endormissement (complément). La mélatonine, la TSH et la prolactine s\'élèvent aussi la nuit (complément).', spot: lane(1, 4), h: 0.5 },
         { t: 'Testostérone : le matin', d: 'La testostérone est plus élevée le matin : on la dose le matin (complément).', spot: [...lane(5), [1100, 830, 450, 70]], h: 8 },
@@ -496,7 +496,7 @@
         a.text(dx + 24, 0, t, 'note', null, lg);
       });
       card(1120, 236, 420, 84, 'p-orange', 'Cancer médullaire de la thyroïde', 'quasi constant · calcitonine (p. 18)', 'ztr-nem2-cmt', ['a', 'b', 'ab'], [M.thy]);
-      card(1120, 331, 420, 84, 'p-orange', 'Phéochromocytome', 'souvent bilatéral (p. 79)', 'ztr-nem2-pheo', ['a', 'b', 'ab'], [M.adrR]);
+      card(1120, 331, 420, 84, 'p-orange', 'Phéochromocytome', 'souvent bilatéral (complément) · p. 79', 'ztr-nem2-pheo', ['a', 'b', 'ab'], [M.adrR]);
       card(1120, 426, 420, 84, 'p-gold', 'Hyperparathyroïdie primaire', 'NEM 2A seulement', 'ztr-nem2-hpt', ['a'], [M.ptR]);
       card(1120, 521, 420, 84, 'p-rose', 'Névromes muqueux', 'lèvres, langue · ganglioneuromatose digestive', 'ztr-nem2-nev', ['b'], [M.lips, M.gut]);
       card(1120, 616, 420, 84, 'p-rose', 'Morphotype marfanoïde', 'grande taille, membres longs et grêles', 'ztr-nem2-marf', ['b'], [M.arm]);
@@ -551,7 +551,7 @@
     'ztr-ds-hook': { t: 'Effet crochet', k: 'Complément', d: 'Dans un dosage sandwich en un temps, un très grand excès d\'antigène sature à la fois les anticorps de capture et de détection : peu de sandwichs se forment et le résultat est faussement modéré. Devant un macroadénome avec une prolactine modérée, il faut redoser après dilution avant de conclure à une hyperprolactinémie de déconnexion (déconnexion : p. 56).', src: 'Polycopié p. 56 (déconnexion) · effet crochet : complément' },
     'ztr-ds-het': { t: 'Anticorps hétérophiles', k: 'Polycopié p. 56 (interférence de dosage)', d: 'Des anticorps du patient dirigés contre les immunoglobulines animales du réactif peuvent relier capture et détection sans hormone : résultat faussement élevé, plus rarement abaissé (complément). Le polycopié demande un contrôle dans un autre laboratoire, avec une autre technique (p. 56).', src: 'Polycopié p. 56' },
     'ztr-ds-tbg': { t: 'Protéines de transport : TBG, CBG', k: 'Polycopié p. 8 (TBG)', d: 'Le dosage des hormones libres évite les fluctuations liées à la TBG (p. 8). Les œstrogènes et la grossesse augmentent la TBG et la CBG : T4 totale et cortisol total augmentent, les fractions libres restent normales (complément).', src: 'Polycopié p. 8 · CBG : complément' },
-    'ztr-ds-hour': { t: 'Horaire et conditions du prélèvement', k: 'Polycopié p. 56, 59, 77, 88', d: 'Cortisol à 8 h (p. 88), cortisol salivaire à minuit (p. 59), aldostérone et rénine le matin 2 h après le lever, assis depuis 5 à 15 min (p. 77), prolactine au repos (p. 56) ; testostérone le matin (complément).', src: 'Polycopié p. 56, 59, 77, 88' }
+    'ztr-ds-hour': { t: 'Horaire et conditions du prélèvement', k: 'Polycopié p. 55, 59, 77, 88', d: 'Cortisol à 8 h (p. 88), cortisol salivaire à minuit (p. 59), aldostérone et rénine le matin 2 h après le lever, assis depuis 5 à 15 min (p. 77), prolactine au repos (p. 55) ; testostérone le matin (complément).', src: 'Polycopié p. 55, 59, 77, 88' }
   });
   const dsDef = HV.scene(Object.assign({
     id: 'dosages', loupe: 'Dosages',
@@ -691,10 +691,10 @@
     ['hc', 'Hydrocortisone, fludrocortisone', 'substitution GR et MR', 'R', 'adr', 'L\'hydrocortisone remplace le cortisol (récepteur des glucocorticoïdes) ; la fludrocortisone remplace l\'aldostérone (récepteur minéralocorticoïde) dans l\'insuffisance surrénale primaire. Fludrocortisone utilisée aussi en test de confirmation de l\'hyperaldostéronisme (p. 77).', 'surdosage : signes de Cushing ; fludrocortisone : HTA, œdèmes, hypokaliémie', 'Fludrocortisone : p. 77'],
     ['spi', 'Spironolactone', 'antagoniste du MR', 'R', 'kidR', 'Antagoniste du récepteur minéralocorticoïde dans le tubule distal et le canal collecteur : traitement de l\'hyperaldostéronisme primaire.', 'hyperkaliémie, gynécomastie', null],
     ['ddavp', 'Desmopressine', 'agoniste V2 · tube collecteur', 'R', 'kidR', 'Analogue de l\'ADH sélectif du récepteur V2, qui fait réabsorber l\'eau par les aquaporines (V2 : p. 50) : traitement du diabète insipide central.', 'hyponatrémie (intoxication à l\'eau)', 'V2 : p. 50'],
-    ['sulf', 'Sulfamides hypoglycémiants', 'ferment le canal K-ATP de la cellule β', 'R', 'panc', 'Ferment le canal K-ATP de la cellule β : la sécrétion d\'insuline devient indépendante de la glycémie.', 'hypoglycémie (p. 70), prise de poids', 'Hypoglycémie : p. 70 (partie 2)'],
+    ['sulf', 'Sulfamides hypoglycémiants', 'ferment le canal K-ATP de la cellule β', 'R', 'panc', 'Ferment le canal K-ATP de la cellule β : la sécrétion d\'insuline devient indépendante de la glycémie.', 'hypoglycémie (p. 70, partie 2), prise de poids', 'Hypoglycémie : p. 70 (partie 2)'],
     ['glp', 'Analogues du GLP-1', 'insuline glucose-dépendante, satiété', 'R', 'panc', 'Activent le récepteur du GLP-1 : sécrétion d\'insuline seulement si la glycémie est élevée, glucagon ↓, vidange gastrique ralentie, satiété.', 'nausées, vomissements', null],
     ['eze', 'Ézétimibe', 'bloque NPC1L1 (intestin)', 'R', 'gut', 'Inhibe le transporteur NPC1L1 de la bordure en brosse : moins de cholestérol absorbé, plus de récepteurs des LDL hépatiques.', 'bien toléré (troubles digestifs)', null],
-    ['ins', 'Insulines', 'muscle, tissu adipeux, foie', 'R', 'mus', 'Remplacent l\'insuline : captation du glucose par le muscle et le tissu adipeux via GLUT4 (p. 29-30), freinage de la production hépatique de glucose.', 'hypoglycémie (p. 70), prise de poids', 'GLUT4 : p. 29-30 · hypoglycémie : p. 70 (partie 2)'],
+    ['ins', 'Insulines', 'muscle, tissu adipeux, foie', 'R', 'mus', 'Remplacent l\'insuline : captation du glucose par le muscle et le tissu adipeux via GLUT4 (p. 29-30, partie 2), freinage de la production hépatique de glucose.', 'hypoglycémie (p. 70, partie 2), prise de poids', 'GLUT4 : p. 29-30 · hypoglycémie : p. 70 (partie 2)'],
     ['teri', 'Tériparatide', 'fragment de PTH · ostéoblaste', 'R', 'boneR', 'Fragment 1-34 de la PTH en injection quotidienne : l\'exposition intermittente stimule surtout les ostéoblastes (ostéoformation).', 'hypercalcémie, nausées', null]
   ];
   DRUGS.forEach((d) => {
@@ -708,7 +708,7 @@
       'Hypophyse : cabergoline (D2), analogues de la somatostatine (p. 49).',
       'Thyroïde : antithyroïdiens (TPO, p. 8), lévothyroxine (introduction progressive, p. 21).',
       'Surrénale et rein : métyrapone, osilodrostat ; hydrocortisone, fludrocortisone ; spironolactone ; desmopressine (V2, p. 50) ; iSGLT2 (p. 31, partie 2).',
-      'Glucose : metformine (foie), sulfamides (K-ATP ; hypoglycémies, p. 70), GLP-1, insulines.',
+      'Glucose : metformine (foie), sulfamides (K-ATP ; hypoglycémies, p. 70, partie 2), GLP-1, insulines.',
       'Lipides : statines (HMG-CoA réductase), anti-PCSK9 (p. 20, partie 2), ézétimibe (NPC1L1).',
       'Os et calcium : bisphosphonates, dénosumab, tériparatide, calcimimétiques (CaSR, p. 37).'
     ],
@@ -756,7 +756,7 @@
         { t: 'Hypophyse', d: 'La cabergoline, agoniste D2, reproduit le tonus inhibiteur de la dopamine sur les cellules lactotropes ; les analogues de la somatostatine freinent la GH (p. 49). Le pegvisomant, lui, bloque le récepteur de la GH (complément).', keys: ['cab', 'sst', 'peg'], ex: [[T.hyp[0], T.hyp[1], 40]] },
         { t: 'Thyroïde', d: 'Les antithyroïdiens inhibent la TPO (p. 8) ; la lévothyroxine substitue la T4, introduite progressivement chez le sujet âgé ou coronarien (p. 21).', keys: ['ats', 'levo'], ex: [[T.thy[0], T.thy[1], 40]] },
         { t: 'Surrénales et reins', d: 'Métyrapone et osilodrostat bloquent la 11β-hydroxylase ; hydrocortisone et fludrocortisone substituent ; spironolactone bloque le MR ; desmopressine active le V2 (p. 50) ; les iSGLT2 bloquent SGLT2 (p. 31, partie 2).', keys: ['mety', 'hc', 'spi', 'ddavp', 'sglt'], ex: [[T.adr[0] - 20, T.adr[1] + 10, 55]] },
-        { t: 'Glucose', d: 'Metformine sur le foie, sulfamides sur le canal K-ATP (risque d\'hypoglycémie, p. 70), analogues du GLP-1, insulines sur le muscle et le tissu adipeux (GLUT4, p. 29-30).', keys: ['met', 'sulf', 'glp', 'ins'], ex: [[T.panc[0], T.panc[1], 40]] },
+        { t: 'Glucose', d: 'Metformine sur le foie, sulfamides sur le canal K-ATP (risque d\'hypoglycémie, p. 70, partie 2), analogues du GLP-1, insulines sur le muscle et le tissu adipeux (GLUT4, p. 29-30, partie 2).', keys: ['met', 'sulf', 'glp', 'ins'], ex: [[T.panc[0], T.panc[1], 40]] },
         { t: 'Lipides', d: 'Statines (HMG-CoA réductase) et anti-PCSK9 augmentent les récepteurs des LDL du foie (p. 20, partie 2) ; l\'ézétimibe réduit l\'absorption intestinale du cholestérol (complément).', keys: ['sta', 'pcsk', 'eze'], ex: [[T.liv[0], T.liv[1], 40]] },
         { t: 'Os et calcium', d: 'Bisphosphonates et dénosumab freinent l\'ostéoclaste, le tériparatide stimule l\'ostéoblaste, les calcimimétiques activent le CaSR parathyroïdien (p. 37).', keys: ['bis', 'teri', 'calc'], ex: [[T.bone[0], T.bone[1], 40]] }
       ];

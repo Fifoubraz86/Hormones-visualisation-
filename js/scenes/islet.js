@@ -6,20 +6,20 @@
   const clamp = HV.clamp;
 
   Object.assign(HV.INFO, {
-    'cell-beta': { t: 'Cellule β', k: '60 à 70 % de l\'îlot · cœur de l\'îlot (complément)', d: 'Sécrète l\'insuline (et le peptide C, l\'amyline). Détruite par l\'auto-immunité dans le diabète de type 1.' },
-    'cell-alpha': { t: 'Cellule α', k: '15 à 20 % · plutôt en périphérie chez le rongeur, mêlée aux β chez l\'homme (complément)', d: 'Sécrète le glucagon, hyperglycémiant. Freinée par l\'insuline, le zinc et le GABA libérés par les cellules β voisines.' },
+    'cell-beta': { t: 'Cellule β', k: '≈ 50 à 60 % de l\'îlot humain (60 à 80 % chez le rongeur, en cœur d\'îlot) (complément)', d: 'Sécrète l\'insuline (et le peptide C, l\'amyline). Détruite par l\'auto-immunité dans le diabète de type 1.' },
+    'cell-alpha': { t: 'Cellule α', k: '≈ 30 à 40 % chez l\'homme, mêlée aux β ; 15 à 20 % et en périphérie chez le rongeur (complément)', d: 'Sécrète le glucagon, hyperglycémiant. Freinée par l\'insuline, le zinc et le GABA libérés par les cellules β voisines.' },
     'cell-delta': { t: 'Cellule δ', k: '5 à 10 % (complément)', d: 'Sécrète la somatostatine, qui freine localement l\'insuline et le glucagon (action paracrine).' },
     'cell-pp': { t: 'Cellule PP', k: '< 5 %, surtout dans la tête du pancréas (complément)', d: 'Sécrète le polypeptide pancréatique (satiété, sécrétion exocrine).' },
     'cell-eps': { t: 'Cellule ε', k: '< 1 % (complément)', d: 'Sécrète la ghréline, en petite quantité chez l\'adulte.' },
     acini: { t: 'Pancréas exocrine', k: '≈ 99 % du pancréas', d: 'Les acini sécrètent les enzymes digestives dans les canaux pancréatiques. Les îlots, dispersés entre eux, ne représentent qu\'environ 1 % du tissu.' },
     'islet-cap': { t: 'Capillaires fenêtrés de l\'îlot', k: 'Drainage portal vers le foie', d: 'L\'îlot est très vascularisé. L\'insuline et le glucagon gagnent la veine porte : le foie reçoit les concentrations les plus fortes (complément).' },
-    glut2: { t: 'GLUT2', k: 'Transporteur du glucose à faible affinité (complément)', d: 'Laisse entrer le glucose proportionnellement à la glycémie : la concentration intracellulaire suit la concentration plasmatique. Chez l\'homme, GLUT1 joue aussi un rôle.' },
+    glut2: { t: 'GLUT2', k: 'Transporteur du glucose à faible affinité (complément)', d: 'Laisse entrer le glucose proportionnellement à la glycémie : la concentration intracellulaire suit la concentration plasmatique. Chez l\'homme, GLUT1 est même prédominant sur GLUT2 (complément).' },
     gk: { t: 'Glucokinase', k: 'Le « capteur de glucose » de la cellule β (complément)', d: 'Phosphoryle le glucose en glucose-6-phosphate. Non freinée par son produit, son activité suit la glycémie dans la zone physiologique. Ses mutations donnent un diabète MODY 2.' },
     mito: { t: 'Mitochondrie', k: 'Glycolyse puis cycle de Krebs', d: 'Le métabolisme du glucose augmente le rapport ATP/ADP du cytoplasme.' },
     katp: { t: 'Canal K-ATP (Kir6.2 / SUR1)', k: 'Fermé par l\'ATP · cible des sulfamides et glinides (complément)', d: 'Au repos, il laisse sortir le K⁺ et maintient la membrane à environ −70 mV. Quand l\'ATP monte, il se ferme : la membrane se dépolarise. Les sulfamides le ferment directement (risque d\'hypoglycémie) ; ses mutations activatrices donnent un diabète néonatal.' },
     cav: { t: 'Canaux calciques voltage-dépendants', k: 'Ouverts par la dépolarisation (complément)', d: 'Le calcium qui entre déclenche la fusion des granules d\'insuline avec la membrane.' },
     granules: { t: 'Granules d\'insuline', k: 'Insuline cristallisée avec le zinc, peptide C (complément)', d: 'Une petite réserve de granules amarrés à la membrane est libérée tout de suite (1re phase, en quelques minutes) ; les granules de réserve sont mobilisés ensuite (2e phase, prolongée). La 1re phase disparaît tôt dans le diabète de type 2.' },
-    glp1r: { t: 'Récepteur du GLP-1 (et du GIP)', k: 'Incrétines · AMPc ↑ (complément)', d: 'Les incrétines sécrétées par l\'intestin après un repas amplifient la sécrétion d\'insuline, seulement si la glycémie est élevée. Cibles des analogues du GLP-1 et des inhibiteurs de la DPP-4.' },
+    glp1r: { t: 'Récepteurs du GLP-1 et du GIP', k: 'Incrétines · AMPc ↑ (complément)', d: 'Les incrétines sécrétées par l\'intestin après un repas amplifient la sécrétion d\'insuline, seulement si la glycémie est élevée. Cibles des analogues du GLP-1 (et du double agoniste GIP/GLP-1) ; les inhibiteurs de la DPP-4 augmentent les incrétines endogènes.' },
     paracrine: { t: 'Dialogue paracrine', k: 'Entre cellules voisines de l\'îlot (complément)', d: 'L\'insuline, le zinc et le GABA des cellules β freinent les cellules α ; la somatostatine des cellules δ freine α et β.' },
     vm: { t: 'Potentiel de membrane', k: 'Repos ≈ −70 mV (complément)', d: 'La fermeture des canaux K-ATP dépolarise la membrane, qui génère alors des potentiels d\'action calciques.' }
   });
@@ -36,12 +36,12 @@
     scale: 0.16,
     title: 'Îlot de Langerhans',
     level: 'Tissu et cellule',
-    lead: 'Environ un million d\'îlots, dispersés dans le pancréas exocrine, forment le pancréas endocrine. Chaque îlot réunit des cellules β (insuline), α (glucagon), δ (somatostatine), PP et ε. Dans la cellule β, le glucose est son propre signal : son métabolisme fait monter l\'ATP, qui ferme les canaux K-ATP ; la membrane se dépolarise, le calcium entre et les granules d\'insuline sont libérés.',
+    lead: 'Environ un million d\'îlots, dispersés dans le pancréas exocrine, forment le pancréas endocrine. Chaque îlot réunit des cellules β (insuline), α (glucagon), δ (somatostatine), PP et ε. Dans la cellule β, le glucose est son propre signal : son métabolisme fait monter l\'ATP, qui ferme les canaux K-ATP ; la membrane se dépolarise, le calcium entre et les granules d\'insuline sont libérés (complément ; le polycopié décrit les cellules β et α et le 1 % du pancréas endocrine, partie 2 p. 29).',
     points: [
       'Couplage glucose – insuline : GLUT2 → glucokinase → ATP/ADP ↑ → fermeture des canaux K-ATP → dépolarisation → entrée de Ca²⁺ → exocytose (complément).',
       'Sécrétion biphasique : pic précoce (granules amarrés) puis plateau (mobilisation des réserves) ; la 1re phase est perdue tôt dans le DT2 (complément).',
-      'Les incrétines (GLP-1, GIP) amplifient la sécrétion seulement en hyperglycémie : peu d\'hypoglycémies avec les analogues du GLP-1, contrairement aux sulfamides qui ferment directement le canal K-ATP.',
-      'Paracrinie : l\'insuline freine les cellules α voisines, la somatostatine freine α et β.',
+      'Les incrétines (GLP-1, GIP) amplifient la sécrétion seulement en hyperglycémie : peu d\'hypoglycémies avec les analogues du GLP-1, contrairement aux sulfamides qui ferment directement le canal K-ATP (complément).',
+      'Paracrinie : l\'insuline freine les cellules α voisines, la somatostatine freine α et β (complément).',
       'Changez de scénario (DT1, DT2, insulinome) ou lancez l\'HGPO dans le panneau.'
     ],
     legend: new Set(['glucose', 'insulin', 'glucagon', 'sst', 'k', 'ca']),
@@ -106,7 +106,7 @@
       a.flow('M 300,640 C 320,600 360,590 400,575', { mol: 'sst', rate: () => 0.8, size: 1.1, speed: 40, track: false });
       // Proportions
       const lg = a.el('g', { transform: 'translate(70 210)' });
-      [['beta', 'β : insuline · 60–70 %'], ['alpha', 'α : glucagon · 15–20 %'], ['delta', 'δ : somatostatine · 5–10 %'], ['pp', 'PP : polypeptide pancréatique'], ['eps', 'ε : ghréline · < 1 %']].forEach(([k, t], i) => {
+      [['beta', 'β : insuline · ≈ 50–60 %'], ['alpha', 'α : glucagon · ≈ 30–40 %'], ['delta', 'δ : somatostatine · 5–10 %'], ['pp', 'PP : polypeptide pancréatique'], ['eps', 'ε : ghréline · < 1 %']].forEach(([k, t], i) => {
         const row = a.el('g', { class: 'icells ' + k, 'data-info': 'cell-' + (k === 'beta' ? 'beta' : k === 'alpha' ? 'alpha' : k === 'delta' ? 'delta' : k) }, lg);
         a.el('circle', { cx: 0, cy: i * 26, r: 9, class: 'icell' }, row);
         a.text(18, i * 26 + 6, t, 'note', null, row);
@@ -202,14 +202,14 @@
         cellsG.b.setAttribute('opacity', (0.15 + 0.85 * Math.min(1, beta)).toFixed(2));
         cell.setAttribute('opacity', (0.35 + 0.65 * Math.min(1, beta)).toFixed(2));
         gran.setAttribute('opacity', (0.1 + 0.9 * Math.min(1, beta + p.tumor)).toFixed(2));
-        insul.setAttribute('opacity', p.beta < 0.5 ? 1 : 0);
+        insul.setAttribute('opacity', p.beta < 0.1 ? 1 : 0); // insulite : DT1 seulement (pas le DT2)
         tumor.setAttribute('opacity', p.tumor > 0.02 ? 1 : 0);
         txt -= dt;
         if (txt <= 0) {
           txt = 0.3;
           atpT.textContent = 'ATP/ADP ' + (atp > 0.55 ? '↑↑' : atp > 0.25 ? '↑' : 'bas');
           vmT.textContent = Math.round(-70 + 30 * caOpen) + ' mV';
-          state.textContent = p.beta < 0.3 ? 'Cellules β détruites : plus d\'insuline malgré l\'hyperglycémie (DT1)'
+          state.textContent = p.beta < 0.3 ? (p.exo > 0.05 ? 'Cellules β détruites : seule l\'insuline injectée agit, sans s\'adapter à la glycémie' : 'Cellules β détruites : plus d\'insuline malgré l\'hyperglycémie (DT1)')
             : p.tumor > 0.02 ? 'Insulinome : sécrétion autonome, même quand la glycémie est basse'
               : 'Glycémie ' + s.g.toFixed(2).replace('.', ',') + ' g/L → ' + (caOpen > 0.5 ? 'canaux K-ATP fermés, insuline sécrétée' : caOpen > 0.15 ? 'sécrétion modérée' : 'canaux K-ATP ouverts, sécrétion basale');
         }

@@ -150,6 +150,8 @@
       measure: (sim) => sim.lab('g'),
       interpret(v) {
         const g0 = v[0], g2 = v[v.length - 1], f = (x) => x.toFixed(2).replace('.', ',');
+        // Glycémie à jeun basse : l'HGPO n'est pas l'examen adapté (normale à jeun 0,80–1,10 g/L ; hypoglycémie < 0,50 g/L hors diabète, polycopié partie 2 p. 32 et 66).
+        if (g0 < 0.7) return { tone: 'bad', text: `À jeun : ${f(g0)} g/L : glycémie basse (hypoglycémie si < 0,50 g/L hors diabète). L'HGPO n'est pas l'examen adapté : rechercher une hypoglycémie organique (triade de Whipple, épreuve de jeûne).` };
         // On classe d'abord sur la glycémie à jeun, puis à 2 h ; on retient la catégorie la plus haute (polycopié, tableau 8).
         const c0 = g0 >= 1.26 ? 3 : g0 >= 1.1 ? 1 : 0;
         const c2 = g2 >= 2 ? 3 : g2 >= 1.4 ? 2 : 0;
@@ -176,6 +178,7 @@
       interpret(v, sim) {
         const min = Math.min(...v), ins = sim.lab('ins'), f = (x) => x.toFixed(2).replace('.', ',');
         const iTxt = ins.toFixed(1).replace('.', ',') + ' µUI/mL';
+        if (sim.p && sim.p.exo > 0.05) return { tone: 'warn', text: 'Épreuve non indiquée chez le diabétique traité par insuline : l\'hypoglycémie est iatrogène (polycopié, partie 2 p. 70).' };
         if (min >= 0.5) return { tone: 'good', text: `Glycémie minimale ${f(min)} g/L, sans hypoglycémie ; insuline ${ins < 3 ? 'freinée' : 'adaptée à la glycémie'} en fin de jeûne (${iTxt}). Pas d'hypoglycémie organique.` };
         if (ins >= 3) return { tone: 'bad', text: `Hypoglycémie à ${f(min)} g/L avec une insuline non freinée (${iTxt}, ≥ 3 µUI/mL ; complément) : hyperinsulinisme. Peptide C élevé : hyperinsulinisme endogène (insulinome, ou prise de sulfamides hypoglycémiants, à rechercher dans le plasma) ; peptide C bas : insuline exogène.` };
         return { tone: 'warn', text: `Hypoglycémie à ${f(min)} g/L avec une insuline freinée : cause non insulinique à rechercher.` };

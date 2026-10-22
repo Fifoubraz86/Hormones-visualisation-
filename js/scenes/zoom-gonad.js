@@ -109,7 +109,7 @@
     'zgo-primordial': { t: 'Follicule primordial', k: 'La réserve ovarienne', d: 'Ovocyte I bloqué en prophase de 1re division méiotique, entouré d\'une couche de cellules aplaties. Le stock est constitué avant la naissance puis s\'épuise jusqu\'à la ménopause (complément).' },
     'zgo-primary': { t: 'Follicule primaire', k: 'Une couche de cellules cubiques', d: 'Sortie de la réserve (recrutement initial), indépendante des gonadotrophines ; apparition de la zone pellucide (complément).' },
     'zgo-secondary': { t: 'Follicule secondaire (préantral)', k: 'Plusieurs couches de granulosa, thèque', d: 'La granulosa prolifère et s\'entoure de la thèque, qui acquiert des récepteurs de la LH. Croissance surtout sous le contrôle de facteurs locaux (complément).' },
-    'zgo-antral': { t: 'Follicule antral (cavitaire)', k: 'Apparition de l\'antrum (cavité)', d: 'Les petits follicules antraux sécrètent l\'AMH et l\'inhibine B. Ils deviennent sensibles puis dépendants de la FSH : c\'est parmi eux qu\'une cohorte est recrutée à chaque cycle.' },
+    'zgo-antral': { t: 'Follicule antral (cavitaire)', k: 'Apparition de l\'antrum (cavité)', d: 'Les petits follicules antraux sécrètent l\'AMH (complément) et l\'inhibine B (polycopié, partie 2, p. 4). Ils deviennent sensibles puis dépendants de la FSH : c\'est parmi eux qu\'une cohorte est recrutée à chaque cycle (complément).' },
     'zgo-preov': { t: 'Follicule préovulatoire (de De Graaf)', k: 'Le follicule dominant', d: 'Le follicule dominant : antrum volumineux, ovocyte dans le cumulus oophorus. Il sécrète beaucoup d\'estradiol, qui déclenche par rétrocontrôle positif le pic de LH.' },
     'zgo-ovul': { t: 'Ovulation (J14)', k: 'Déclenchée par le pic de LH', d: 'Rupture du follicule et expulsion de l\'ovocyte II (polycopié).' },
     'zgo-cl': { t: 'Corps jaune', k: 'Phase lutéale, J14 à J28', d: 'Les restes folliculaires se transforment en corps jaune, qui sécrète de la progestérone et de l\'estradiol (polycopié). Sans grossesse, il régresse en fin de cycle ; en cas de grossesse, l\'hCG le maintient (complément).' },
@@ -126,10 +126,10 @@
   const fol = HV.scene(Object.assign({
     id: 'folliculo', parent: 'gonadoF', loupe: 'Folliculogenèse',
     title: 'Folliculogenèse', level: 'Tissu et cellule',
-    lead: 'Dans l\'ovaire, les follicules passent du stade primordial (la réserve) au follicule préovulatoire de De Graaf. La croissance dure environ trois mois ; seule la phase finale dépend de la FSH. À chaque cycle, une cohorte est recrutée et un seul follicule, le dominant, est sélectionné puis ovule. Thèque et granulosa coopèrent : la LH fait fabriquer des androgènes à la thèque, la FSH les fait aromatiser en estradiol par la granulosa.',
+    lead: 'Dans l\'ovaire, les follicules passent du stade primordial (la réserve) au follicule préovulatoire de De Graaf. La croissance dure plusieurs mois (≈ 3 mois du stade préantral au stade préovulatoire ; complément) ; seule la phase finale dépend de la FSH. À chaque cycle, une cohorte est recrutée et un seul follicule, le dominant, est sélectionné puis ovule. Thèque et granulosa coopèrent : la LH fait fabriquer des androgènes à la thèque, la FSH les fait aromatiser en estradiol par la granulosa.',
     points: [
       'Primordial → primaire → secondaire (préantral) → antral → préovulatoire → ovulation → corps jaune → corps blanc.',
-      'La croissance d\'un follicule dure ≈ 3 mois ; seule la phase finale, pendant la phase folliculaire, dépend de la FSH (complément).',
+      'Du stade préantral au stade préovulatoire, la croissance dure ≈ 3 mois (plus de 6 mois depuis la sortie de la réserve) ; seule la phase finale, pendant la phase folliculaire, dépend de la FSH (complément).',
       'Sélection du dominant : la FSH baisse en phase folliculaire (estradiol, inhibine B) ; seul le follicule le plus sensible survit, les autres deviennent atrétiques (complément).',
       'AMH : sécrétée par les petits follicules en croissance, marqueur de la réserve ovarienne (complément). Inhibine B : freine la FSH.',
       'Deux cellules – deux gonadotrophines : thèque + LH → androgènes ; granulosa + FSH → aromatase → estradiol (polycopié).'
@@ -163,7 +163,7 @@
         a.text((x0 + x1) / 2, y + 22, txt, 'note', { anchor: 'middle' });
       };
       brk(60, 160, 478, 'réserve fixée', 'p-grey');
-      brk(200, 560, 478, 'croissance lente (≈ 3 mois au total, compl.)', 'p-grey');
+      brk(200, 560, 478, 'croissance lente (plusieurs mois, compl.)', 'p-grey');
       brk(570, 950, 478, 'phase finale : dépend de la FSH', 'p-rose');
       brk(1170, 1490, 478, 'phase lutéale : J14–J28', 'p-amber');
       // Marqueurs hormonaux
@@ -280,7 +280,7 @@
 
       HV.spotlight(fol, a, [
         { t: 'La réserve', d: 'Les follicules primordiaux forment un stock constitué avant la naissance. Leur sortie de la réserve ne dépend pas des gonadotrophines (complément).', spot: [[110, 300, 90]] },
-        { t: 'Une croissance lente', d: 'Primaire, secondaire puis antral : la croissance dure environ trois mois. L\'AMH, sécrétée par ces petits follicules, reflète la réserve ovarienne (complément).', spot: [[200, 200, 560, 400]] },
+        { t: 'Une croissance lente', d: 'Primaire, secondaire puis antral : une croissance de plusieurs mois (≈ 3 mois du préantral au préovulatoire). L\'AMH, sécrétée par ces petits follicules, reflète la réserve ovarienne (complément).', spot: [[200, 200, 560, 400]] },
         { t: 'La phase finale dépend de la FSH', d: 'Les follicules antraux recrutés à la fin du cycle précédent ne continuent que s\'ils reçoivent assez de FSH. Ils sécrètent l\'inhibine B, qui freine la FSH.', spot: [[560, 190, 400, 410]] },
         { t: 'Sélection du dominant', d: 'En phase folliculaire, l\'estradiol et l\'inhibine B font baisser la FSH sous le seuil : seul le follicule le plus sensible continue jusqu\'au stade préovulatoire, les autres deviennent atrétiques (complément).', spot: [[60, 620, 700, 350]] },
         { t: 'Deux cellules, deux gonadotrophines', d: 'La LH stimule la synthèse d\'androgènes par la thèque interne ; la FSH stimule l\'aromatisation de ces androgènes en estradiol par la granulosa (polycopié).', spot: [[800, 620, 740, 350]] },
@@ -437,12 +437,12 @@
         vals[1].textContent = f1(L('lh')) + ' UI/L';
         vals[2].textContent = Math.round(L('e2')) + ' pg/mL';
         vals[3].textContent = f1(L('prog')) + ' ng/mL';
-        vals[4].textContent = !cyc ? (sim.s.e2 > 0.5 ? 'non sécrétoire' : 'mince') : d < 5 ? 'desquamation' : d < 14.5 ? 'prolifère' : 'sécrétoire';
+        vals[4].textContent = !cyc ? (sim.p.sopk >= 0.5 ? 'prolifératif' : sim.s.e2 > 0.5 ? 'non sécrétoire' : 'mince') : d < 5 ? 'desquamation' : d < 14.5 ? 'prolifère' : 'sécrétoire';
         const q = cyc ? glaireQ(d) : 0.15 * clamp(sim.s.e2, 0, 1);
         vals[5].textContent = q > 0.55 ? 'filante' : q > 0.25 ? 'en cours' : 'épaisse';
         vals[6].textContent = cyc && d > 15.2 ? 'plateau haut' : 'basse';
         setLines(fbT, R.e2Positive(T) && cyc ? ['positif : l\'estradiol élevé', 'déclenche le pic de LH'] : ['négatif : l\'estradiol et la', 'progestérone freinent LH et FSH']);
-        setLines(stT, cyc ? ['Cycle ovulatoire : pic de LH,', 'puis corps jaune et progestérone.'] : ['Pas de cycle ovulatoire dans ce', 'scénario : pas de pic de LH ni', 'de phase lutéale, aménorrhée.']);
+        setLines(stT, cyc ? ['Cycle ovulatoire : pic de LH,', 'puis corps jaune et progestérone.'] : ['Pas de cycle ovulatoire dans ce', 'scénario : pas de pic de LH ni', ...(sim.p.sopk >= 0.5 ? ['de phase lutéale ; spanioménorrhée', 'ou aménorrhée, endomètre exposé', 'à l\'estradiol seul (compl.).'] : ['de phase lutéale, aménorrhée.'])]);
       });
 
       HV.spotlight(endo, a, [
@@ -451,7 +451,7 @@
         { t: 'La glaire devient perméable', d: 'En période préovulatoire, l\'estradiol rend la glaire abondante, filante et perméable aux spermatozoïdes ; après l\'ovulation, la progestérone la rend infranchissable.', spot: [[X(9), 735, X(17) - X(9), 55]] },
         { t: 'Phase lutéale', d: 'Le corps jaune sécrète progestérone et estradiol : l\'endomètre devient sécrétoire, prêt pour l\'implantation ; la température basale monte de 0,3 à 0,5 °C (complément).', spot: [[X(14.6), 330, X(28) - X(14.6), 590]] },
         { t: 'Les règles', d: 'Sans grossesse, le corps jaune régresse : la chute de la progestérone et de l\'estradiol entraîne la desquamation de l\'endomètre. Le premier jour des règles est J1.', spot: [[X(1) - 10, 560, X(5) - X(1) + 20, 170]] },
-        { t: 'Lire les valeurs', d: 'Le encadré de droite donne les valeurs au jour du curseur, selon le scénario choisi dans le panneau (ménopause, déficit gonadotrope, hyperprolactinémie).', spot: [[1175, 240, 380, 735]] }
+        { t: 'Lire les valeurs', d: 'L\'encadré de droite donne les valeurs au jour du curseur, selon le scénario choisi dans le panneau (ménopause, déficit gonadotrope, hyperprolactinémie).', spot: [[1175, 240, 380, 735]] }
       ]);
     }
   }, HV.LOUPE.R(1)));
@@ -610,7 +610,7 @@
       'Sertoli (FSH) : barrière hémato-testiculaire, ABP, inhibine B (rétrocontrôle de la FSH), AMH chez le fœtus (complément sauf inhibine B).',
       'Spermatogonies → spermatocytes (méiose) → spermatides → spermatozoïdes : ≈ 74 jours (complément).',
       'Leydig (LH) → testostérone, très concentrée dans le testicule, bien plus que dans le sang (complément).',
-      'Testostérone exogène : LH et FSH freinées, spermatogenèse arrêtée. Klinefelter : tubes hyalinisés, azoospermie.',
+      'Testostérone exogène : LH et FSH freinées, spermatogenèse arrêtée (complément). Klinefelter : azoospermie (polycopié, partie 2, p. 11), tubes hyalinisés (complément).',
       'Changez de scénario dans le panneau pour voir l\'effet sur le tube.'
     ],
     source: POLY,
@@ -754,8 +754,10 @@
         if (txt > 0) return;
         txt = 0.3;
         const msg = p.exoT > 0.05 ? ['Testostérone exogène : LH et FSH freinées, la testostérone', 'intratesticulaire chute, la spermatogenèse s\'arrête.']
-          : p.sertoli < 0.5 ? ['Atteinte testiculaire (Klinefelter) : tubes hyalinisés,', 'azoospermie, inhibine B basse, FSH et LH élevées.']
-            : p.hypo < 0.5 ? ['Déficit en GnRH : sans LH ni FSH, Leydig et Sertoli', 'ne sont plus stimulées : testostérone basse, pas de spermatozoïdes.']
+          : sim.lab('tt') < 10 && (sim.lab('lh') > 9 || sim.lab('fsh') > 12) && p.sertoli >= 0.5 ? ['Atteinte testiculaire (cellules de Leydig) : testostérone', 'basse, LH élevée ; inhibine B conservée.']
+          : sim.lab('tt') < 10 && (sim.lab('lh') > 9 || sim.lab('fsh') > 12) ? ['Atteinte testiculaire (Klinefelter) : tubes hyalinisés,', 'azoospermie, inhibine B basse, FSH et LH élevées.']
+            : sim.lab('tt') >= 10 && sim.lab('inh') < 80 ? ['Atteinte des cellules de Sertoli : inhibine B basse,', 'FSH normale haute ou élevée, spermatogenèse altérée.']
+            : sim.lab('tt') < 10 ? ['Déficit en GnRH : sans LH ni FSH, Leydig et Sertoli', 'ne sont plus stimulées : testostérone basse, pas de spermatozoïdes.']
               : ['Axe normal : la LH fait produire la testostérone,', 'la FSH et la testostérone soutiennent la spermatogenèse.'];
         stT.textContent = '';
         msg.forEach((ln, i) => HV.el('tspan', { x: RX, dy: i ? '1.25em' : 0, text: ln }, stT));
@@ -876,10 +878,10 @@
 
       HV.spotlight(sexd, a, [
         { t: 'Une gonade bipotentielle', d: 'Au début, la gonade peut devenir testicule ou ovaire, et l\'embryon possède à la fois les canaux de Wolff et de Müller (complément).', spot: [[60, 320, 220, 170]] },
-        { t: 'SRY fait le testicule', d: 'La différenciation testiculaire dépend principalement du chromosome Y (polycopié) : SRY oriente la gonade vers le testicule.', spot: [[320, 190, 450, 160]] },
+        { t: 'SRY fait le testicule', d: 'La différenciation testiculaire dépend principalement du chromosome Y (polycopié, partie 2, p. 1) : son gène SRY oriente la gonade vers le testicule (complément).', spot: [[320, 190, 450, 160]] },
         { t: 'AMH et testostérone', d: 'Les cellules de Sertoli sécrètent l\'AMH, qui fait régresser les canaux de Müller ; les cellules de Leydig sécrètent la testostérone, qui maintient les canaux de Wolff (complément).', spot: [[800, 186, 760, 170]] },
         { t: 'La DHT virilise les organes externes', d: 'La 5α-réductase transforme la testostérone en DHT, nécessaire à la formation du pénis, du scrotum et de la prostate (complément).', spot: [[800, 330, 760, 120]] },
-        { t: 'La voie féminine', d: 'Sans testicule, pas d\'AMH ni de testostérone : les canaux de Müller forment trompes et utérus, les canaux de Wolff régressent, les organes externes sont féminins (polycopié).', spot: [[320, 460, 1240, 190]] },
+        { t: 'La voie féminine', d: 'Sans testicule, le développement est féminin (polycopié, partie 2, p. 1) : sans AMH ni testostérone, les canaux de Müller forment trompes et utérus, les canaux de Wolff régressent, les organes externes sont féminins (complément).', spot: [[320, 460, 1240, 190]] },
         { t: 'Trois exemples', d: 'Selon l\'étape bloquée, gonades, canaux et organes externes ne concordent plus (complément ; HCS : polycopié, partie 1).', spot: [[60, 700, 1490, 270]] }
       ]);
     }
@@ -991,7 +993,7 @@
       a.text(RX + 18, 514, ['Avant la puberté : DHEA-S surrénalien ↑,', 'indépendante de l\'axe gonadotrope ;', 'pilosité de la fille (polycopié).'], 'note', { lh: 1.25 });
       box(a, RX, 598, RW, 128, 'p-red', null, 'zgo-girl');
       a.text(RX + 18, 628, 'Seuils (polycopié)', 'lbl-s strong');
-      a.text(RX + 18, 656, ['précoce : seins < 8 ans, testicules < 9 ans', 'retardée : > 13 ans (F), > 14 ans (G)', 'aménorrhée primaire : pas de règles à 15 ans'], 'note', { lh: 1.25 });
+      a.text(RX + 18, 656, ['précoce : seins < 8 ans, testicules < 9 ans', 'retardée : > 13 ans (F), > 14 ans (G)', 'aménorrhée primaire : pas de règles à 15 ans ou 3 ans après S2'], 'note', { lh: 1.25 });
 
       /* ---- Stades de Tanner ---- */
       const TY = 752, TC = (k) => 340 + k * 190;
