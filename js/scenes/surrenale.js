@@ -33,7 +33,7 @@
     const bF = docF * e11;
     // Zone réticulée : DHEA, sulfatée en DHEA-S ; la 17-OHP accumulée est détournée vers la Δ4-androstènedione.
     const dhea = 0.25 * F;
-    const adione = 0.2 * F + ohp * C;
+    const adione = 0.2 * F + ohp * 0.3;
     // Zone glomérulée : progestérone → DOC (CYP21) → corticostérone → aldostérone (CYP11B2, intacte ici).
     const progG = (0.1 * G) / (e21 + C);
     const docG = (progG * e21) / (1 + C);
@@ -43,7 +43,7 @@
       preg: F + 0.1 * G, ohpreg, dhea, dheas: dhea, prog: progF + progG, ohp, adione, testo: adione,
       doc: docF + docG, s11, b: bF + bG, cort, aldo,
       // Flux le long des flèches du schéma
-      J: { st: F + 0.1 * G, h17: 0.6 * F + 0.25 * F, ly: dhea, sult: dhea, hsd1: 0.15 * F + 0.1 * G, hsd2: 0.6 * F, ly2: ohp * C, hsd17: adione,
+      J: { st: F + 0.1 * G, h17: 0.6 * F + 0.25 * F, ly: dhea, sult: dhea, hsd1: 0.15 * F + 0.1 * G, hsd2: 0.6 * F, ly2: ohp * 0.3, hsd17: adione,
         c21g: progF * e21 + progG * e21, c21f: ohp * e21, c11g: bF + bG, c11f: cort, as: aldo, h17b: 0.6 * F }
     };
   }
@@ -71,7 +71,8 @@
       const mc = 0.8 * s.aldo + 0.2 * s.doc;
       const ang = clamp(ex(-1.8 * (mc - 1)), 0.03, 12);
       const k = clamp(4.2 - 1.1 * ln(Math.max(mc, 0.05)), 2.6, 6.8);
-      const troph = p.syn > 0 ? s.troph : clamp(pw(Math.max(acth, 0.01), 0.8), 0.15, 1.25);
+      // Excès chronique d'ACTH : hyperplasie et hypertrophie surrénaliennes (polycopié p. 72).
+      const troph = p.syn > 0 ? s.troph : clamp(pw(Math.max(acth, 0.01), 0.8), 0.15, 2);
       delete r.J;
       return Object.assign(r, { acth, ang, mc, k, troph });
     },
@@ -98,10 +99,10 @@
     ],
     scenarios: [
       { id: 'eu', name: 'Surrénale normale', note: 'L\'ACTH commande les zones fasciculée et réticulée, l\'angiotensine II et la kaliémie la zone glomérulée.', p: {} },
-      { id: 'cortico', name: 'Insuffisance corticotrope', note: 'Atteinte hypothalamo-hypophysaire : ACTH basse, cortisol et androgènes surrénaliens bas ; aldostérone et rénine normales, la zone glomérulée dépendant du SRAA (polycopié p. 82 et 85).', p: { pit: 0.05 } },
+      { id: 'cortico', name: 'Insuffisance corticotrope', note: 'Atteinte hypothalamo-hypophysaire : ACTH basse, cortisol et androgènes surrénaliens bas ; aldostérone et rénine normales, la zone glomérulée dépendant du SRAA (polycopié p. 85 et 88).', p: { pit: 0.05 } },
       { id: 'periph', name: 'Insuffisance surrénale périphérique', note: 'Destruction des deux surrénales : tous les stéroïdes baissent (minéralocorticoïdes, glucocorticoïdes, androgènes) ; ACTH et rénine élevées, hyperkaliémie, hyponatrémie (polycopié p. 85).', p: { adr: 0.06 } },
       { id: 'b21', name: 'Bloc en 21-hydroxylase, forme classique', note: 'CYP21A2, 95 % des HCS : cortisol et aldostérone effondrés, 17-OHP et progestérone accumulées et détournées vers les androgènes ; ACTH et rénine élevées, perte de sel (polycopié p. 80-81).', p: { cyp21: 0.03 } },
-      { id: 'b21nc', name: 'Bloc en 21-hydroxylase, forme non classique', note: 'L\'ACTH compense : cortisol conservé, 17-OHP et androgènes modérément élevés ; diagnostic par la 17-OHP de base ou après Synacthène (polycopié p. 82).', p: { cyp21: 0.35 } },
+      { id: 'b21nc', name: 'Bloc en 21-hydroxylase, forme non classique', note: 'Cortisol conservé avec une ACTH normale ou discrètement augmentée ; 17-OHP et androstènedione modérément élevées ; diagnostic par la 17-OHP de base ou après Synacthène (polycopié p. 82).', p: { cyp21: 0.35 } },
       { id: 'b21syn', name: 'Forme non classique sous Synacthène', note: 'Après ACTH 1-24, la 17-OHP s\'élève franchement : c\'est le test diagnostique de la forme non classique (polycopié p. 82).', p: { cyp21: 0.35, syn: 1 } },
       { id: 'b11', name: 'Bloc en 11β-hydroxylase (complément)', note: 'Environ 5 % des HCS (CYP11B1, complément) : cortisol bas, ACTH élevée ; 11-désoxycortisol et DOC accumulés. La DOC est minéralocorticoïde : HTA, hypokaliémie, rénine et aldostérone basses ; virilisation.', p: { cyp11b1: 0.03 } }
     ],

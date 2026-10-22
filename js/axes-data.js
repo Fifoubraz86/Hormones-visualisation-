@@ -213,7 +213,7 @@
     id: 'medullo', card: { side: 'L', row: 5 }, color: 'p-red', target: [765, 456],
     name: 'Médullosurrénale', sub: 'Système sympathique · cellules chromaffines · catécholamines',
     lead: 'Les nerfs splanchniques du système sympathique stimulent les cellules chromaffines, qui libèrent l\'adrénaline (80 à 95 %) et la noradrénaline (10 à 20 %) stockées dans leurs granules. Les glucocorticoïdes du cortex stimulent leur synthèse. Dans la cellule (et dans la tumeur), la COMT transforme en continu les catécholamines en métanéphrines : c\'est ce que l\'on dose.',
-    points: ['Réaction de combat ou de fuite : fréquence cardiaque ↑, pression artérielle ↑, vasoconstriction.', 'Les catécholamines participent à la contre-régulation de l\'hypoglycémie ; leurs signes adrénergiques alertent le patient.', 'Les glucocorticoïdes augmentent la tyrosine hydroxylase et la PNMT : seule la médullosurrénale, baignée de cortisol, fabrique beaucoup d\'adrénaline.', 'Profil sécrétoire (complément) : adrénergique (métanéphrine ↑, paroxysmes, tachycardie, hyperglycémie), noradrénergique (normétanéphrine ↑, HTA plus permanente ; paragangliomes extra-surrénaliens), dopaminergique (3-méthoxytyramine ↑, souvent peu d\'HTA ; paragangliomes, gène SDHB).'],
+    points: ['Réaction de combat ou de fuite : fréquence cardiaque ↑, pression artérielle ↑, vasoconstriction.', 'Les catécholamines participent à la contre-régulation de l\'hypoglycémie ; leurs signes adrénergiques alertent le patient (polycopié, partie 2, p. 67).', 'Les glucocorticoïdes augmentent la tyrosine hydroxylase et la PNMT (polycopié p. 74) : seule la médullosurrénale, baignée de cortisol, fabrique beaucoup d\'adrénaline (complément).', 'Profil sécrétoire (complément) : adrénergique (métanéphrine ↑, paroxysmes, tachycardie, hyperglycémie), noradrénergique (normétanéphrine ↑, HTA plus permanente ; paragangliomes extra-surrénaliens), dopaminergique (3-méthoxytyramine ↑, souvent peu d\'HTA ; paragangliomes, gène SDHB).'],
     nodes: [
       { id: 'nerve', x: 230, y: 380, organ: 'nerve', label: 'Nerfs splanchniques', sub: 'système sympathique', color: 'p-red' },
       { id: 'med', x: 600, y: 380, organ: 'adrenalKidney', label: 'Médullosurrénale', sub: 'cellules chromaffines', color: 'p-red' },
@@ -254,7 +254,7 @@
       { id: 'breast', x: 1330, y: 600, organ: 'breast', s: 0.85, label: 'Seins, os, peau', sub: 'effets trophiques, HDL ↑', color: 'p-rose' },
       { id: 'kiss', at: 'arc', dot: 9, hit: 16, leader: true, lx: 270, ly: -150, anchor: 'end', label: 'Neurones à kisspeptine', sub: 'noyau arqué', color: 'p-magenta', info: 'Les neurones à kisspeptine de l\'hypothalamus (noyau arqué, complément) stimulent les neurones à GnRH (polycopié, partie 2, p. 3).' },
       { id: 'aff', x: 620, y: 718, label: 'Neurones à GABA, à glutamate', w: 300, sub: 'autres afférences', color: 'p-violet', info: 'Influences distinctes des kisspeptines sur les neurones à GnRH (polycopié, partie 2, p. 3) : le glutamate stimule, le GABA module (complément).' },
-      { id: 'lep', x: 600, y: 872, organ: 'fat', s: 0.7, label: 'Tissu adipeux blanc', sub: 'leptine (permissif)', color: 'p-amber', info: 'Effet permissif indirect de la leptine, sécrétée par le tissu adipeux blanc, sur les neurones à GnRH (polycopié).' }
+      { id: 'lep', x: 600, y: 872, organ: 'fat', s: 0.7, label: 'Tissu adipeux blanc', sub: 'leptine (permissif)', color: 'p-amber', info: 'Effet permissif indirect de la leptine, sécrétée par le tissu adipeux blanc, sur les neurones à GnRH (polycopié, partie 2, p. 4).' }
     ],
     links: [
       { from: 'hypo', to: 'pit', kind: 'stim', mol: 'gnrh', mod: R.gnrhPulse, rate: 2, labelOff: 150 },
@@ -290,7 +290,7 @@
       { id: 'brain', x: 1330, y: 620, organ: 'brainLateral', s: 0.85, label: 'Cerveau, peau', sub: 'libido · pilosité, sébum', color: 'p-blue' },
       { id: 'kiss', at: 'arc', dot: 9, hit: 16, leader: true, lx: 270, ly: -150, anchor: 'end', label: 'Neurones à kisspeptine', sub: 'noyau arqué', color: 'p-magenta', info: 'Les neurones à kisspeptine de l\'hypothalamus (noyau arqué, complément) stimulent les neurones à GnRH (polycopié, partie 2, p. 3).' },
       { id: 'aff', x: 620, y: 718, label: 'Neurones à GABA, à glutamate', w: 300, sub: 'autres afférences', color: 'p-violet', info: 'Influences distinctes des kisspeptines sur les neurones à GnRH (polycopié, partie 2, p. 3) : le glutamate stimule, le GABA module (complément).' },
-      { id: 'lep', x: 600, y: 872, organ: 'fat', s: 0.7, label: 'Tissu adipeux blanc', sub: 'leptine (permissif)', color: 'p-amber', info: 'Effet permissif indirect de la leptine, sécrétée par le tissu adipeux blanc, sur les neurones à GnRH (polycopié).' }
+      { id: 'lep', x: 600, y: 872, organ: 'fat', s: 0.7, label: 'Tissu adipeux blanc', sub: 'leptine (permissif)', color: 'p-amber', info: 'Effet permissif indirect de la leptine, sécrétée par le tissu adipeux blanc, sur les neurones à GnRH (polycopié, partie 2, p. 4).' }
     ],
     links: [
       { from: 'hypo', to: 'pit', kind: 'stim', mol: 'gnrh', mod: R.gnrhPulse, rate: 2, labelOff: 150 },

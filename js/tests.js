@@ -26,9 +26,12 @@
       interpret(v, sim) {
         // Seules les valeurs prélevées aux temps du protocole comptent (T0, 30 et 60 min).
         const peak = Math.max(...v);
-        if (peak >= 500) return { tone: 'good', text: `Cortisol maximal sur les prélèvements : ${n0(peak)} nmol/L (≥ 500 nmol/L, 18 µg/dL) : réponse normale. Une insuffisance surrénale est éliminée (sauf insuffisance corticotrope récente, avant l'atrophie surrénalienne).` };
+        // Bloc en 21-hydroxylase : le test sert surtout à doser la 17-OHP stimulée (polycopié p. 82).
+        const b21 = sim.p && sim.p.cyp21 < 0.9;
+        const ohp = b21 ? ` 17-OHP après stimulation : ${sim.lab('ohp').toFixed(1).replace('.', ',')} × N : élévation en faveur d'un bloc en 21-hydroxylase (polycopié p. 82).` : '';
+        if (peak >= 500) return { tone: b21 ? 'warn' : 'good', text: `Cortisol maximal sur les prélèvements : ${n0(peak)} nmol/L (≥ 500 nmol/L, 18 µg/dL) : réponse normale. Une insuffisance surrénale est éliminée (sauf insuffisance corticotrope récente, avant l'atrophie surrénalienne).` + ohp };
         const acth = sim.lab('acth') > 52; // ACTH endogène (le Synacthène n'est pas dosé comme ACTH)
-        return { tone: 'bad', text: `Cortisol maximal sur les prélèvements : ${n0(peak)} nmol/L (< 500) : réponse insuffisante. ` + (acth ? 'Avec une ACTH élevée : insuffisance surrénale périphérique.' : 'Avec une ACTH basse ou normale : insuffisance corticotrope ancienne, avec atrophie surrénalienne.') };
+        return { tone: 'bad', text: `Cortisol maximal sur les prélèvements : ${n0(peak)} nmol/L (< 500) : réponse insuffisante. ` + (acth ? (b21 ? 'Avec une ACTH élevée : insuffisance surrénale périphérique, ici par bloc en 21-hydroxylase.' : 'Avec une ACTH élevée : insuffisance surrénale périphérique.') : 'Avec une ACTH basse ou normale : insuffisance corticotrope ancienne, avec atrophie surrénalienne.') + ohp };
       }
     },
     {
@@ -125,7 +128,7 @@
   T.raa = [{
     id: 'saline', name: 'Test de charge sodée', poly: true,
     what: 'Confirme l\'autonomie de l\'aldostérone : l\'expansion volémique la freine-t-elle ?',
-    proto: 'Perfusion de 2 L de sérum salé isotonique en 4 h, patient allongé ; aldostérone avant et après. Les seuils sont des compléments (variables selon les centres).',
+    proto: 'Principe : expansion volémique par charge sodée (polycopié p. 77). Perfusion de 2 L de sérum salé isotonique en 4 h, en position couchée ou assise ; aldostérone avant et après. Protocole et seuils : complément (Endocrine Society 2016), variables selon les centres.',
     unit: 'pmol/L', label: 'Aldostérone', thr: 140, thrDir: 'below', thrLabel: 'freinage normal < 140 pmol/L (5 ng/dL)',
     span: 4, xUnit: 'h', duration: 14,
     samples: [{ x: 0.04, label: '0 h' }, { x: 0.5, label: '2 h' }, { x: 1, label: '4 h' }],

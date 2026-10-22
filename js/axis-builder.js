@@ -390,10 +390,10 @@
           const cg = a.el('g', { class: 'cycle', transform: 'translate(600 172)', 'data-info': ax.id + '.clock' });
           HV.INFO[ax.id + '.clock'] = { t: 'Cycle ovarien simulé', k: '28 jours', d: 'J1 : règles. J1–J14 : phase folliculaire. J14 : ovulation déclenchée par le pic de LH. J14–J28 : phase lutéale (corps jaune).', live: () => 'Jour ' + Math.floor(T.d) };
           a.el('rect', { x: 0, y: 0, width: 420, height: 16, rx: 8, class: 'cycle-foll' }, cg);
-          a.el('rect', { x: 210, y: 0, width: 210, height: 16, rx: 8, class: 'cycle-lut' }, cg);
+          a.el('rect', { x: 195, y: 0, width: 225, height: 16, rx: 8, class: 'cycle-lut' }, cg);
           a.el('rect', { x: 0, y: 0, width: 75, height: 16, rx: 8, class: 'cycle-mens' }, cg);
           a.text(0, 40, 'J1 règles', 'note', null, cg);
-          a.text(210, 40, 'J14 ovulation', 'note', { anchor: 'middle' }, cg);
+          a.text(195, 40, 'J14 ovulation', 'note', { anchor: 'middle' }, cg);
           a.text(420, 40, 'J28', 'note', { anchor: 'end' }, cg);
           cycleMark = a.el('path', { d: 'M 0,-4 L -8,-16 L 8,-16 Z', class: 'cycle-mark' }, cg);
           cycleTxt = a.text(440, 15, '', 'clock-t', null, cg);

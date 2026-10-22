@@ -67,7 +67,7 @@
     kidney: { t: 'Reins', k: 'Rénine, EPO, calcitriol', d: 'Organe endocrine : rénine (système rénine-angiotensine-aldostérone), érythropoïétine, 1α-hydroxylation de la vitamine D. Cible de l\'ADH et de l\'aldostérone.' },
     adrenal: { t: 'Surrénales', k: 'Cortex et médullaire', d: 'Cortex : aldostérone, cortisol, androgènes. Médullaire : adrénaline et noradrénaline.' },
     pancreas: { t: 'Pancréas endocrine', k: 'Îlots de Langerhans', d: 'Cellules β (insuline), α (glucagon), δ (somatostatine).' },
-    ovary: { t: 'Ovaires', k: 'Axe gonadotrope féminin', d: 'Œstradiol, progestérone, inhibine, AMH. Fonctionnement cyclique sous LH et FSH.' },
+    ovary: { t: 'Ovaires', k: 'Axe gonadotrope féminin', d: 'Estradiol, progestérone, inhibine B, AMH (complément). Fonctionnement cyclique sous LH et FSH.' },
     testis: { t: 'Testicules', k: 'Axe gonadotrope masculin', d: 'Cellules de Leydig (testostérone, sous LH) et de Sertoli (spermatogenèse, inhibine B, sous FSH).' },
 
     /* ---- Structures cellulaires et vaisseaux ---- */

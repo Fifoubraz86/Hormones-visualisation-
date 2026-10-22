@@ -113,7 +113,7 @@
           if (!fig) sc.removeAttribute('data-figs');
         }
         miss.setAttribute('visibility', ind && !fig ? 'visible' : 'hidden');
-        scTxt.textContent = !ind ? 'non indiquée : TSH non basse' : P.auto > 0.02 ? 'nodule chaud (fig. 9A du polycopié)' : P.trab > 0.05 ? 'fixation diffuse (fig. 9B) ; inutile si TRAb positifs (p. 30)' : P.levo > 0.02 ? 'hypofixation globale (apport de LT4 ; complément)' : 'TSH basse : autre cause';
+        scTxt.textContent = !ind ? 'non indiquée : TSH non basse' : P.auto > 0.02 ? 'nodule chaud (fig. 9A du polycopié)' : P.trab > 0.05 ? 'diffuse (9B) : inutile si TRAb +' : P.levo > 0.02 ? 'hypofixation (LT4 ; complément)' : 'TSH basse : autre cause';
       });
 
       /* --- Circulation --- */
