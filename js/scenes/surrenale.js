@@ -111,10 +111,10 @@
       if (p.cyp11b1 < 0.9 && sx > 3) return { tone: 'bad', label: 'Bloc en 11β-hydroxylase', text: 'Complément : cortisol bas et ACTH élevée ; 11-désoxycortisol et DOC accumulés. La DOC, minéralocorticoïde, retient le sodium : HTA et hypokaliémie avec rénine et aldostérone basses. Androgènes surrénaliens en excès : virilisation.' };
       if (p.cyp21 < 0.9 && oh > 3) {
         if (c < 275) return { tone: 'bad', label: 'Bloc en 21-hydroxylase, forme classique', text: 'Cortisol bas, ACTH élevée, 17-OHP très élevée, androgènes en excès ; aldostérone basse avec rénine élevée, hyperkaliémie et hyponatrémie : forme avec perte de sel. Fille : virilisation des organes génitaux externes. Dépistage néonatal : 17-OHP à J3 (polycopié p. 80-81).' };
-        return { tone: 'warn', label: 'Bloc en 21-hydroxylase, forme non classique', text: 'Cortisol maintenu au prix d\'une ACTH élevée ; 17-OHP et androgènes augmentés' + (p.syn > 0 ? ', 17-OHP explosive sous Synacthène' : '') + ' : pubarche précoce, avance d\'âge osseux, hyperandrogénie de l\'adolescente (polycopié p. 81-82).' };
+        return { tone: 'warn', label: 'Bloc en 21-hydroxylase, forme non classique', text: 'Cortisol conservé, ACTH normale ou discrètement augmentée ; 17-OHP et androgènes augmentés' + (p.syn > 0 ? ', 17-OHP explosive sous Synacthène' : '') + ' : pubarche précoce, avance d\'âge osseux, hyperandrogénie de l\'adolescente (polycopié p. 81-82).' };
       }
       if (c < 138 && a > 52) return { tone: 'bad', label: 'Insuffisance surrénale périphérique', text: 'Cortisol bas, ACTH élevée (mélanodermie), aldostérone basse et rénine élevée, SDHEA bas : toutes les hormones corticosurrénaliennes manquent (polycopié p. 85). Hyperkaliémie, hyponatrémie, hypotension.' };
-      if (c < 138) return { tone: 'bad', label: 'Insuffisance corticotrope', text: 'Cortisol bas avec ACTH basse ou inadaptée ; aldostérone et rénine normales, kaliémie normale : la zone glomérulée dépend du SRAA. Androgènes surrénaliens bas (polycopié p. 82 et 85).' };
+      if (c < 138) return { tone: 'bad', label: 'Insuffisance corticotrope', text: 'Cortisol bas avec ACTH basse ou inadaptée ; aldostérone et rénine normales, kaliémie normale : la zone glomérulée dépend du SRAA. Androgènes surrénaliens bas (polycopié p. 85 et 88).' };
       if (ren > 40 || ren < 5) return { tone: 'warn', label: 'Rénine anormale', text: 'Le système rénine-angiotensine compense un défaut ou un excès d\'activité minéralocorticoïde.' };
       return { tone: 'good', label: 'Fonction surrénalienne normale', text: 'Cortisol, aldostérone et androgènes surrénaliens dans les normes ; précurseurs non accumulés.' };
     }
@@ -200,7 +200,7 @@
     'sr-preg': { t: 'Prégnénolone', k: 'Premier stéroïde · C₂₁H₃₂O₂', d: 'Produite dans les trois zones par clivage de la chaîne latérale du cholestérol (P450scc) ; chaque zone la modifie ensuite avec ses enzymes propres (polycopié p. 70, figure 26).' },
     'sr-ohpreg': { t: '17-OH-prégnénolone', k: 'Voie Δ5 · C₂₁H₃₂O₃', d: '17α-hydroxylation par le CYP17, présent dans les zones fasciculée et réticulée mais pas dans la glomérulée (complément).' },
     'sr-dhea': { t: 'DHEA', k: 'Déhydroépiandrostérone · C₁₉H₂₈O₂', d: 'Androgène surrénalien de la zone réticulée, sous la dépendance de l\'ACTH (polycopié p. 73). Obtenue par l\'activité 17,20-lyase du CYP17.' },
-    'sr-dheas': { t: 'SDHEA (DHEA-S)', k: 'Sulfate de DHEA · C₁₉H₂₈O₅S', d: 'Forme sulfatée et circulante de la DHEA (sulfotransférase SULT2A1, complément). Bas dans l\'adénome cortisolique et dans les insuffisances surrénales, élevé dans le corticosurrénalome (polycopié p. 80).' },
+    'sr-dheas': { t: 'SDHEA (DHEA-S)', k: 'Sulfate de DHEA · C₁₉H₂₈O₅S', d: 'Forme sulfatée et circulante de la DHEA (sulfotransférase SULT2A1, complément). Bas dans l\'adénome cortisolique et dans les insuffisances surrénales, élevé dans le corticosurrénalome (polycopié p. 80 et 85).' },
     'sr-prog': { t: 'Progestérone', k: 'Voie Δ4 · C₂₁H₃₀O₂', d: 'Formée par la 3β-hydroxystéroïde déshydrogénase. Substrat de la 21-hydroxylase vers la DOC ; s\'accumule dans le bloc en 21-hydroxylase.' },
     'sr-ohp': { t: '17-hydroxyprogestérone (17-OHP)', k: 'Marqueur du bloc en 21-hydroxylase · C₂₁H₃₀O₃', d: 'Substrat de la 21-hydroxylase vers le 11-désoxycortisol. S\'accumule massivement en cas de déficit ; dosée au 3e jour de vie (test de Guthrie) et, dans les formes non classiques, de base ou après test au Synacthène (polycopié p. 81-82).' },
     'sr-adione': { t: 'Δ4-androstènedione', k: 'Précurseur de la testostérone · C₁₉H₂₆O₂', d: 'Produite par la zone réticulée (polycopié p. 73). Augmentée dans les blocs en 21- et 11β-hydroxylase, par détournement des précurseurs accumulés.' },
@@ -208,10 +208,10 @@
     'sr-doc': { t: '11-désoxycorticostérone (DOC)', k: 'Minéralocorticoïde · C₂₁H₃₀O₃', d: 'Produit de la 21-hydroxylase sur la progestérone. Minéralocorticoïde actif (complément) : son excès dans le bloc en 11β-hydroxylase retient le sodium, donne une HTA avec hypokaliémie et freine la rénine.' },
     'sr-s11': { t: '11-désoxycortisol (composé S)', k: 'Précurseur immédiat du cortisol · C₂₁H₃₀O₄', d: 'Produit de la 21-hydroxylase sur la 17-OHP ; converti en cortisol par la 11β-hydroxylase. S\'accumule dans le bloc en 11β-hydroxylase (complément).' },
     'sr-b': { t: 'Corticostérone', k: 'C₂₁H₃₀O₄', d: 'Intermédiaire de la voie de l\'aldostérone dans la zone glomérulée (11β-hydroxylation de la DOC).' },
-    'sr-cort': { t: 'Cortisol', k: 'Principal glucocorticoïde · C₂₁H₃₀O₅', d: 'Produit par la zone fasciculée sous ACTH ; freine la CRH et l\'ACTH (rétrocontrôle négatif). Pic en début de matinée (polycopié p. 71).' },
+    'sr-cort': { t: 'Cortisol', k: 'Principal glucocorticoïde · C₂₁H₃₀O₅', d: 'Produit par la zone fasciculée sous ACTH ; freine la CRH et l\'ACTH (rétrocontrôle négatif). Pic en début de matinée (polycopié p. 72-73).' },
     'sr-aldo': { t: 'Aldostérone', k: 'Minéralocorticoïde · C₂₁H₂₈O₅', d: 'Produite par la zone glomérulée grâce à l\'aldostérone synthase (CYP11B2) ; agit sur le tube distal et le canal collecteur : réabsorption du sodium, excrétion du potassium (polycopié p. 70). Réglée par le SRAA et la kaliémie.' },
-    'sr-zg': { t: 'Zone glomérulée', k: 'Couche la plus externe', d: 'Principal site de production de l\'aldostérone (aldostérone synthase). Commandée par l\'angiotensine II et la kaliémie, peu par l\'ACTH : elle est préservée dans l\'insuffisance corticotrope (polycopié p. 70 et 82).' },
-    'sr-zf': { t: 'Zone fasciculée', k: '75 à 80 % du cortex', d: 'Produit le cortisol sous le contrôle de l\'ACTH, avec un rythme circadien (polycopié p. 71).' },
+    'sr-zg': { t: 'Zone glomérulée', k: 'Couche la plus externe', d: 'Principal site de production de l\'aldostérone (aldostérone synthase). Commandée par l\'angiotensine II et la kaliémie, peu par l\'ACTH : elle est préservée dans l\'insuffisance corticotrope (polycopié p. 70, 72 et 85).' },
+    'sr-zf': { t: 'Zone fasciculée', k: '75 à 80 % du cortex', d: 'Produit le cortisol sous le contrôle de l\'ACTH, avec un rythme circadien (polycopié p. 72-73).' },
     'sr-zr': { t: 'Zone réticulée', k: 'Couche la plus interne', d: 'Produit les androgènes surrénaliens : DHEA, DHEA-S, androstènedione ; dépendante de l\'axe hypothalamo-hypophyso-surrénalien (polycopié p. 73).' },
     'sr-acth': { t: 'ACTH', k: 'Axe corticotrope', d: 'Stimule StAR et les enzymes des zones fasciculée et réticulée. Quand le cortisol baisse (bloc, insuffisance surrénale), le rétrocontrôle est levé et l\'ACTH monte. Clic : axe corticotrope.' },
     'sr-ang': { t: 'Angiotensine II et kaliémie', k: 'Système rénine-angiotensine-aldostérone', d: 'Commandent la zone glomérulée. Une activité minéralocorticoïde insuffisante élève la rénine ; un excès (DOC du bloc en 11β-hydroxylase) la freine. Clic : SRAA.' },
@@ -221,7 +221,7 @@
     'sr-e-ly': { t: 'CYP17 · 17,20-lyase', k: 'Zone réticulée', d: 'Coupe la chaîne latérale en C17 : stéroïdes en C19, les androgènes (DHEA, androstènedione).' },
     'sr-e-21': { t: 'CYP21A2 · 21-hydroxylase', k: 'Gène sur le chromosome 6p21.3', d: 'Indispensable à la production du cortisol et de l\'aldostérone. Son déficit, autosomique récessif, cause 95 % des hyperplasies congénitales des surrénales (polycopié p. 80).' },
     'sr-e-11': { t: 'CYP11B1 · 11β-hydroxylase', k: 'Zone fasciculée', d: 'Dernière étape du cortisol (11-désoxycortisol → cortisol) et 11β-hydroxylation de la DOC. Son déficit (environ 5 % des HCS) est un complément au polycopié.' },
-    'sr-e-as': { t: 'CYP11B2 · aldostérone synthase', k: 'Zone glomérulée', d: 'Hydroxylations en 11β et 18, puis oxydation en 18 : corticostérone → 18-OH-corticostérone → aldostérone (polycopié p. 70 ; détail : complément).' },
+    'sr-e-as': { t: 'CYP11B2 · aldostérone synthase', k: 'Zone glomérulée', d: 'Hydroxylations en 11β et 18, puis oxydation en 18 : corticostérone → 18-OH-corticostérone → aldostérone (polycopié p. 70 et figure 26).' },
     'sr-e-sult': { t: 'SULT2A1', k: 'Sulfotransférase', d: 'Sulfate la DHEA en DHEA-S, forme circulante abondante (complément).' },
     'sr-e-17b': { t: '17β-HSD', k: 'Gonades et périphérie', d: 'Réduit la Δ4-androstènedione en testostérone (complément).' }
   });
@@ -247,7 +247,7 @@
       'Bloc en 11β-hydroxylase (complément) : 11-désoxycortisol et DOC élevés, HTA avec hypokaliémie.',
       'Valeurs des précurseurs exprimées par rapport à la normale (× N), à titre pédagogique.'
     ],
-    source: 'Source : Polycopié de sémiologie endocrinienne, CEEDMM, 2e édition (2023), partie 1, p. 70-73 et 80-85, figure 26 ; compléments signalés.',
+    source: 'Source : Polycopié de sémiologie endocrinienne, CEEDMM, 2e édition (2023), partie 1, p. 61, 70-73, 80-85 et 88-89, figure 26 ; compléments signalés.',
     legend: new Set(['chol', 'acth', 'angio', 'k', 'cortisol', 'aldo', 'dhea']),
     build(g, a) {
       def.sim = sim;
@@ -397,7 +397,7 @@
 
       HV.spotlight(def, a, [
         { t: 'Le cholestérol entre dans la mitochondrie', d: 'StAR transporte le cholestérol vers la membrane mitochondriale interne : c\'est l\'étape limitante, stimulée par l\'ACTH. La P450scc (CYP11A1) clive sa chaîne latérale et forme la prégnénolone (polycopié p. 70).', spot: [[COL.f, ROW[1], 190], [COL.g, ROW[2], 170]] },
-        { t: 'Zone glomérulée : l\'aldostérone', d: 'Sans CYP17, la zone glomérulée ne fabrique que des minéralocorticoïdes : progestérone, DOC, corticostérone, puis aldostérone par l\'aldostérone synthase. Elle obéit à l\'angiotensine II et à la kaliémie (SRAA).', spot: [[COL.g, 560, 360]] },
+        { t: 'Zone glomérulée : l\'aldostérone', d: 'Sans CYP17 (complément), la zone glomérulée ne fabrique que des minéralocorticoïdes : progestérone, DOC, corticostérone, puis aldostérone par l\'aldostérone synthase. Elle obéit à l\'angiotensine II et à la kaliémie (SRAA).', spot: [[COL.g, 560, 360]] },
         { t: 'Zone fasciculée : le cortisol', d: 'Sous ACTH, la 17α-hydroxylation (CYP17) oriente vers le cortisol : 17-OHP, 11-désoxycortisol (21-hydroxylase), cortisol (11β-hydroxylase). Le cortisol freine en retour la CRH et l\'ACTH.', spot: [[COL.f, 540, 330]] },
         { t: 'Zone réticulée : les androgènes', d: 'La 17,20-lyase du CYP17 forme la DHEA, sulfatée en SDHEA, et la Δ4-androstènedione, précurseur de la testostérone. Ces androgènes dépendent de l\'ACTH (polycopié p. 73).', spot: [[COL.r, 540, 330]] },
         { t: 'Bloc en 21-hydroxylase', d: 'Choisissez le scénario : la progestérone et la 17-OHP s\'accumulent et partent vers les androgènes ; cortisol et aldostérone chutent, l\'ACTH et la rénine montent (95 % des HCS).', spot: [[COL.f, ROW[3], 200], [COL.g, ROW[4], 170], [COL.r, ROW[3], 170]] },
