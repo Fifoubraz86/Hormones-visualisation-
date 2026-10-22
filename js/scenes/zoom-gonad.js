@@ -778,7 +778,7 @@
   Object.assign(HV.INFO, {
     'zgo-bip': { t: 'Gonade bipotentielle', k: 'Crête génitale (complément)', d: 'Au début de la vie embryonnaire, la gonade est indifférenciée et l\'embryon possède les deux systèmes de canaux : canaux de Wolff et canaux de Müller.' },
     'zgo-sry': { t: 'SRY', k: 'Gène du chromosome Y', d: 'La différenciation testiculaire dépend principalement de la présence du chromosome Y (polycopié). SRY déclenche (via SOX9) la différenciation des cellules de Sertoli (complément).' },
-    'zgo-amh': { t: 'AMH (hormone antimüllérienne)', k: 'Cellules de Sertoli fœtales (complément)', d: 'Fait régresser les canaux de Müller du côté où elle est sécrétée.' },
+    'zgo-amh-fet': { t: 'AMH (hormone antimüllérienne)', k: 'Cellules de Sertoli fœtales (complément)', d: 'Fait régresser les canaux de Müller du côté où elle est sécrétée.' },
     'zgo-wolff': { t: 'Canaux de Wolff', k: 'Testostérone (complément)', d: 'La testostérone, à forte concentration locale, les stabilise : épididyme, canal déférent, vésicules séminales. Sans testostérone, ils régressent.' },
     'zgo-muller': { t: 'Canaux de Müller', k: 'Trompes, utérus, haut du vagin (complément)', d: 'Se développent en l\'absence d\'AMH.' },
     'zgo-5ar': { t: '5α-réductase de type 2', k: 'Testostérone → DHT (complément)', d: 'La dihydrotestostérone, androgène plus puissant, virilise le sinus urogénital et les organes génitaux externes : pénis, scrotum, prostate.' },
@@ -791,7 +791,7 @@
     title: 'Différenciation sexuelle', level: 'Notion',
     lead: 'La différenciation des gonades primitives en testicules ou en ovaires est génétiquement déterminée et dépend principalement de la présence du chromosome Y. La formation des organes génitaux masculins nécessite un testicule fonctionnel et sécréteur ; en l\'absence de tissu testiculaire, le développement est féminin (polycopié).',
     points: [
-      'Gonade bipotentielle + SRY (chromosome Y) → testicule (polycopié).',
+      'Gonade bipotentielle + chromosome Y (polycopié ; gène SRY, complément) → testicule.',
       'AMH (Sertoli) → régression des canaux de Müller ; testostérone (Leydig) → canaux de Wolff (complément).',
       'Testostérone → 5α-réductase → DHT → organes génitaux externes masculins (complément).',
       'Sans testicule : développement féminin (polycopié).',
@@ -817,14 +817,14 @@
       node(330, 230, 170, 76, 'SRY', 'p-blue', 'zgo-sry', 'chromosome Y');
       node(550, 200, 210, 136, '', 'p-blue', 'zgo-sertoli');
       a.text(655, 232, 'testicule', 'lbl-s strong', { anchor: 'middle' });
-      a.text(655, 266, 'Sertoli → AMH', 'note', { anchor: 'middle', attrs: { 'data-info': 'zgo-amh' } });
+      a.text(655, 266, 'Sertoli → AMH', 'note', { anchor: 'middle', attrs: { 'data-info': 'zgo-amh-fet' } });
       a.text(655, 300, 'Leydig → testostérone', 'note', { anchor: 'middle', attrs: { 'data-info': 'zgo-leydig' } });
       arr('M 282,360 C 300,330 310,280 328,272');
       arr('M 502,268 L 548,268');
       arr('M 762,250 L 806,228');
       arr('M 762,300 L 806,304');
       // hormones
-      node(810, 196, 200, 56, 'AMH', 'p-teal', 'zgo-amh');
+      node(810, 196, 200, 56, 'AMH', 'p-teal', 'zgo-amh-fet');
       node(810, 276, 200, 56, 'testostérone', 'p-blue', 'testo');
       node(810, 356, 200, 56, 'DHT', 'p-blue2', 'zgo-5ar');
       arr('M 910,334 L 910,354');

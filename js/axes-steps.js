@@ -21,10 +21,10 @@
 
   S.somato = [
     { t: 'Double commande hypothalamique', d: 'L\'hypothalamus sécrète la GHRH (stimulante) et la somatostatine (inhibitrice) dans le système porte.', on: ['hypo'] },
-    { t: 'Sécrétion pulsatile de GH', d: 'Les cellules somatotropes libèrent la GH par pulses, surtout la nuit, dans les premières heures du sommeil.', on: ['hypo>pit', 'pit'] },
-    { t: 'La GH fait produire l\'IGF-1 par le foie', d: 'La GH agit surtout par l\'IGF-1 hépatique, dont le taux est stable : c\'est le meilleur reflet de la sécrétion de GH sur 24 h.', on: ['pit>liver', 'liver'] },
+    { t: 'Sécrétion pulsatile de GH', d: 'Les cellules somatotropes libèrent la GH par pulses, surtout la nuit (polycopié p. 49), dans les premières heures du sommeil (complément).', on: ['hypo>pit', 'pit'] },
+    { t: 'La GH fait produire l\'IGF-1 par le foie', d: 'La GH agit surtout par l\'IGF-1 hépatique, dont le taux est stable : c\'est le meilleur reflet de la sécrétion de GH sur 24 h (complément).', on: ['pit>liver', 'liver'] },
     { t: 'Effets de croissance', d: 'L\'IGF-1 fait croître les cartilages de conjugaison (taille) tant qu\'ils ne sont pas soudés, ainsi que les muscles et les viscères.', on: ['liver>bone', 'liver>muscle', 'bone', 'muscle'] },
-    { t: 'Rétrocontrôle négatif', d: 'L\'IGF-1 freine la GH et la GHRH (et stimule la somatostatine).', on: ['liver>pit', 'liver>hypo'] },
+    { t: 'Rétrocontrôle négatif', d: 'L\'IGF-1 freine la GH et la GHRH (polycopié p. 49) ; elle stimule aussi la somatostatine (complément).', on: ['liver>pit', 'liver>hypo'] },
     { t: 'Le glucose module la GH', d: 'L\'hypoglycémie stimule la GH (hormone de contre-régulation) ; l\'hyperglycémie la freine. D\'où les deux tests : hypoglycémie insulinique pour un déficit, HGPO pour une acromégalie.', on: ['hypog', 'hypog>pit', 'hgpo', 'hgpo>pit'] }
   ];
 
@@ -38,12 +38,12 @@
   ];
 
   S.adh = [
-    { t: 'L\'osmostat mesure l\'osmolalité', d: 'Des osmorécepteurs hypothalamiques comparent l\'osmolalité plasmatique (≈ 2 × natrémie + 10) à une consigne d\'environ 285 mosmol/kg, comme un thermostat.', on: ['osm', 'osm>hypo', 'hypo'] },
+    { t: 'L\'osmostat mesure l\'osmolalité', d: 'Des osmorécepteurs hypothalamiques comparent l\'osmolalité plasmatique (≈ 2 × natrémie + 10) à une consigne d\'environ 285 à 290 mosmol/kg (complément), comme un thermostat.', on: ['osm', 'osm>hypo', 'hypo'] },
     { t: 'L\'ADH descend dans les axones', d: 'L\'ADH est fabriquée dans les corps cellulaires des noyaux supraoptiques et paraventriculaires, puis transportée le long des axones de la tige jusqu\'à la posthypophyse, où elle est stockée.', on: ['hypo>post', 'post'] },
     { t: 'L\'ADH agit sur le canal collecteur', d: 'Libérée dans le sang quand l\'osmolalité monte, l\'ADH se fixe au récepteur V2 : les aquaporines 2 s\'insèrent dans la membrane et l\'eau libre est réabsorbée. Les urines deviennent rares et concentrées.', on: ['post>kidney', 'kidney', 'kidney>urine', 'urine'] },
     { t: 'L\'eau réabsorbée ramène l\'osmolalité à la consigne', d: 'L\'eau récupérée dilue le plasma : l\'osmolalité redescend, l\'osmostat cesse de stimuler l\'ADH. C\'est le rétrocontrôle négatif de la boucle.', on: ['kidney>osm'] },
     { t: 'La soif complète le système', d: 'Un peu au-dessus du seuil de l\'ADH, la soif pousse à boire : le rein ne fait qu\'économiser l\'eau, seule la boisson remplace celle qui est perdue.', on: ['hypo>thirst', 'thirst', 'thirst>osm'] },
-    { t: 'Deux autres commandes', d: 'Une hypovolémie importante stimule l\'ADH même si l\'osmolalité est normale ; aux fortes concentrations, l\'ADH devient vasoconstrictrice (V1a). Le cortisol, lui, freine l\'ADH.', on: ['baro', 'baro>hypo', 'post>vessel', 'vessel', 'cort', 'cort>hypo'] },
+    { t: 'Deux autres commandes', d: 'Une hypovolémie importante stimule l\'ADH même si l\'osmolalité est normale (complément) ; en cas de chute brutale de la pression artérielle, l\'ADH est un puissant vasopresseur (polycopié p. 50 ; récepteur V1a, complément). Le cortisol, lui, freine l\'ADH (p. 72).', on: ['baro', 'baro>hypo', 'post>vessel', 'vessel', 'cort', 'cort>hypo'] },
     { t: 'L\'ocytocine : mêmes neurones, autre histoire', d: 'L\'ocytocine suit la même voie axonale mais vise l\'utérus (contractions) et le sein (éjection du lait). Ses stimulus sont la succion du mamelon et la distension du col ; au cours du travail, les contractions augmentent la distension : rétrocontrôle positif.', on: ['oxyPanel', 'post>uterus', 'post>breast', 'uterus', 'breast', 'suck', 'suck>hypo', 'cervix', 'cervix>hypo', 'uterus>cervix'] },
     { t: 'À vous de jouer', d: 'Choisissez « Déshydratation : marche dans le désert » ou « Hyperhydratation » dans le panneau, ou lancez les situations « Charge en eau » et « Marche dans le désert » dans les tests dynamiques : regardez l\'aiguille de l\'osmostat et les urines.', on: ['levels'] }
   ];

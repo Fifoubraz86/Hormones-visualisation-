@@ -7,7 +7,7 @@
   const clamp = HV.clamp;
   // Rangée centrée sous la silhouette (repère de l'atlas) : vignettes 144 × 90.
   const ROW = (k) => ({ parent: 'atlas', x: 330 + k * 165, y: 1050, scale: 0.09 });
-  const SRC = 'Source : Polycopié de sémiologie endocrinienne, CEEDMM, 1re édition 2023 (pages PDF citées « p. »). Le reste est marqué « complément ».';
+  const SRC = 'Source : Polycopié de sémiologie endocrinienne, CEEDMM, 2e édition (2023) (pages PDF citées « p. », partie 1 sauf mention « partie 2 »). Le reste est marqué « complément ».';
 
   /* ---------- Outils communs ---------- */
   const box = (a, x, y, w, h, color, parent, attrs) => a.el('rect', Object.assign({ x, y, width: w, height: h, rx: 14, class: 'ztr-box', style: `--c: var(--${color})` }, attrs || {}), parent);
@@ -26,7 +26,7 @@
     'ztr-sig-gs': { t: 'RCPG couplés à Gs', k: 'ACTH, TSH, LH, FSH, glucagon, PTH, ADH (récepteur V2) (complément)', d: 'Récepteur à sept domaines transmembranaires. La protéine Gs active l\'adénylate cyclase : l\'AMPc monte et active la protéine kinase A, qui phosphoryle des enzymes, des canaux et le facteur de transcription CREB. Effet en secondes à minutes.' },
     'ztr-sig-gq': { t: 'RCPG couplés à Gq', k: 'TRH, GnRH, angiotensine II, ADH (récepteur V1) (complément)', d: 'La protéine Gq active la phospholipase C β, qui coupe le PIP2 en IP3 et DAG. L\'IP3 libère le Ca²⁺ du réticulum endoplasmique ; le DAG active la protéine kinase C. Effet rapide : sécrétion, contraction (vasoconstriction pour V1 et angiotensine II).' },
     'ztr-sig-jak': { t: 'Récepteurs à activité JAK – STAT', k: 'GH, prolactine, leptine (famille des récepteurs des cytokines) (complément)', d: 'Le récepteur n\'a pas d\'activité enzymatique propre : la fixation de l\'hormone rapproche deux chaînes et active les kinases JAK associées, qui phosphorylent les STAT. Les STAT dimérisés gagnent le noyau et activent des gènes (par exemple l\'IGF-1 dans le foie sous l\'effet de la GH).' },
-    'ztr-sig-tk': { t: 'Récepteurs à activité tyrosine kinase', k: 'Insuline, IGF-1 (complément)', d: 'La fixation de l\'hormone active le domaine tyrosine kinase du récepteur (autophosphorylation), qui phosphoryle les substrats IRS. Deux voies : PI3K – Akt (métabolique : translocation de GLUT4, glycogenèse) et MAPK (croissance, mitogenèse). GLUT4 insulino-dépendant : p. 29-30.', src: 'Polycopié p. 29-30 (GLUT4) · reste : complément' }
+    'ztr-sig-tk': { t: 'Récepteurs à activité tyrosine kinase', k: 'Insuline, IGF-1 (complément)', d: 'La fixation de l\'hormone active le domaine tyrosine kinase du récepteur (autophosphorylation), qui phosphoryle les substrats IRS. Deux voies : PI3K – Akt (métabolique : translocation de GLUT4, glycogenèse) et MAPK (croissance, mitogenèse). GLUT4 insulino-dépendant : p. 29-30, partie 2.', src: 'Polycopié partie 2, p. 29-30 (GLUT4) · reste : complément' }
   });
   const sigDef = HV.scene(Object.assign({
     id: 'signal', loupe: 'Signalisation',
@@ -111,7 +111,7 @@
         { t: 'RCPG – Gs : l\'AMPc', d: 'Gs active l\'adénylate cyclase ; l\'AMPc active la PKA. Voie de l\'ACTH, de la TSH, de LH et FSH, du glucagon, de la PTH et de l\'ADH sur le récepteur V2 rénal (complément ; V2 : p. 50).', spot: col(1) },
         { t: 'RCPG – Gq : le calcium', d: 'Gq active la phospholipase C : l\'IP3 libère le calcium, le DAG active la PKC. Voie de la TRH, de la GnRH, de l\'angiotensine II et de l\'ADH sur le récepteur V1 vasculaire (complément).', spot: col(2) },
         { t: 'JAK – STAT', d: 'La GH, la prolactine et la leptine activent des kinases JAK associées au récepteur, qui phosphorylent les STAT ; ceux-ci régulent des gènes dans le noyau, comme l\'IGF-1 hépatique pour la GH (complément).', spot: col(3) },
-        { t: 'Tyrosine kinase', d: 'Les récepteurs de l\'insuline et de l\'IGF-1 sont des tyrosine kinases. La voie PI3K – Akt fait migrer GLUT4 vers la membrane (muscle, tissu adipeux) ; la voie MAPK favorise la croissance (complément ; GLUT4 : p. 29-30).', spot: col(4) },
+        { t: 'Tyrosine kinase', d: 'Les récepteurs de l\'insuline et de l\'IGF-1 sont des tyrosine kinases. La voie PI3K – Akt fait migrer GLUT4 vers la membrane (muscle, tissu adipeux) ; la voie MAPK favorise la croissance (complément ; GLUT4 : p. 29-30, partie 2).', spot: col(4) },
         { t: 'Vitesse d\'action', d: 'Les voies membranaires (Gs, Gq) agissent en secondes à minutes ; les voies qui passent par la transcription (récepteurs nucléaires, STAT) en heures (complément).', spot: [[50, 845, 1500, 70]] }
       ]);
     }
@@ -140,7 +140,7 @@
     'ztr-n-gnrh': { t: 'Axe gonadotrope', k: 'GnRH pulsatile → LH, FSH', d: 'Sensible à de nombreux signaux : prolactine, cortisol, état nutritionnel.' },
     'ztr-n-gh': { t: 'Axe somatotrope', k: 'GHRH → GH → IGF-1', d: 'Freiné par l\'hypercortisolisme (complément).' },
     'ztr-n-hypot': { t: 'Hypothyroïdie primaire', k: 'T4 ↓ → TRH et TSH ↑', d: 'La levée du rétrocontrôle augmente la TRH, qui stimule aussi les cellules lactotropes.' },
-    'ztr-n-prl': { t: 'Hyperprolactinémie', k: 'Causes à écarter : grossesse, médicaments, hypothyroïdie, insuffisance rénale, macroprolactine (p. 56)', d: 'Freine la pulsatilité de la GnRH (p. 62).' },
+    'ztr-n-prl': { t: 'Hyperprolactinémie', k: 'Causes à écarter : grossesse, médicaments, hypothyroïdie, insuffisance rénale, macroprolactine (p. 55-56)', d: 'Freine la pulsatilité de la GnRH (p. 62).' },
     'ztr-n-denut': { t: 'Dénutrition', k: 'Anorexie mentale, déficit énergétique', d: 'Adaptation à l\'épargne énergétique : axes gonadotrope et thyréotrope ralentis (complément ; dénutrition extrême : p. 19).' },
     'ztr-n-t3': { t: 'T3 basse', k: 'Syndrome de basse T3 (p. 22)', d: 'Sans dysfonctionnement thyroïdien ; le dosage de T3L n\'est d\'ailleurs pas utile dans le bilan d\'une hypothyroïdie (p. 22).' },
     'ztr-n-ic': { t: 'Insuffisance corticotrope', k: 'ACTH et cortisol ↓', d: 'Hypoglycémie possible, hyponatrémie de dilution (p. 60-61).' },

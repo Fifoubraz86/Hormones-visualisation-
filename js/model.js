@@ -83,7 +83,7 @@
     { id: 'nodule', name: 'Adénome toxique', note: 'Un nodule autonome sécrète indépendamment de la TSH, qui s\'effondre.', p: { auto: 1.6 } },
     { id: 'central', name: 'Hypothyroïdie centrale', note: 'Insuffisance hypophysaire : T4L basse avec une TSH normale ou basse, inadaptée.', p: { pit: 0.08 } },
     { id: 'iodine', name: 'Carence iodée', note: 'La TSH stimule la glande qui grossit (goitre) et privilégie la T3 (complément).', p: { iodine: 0.12 } },
-    { id: 'nti', name: 'Syndrome de basse T3', note: 'Maladie aiguë sévère : moins de conversion T4 → T3, plus de T3 reverse (complément).', p: { d12: 0.45, d3: 2.2, hypo: 0.75 } }
+    { id: 'nti', name: 'Syndrome de basse T3', note: 'Maladie aiguë ou chronique sévère : syndrome de basse T3L lié au stress somatique, sans dysfonction thyroïdienne (polycopié p. 22). Mécanisme : moins de conversion T4 → T3, plus de T3 reverse (complément).', p: { d12: 0.45, d3: 2.2, hypo: 0.75 } }
   ];
 
   function setScenario(id) {
@@ -112,7 +112,9 @@
         return { tone: 'bad', label: 'Thyrotoxicose', text: 'TSH effondrée et hormones libres élevées : excès d\'hormones thyroïdiennes non freiné par le rétrocontrôle.' + cause };
       }
       if (t4 < 12) return { tone: 'bad', label: 'Origine centrale', text: 'TSH basse et T4L basse : évoquer une atteinte hypothalamo-hypophysaire.' };
-      return { tone: 'warn', label: 'Hyperthyroïdie infraclinique', text: 'TSH basse, hormones libres encore dans les normes.' };
+      // Sous LT4 seule : thyrotoxicose infraclinique iatrogène, pas une hyperthyroïdie (polycopié p. 24).
+      if (p.levo > 0.02 && p.trab <= 0.05 && p.auto <= 0.02) return { tone: 'warn', label: 'TSH freinée sous lévothyroxine', text: 'TSH basse, hormones libres normales sous LT4 : surdosage modéré (thyrotoxicose infraclinique iatrogène, sans hyperthyroïdie) ; réduire la dose et contrôler la TSH à 6–8 semaines (complément).' };
+      return { tone: 'warn', label: 'Hyperthyroïdie infraclinique', text: 'TSH basse, hormones libres encore dans les normes. Si la TSH est entre 0,1 et 0,4 mUI/L : contrôle à 6 semaines (polycopié p. 28).' };
     }
     if (t4 < 12) return { tone: 'bad', label: 'Hypothyroïdie centrale', text: 'T4L basse avec une TSH « normale » : la TSH est inadaptée au niveau de T4L.' };
     if (t3 < 3.1) return { tone: 'warn', label: 'Syndrome de basse T3', text: 'T3L basse, TSH normale' + (rt3 > 0.38 ? ', T3 reverse élevée' : '') + ' : conversion périphérique diminuée.' };
@@ -125,7 +127,7 @@
     const out = [];
     if (p.auto > 0.02) out.push('nodule thyroïdien autonome (adénome toxique), parenchyme éteint');
     if (p.trab > 0.05) out.push('goitre diffus hypervasculaire (maladie de Basedow)');
-    if (p.thy < 0.6) out.push(p.atro > 0.5 ? 'thyroïdite chronique auto-immune atrophique' : 'maladie de Hashimoto : thyroïde augmentée de volume, infiltrat lymphocytaire');
+    if (p.thy < 0.6) out.push(p.atro > 0.5 ? 'thyroïdite chronique auto-immune atrophique' : (s.goitre > 1.15 ? 'maladie de Hashimoto : thyroïde augmentée de volume, infiltrat lymphocytaire' : 'maladie de Hashimoto, infiltrat lymphocytaire'));
     if (p.iodine < 0.5) out.push('goitre multinodulaire');
     if (p.pit < 0.5) out.push('macroadénome hypophysaire non sécrétant');
     return out.join(' · ');

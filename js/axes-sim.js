@@ -719,7 +719,7 @@
     params: [
       { key: 'beta', label: 'Masse de cellules β', min: 0, max: 1.5, step: 0.01, fmt: pct },
       { key: 'sens', label: 'Sensibilité à l\'insuline', min: 0.1, max: 1.5, step: 0.01, fmt: pct },
-      { key: 'tumor', label: 'Insulinome', min: 0, max: 4, step: 0.1, fmt: x100 },
+      { key: 'tumor', label: 'Insulinome', min: 0, max: 6, step: 0.1, fmt: x100 },
       { key: 'exo', label: 'Insuline injectée', min: 0, max: 3, step: 0.05, fmt: x100 },
       { key: 'glucResp', label: 'Réponse du glucagon', min: 0, max: 1.2, step: 0.01, fmt: pct }
     ],
@@ -728,13 +728,14 @@
       { id: 'dt1', name: 'Diabète de type 1', note: 'Destruction auto-immune des cellules β : carence totale en insuline, cétose.', p: { beta: 0.02 } },
       { id: 'dt1t', name: 'DT1 traité, surdosage en insuline', note: 'Insuline exogène sans baisse possible et réponse du glucagon perdue : hypoglycémies.', p: { beta: 0.02, exo: 2.4, glucResp: 0.15 } },
       { id: 'dt2', name: 'Diabète de type 2', note: 'Insulinorésistance et défaut de sécrétion d\'insuline : glycémie à jeun ≥ 1,26 g/L.', p: { sens: 0.2, beta: 0.35 } },
-      { id: 'insulinome', name: 'Insulinome', note: 'Sécrétion autonome d\'insuline : hypoglycémies de jeûne avec insuline inappropriée.', p: { tumor: 4.5 } }
+      { id: 'insulinome', name: 'Insulinome', note: 'Sécrétion autonome d\'insuline : hypoglycémies de jeûne avec insuline inappropriée.', p: { tumor: 5.5 } }
     ],
     interpret(s, p, L) {
       const g = L('g'), k = L('ket'), i = L('ins');
+      // Chez le diabétique sous insuline, la classification en niveaux s'applique d'abord (polycopié, partie 2 p. 66-68).
+      if (g < 0.7 && p.exo > 0) return { tone: 'bad', label: 'Hypoglycémie du diabétique, niveau ' + (g < 0.54 ? 2 : 1), text: g < 0.54 ? 'Glycémie < 0,54 g/L sous insuline : hypoglycémie de niveau 2.' : 'Glycémie entre 0,54 et 0,70 g/L sous insuline : hypoglycémie de niveau 1.' };
       if (g < 0.5) return { tone: 'bad', label: 'Hypoglycémie', text: i > 3 ? 'Glycémie < 0,50 g/L avec insuline non freinée : hyperinsulinisme (insulinome, insuline exogène).' : 'Glycémie basse : resucrage immédiat.' };
       if (g < 0.7 && p.exo === 0 && i > 3) return { tone: 'warn', label: 'Glycémie basse, insuline inappropriée', text: 'Hors diabète, l\'hypoglycémie se définit par une glycémie < 0,50 g/L (triade de Whipple) ; une insuline non freinée devant une glycémie basse fait évoquer un insulinome (épreuve de jeûne).' };
-      if (g < 0.7 && p.exo > 0) return { tone: 'bad', label: 'Hypoglycémie du diabétique, niveau ' + (g < 0.54 ? 2 : 1), text: g < 0.54 ? 'Glycémie < 0,54 g/L sous insuline : hypoglycémie de niveau 2.' : 'Glycémie entre 0,54 et 0,70 g/L sous insuline : hypoglycémie de niveau 1.' };
       if (k > 0.6 && g > 2) return { tone: 'bad', label: 'Hyperglycémie avec cétose', text: 'Carence en insuline : la lipolyse et la cétogenèse s\'emballent (risque d\'acidocétose).' };
       if (g >= 1.26) return { tone: 'warn', label: 'Hyperglycémie', text: 'Glycémie élevée : diabète si ≥ 1,26 g/L à jeun à deux reprises ou ≥ 2,00 g/L avec symptômes. Entre 1,10 et 1,25 g/L à jeun : hyperglycémie modérée à jeun.' };
       return { tone: 'good', label: 'Glycémie normale', text: 'Équilibre insuline / glucagon conservé.' };
@@ -752,7 +753,7 @@
       rates: { ogttRate: (s, p) => 3 * p.ogtt, exoRate: (s, p) => p.exo * 0.8 },
       scale: { fat: (p) => (p.sens < 0.6 ? 1.3 : 1) },
       lesions: [
-        { node: 'islet', kind: 'infiltrate', dx: 6, dy: -24, show: (p) => p.beta < 0.5, label: 'insulite auto-immune', ly: -40, title: 'Diabète de type 1', text: 'Destruction auto-immune des cellules β (infiltrat lymphocytaire des îlots).' },
+        { node: 'islet', kind: 'infiltrate', dx: 6, dy: -24, show: (p) => p.beta < 0.1, label: 'insulite auto-immune', ly: -40, title: 'Diabète de type 1', text: 'Destruction auto-immune des cellules β (infiltrat lymphocytaire des îlots).' },
         { node: 'islet', kind: 'nodule', tone: 'blue', dx: -36, dy: 10, show: (p) => p.tumor > 0.02, label: 'insulinome', title: 'Insulinome', text: 'Tumeur endocrine pancréatique sécrétant l\'insuline de façon autonome.' },
         { node: 'fat', kind: 'label', show: (p) => p.sens < 0.6, label: 'adiposité viscérale', ly: -84, title: 'Insulinorésistance', text: 'Diabète de type 2 : insulinorésistance (foie, muscle, tissu adipeux) et défaut de sécrétion.' }
       ],

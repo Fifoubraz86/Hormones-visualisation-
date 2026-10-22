@@ -432,7 +432,7 @@
   ];
   TYPES.forEach((t) => { HV.INFO['zh-' + t.k] = { t: 'Cellules ' + t.name.toLowerCase(), k: t.horm + ' · ' + t.pct + ' des cellules (complément)', d: t.d }; });
   Object.assign(HV.INFO, {
-    'zh-mosaic': { t: 'Antéhypophyse (adénohypophyse)', k: '6 hormones principales (polycopié p. 47)', d: 'GH, prolactine, LH et FSH, TSH et ACTH. Toutes sont sous influence stimulante de facteurs hypothalamiques véhiculés par le système porte, sauf la prolactine, freinée par la dopamine. Répartition : somatotropes et lactotropes surtout latérales, corticotropes et thyréotropes plutôt médianes (complément).' },
+    'zh-mosaic': { t: 'Antéhypophyse (adénohypophyse)', k: '6 hormones principales (polycopié p. 47)', d: 'GH, prolactine, LH et FSH, TSH et ACTH. Toutes sont sous influence stimulante de facteurs hypothalamiques véhiculés par le système porte, sauf la prolactine, freinée par la dopamine (polycopié p. 47) ; la somatostatine freine en outre la GH (p. 49). Répartition : somatotropes et lactotropes surtout latérales, corticotropes et thyréotropes plutôt médianes (complément).' },
     'zh-capil': { t: 'Capillaires sinusoïdes', k: 'Système porte → circulation générale (complément)', d: 'Le sang porte apporte les facteurs hypothalamiques au contact des cellules ; les hormones sécrétées par exocytose (polycopié p. 47) gagnent la circulation générale.' },
     'zh-prop': { t: 'Proportions des types cellulaires', k: 'Complément (manuels d\'histologie et d\'endocrinologie)', d: 'Somatotropes ≈ 50 %, lactotropes et corticotropes 15 à 20 % chacun, gonadotropes ≈ 10 %, thyréotropes ≈ 5 %. Ordres de grandeur : ils varient selon les sources, le sexe et l\'état physiologique (grossesse).' }
   });
@@ -445,7 +445,7 @@
     level: 'Tissu',
     lead: 'L\'antéhypophyse sécrète six hormones principales (GH, prolactine, LH, FSH, TSH, ACTH) produites par cinq types de cellules. Chaque type obéit à son facteur hypothalamique et commande sa glande cible ; seule la prolactine est d\'abord freinée, par la dopamine.',
     points: [
-      'Six hormones antéhypophysaires principales ; toutes sous contrôle stimulant hypothalamique, sauf la prolactine, freinée par la dopamine (polycopié p. 47).',
+      'Six hormones antéhypophysaires principales ; toutes sous contrôle stimulant hypothalamique, sauf la prolactine, freinée par la dopamine (polycopié p. 47) ; la somatostatine freine en outre la GH (p. 49).',
       'Somatotropes ≈ 50 %, lactotropes 15–20 %, corticotropes 15–20 %, gonadotropes ≈ 10 %, thyréotropes ≈ 5 % (complément).',
       'Facteurs et cibles des cinq axes : polycopié p. 48–49.',
       'Survolez une ligne ou une cellule pour isoler un type.'
