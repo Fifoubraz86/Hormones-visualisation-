@@ -93,11 +93,16 @@
       span: 120, xUnit: 'min', duration: 15,
       samples: [{ x: 0.04, label: 'T0' }, { x: 0.25, label: '30' }, { x: 0.5, label: '60' }, { x: 0.75, label: '90' }, { x: 1, label: '120' }],
       apply(p, x) { if (x > 0.05) p.load = clamp(Math.min((x - 0.05) * 8, 1) * (1 - 0.4 * Math.max(0, x - 0.6) / 0.4), 0, 1); },
-      measure: (sim) => sim.lab('gh'),
-      interpret(v, sim) {
-        const nadir = Math.min(...v.slice(1));
+      measure: (sim) => {
+        const st = HV.Tests.state();
+        if (st && !st.trace.length) st.igf0 = sim.lab('igf'); // IGF-1 avant la charge
+        return sim.lab('gh');
+      },
+      interpret(v, sim, st) {
+        const nadir = Math.min(...v.slice(1)), igf0 = st && st.igf0 != null ? st.igf0 : sim.lab('igf');
+        if (nadir >= 0.4 && igf0 <= 300) return { tone: 'warn', text: `Nadir de GH à ${n2(nadir)} ng/mL (≥ 0,4) : absence de freination, mais IGF-1 normale (${n0(igf0)} µg/L) : résultat discordant, à contrôler. Le diagnostic d'acromégalie repose d'abord sur l'IGF-1 élevée (polycopié p. 55).` };
         if (nadir < 0.4) return { tone: 'good', text: `Nadir de GH à ${n2(nadir)} ng/mL : freination normale. Pas d'acromégalie.` };
-        return { tone: 'bad', text: `Nadir de GH à ${n2(nadir)} ng/mL (≥ 0,4) : absence de freination. Avec une IGF-1 élevée (${n0(sim.lab('igf'))} µg/L), le diagnostic d'acromégalie est confirmé : IRM hypophysaire.` };
+        return { tone: 'bad', text: `Nadir de GH à ${n2(nadir)} ng/mL (≥ 0,4) : absence de freination. Avec une IGF-1 élevée (${n0(igf0)} µg/L), le diagnostic d'acromégalie est confirmé : IRM hypophysaire.` };
       }
     }
   ];
@@ -189,6 +194,8 @@
       measure: (sim) => sim.lab('diur'),
       interpret(v, sim, st) {
         const peak = Math.max(...v), na = sim.lab('na');
+        if (st.base.siadh > 0.02 || st.base.drug > 0.02) return { tone: 'bad', text: `L'ADH reste élevée : le rein ne peut pas éliminer l'eau bue, les urines restent concentrées et la natrémie chute à ${n0(na)} mmol/L. C'est pourquoi le SIADH se traite par restriction hydrique.` };
+        if (st.base.hypo < 0.5 || st.base.kidney < 0.5) return { tone: 'warn', text: `Les urines sont déjà abondantes et diluées en permanence (diabète insipide) : la charge en eau ne modifie guère la diurèse, déjà maximale (${n2(peak)} L/24 h en débit). Natrémie ${n0(na)} mmol/L.` };
         return { tone: 'good', text: `L'eau bue abaisse l'osmolalité : l'ADH s'effondre, les urines deviennent abondantes (jusqu'à ${n2(peak)} L/24 h en débit) et diluées, puis tout revient à la normale en quelques heures (natrémie ${n0(na)} mmol/L). C'est le rétrocontrôle négatif de l'osmostat. Si le rein ne pouvait pas éliminer l'eau (SIADH), la même charge ferait chuter la natrémie.` };
       }
     },
@@ -196,7 +203,7 @@
       id: 'desert', name: 'Marche dans le désert (6 h)', poly: false,
       what: 'Situation de la vie courante : sueur abondante sans pouvoir boire.',
       proto: 'Six heures de marche au soleil sans eau ; natrémie, osmolalité urinaire et diurèse (illustration physiologique, complément).',
-      unit: 'mosmol/kg', label: 'Osmolalité urinaire', thr: 600, thrDir: 'above', thrLabel: 'urines concentrées > 600 mosmol/kg',
+      unit: 'mosmol/kg', label: 'Osmolalité urinaire', thr: 600, thrDir: 'above', thrLabel: 'urines concentrées > 600 mosmol/kg (complément)',
       span: 6, xUnit: 'h', duration: 16,
       samples: [{ x: 0.03, label: '0 h' }, { x: 0.33, label: '2 h' }, { x: 0.67, label: '4 h' }, { x: 1, label: '6 h' }],
       apply(p, x) { if (x > 0.04) p.sweat = Math.min(1, (x - 0.04) * 3); },
@@ -219,19 +226,21 @@
       apply(p, x) {
         const siadh = p.siadh > 0.02 || p.drug > 0.02;
         // SIADH : restriction partielle (500 à 800 mL/j) et correction lente ; jamais de desmopressine.
-        if (x > 0.05) p.restrict = siadh ? 0.2 : 1;
+        if (x > 0.05) { p.restrict = siadh ? 0.2 : 1; if (!siadh) { p.drink = 0; p.sweat = 0; } }
         if (x > 0.8 && !siadh) p.ddavp = 1;
       },
       measure: (sim) => {
         const st = HV.Tests.state();
         if (st && !st.trace.length) st.na0 = sim.lab('na'); // natrémie de départ
+        if (st) st.naMax = Math.max(st.naMax || 0, sim.lab('na')); // natrémie la plus haute de l'épreuve
         return sim.lab('uosm');
       },
       track: (sim) => sim.lab('diur') / 24, // litres par heure
       interpret(v, sim, st) {
         const u8 = v[4], ud = v[5], na = sim.lab('na');
         const loss = (st.acc / 70) * 100;
-        const extra = ` Natrémie finale ${n0(na)} mmol/L ; perte de poids ≈ ${loss.toFixed(1).replace('.', ',')} %.` + (loss > 3 || na > 148 ? ' En pratique, l\'épreuve est interrompue avant ce stade (perte de poids > 3 à 5 % ou natrémie qui dépasse la normale ; complément).' : '');
+        const naMax = Math.max(st.naMax || 0, na);
+        const extra = ` Natrémie maximale ${n0(naMax)} mmol/L ; perte de poids ≈ ${loss.toFixed(1).replace('.', ',')} %.` + (loss > 3 || naMax > 148 ? ' En pratique, l\'épreuve est interrompue avant ce stade (perte de poids > 3 à 5 % ou natrémie qui dépasse la normale ; complément).' : '');
         if (st.base.siadh > 0.02 || st.base.drug > 0.02) {
           const na0 = st.na0 != null ? st.na0 : na, d = na - na0;
           return { tone: 'warn', text: `Restriction hydrique partielle (500 à 800 mL/j ; complément) : les urines restent inappropriément concentrées et la natrémie remonte lentement, de ${n0(na0)} à ${n0(na)} mmol/L (+${d.toFixed(1).replace('.', ',')} mmol/L) : argument pour un SIADH (épreuve diagnostique et thérapeutique). Pas de desmopressine dans un SIADH. Mise en garde : corriger de 8 à 10 mmol/L par 24 h au plus (risque de myélinolyse osmotique ; complément).` };

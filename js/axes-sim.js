@@ -242,7 +242,7 @@
       extraLinks: [{ from: 'load', to: 'pit', kind: 'inhib', mol: 'glucose', v: 'loadRate', label: '' }, { from: 'ins', to: 'hypo', kind: 'stim', color: 'p-blue2', label: '' }],
       rates: { loadRate: (s, p) => 2 * p.load },
       lesions: [
-        { node: 'pit', kind: 'mass', tone: 'sky', dy: -4, show: (p) => p.autoPit > 0.02, size: (p) => clamp(0.6 + 0.12 * p.autoPit, 0.6, 1.3), label: 'adénome somatotrope', ly: 52, title: 'Adénome somatotrope', text: 'Souvent un macroadénome au diagnostic (extension vers le sinus caverneux ou le chiasma).' },
+        { node: 'pit', kind: 'mass', tone: 'sky', dy: -4, show: (p) => p.autoPit > 0.02, size: (p) => clamp(0.6 + 0.12 * p.autoPit, 0.6, 1.3), label: 'adénome somatotrope', ly: 52, title: 'Adénome somatotrope', text: 'Souvent un macroadénome au diagnostic (complément), pouvant s\'étendre vers le sinus caverneux ou le chiasma.' },
         { node: 'pit', kind: 'mass', tone: 'grey', dy: -4, show: (p) => p.pit < 0.5, label: 'lésion hypophysaire', ly: 52, title: 'Insuffisance somatotrope', text: 'Atteinte hypophysaire (tumeur, chirurgie, radiothérapie). Le test de référence est l\'hypoglycémie insulinique.' },
         { node: 'liver', kind: 'label', show: (p) => p.liver < 0.6, label: 'production d\'IGF-1 diminuée', ly: -72, title: 'Résistance à la GH', text: 'Dénutrition ou insuffisance hépatique : l\'IGF-1 baisse malgré une GH élevée (complément).' }
       ],
@@ -282,7 +282,7 @@
     interpret(s, p, L) {
       const v = L('prl');
       if (v > 200) return { tone: 'bad', label: 'Prolactine > 200 ng/mL', text: 'Évoque un macroadénome à prolactine.' };
-      if (v > 25) return { tone: 'warn', label: 'Hyperprolactinémie', text: 'Écarter grossesse, médicaments et macroprolactinémie ; < 200 ng/mL avec tumeur volumineuse : déconnexion. La LH est freinée (pulsatilité de la GnRH inhibée).' };
+      if (v > 25) return { tone: 'warn', label: 'Hyperprolactinémie', text: 'Écarter les causes physiologiques (grossesse, allaitement), iatrogènes (psychotropes, toxiques), pathologiques (hypothyroïdie profonde, insuffisance rénale terminale) et analytiques (interférence, macroprolactinémie). Avec une IRM compatible : < 100 ng/mL évoque plutôt un microadénome ; < 200 ng/mL avec une tumeur supracentimétrique : déconnexion (polycopié p. 56). La LH est freinée (pulsatilité de la GnRH inhibée).' };
       return { tone: 'good', label: 'Prolactine normale', text: 'Tonus dopaminergique conservé.' };
     },
     hooks: {
@@ -317,12 +317,15 @@
       const dW = 2.4 * p.drink - 0.45 * p.sweat - (s.W > 0 ? s.W * 0.8 * clamp(1.15 - eff, 0.03, 1.15) : 0) + (s.W < 0 ? -s.W * 0.8 * canDrink : 0);
       const W = clamp(s.W + dW, -4, 6);
       // Rétention d'eau libre → baisse de la natrémie ; perte d'eau compensée par la soif, sauf en restriction hydrique.
-      const na = 140 + 3 * p.restrict + (eff >= 1 ? -40 * (eff - 1) * canDrink : (7 + 10 * p.restrict) * (1 - eff)) - 2.6 * s.W;
+      // Tant que le patient boit, la natrémie du diabète insipide reste à peine augmentée (polycopié p. 64).
+      let na = 140 + 3 * p.restrict + (eff >= 1 ? -40 * (eff - 1) * canDrink : (5 + 12 * p.restrict) * (1 - eff)) - 2.6 * s.W;
+      // Sans boisson, la natrémie ne peut pas redescendre : la desmopressine arrête la perte d'eau, elle ne la rend pas.
+      if (p.restrict >= 1) na = Math.max(na, s.na);
       return { adh, eff, na, W };
     },
     labs: [
       { key: 'na', name: 'Natrémie', unit: 'mmol/L', k: 1, lo: 135, hi: 145, min: 110, max: 160, dec: 0 },
-      { key: 'posm', name: 'Osmolalité plasmatique', unit: 'mosmol/kg', range: '285–295 mosmol/kg', lo: 280, hi: 295, min: 240, max: 330, dec: 0, fn: (s) => 2 * s.na + 10 },
+      { key: 'posm', name: 'Osmolalité plasmatique', unit: 'mosmol/kg', range: '285–295 mosmol/kg (complément)', lo: 285, hi: 295, min: 240, max: 330, dec: 0, fn: (s) => 2 * s.na + 10 },
       { key: 'uosm', name: 'Osmolalité urinaire', unit: 'mosmol/kg', range: '100–1200 selon l\'apport', lo: 100, hi: 1200, min: 0, max: 1300, dec: 0, fn: (s) => uosmOf(s.eff, s.na) },
       { key: 'diur', name: 'Diurèse', unit: 'L/24 h', range: '< 3 L/24 h', lo: 0.5, hi: 3, min: 0, max: 14, dec: 1, fn: (s) => clamp(900 / uosmOf(s.eff, s.na), 0.4, 14) }
     ],
@@ -338,14 +341,14 @@
       { id: 'eu', name: 'Équilibre hydrique normal', note: 'Natrémie stable, urines concentrées selon les besoins.', p: {} },
       { id: 'deshy', name: 'Déshydratation : marche dans le désert', note: 'Plusieurs heures de sueur sans boire : l\'osmolalité monte, l\'ADH et la soif s\'élèvent, les urines deviennent rares et très concentrées.', p: { sweat: 1 } },
       { id: 'hyper', name: 'Hyperhydratation : 1,5 L d\'eau bus', note: 'Apport d\'eau abondant : l\'osmolalité baisse, l\'ADH s\'effondre, le rein élimine l\'excès par des urines abondantes et diluées.', p: { drink: 1 } },
-      { id: 'dic', name: 'Diabète insipide central', note: 'Défaut d\'ADH : polyurie > 3 L, urines diluées < 200 mosmol/kg, natrémie un peu haute.', p: { hypo: 0.01 } },
+      { id: 'dic', name: 'Diabète insipide central', note: 'Défaut d\'ADH : polyurie > 3 L/24 h, polydipsie, urines diluées < 200 mosmol/kg ; natrémie conservée tant que le patient boit, un peu augmentée si les sorties dépassent les apports (polycopié p. 64).', p: { hypo: 0.01 } },
       { id: 'din', name: 'Diabète insipide néphrogénique', note: 'Résistance rénale à l\'ADH (complément) : même tableau, ADH élevée.', p: { kidney: 0.05 } },
       { id: 'siadh', name: 'SIADH paranéoplasique', note: 'Une tumeur sécrète de l\'ADH de façon autonome (syndrome paranéoplasique) : rétention d\'eau sans œdème, hyponatrémie en règle très basse (< 120 mmol/L), urines inappropriément concentrées.', p: { siadh: 5 } },
       { id: 'siadhm', name: 'SIADH médicamenteux', note: 'De nombreux médicaments (polycopié p. 64) : ils stimulent surtout la libération hypothalamique d\'ADH ou potentialisent son effet rénal (complément). Même tableau ; l\'éviction du médicament confirme rétrospectivement le diagnostic.', p: { drug: 1.6 } }
     ],
     interpret(s, p, L) {
       const na = L('na'), u = L('uosm'), d = L('diur');
-      if (na < 135 && u > 100) return { tone: 'bad', label: 'Hyponatrémie, urines concentrées', text: 'Profil de SIADH (osmolalité urinaire > 100 mosmol/kg, complément ; natriurèse conservée) en l\'absence d\'insuffisance cardiaque, rénale ou hépatique : restriction hydrique.' };
+      if (na < 135 && u > 100) return { tone: 'bad', label: 'Hyponatrémie, urines concentrées', text: 'Profil de SIADH (osmolalité urinaire > 100 mosmol/kg, complément ; natriurèse conservée) en l\'absence d\'insuffisance cardiaque, rénale ou hépatique (polycopié p. 63), d\'insuffisance corticotrope (p. 60-61) et d\'hypothyroïdie (complément) : restriction hydrique.' };
       if (L('posm') > 295 && u > 600) return { tone: 'warn', label: 'Déshydratation, ADH stimulée', text: 'Hypernatrémie avec urines rares et concentrées : le rein économise l\'eau au maximum ; seule la boisson corrige le déficit.' };
       if (d > 2.5 && u < 300 && na < 141) return { tone: 'warn', label: 'Diurèse aqueuse', text: 'Urines abondantes et diluées avec une natrémie normale basse : réponse adaptée à un apport d\'eau (à distinguer d\'une potomanie si elle est permanente).' };
       if (d > 3 && u < 200) return { tone: 'bad', label: 'Polyurie hypotonique', text: 'Diabète insipide : confirmer par une épreuve de restriction hydrique, après IRM.' };
