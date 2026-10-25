@@ -663,3 +663,16 @@ body.ph-noscroll { overflow: hidden; }
 @media (max-width: 900px) { .ph-side { grid-template-columns: 1fr; } }
 .ph-predcol { display: flex; flex-direction: column; gap: 8px; }
 .ph-full .px-svg { max-height: 82vh; }
+/* Type de partie, niveau, humour */
+.sv-games { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 700px) { .sv-games { grid-template-columns: 1fr; } }
+.sv-gamebtn { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; padding: 12px 14px; border-radius: 14px; border: 2px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer; font: inherit; }
+.sv-gamebtn strong { font-size: 1.05rem; } .sv-gamebtn span:last-child { color: var(--muted); font-size: 0.88rem; }
+.sv-game-ic { font-size: 1.6rem; }
+.sv-gamebtn:hover { border-color: var(--accent); }
+.sv-gamebtn.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--panel)); }
+.sv-gameopts { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 12px; }
+.sv-seg { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.sv-segb { font: 600 0.88rem var(--font-body); padding: 6px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer; }
+.sv-segb.on { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+.sv-sf { border-left: 3px solid var(--warn); padding-left: 8px; }

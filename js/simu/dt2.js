@@ -30,6 +30,7 @@
   const suLabel = (rx) => { const T = D.suType(rx), v = rx.su / T.k; return T.short + ' ' + String(Math.round(v * 10) / 10).replace('.', ',') + ' mg/j' + (T.meal ? ' (en 3 prises, avant les repas)' : ''); };
   function suPick(id, rx, onChange) {
     const T = D.suType(rx), opts = [[0, 'Aucun']].concat(T.doses.map((x) => [x * T.k, String(x).replace('.', ',') + ' ' + T.unit + (T.meal ? ' (' + String(x / 3).replace('.', ',') + ' mg × 3)' : '')]));
+    if (SF()) { const mx = T.doses[T.doses.length - 1]; opts.push([240, String(mx * 2).replace('.', ',') + ' ' + T.unit + ' (× 2, sans filet)'], [600, String(mx * 5).replace('.', ',') + ' ' + T.unit + ' (× 5, sans filet)']); }
     const cur = opts.reduce((a, o) => (Math.abs(o[0] - (rx.su || 0)) < Math.abs(a[0] - (rx.su || 0)) ? o : a))[0];
     return h('div', { class: 'sv-inline' }, [
       h('select', { id: id + 'T', 'aria-label': 'Molécule', onchange: (e) => { const was = rx.su || 0; onChange(e.target.value, was ? Math.min(120, was) : 0); } }, Object.entries(D.SUT).map(([k, v]) => h('option', { value: k, selected: (rx.suType || 'glic') === k }, v.name))),
@@ -72,7 +73,7 @@
   ];
   const WORK = { jour: 'De jour, horaires réguliers', nuit: 'De nuit, en poste fixe', '2x8': 'En 2 × 8 alternés (matin / après-midi, par semaine)', '3x8': 'En 3 × 8 alternés (matin / après-midi / nuit, par semaine)' };
   const ADH = { bonne: 'Bonne', moyenne: 'Oublis fréquents', peur: 'Peur de l\'hypoglycémie', detresse: 'Détresse psychologique, syndrome dépressif', cachee: 'Inconnue (cachée)' };
-  const BASE = { profile: 'sird', sex: 'M', age: 56, weight: 98, height: 172, a1c: 8.5, duration: 1, dfg: 85, alb: 'normo', ethnic: 'eur', sbp: 142, retino: 'none', hfail: false, cvd: false, hcvr: false, masld: false, severe: false, driver: false, geria: 'bonne', panc: false, mtc: false, myco: false, irregular: false, lowcarb: false, adh: 'bonne', work: 'jour', stage: 'diag', mode: 'decouverte', variab: 'moyen', rx0: null, act0: 30, soda0: 1, snack0: 'modere', motiv: 'moyenne' };
+  const BASE = { profile: 'sird', sex: 'M', age: 56, weight: 98, height: 172, a1c: 8.5, duration: 1, dfg: 85, alb: 'normo', ethnic: 'eur', sbp: 142, retino: 'none', hfail: false, cvd: false, hcvr: false, masld: false, severe: false, driver: false, geria: 'bonne', panc: false, mtc: false, myco: false, irregular: false, lowcarb: false, adh: 'bonne', work: 'jour', stage: 'diag', mode: 'decouverte', level: 'interne', humor: 'noir', game: 'libre', variab: 'moyen', rx0: null, act0: 30, soda0: 1, snack0: 'modere', motiv: 'moyenne' };
   let cfg = Object.assign({}, BASE);
   let G = null;
 
@@ -90,6 +91,8 @@
   }
   const dayLabel = (d) => 'J' + d + ' · S' + fmt(d / 7, d % 7 ? 1 : 0) + (d >= 60 ? ' · M' + fmt(d / 30.4, 0) : '');
   const g2 = (v) => fmt(v, 2) + ' g/L';
+  // Humour léger : légendes sans cynisme.
+  const TOON_SOFT = { hypoSevere: 'Le sucre dans la poche, c\'est utile.', hypo: 'Plusieurs malaises : on allège le traitement ?', death: 'Revenez en arrière et changez d\'avis.', diarrhee: 'La metformine, ça s\'augmente doucement.', vomit: 'Les paliers de l\'aGLP1 servent à ça.', acd: 'Cétonémie à surveiller sous iSGLT2.', hyperosm: 'Penser à l\'hydratation.', lactic: 'Metformine et DFG < 30 : non.', panc: 'Antécédent de pancréatite : pas d\'incrétine.', retino: 'Baisse trop rapide de l\'HbA1c : l\'œil a souffert.', retinoNat: 'Le laser, c\'était pour avant.', trophy: 'Bravo !' };
   const TOON_CAPTION = {
     hypoSevere: 'Le sucre, c\'était pas que pour le café.',
     hypo: 'Trois malaises ce mois-ci. Le sulfamide, lui, va très bien.',
@@ -110,6 +113,11 @@
 
   // Mode entraînement : aides masquées jusqu'à la fin ; correction de chaque décision au bilan suivant.
   const TRAIN = () => G && G.cfg.mode === 'entrainement' && !G.trainDone;
+  // Réglages de partie : niveau (externe : item 247, fiche LiSA, CEEDMM ; interne : tout), humour, sans filet.
+  const EXT = () => (G ? G.cfg : cfg).level === 'externe';
+  const SF = () => (G ? G.cfg : cfg).game === 'sansfilet';
+  const HUM = () => (G ? G.cfg : cfg).humor || 'noir';
+  const pick = (a) => a[Math.floor(Math.random() * a.length)];
 
   /* ---------- Configuration ---------- */
   function setup(keep) {
@@ -138,15 +146,17 @@
         h('h1', null, 'Choisissez, dosez, attendez l\'HbA1c.'),
         h('p', { class: 'sv-lead' }, 'Créez un patient avec ses facteurs prédictifs de réponse (réserve insulinique, insulinorésistance, fonction rénale, origine, sous-type, observance, comorbidités), prescrivez librement, choisissez la date du bilan : HbA1c, glycémies, poids, hypoglycémies et événements indésirables découlent de vos choix. Aucune correction.')
       ]),
-      h('section', { class: 'sv-card sv-setup' }, [
+      gameCard(),
+      cfg.game === 'histoire' && S.dt2story ? S.dt2story.picker({ h, cfg, start: (story) => begin(story) }) : null,
+      cfg.game === 'histoire' ? null : h('section', { class: 'sv-card sv-setup' }, [
         h('h3', null, 'Situation de départ (arbres de la SFD 2025)'),
         h('div', { class: 'sv-stages' }, groups.map((gname) => h('div', { class: 'sv-stage-g' }, [h('p', { class: 'sv-stage-h' }, gname), h('div', { class: 'sv-chips' }, STAGES.filter((x) => x.g === gname).map((st) => h('button', { type: 'button', class: 'sv-chip' + (cfg.stage === st.id ? ' on' : ''), 'aria-pressed': String(cfg.stage === st.id), onclick: () => pickStage(st) }, st.label)))]))),
         h('p', { class: 'sv-note' }, 'Fixe le traitement en cours (doses selon le poids), une HbA1c et une ancienneté typiques, modifiables ci-dessous. Les comorbidités (insuffisance cardiaque, maladie rénale, âge…) se règlent plus bas.'),
-        h('h3', null, 'Diabètes atypiques'),
-        h('div', { class: 'sv-chips' }, PRESETS.map((p) => h('button', { type: 'button', class: 'sv-chip', onclick: () => { const keep = cfg.a1cLocked ? { a1c: cfg.a1c, a1cLocked: true } : {}; cfg = Object.assign({}, BASE, { variab: cfg.variab }, p.cfg, { stage: null }, keep); setup(true); } }, p.label))),
+        EXT() ? null : h('h3', null, 'Diabètes atypiques'),
+        EXT() ? null : h('div', { class: 'sv-chips' }, PRESETS.map((p) => h('button', { type: 'button', class: 'sv-chip', onclick: () => { const keep = cfg.a1cLocked ? { a1c: cfg.a1c, a1cLocked: true } : {}; cfg = Object.assign({}, BASE, { variab: cfg.variab }, p.cfg, { stage: null }, keep); setup(true); } }, p.label))),
         h('h3', null, 'Le patient'),
         h('div', { class: 'sv-form' }, [
-          field('Profil', sel('dtProf', cfg.profile, Object.entries(D.PROFILES).map(([k, v]) => [k, v.label]), (v) => { cfg.profile = v; setup(); }), 'dtProf'),
+          field('Profil', sel('dtProf', cfg.profile, Object.entries(D.PROFILES).filter(([k]) => !EXT() || ['sird', 'mard'].includes(k)).map(([k, v]) => [k, v.label]), (v) => { cfg.profile = v; setup(); }), 'dtProf'),
           field('Sexe', sel('dtSex', cfg.sex, [['F', 'Femme'], ['M', 'Homme']], (v) => { cfg.sex = v; }), 'dtSex'),
           slider('dtAge', 'Âge', 'age', 18, 95, 1, 'ans', 0, () => setup(true)),
           slider('dtW', 'Poids', 'weight', 40, 200, 1, 'kg', 0, () => { const st = STAGES.find((x) => x.id === cfg.stage); if (st && st.rx(cfg.weight) && (st.rx(cfg.weight).basal || 0) > 0) { cfg.rx0 = st.rx(cfg.weight); setup(true); } }),
@@ -211,6 +221,46 @@
       h('p', { class: 'sv-disc' }, 'Modèle pédagogique simplifié : effets et délais illustratifs (HbA1c jugée à 3 mois, demi-vie de l\'HbA1c ≈ 1 mois) ; ne remplace ni le jugement clinique ni les recommandations. Repères : prise de position SFD 2025 sur les traitements de l\'hyperglycémie, item EDN 247 (fiche LiSA), protocole d\'adaptation des doses d\'insuline du service ; effets des traitements : référentiel de la littérature.')
     );
     window.scrollTo(0, keep ? y0 : 0);
+  }
+
+  // Type de partie, niveau et humour.
+  function gameCard() {
+    const GAMES = [['libre', '🩺', 'Consultation libre', 'Un patient, vos ordonnances, vos bilans.'], ['histoire', '📖', 'Mode histoire', 'Quatre vies de patients, de la découverte du diabète aux vieux jours.'], ['sansfilet', '🎪', 'Sans filet', 'Tout est permis, même 100 U d\'un coup. Le simulateur commente.']];
+    const seg = (id, key, opts) => h('div', { class: 'sv-seg', role: 'radiogroup', id }, opts.map(([k, t]) => h('button', { type: 'button', role: 'radio', 'aria-checked': String(cfg[key] === k), class: 'sv-segb' + (cfg[key] === k ? ' on' : ''), onclick: () => { cfg[key] = k; if (key === 'level' && k === 'externe' && !['sird', 'mard'].includes(cfg.profile)) cfg.profile = 'sird'; setup(true); } }, t)));
+    return h('section', { class: 'sv-card sv-game', id: 'dtGame' }, [
+      h('div', { class: 'sv-games' }, GAMES.map(([k, ic, t, sub]) => h('button', { type: 'button', class: 'sv-gamebtn' + (cfg.game === k ? ' on' : ''), id: 'dtGame-' + k, 'aria-pressed': String(cfg.game === k), onclick: () => { cfg.game = k; setup(true); } }, [h('span', { class: 'sv-game-ic', 'aria-hidden': 'true' }, ic), h('strong', null, t), h('span', null, sub)]))),
+      h('div', { class: 'sv-gameopts' }, [
+        h('div', null, [h('p', { class: 'sv-stage-h' }, 'Niveau'), seg('dtLevel', 'level', [['externe', 'Externe (DFASM2 : item 247, fiche LiSA, CEEDMM)'], ['interne', 'Interne (tous les patients, toutes les options)']])]),
+        h('div', null, [h('p', { class: 'sv-stage-h' }, 'Humour'), seg('dtHumor', 'humor', [['sobre', 'Sobre'], ['leger', 'Léger'], ['noir', 'Noir']])])
+      ]),
+      cfg.level === 'externe' ? h('p', { class: 'sv-note' }, 'Niveau externe : DT2 typique (insulinorésistant ou du sujet âgé), traitements de l\'item 247 (metformine, sulfamides et glinides, iDPP4, aGLP1, iSGLT2, insuline basale puis basal-bolus) ; pompe, boucle, hospitalisation, tirzépatide et acarbose réservés au niveau interne.') : null,
+      cfg.game === 'sansfilet' ? h('p', { class: 'sv-note sv-sf' }, 'Sans filet : aucune règle ne bloque l\'ordonnance (doses jusqu\'à 1 000 U, metformine jusqu\'à 10 g, sulfamide à dose quintuple, associations absurdes). Les conséquences, elles, sont simulées, et commentées' + (cfg.humor === 'sobre' ? '.' : ' sans pitié.')) : null
+    ]);
+  }
+
+  // Sans filet : conséquences immédiates des prescriptions absurdes (le simulateur, lui, ne refuse rien).
+  function absurd(prev, rx) {
+    const pt = G.pt, W = pt.st.W, ins = bas(rx) + (rx.rapid || 0), ukg = ins / W, pIns = bas(prev) + (prev.rapid || 0);
+    const maxDose = Math.max(bas(rx), ...(rx.rapidM || [0]));
+    const H = HUM(), cap = (noir, leger) => (H === 'noir' ? pick(noir) : H === 'leger' ? pick(leger) : null);
+    const who = G.cfg.sex === 'F' ? 'La patiente' : 'Le patient', e = G.cfg.sex === 'F' ? 'e' : '';
+    if (maxDose >= 100 || ukg >= 3) return { death: true, toon: 'death', epitaphe: epitaph('mega', maxDose), text: 'J+1 : ' + maxDose + ' U d\'insuline en une injection (' + fmt(ukg, 1) + ' U/kg/j). Glycémie capillaire « LO », coma convulsif, glucosé 30 % en continu, réanimation : décès dans la nuit.', caption: cap(['100 U d\'un coup : même le glucagon a démissionné.', 'Le stylo était plein. Le patient aussi, de remords.', 'Titration express : de 0 à l\'au-delà en une injection.', 'Objectif glycémique atteint. Définitivement.'], ['Un peu trop d\'insuline, beaucoup trop d\'un coup.', 'Le stylo n\'était pas une seringue de 100 U.']) };
+    if (rx.su >= 600) return { death: true, toon: 'death', epitaphe: epitaph('suMega'), text: 'J+2 : sulfamide à cinq fois la dose maximale. Hypoglycémie sévère, récidivante malgré le resucrage (demi-vie longue), découvert' + e + ' inconscient' + e + ' : décès.', caption: cap(['Cinq comprimés de plus, cinq jours de sucre en moins.', 'Le pancréas a craché toute son insuline. Puis le patient son dernier soupir.'], ['Le sulfamide à haute dose, ça ne pardonne pas.']) };
+    if (rx.met >= 10000) return { death: true, toon: 'death', epitaphe: epitaph('lactic'), text: 'J+3 : ' + rx.met / 1000 + ' g de metformine par jour. Vomissements, polypnée, lactates 18 mmol/L, pH 6,9 : décès en réanimation.', caption: cap(['10 g de metformine : la limonade à la lactate.', 'Il voulait une HbA1c à 5 %. Il a eu un pH à 6,9.'], ['Dix grammes, c\'était beaucoup.']) };
+    if (ukg >= 1.5 && ins > pIns * 2 + 10) { pt.st.hypoSev++; G.ev.sevSeen = pt.st.hypoSev; return { toon: 'hypoSevere', text: 'J+1 : insuline doublée d\'un coup (' + ins + ' U/j, ' + fmt(ukg, 1) + ' U/kg). Hypoglycémie sévère au petit matin (0,28 g/L), retrouvé' + e + ' par le conjoint : glucagon, SAMU. ' + who + ' a jeté ses stylos.', caption: cap(['La titration « tout de suite, tout d\'un coup ».', 'Le protocole disait + 2 U. Pas + 200 %.'], ['On augmente par petits pas, d\'habitude.']) }; }
+    if (rx.su > 120) { pt.st.hypoSev++; G.ev.sevSeen = pt.st.hypoSev; return { toon: 'hypoSevere', text: 'J+1 : sulfamide au-delà de la dose maximale. Hypoglycémie sévère, récidive 6 h après le resucrage : 48 h d\'hospitalisation sous glucosé.', caption: cap(['Plus de comprimés, plus de sucre… dans la perfusion.', 'Au-delà de la dose maximale, il n\'y a que des hypoglycémies maximales.'], ['La dose maximale, c\'est aussi pour ça.']) }; }
+    if (rx.met > 3000) { pt.take.met = false; G.ev.notes.push('a arrêté la metformine (diarrhée profuse)'); }
+    if (rx.met > 3000) return { toon: 'diarrhee', text: 'J+2 : ' + fmt(rx.met / 1000, 1) + ' g de metformine. Diarrhée profuse, 14 selles par jour, ' + who.toLowerCase() + ' n\'est plus sorti' + e + ' de chez lui' + (e ? 'le' : '') + ' : arrêt de la metformine.', stop: 'met', caption: cap(['Au-delà de 3 g, la metformine agit surtout sur le rouleau de papier.', 'Le transit a été très réactif.'], ['La metformine au-delà de 3 g : surtout des effets digestifs.']) };
+    return null;
+  }
+  // Remarques sans conséquence grave (sans filet).
+  function absurdSoft(rx) {
+    const H = HUM(), n = (rx.met > 0) + (rx.su > 0) + (rx.dpp4 > 0) + (rx.glp !== 'none') + (rx.sglt2 !== 'none') + (rx.acarb > 0) + (bas(rx) > 0) + (rx.rapid > 0);
+    const out = [];
+    if (rx.dpp4 > 0 && rx.glp !== 'none') out.push(H === 'noir' ? 'iDPP4 + aGLP1 : bloquer la dégradation d\'un GLP-1 qui ne se dégrade pas. Ceinture, bretelles et parachute.' : 'iDPP4 + aGLP1 : association sans intérêt (mécanismes redondants).');
+    if (rx.su > 0 && bas(rx) + rx.rapid > 0) out.push(H === 'noir' ? 'Sulfamide sous insuline : deux pédales d\'accélérateur, aucun frein.' : 'Sulfamide sous insuline : risque d\'hypoglycémie majoré.');
+    if (n >= 6) out.push(H === 'noir' ? n + ' classes thérapeutiques : le pilulier a demandé un arrêt de travail.' : n + ' classes thérapeutiques : ordonnance très chargée, observance compromise.');
+    return out;
   }
 
   /* ---------- Partie ---------- */
@@ -337,7 +387,7 @@
   }
 
   // Épitaphes d'humour noir.
-  function epitaph(cause) {
+  function epitaph(cause, arg) {
     const pt = G.pt, c = G.cfg;
     const nm = (c.sex === 'F' ? 'Ci-gît Mme ' : 'Ci-gît M. ') + ['Glycémie', 'Sucre', 'Insuline', 'Glucose'][Math.floor(pt.day / 7) % 4];
     const age = c.age + Math.floor(pt.day / 365) + ' ans';
@@ -345,7 +395,9 @@
     const L = {
       hypo: [nm + ', ' + age, a1c + ', impeccable', 'Mort guéri de son diabète', '(hypoglycémie sévère)'],
       lactic: [nm + ', ' + age, 'DFG < 30, metformine 2 g', 'Il ne manquait que le citron', '(acidose lactique)'],
-      hyperosm: [nm + ', ' + age, 'Glycémie : 9 g/L', 'Desséché comme un raisin', '(coma hyperosmolaire)']
+      hyperosm: [nm + ', ' + age, 'Glycémie : 9 g/L', 'Desséché comme un raisin', '(coma hyperosmolaire)'],
+      mega: [nm + ', ' + age, (arg || 100) + ' U en une injection', 'Le pancréas n\'a pas eu le temps de dire ouf', '(coma hypoglycémique)'],
+      suMega: [nm + ', ' + age, 'Sulfamide × 5', 'Sucré jusqu\'au bout, sauf le sang', '(hypoglycémie sévère)']
     };
     return L[cause];
   }
@@ -582,7 +634,8 @@
     if (d.device === 'pump' && !d.cgm && !['4', '6'].includes(d.asg)) block.push('Pompe sans capteur : autosurveillance capillaire au moins 4 fois par jour.');
     if (onInsD && d.titr.who !== 'none' && d.asg === '0' && !d.cgm) block.push('Titration de l\'insuline sans autosurveillance ni capteur : impossible ; il faut au moins la glycémie du réveil chaque jour.');
     if (onInsD && d.titr.who !== 'none' && d.rapid > 0 && d.titr.bolusCtl === 'pp' && d.asg !== '6' && !d.cgm) block.push('Bolus adaptés sur la glycémie post-prandiale : prescrire l\'autosurveillance 6 fois par jour (avant et 2 h après les repas) ou un capteur.');
-    if (block.length) { say(block); return; }
+    if (block.length && !SF()) { say(block); return; }
+    G.sfWarn = SF() && block.length ? block : null;
     // Entraînement : arbre des décisions au moment de la décision (avant l'ordonnance), pour la correction.
     const treeAt = G.cfg.mode === 'entrainement' && S.dt2tree ? S.dt2tree.build(pt, G.cfg) : null;
     G.undo.push(snapshot());
@@ -616,7 +669,10 @@
     G.visitStart = pt.day;
     let interrupt = null;
     const rng = G.cfg.variab === 'reel' ? Math.random : null;
-    D.advance(pt, days, () => { recordDay(true); glpStep(); const e = daily(); if (e) { interrupt = e; return false; } return true; }, rng);
+    const crazy = SF() ? absurd(prev, pt.rx) : null;
+    if (SF()) { const soft = absurdSoft(pt.rx).concat((G.sfWarn || []).map((x) => (HUM() === 'noir' ? 'Règle ignorée (vous l\'avez voulu) : ' : 'Règle ignorée : ') + x)); if (soft.length) G.ev.banner = soft.join(' · '); }
+    if (crazy) { D.advance(pt, Math.min(days, crazy.death ? 2 : 1), () => { recordDay(true); return true; }, rng); interrupt = crazy; }
+    else D.advance(pt, days, () => { recordDay(true); glpStep(); const e = daily(); if (e) { interrupt = e; return false; } return true; }, rng);
     // Doses atteintes par la titration : point de départ de la prochaine ordonnance.
     d.basal = bas(pt.rx); d.rapidM = pt.rx.rapidM.slice(); d.rapid = pt.rx.rapid; d.seg = pt.rx.pumpSeg ? pt.rx.pumpSeg.slice() : null; if (pt.rx.ratio) d.ratio = pt.rx.ratio; d.glpDose = pt.rx.glp === d.glp ? pt.rx.glpDose : d.glpDose;
     let note = (d.mode === 'tele' ? 'Téléconsultation à ' : 'Consultation à ') + (d.unit === 'sem' ? d.wait + ' semaine' + (d.wait > 1 ? 's' : '') : days + ' jour' + (days > 1 ? 's' : ''));
@@ -725,9 +781,9 @@
     const d = G.draft;
     const re = () => render();
     const sel = (id, label, val, opts, on, rerender) => h('div', { class: 'sv-field' }, [h('label', { for: id }, label), h('select', { id, onchange: (e) => { on(e.target.value); if (rerender) re(); } }, opts.map(([k, t]) => h('option', { value: k, selected: String(val) === String(k) }, t)))]);
-    const num = (id, label, val, on) => h('div', { class: 'sv-field' }, [h('label', { for: id }, label), h('span', { class: 'sv-numwrap' }, [h('input', { type: 'number', id, class: 'sv-num', value: val, min: 0, max: 300, step: 1, inputmode: 'numeric', oninput: (e) => on(Math.max(0, Math.round(parseFloat(e.target.value) || 0))) }), ' U/j'])]);
+    const num = (id, label, val, on) => h('div', { class: 'sv-field' }, [h('label', { for: id }, label), h('span', { class: 'sv-numwrap' }, [h('input', { type: 'number', id, class: 'sv-num', value: val, min: 0, max: SF() ? 1000 : 300, step: 1, inputmode: 'numeric', oninput: (e) => on(Math.max(0, Math.round(parseFloat(e.target.value) || 0))) }), ' U/j'])]);
     const Gp = D.GLP1[d.glp];
-    const tabs = h('div', { class: 'sv-modes' }, [h('p', { class: 'sv-eyebrow' }, 'Prochaine étape'), h('div', { class: 'sv-tabs', role: 'tablist' }, MODES.map(([k, ic, t]) => h('button', { type: 'button', role: 'tab', id: 'dtMode-' + k, 'aria-selected': String(d.mode === k), class: 'sv-tab' + (d.mode === k ? ' on' : ''), onclick: () => { d.mode = k; re(); } }, [h('span', { class: 'sv-tab-ic', 'aria-hidden': 'true' }, ic), h('span', null, t)])))]);
+    const tabs = h('div', { class: 'sv-modes' }, [h('p', { class: 'sv-eyebrow' }, 'Prochaine étape'), h('div', { class: 'sv-tabs', role: 'tablist' }, MODES.filter(([k]) => !(EXT() && k === 'hosp')).map(([k, ic, t]) => h('button', { type: 'button', role: 'tab', id: 'dtMode-' + k, 'aria-selected': String(d.mode === k), class: 'sv-tab' + (d.mode === k ? ' on' : ''), onclick: () => { d.mode = k; re(); } }, [h('span', { class: 'sv-tab-ic', 'aria-hidden': 'true' }, ic), h('span', null, t)])))]);
     if (d.mode === 'hosp') return h('div', { class: 'sv-card sv-ordo' }, [tabs, hospForm(d, re)]);
     return h('div', { class: 'sv-card sv-ordo' }, [
       tabs,
@@ -741,18 +797,18 @@
       h('label', { class: 'sv-check' }, [h('input', { type: 'checkbox', id: 'dtDiet', checked: d.diet, onchange: (e) => { d.diet = e.target.checked; } }), ' Suivi diététique (consultations, journal alimentaire)']),
       h('h4', null, 'Médicaments'),
       h('div', { class: 'sv-form' }, [
-        h('div', { class: 'sv-field' }, [sel('dtMet', 'Metformine', d.met, MET.map((x) => [x, x ? x + ' mg/j' : 'Aucune']), (v) => { d.met = +v; }), h('label', { class: 'sv-check sv-small' }, [h('input', { type: 'checkbox', id: 'dtMetProg', checked: d.metProg, onchange: (e) => { d.metProg = e.target.checked; } }), ' Introduction progressive (+ 500 mg par semaine)'])]),
+        h('div', { class: 'sv-field' }, [sel('dtMet', 'Metformine', d.met, MET.concat(SF() ? [4000, 6000, 10000] : []).map((x) => [x, x ? x + ' mg/j' : 'Aucune']), (v) => { d.met = +v; }), h('label', { class: 'sv-check sv-small' }, [h('input', { type: 'checkbox', id: 'dtMetProg', checked: d.metProg, onchange: (e) => { d.metProg = e.target.checked; } }), ' Introduction progressive (+ 500 mg par semaine)'])]),
         h('div', { class: 'sv-field' }, [h('label', { for: 'dtSu' }, 'Insulinosécréteur (sulfamide, glinide)'), suPick('dtSu', d, (t, v) => { const ch = t !== (d.suType || 'glic'); d.suType = t; d.su = v; if (ch) re(); })]),
         sel('dtDpp', 'Sitagliptine (iDPP4)', d.dpp4, DPP4.map((x) => [x, x ? x + ' mg/j' : 'Aucune']), (v) => { d.dpp4 = +v; }),
         h('div', { class: 'sv-field' }, [h('label', { for: 'dtGlp' }, 'Agoniste du GLP-1'), h('div', { class: 'sv-inline' }, [
-          h('select', { id: 'dtGlp', onchange: (e) => { d.glp = e.target.value; d.glpDose = d.glp === 'none' ? 0 : D.GLP1[d.glp].doses[0]; if (d.glp !== 'none') { d.glpUp = true; d.glpTarget = D.GLP1[d.glp].doses[D.GLP1[d.glp].doses.length - 1]; } re(); } }, Object.entries(D.GLP1).map(([k, v]) => h('option', { value: k, selected: d.glp === k }, v.name))),
+          h('select', { id: 'dtGlp', onchange: (e) => { d.glp = e.target.value; d.glpDose = d.glp === 'none' ? 0 : D.GLP1[d.glp].doses[0]; if (d.glp !== 'none') { d.glpUp = true; d.glpTarget = D.GLP1[d.glp].doses[D.GLP1[d.glp].doses.length - 1]; } re(); } }, Object.entries(D.GLP1).filter(([k]) => !(EXT() && k === 'tirz')).map(([k, v]) => h('option', { value: k, selected: d.glp === k }, v.name))),
           Gp.doses.length ? h('select', { id: 'dtGlpDose', 'aria-label': 'Dose', onchange: (e) => { d.glpDose = +e.target.value; re(); } }, Gp.doses.map((x) => h('option', { value: x, selected: d.glpDose === x }, String(x).replace('.', ',') + ' ' + Gp.unit))) : null
         ]),
           Gp.doses.length && Gp.doses.indexOf(d.glpDose) < Gp.doses.length - 1 ? h('div', { class: 'sv-inline sv-small' }, [h('label', { class: 'sv-check sv-small' }, [h('input', { type: 'checkbox', id: 'dtGlpUp', checked: !!d.glpUp, onchange: (e) => { d.glpUp = e.target.checked; if (d.glpUp && !(Gp.doses.indexOf(d.glpTarget) > Gp.doses.indexOf(d.glpDose))) d.glpTarget = Gp.doses[Gp.doses.length - 1]; } }), ' Monter d\'un palier ' + (Gp.step >= 28 ? 'toutes les 4 semaines' : 'chaque semaine') + ' jusqu\'à']),
             h('select', { id: 'dtGlpTarget', 'aria-label': 'Dose cible', onchange: (e) => { d.glpTarget = +e.target.value; d.glpUp = true; } }, Gp.doses.filter((x) => x > d.glpDose).map((x) => h('option', { value: x, selected: (d.glpTarget || Gp.doses[Gp.doses.length - 1]) === x }, String(x).replace('.', ',') + ' ' + Gp.unit)))]) : null
         ]),
         sel('dtSglt', 'iSGLT2', d.sglt2, Object.entries(D.SGLT2), (v) => { d.sglt2 = v; }),
-        sel('dtAcarb', 'Acarbose', d.acarb, ACARB.map((x) => [x, x ? x + ' mg/j' : 'Aucune']), (v) => { d.acarb = +v; }),
+        EXT() ? null : sel('dtAcarb', 'Acarbose', d.acarb, ACARB.map((x) => [x, x ? x + ' mg/j' : 'Aucune']), (v) => { d.acarb = +v; }),
       ]),
       insulinBlock(d, re),
       h('h4', null, 'Objectif d\'HbA1c'),
@@ -772,7 +828,7 @@
   function insulinBlock(d, re) {
     const pt = G.pt, W = pt.st.W;
     const sel = (id, label, val, opts, on) => h('div', { class: 'sv-field' }, [h('label', { for: id }, label), h('select', { id, onchange: (e) => { on(e.target.value); } }, opts.map(([k, t]) => h('option', { value: k, selected: String(val) === String(k) }, t)))]);
-    const unit = (id, val, on, label) => h('span', { class: 'sv-numwrap' }, [h('input', { type: 'number', id, class: 'sv-num sv-num-s', value: val, min: 0, max: 300, step: 1, inputmode: 'numeric', 'aria-label': label, oninput: (e) => { on(Math.max(0, Math.round(parseFloat(e.target.value) || 0))); } }), ' U']);
+    const unit = (id, val, on, label) => h('span', { class: 'sv-numwrap' }, [h('input', { type: 'number', id, class: 'sv-num sv-num-s', value: val, min: 0, max: SF() ? 1000 : 300, step: 1, inputmode: 'numeric', 'aria-label': label, oninput: (e) => { on(Math.max(0, Math.round(parseFloat(e.target.value) || 0))); } }), ' U']);
     const tot = () => d.basal + d.rapidM.reduce((a, x) => a + x, 0);
     const dev = d.device || 'inj';
     const note = h('p', { class: 'sv-note', id: 'dtInsNote' });
@@ -790,7 +846,7 @@
     const retNeed = (G.cfg.retino === 'severe' || G.cfg.retino === 'prolif') && G.ev.ppr == null;
     return h('div', { class: 'sv-ins' }, [
       h('h4', null, 'Insulinothérapie'),
-      h('div', { class: 'sv-form' }, [sel('dtDevice', 'Mode d\'administration', dev, DEVICES, (v) => { if (v !== 'inj' && dev === 'inj' && d.basal > 0) d.basal = Math.round(d.basal * 0.8); d.device = v; if (v === 'loop') { d.cgm = true; d.asg = '0'; } re(); })]),
+      h('div', { class: 'sv-form' }, [sel('dtDevice', 'Mode d\'administration', dev, EXT() ? DEVICES.slice(0, 1) : DEVICES, (v) => { if (v !== 'inj' && dev === 'inj' && d.basal > 0) d.basal = Math.round(d.basal * 0.8); d.device = v; if (v === 'loop') { d.cgm = true; d.asg = '0'; } re(); })]),
       dev !== 'inj' ? h('p', { class: 'sv-note', id: 'dtPumpNote' }, dev === 'loop' ? 'Boucle fermée hybride : le capteur pilote le débit de base (ajusté chaque jour, suspendu avant une hypoglycémie) et ajoute des corrections automatiques ; le patient garde ses bolus aux repas, adaptés selon le protocole. DT2 : 2IQP (NEJM 2025), HbA1c − 0,9 contre − 0,3 à 13 semaines, TIR 48 → 64 % ; mise en place par un centre initiateur ; prise en charge en France dans le DT2 à vérifier.' : 'Pompe : débit de base continu d\'analogue rapide (pas de saturation ni de sur-basalisation, résorption plus reproductible) et bolus aux repas. Passage des stylos : débit de base ≈ 80 % de la basale. DT2 en échec du basal-bolus : OpT2mise (Lancet 2014), HbA1c − 1,1 contre − 0,4 à 6 mois, avec 20 % d\'insuline en moins ; mise en place par un centre initiateur.') : null,
       bas(pt.rx) > 0 || dev !== 'inj' ? null : h('p', { class: 'sv-muted' }, 'Initiation : une injection d\'analogue lent, 6 à 10 U/j ou 0,1 à 0,2 U/kg/j, soit ' + lo + ' à ' + hi + ' U ici, puis titration (SFD 2025, avis 18). Une dose de départ plus forte est refusée.'),
       h('div', { class: 'sv-form' }, [
@@ -1151,7 +1207,7 @@
       e.debrief && G.cfg.mode === 'entrainement' ? debriefBlock(e.debrief, e) : null,
       e.event ? h('p', { class: 'sv-event' }, e.event) : null,
       e.banner ? h('p', { class: 'sv-banner' }, '⚠ ' + e.banner) : null,
-      e.toon ? S.toon(e.toon, { epitaphe: e.epitaphe, titre: TOON_CAPTION[e.caption || e.toon] }) : null,
+      e.toon && HUM() !== 'sobre' ? S.toon(e.toon, { epitaphe: e.epitaphe, titre: HUM() === 'leger' ? TOON_SOFT[e.caption || e.toon] || (TOON_CAPTION[e.caption] ? null : e.caption) : TOON_CAPTION[e.caption || e.toon] || e.caption }) : null,
       rows.length ? h('table', { class: 'sv-res sv-big' }, [h('thead', null, h('tr', null, [h('th', null, 'Examen'), h('th', null, 'Résultat'), h('th', null, 'Référence')])), h('tbody', null, rows.map(([a, b, c2, flag]) => h('tr', null, [h('td', null, a), h('td', { class: 'sv-v' + (flag ? ' hi' : '') }, b), h('td', { class: 'sv-ref' }, c2)])))]) : null,
       e.q.length ? h('dl', { class: 'sv-exam sv-qual' }, e.q.flatMap(([k, v]) => [h('dt', null, k), h('dd', null, v)])) : null,
       h('p', { class: 'sv-clin' }, (e.mode === 'tele' ? 'Téléconsultation (vidéo) : poids déclaré ' + fmt(Math.round(e.w), 0) + ' kg, pas d\'examen clinique, PA non mesurée · ' : 'Poids ' + fmt(e.w, 1) + ' kg (IMC ' + fmt(e.bmi, 1) + ') · PA ' + e.sbp + ' mmHg · ') + (e.symptoms.length ? e.symptoms.join(' ; ') : 'pas de plainte particulière') + '.'),
