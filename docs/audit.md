@@ -330,3 +330,19 @@ Réponses de l'auteur au quiz « Arbitrages de l'atlas endocrinien ». « Oui »
 | M4 Demi-vie de l'angiotensine II | Oui | < 1 min |
 | O1 Adénome géant | Sans importance | — |
 | O2 Tronc thyro-cervical | Oui | Terminologie harmonisée |
+
+## Deuxième audit complet (octobre 2026)
+
+Six relecteurs (thyroïde ; surrénales et stéroïdogenèse ; hypophyse et ADH ; gonades ; calcium, glucose, lipides ; molécules et notions transversales), puis application des corrections sûres et contrôles automatiques (tous les scénarios, pas à pas, chevauchements, formules brutes recalculées). Rapports détaillés, avec la liste des corrections appliquées : `docs/audit-2/`.
+
+| Domaine | Erreurs médicales | Imprécisions | Forme |
+| --- | --- | --- | --- |
+| Thyroïde | 1 | 15 | 4 |
+| Surrénales | 1 | 18 | 6 |
+| Hypophyse, ADH | 4 | 12 | 7 |
+| Gonades | 2 | 16 | 4 |
+| Calcium, glucose, lipides | 4 | 22 | 6 |
+| Molécules, transversal | 1 | 11 | 6 |
+| **Total** | **13** | **94** | **33** |
+
+Toutes les erreurs médicales sont corrigées. Les points à trancher (30) sont soumis à l'auteur par le quiz « Arbitrages du 2e audit ».
