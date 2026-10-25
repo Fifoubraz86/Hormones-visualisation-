@@ -113,7 +113,10 @@
 
     // Sulfamides (avis 10, 12 bis, 16, 18 ter, 21 bis).
     if (rx.su > 0) {
-      if (dfg < 30) add('stop', 'Sulfamides contre-indiqués en IRC sévère ou terminale.', 'avis 12 bis');
+      const T = rx.suType || 'glic';
+      if (dfg < 30 && T !== 'repa') add('stop', 'Sulfamides contre-indiqués en IRC sévère ou terminale (le répaglinide reste possible).', 'avis 12 bis');
+      if (T === 'glib' && (dfg < 60 || c.age >= 70)) add('warn', 'Glibenclamide (Hémi-Daonil, Daonil) : hypoglycémies plus fréquentes et prolongées (métabolites actifs éliminés par le rein) ; à éviter chez le sujet âgé ou si DFG < 60 : préférer le gliclazide ou le répaglinide.', 'RCP · item 247');
+      if (T === 'repa') add('tip', 'Répaglinide : un comprimé 15 min avant chaque repas (« pas de repas, pas de comprimé ») ; action courte, utilisable en insuffisance rénale ; contre-indiqué avec le gemfibrozil, prudence avec le clopidogrel.', 'RCP · item 247');
       if (g === 'dependant') add('stop', 'Ne jamais utiliser de sulfamide chez la personne âgée dépendante.', 'avis 21 bis');
       else if (g === 'fragile') add('warn', 'Éviter les sulfamides chez la personne âgée fragile.', 'avis 21 bis');
       const risk = [c.driver && 'conduite ou métier à risque', c.irregular && 'prise alimentaire irrégulière', dfg < 60 && 'insuffisance rénale', st.hypos > 0 && 'hypoglycémies déjà survenues'].filter(Boolean);

@@ -26,6 +26,15 @@
 
   const MET = [0, 500, 850, 1000, 1500, 1700, 2000, 2550, 3000];
   const SU = [0, 30, 60, 90, 120];
+  // Insulinosécréteur : molécule et dose (dose stockée en équivalent gliclazide LM, cf. D.SUT).
+  const suLabel = (rx) => { const T = D.suType(rx), v = rx.su / T.k; return T.short + ' ' + String(Math.round(v * 10) / 10).replace('.', ',') + ' mg/j' + (T.meal ? ' (en 3 prises, avant les repas)' : ''); };
+  function suPick(id, rx, onChange) {
+    const T = D.suType(rx), opts = [[0, 'Aucun']].concat(T.doses.map((x) => [x * T.k, String(x).replace('.', ',') + ' ' + T.unit + (T.meal ? ' (' + String(x / 3).replace('.', ',') + ' mg × 3)' : '')]));
+    const cur = opts.reduce((a, o) => (Math.abs(o[0] - (rx.su || 0)) < Math.abs(a[0] - (rx.su || 0)) ? o : a))[0];
+    return h('div', { class: 'sv-inline' }, [
+      h('select', { id: id + 'T', 'aria-label': 'Molécule', onchange: (e) => { const was = rx.su || 0; onChange(e.target.value, was ? Math.min(120, was) : 0); } }, Object.entries(D.SUT).map(([k, v]) => h('option', { value: k, selected: (rx.suType || 'glic') === k }, v.name))),
+      h('select', { id, 'aria-label': 'Dose', onchange: (e) => onChange(rx.suType || 'glic', +e.target.value) }, opts.map(([v, t]) => h('option', { value: v, selected: v === cur }, t)))]);
+  }
   const DPP4 = [0, 25, 50, 100];
   const ACARB = [0, 150, 300];
   const Y = S.glyco, SFD = S.sfd, H = S.dt2hosp;
@@ -185,7 +194,7 @@
           const Gp = D.GLP1[r.glp || 'none'];
           return [
             field('Metformine', sel('dtR0met', r.met || 0, MET.map((x) => [x, x ? x + ' mg/j' : 'Aucune']), (v) => setR('met', +v)), 'dtR0met'),
-            field('Gliclazide LM', sel('dtR0su', r.su || 0, SU.map((x) => [x, x ? x + ' mg/j' : 'Aucun']), (v) => setR('su', +v)), 'dtR0su'),
+            field('Insulinosécréteur', suPick('dtR0su', r, (t, v) => { setR('suType', t); setR('su', v); setup(true); }), 'dtR0su'),
             field('Sitagliptine', sel('dtR0dpp', r.dpp4 || 0, DPP4.map((x) => [x, x ? x + ' mg/j' : 'Aucune']), (v) => setR('dpp4', +v)), 'dtR0dpp'),
             field('Agoniste du GLP-1', h('div', { class: 'sv-inline' }, [
               sel('dtR0glp', r.glp || 'none', Object.entries(D.GLP1).map(([k, v]) => [k, v.name]), (v) => { setR('glp', v); setR('glpDose', v === 'none' ? 0 : D.GLP1[v].doses[D.GLP1[v].doses.length - 2]); setup(); }),
@@ -516,7 +525,7 @@
     const life = [rx.act ? 'activité ' + rx.act + ' min/sem' : '', rx.sodaStop ? 'arrêt des sodas' : '', rx.wtGoal ? 'objectif −' + rx.wtGoal + ' % de poids' : '', rx.diet ? 'suivi diététique' : ''].filter(Boolean);
     if (life.length) o.push('RHD (' + life.join(', ') + ')');
     if (rx.met) o.push('metformine ' + rx.met + ' mg/j');
-    if (rx.su) o.push('gliclazide LM ' + rx.su + ' mg/j');
+    if (rx.su) o.push(suLabel(rx));
     if (rx.dpp4) o.push('sitagliptine ' + rx.dpp4 + ' mg/j');
     if (rx.glp !== 'none') o.push(D.GLP1[rx.glp].name.split(' (')[0].toLowerCase() + ' ' + String(rx.glpDose).replace('.', ',') + ' ' + D.GLP1[rx.glp].unit);
     if (rx.sglt2 !== 'none') o.push(D.SGLT2[rx.sglt2].toLowerCase());
@@ -579,7 +588,7 @@
     G.undo.push(snapshot());
     const prev = Object.assign({}, pt.rx, { rapidM: pt.rx.rapidM.slice() });
     const metBefore = D.metDose(pt);
-    Object.assign(pt.rx, { met: d.met, su: d.su, dpp4: d.dpp4, glp: d.glp, glpDose: d.glp === 'none' ? 0 : d.glpDose, sglt2: d.sglt2, acarb: d.acarb, basal: d.device === 'inj' ? d.basal : 0, pump: d.device === 'inj' ? 0 : d.basal, device: d.device, basalType: d.basalType, rapidM: d.rapidM.slice(), rapid: d.rapid, act: d.act, sodaStop: d.sodaStop, wtGoal: d.wtGoal, diet: d.diet });
+    Object.assign(pt.rx, { met: d.met, su: d.su, suType: d.suType || 'glic', dpp4: d.dpp4, glp: d.glp, glpDose: d.glp === 'none' ? 0 : d.glpDose, sglt2: d.sglt2, acarb: d.acarb, basal: d.device === 'inj' ? d.basal : 0, pump: d.device === 'inj' ? 0 : d.basal, device: d.device, basalType: d.basalType, rapidM: d.rapidM.slice(), rapid: d.rapid, act: d.act, sodaStop: d.sodaStop, wtGoal: d.wtGoal, diet: d.diet });
     // Pompe : profil horaire (4 tranches) et insulinothérapie fonctionnelle (ratio, sensibilité).
     pt.rx.pumpSeg = d.device !== 'inj' && d.seg ? d.seg.slice() : null;
     if (pt.rx.pumpSeg) pt.rx.pump = Math.round(Y.segTotal(pt.rx.pumpSeg) * 10) / 10;
@@ -733,7 +742,7 @@
       h('h4', null, 'Médicaments'),
       h('div', { class: 'sv-form' }, [
         h('div', { class: 'sv-field' }, [sel('dtMet', 'Metformine', d.met, MET.map((x) => [x, x ? x + ' mg/j' : 'Aucune']), (v) => { d.met = +v; }), h('label', { class: 'sv-check sv-small' }, [h('input', { type: 'checkbox', id: 'dtMetProg', checked: d.metProg, onchange: (e) => { d.metProg = e.target.checked; } }), ' Introduction progressive (+ 500 mg par semaine)'])]),
-        sel('dtSu', 'Gliclazide LM (sulfamide)', d.su, SU.map((x) => [x, x ? x + ' mg/j' : 'Aucun']), (v) => { d.su = +v; }),
+        h('div', { class: 'sv-field' }, [h('label', { for: 'dtSu' }, 'Insulinosécréteur (sulfamide, glinide)'), suPick('dtSu', d, (t, v) => { const ch = t !== (d.suType || 'glic'); d.suType = t; d.su = v; if (ch) re(); })]),
         sel('dtDpp', 'Sitagliptine (iDPP4)', d.dpp4, DPP4.map((x) => [x, x ? x + ' mg/j' : 'Aucune']), (v) => { d.dpp4 = +v; }),
         h('div', { class: 'sv-field' }, [h('label', { for: 'dtGlp' }, 'Agoniste du GLP-1'), h('div', { class: 'sv-inline' }, [
           h('select', { id: 'dtGlp', onchange: (e) => { d.glp = e.target.value; d.glpDose = d.glp === 'none' ? 0 : D.GLP1[d.glp].doses[0]; if (d.glp !== 'none') { d.glpUp = true; d.glpTarget = D.GLP1[d.glp].doses[D.GLP1[d.glp].doses.length - 1]; } re(); } }, Object.entries(D.GLP1).map(([k, v]) => h('option', { value: k, selected: d.glp === k }, v.name))),
@@ -1039,7 +1048,7 @@
     // Sulfamide : hypoglycémies, insuline, sujet âgé, insuffisance rénale sévère.
     if (prev.su > 0) {
       const ger = c.age >= 75 && c.geria && c.geria !== 'bonne';
-      if (sev > 0 || ger || dfg < 30 || ins(rx) > 0) need('stop', 'arrêter le sulfamide', sev > 0 ? 'hypoglycémie sévère' : ger ? 'personne âgée ' + c.geria : dfg < 30 ? 'DFG < 30' : 'pas de sulfamide sous insuline', !(rx.su > 0), sev > 0 ? 'avis 10' : ger ? 'avis 21 bis' : ins(rx) > 0 ? 'avis 18 ter' : 'avis 12 bis');
+      if (sev > 0 || ger || (dfg < 30 && prev.suType !== 'repa') || ins(rx) > 0) need('stop', 'arrêter le sulfamide', sev > 0 ? 'hypoglycémie sévère' : ger ? 'personne âgée ' + c.geria : dfg < 30 ? 'DFG < 30' : 'pas de sulfamide sous insuline', !(rx.su > 0), sev > 0 ? 'avis 10' : ger ? 'avis 21 bis' : ins(rx) > 0 ? 'avis 18 ter' : 'avis 12 bis');
       else if (hy > 0) need('reduce', 'baisser ou arrêter le sulfamide', hy + ' hypoglycémie' + (hy > 1 ? 's' : '') + ' depuis le dernier bilan', rx.su < prev.su, 'avis 10');
     }
     // Insuline : hypoglycémies (sans sulfamide en cause), surtraitement.

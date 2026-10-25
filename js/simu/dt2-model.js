@@ -61,6 +61,16 @@
     gck: { label: 'MODY 2 (glucokinase)', si: 1, rate: 0, gck: true }
   };
   const ETHNIC = { eur: { label: 'Europe', incr: 1 }, asie: { label: 'Asie de l\'Est', incr: 1.8 }, afr: { label: 'Afrique subsaharienne', incr: 1 }, magh: { label: 'Maghreb', incr: 1 } };
+  // Insulinosécréteurs : la dose (rx.su) est exprimée en équivalent gliclazide LM (120 mg = dose maximale) ;
+  // efficacité comparable (− 1 % d'HbA1c environ). Glibenclamide : hypoglycémies plus fréquentes et prolongées
+  // (métabolites actifs à élimination rénale), à éviter chez le sujet âgé ou si DFG < 60. Répaglinide : action
+  // courte, pris avant chaque repas, élimination hépatique, utilisable en insuffisance rénale (complément ; item 247).
+  const SUT = {
+    glic: { name: 'Gliclazide LM (sulfamide)', short: 'gliclazide LM', unit: 'mg/j', doses: [30, 60, 90, 120], k: 1, hypo: 1 },
+    glib: { name: 'Glibenclamide (Hémi-Daonil® 2,5 mg, Daonil® 5 mg)', short: 'glibenclamide', unit: 'mg/j', doses: [2.5, 5, 7.5, 10, 15], k: 8, hypo: 1.8 },
+    repa: { name: 'Répaglinide (glinide, avant chaque repas)', short: 'répaglinide', unit: 'mg/j', doses: [1.5, 3, 6, 12], k: 10, hypo: 0.7, meal: true }
+  };
+  const suType = (rx) => SUT[rx.suType] || SUT.glic;
   // aGLP1 : fraction de l'effet maximal par palier (complément).
   const GLP1 = {
     none: { name: 'Aucun', doses: [] },
@@ -79,7 +89,7 @@
 
   // Mesures hygiéno-diététiques : objectif d'activité (min/sem, 0 = inchangée), arrêt des boissons sucrées,
   // objectif de perte de poids (%), suivi diététique. Atteinte des objectifs = motivation du patient.
-  const RX0 = { met: 0, su: 0, dpp4: 0, glp: 'none', glpDose: 0, sglt2: 'none', acarb: 0, basal: 0, basalType: 'g100', rapid: 0, rapidM: [0, 0, 0], act: 0, sodaStop: false, wtGoal: 0, diet: false };
+  const RX0 = { met: 0, su: 0, suType: 'glic', dpp4: 0, glp: 'none', glpDose: 0, sglt2: 'none', acarb: 0, basal: 0, basalType: 'g100', rapid: 0, rapidM: [0, 0, 0], act: 0, sodaStop: false, wtGoal: 0, diet: false };
   const MOTIV = { faible: 0.3, moyenne: 0.55, forte: 0.8 };
   const SNACK = { aucun: 0, modere: 0.015, important: 0.03 };
   // Effet de l'activité physique sur la sensibilité à l'insuline : effet seuil vers 150 min/sem
@@ -265,11 +275,12 @@
     const e = effects(pt, s.MG);
     // Analogues d'action très prolongée (glargine U300, dégludec) : moins d'hypoglycémies nocturnes ; NPH : plus (SFD 2025, avis 18 bis).
     const insF = pt.rx.device === 'loop' ? 0.5 : pt.rx.pump > 0 ? 0.8 : { g300: 0.7, deg: 0.7, nph: 1.4 }[pt.rx.basalType] || 1;
-    const expo = 0.05 * e.eSu * (p.suBoost > 1 ? 2 : 1) * (s.dfg < 45 ? 1.8 : 1) + 0.17 * e.iexRaw * (pt.rx.pump > 0 || pt.rx.rapid === 0 ? insF : 1);
+    const sut = pt.rx.suType || 'glic', suR = suType(pt.rx).hypo * (sut === 'repa' ? 1 : (s.dfg < 45 ? 1.8 : 1) * (sut === 'glib' && s.dfg < 60 ? 1.5 : 1));
+    const expo = 0.05 * e.eSu * (p.suBoost > 1 ? 2 : 1) * suR + 0.17 * e.iexRaw * (pt.rx.pump > 0 || pt.rx.rapid === 0 ? insF : 1);
     // Travail posté : horaires de repas et de sommeil décalés ; alternance : risque d'hypoglycémie × 1,6.
     const risk = (p.age >= 75 ? 2 : 1) * (p.irregular ? 2 : 1) * ({ nuit: 1.2, '2x8': 1.4, '3x8': 1.6 }[p.work] || 1);
     const lam = expo * risk * Math.exp(-(s.MG - 1.15) / 0.17);
-    const sevFrac = 0.04 * (p.age >= 75 ? 2.5 : 1) * (s.dfg < 45 ? 2 : 1);
+    const sevFrac = 0.04 * (p.age >= 75 ? 2.5 : 1) * (s.dfg < 45 ? 2 : 1) * (pt.rx.su > 0 && pt.rx.suType === 'glib' ? 1.6 : 1);
     if (rng) { if (rng() < lam) s.hypo++; if (rng() < lam * sevFrac) s.hypoSev++; }
     else { s.hypoAcc += lam; s.sevAcc += lam * sevFrac; while (s.hypoAcc >= 1) { s.hypo++; s.hypoAcc -= 1; } if (s.sevAcc >= 1) { s.hypoSev++; s.sevAcc -= 1; } }
     pt.day += 1;
@@ -381,5 +392,5 @@
     return m;
   }
 
-  S.dt2 = { P, fpgOf, eqMG, hospDay, siOf, replay, PROFILES, ETHNIC, GLP1, SGLT2, ALB, RETINO, RX0, MOTIV, SNACK, metDose, lifeAch, actNow, sodaNow, create, advance, measure, effects, glpFrac, beta, a1cOf, clamp };
+  S.dt2 = { SUT, suType, P, fpgOf, eqMG, hospDay, siOf, replay, PROFILES, ETHNIC, GLP1, SGLT2, ALB, RETINO, RX0, MOTIV, SNACK, metDose, lifeAch, actNow, sodaNow, create, advance, measure, effects, glpFrac, beta, a1cOf, clamp };
 })();
