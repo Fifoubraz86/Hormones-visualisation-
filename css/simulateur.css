@@ -687,3 +687,22 @@ body.ph-noscroll { overflow: hidden; }
 .sv-storygoal { padding: 8px 10px; border-radius: 10px; background: var(--panel); border: 1px dashed var(--accent); }
 .sv-storyeval { margin: 6px 0; padding-left: 0; list-style: none; }
 .sv-storyeval li { margin: 4px 0; } .sv-storyeval li.ok b { color: var(--good); } .sv-storyeval li.ko b { color: var(--bad); }
+/* Diabète de type 1 */
+.dt1-segs { display: flex; flex-wrap: wrap; gap: 6px; }
+.dt1-seg { display: flex; flex-direction: column; gap: 2px; font-size: 0.82rem; color: var(--muted); }
+.dt1-seg .sv-num { width: 5.2em; }
+.dt1-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
+.dt1-kpi { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--panel); }
+.dt1-kpi span { font-size: 0.8rem; color: var(--muted); } .dt1-kpi strong { font: 600 1.1rem var(--font-data); } .dt1-kpi em { font-style: normal; font-size: 0.74rem; color: var(--faint); }
+.dt1-kpi.ok { border-color: var(--good); } .dt1-kpi.ko { border-color: var(--warn); }
+.dt1-an { margin: 0; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.dt1-an li { padding: 6px 10px; border-radius: 8px; border-left: 4px solid var(--line); background: var(--panel); }
+.dt1-an .dt1-bad { border-color: var(--bad); } .dt1-an .dt1-warn { border-color: var(--warn); } .dt1-an .dt1-tip { border-color: var(--info); } .dt1-an .dt1-good { border-color: var(--good); }
+.dt1-basal { fill: none; stroke: var(--accent); stroke-width: 2; }
+.dt1-bol { fill: var(--accent); opacity: 0.85; } .dt1-auto { fill: var(--warn); opacity: 0.9; }
+.dt1-p90 { fill: color-mix(in srgb, var(--tsh) 18%, transparent); } .dt1-p50 { fill: color-mix(in srgb, var(--tsh) 38%, transparent); }
+.dt1-truth { padding: 8px 10px; border-radius: 10px; border: 1px dashed var(--accent); font-size: 0.9rem; }
+.dt1-truth p { margin: 4px 0; }
+.dt1-evnote { padding: 8px 10px; border-radius: 10px; background: color-mix(in srgb, var(--info) 10%, var(--panel)); font-size: 0.92rem; }
+.dt1-evnote p { margin: 4px 0; } .dt1-joke { font-style: italic; }
+.dt1-win { font-weight: 700; color: var(--good); }

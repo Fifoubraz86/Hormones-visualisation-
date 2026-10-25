@@ -1,14 +1,14 @@
-/* Choix du mode : thyroïde (par défaut), diabète de type 2 (#dt2), cas commentés (#cas), schéma dynamique de physiologie (#physio) ; #cas-insuline ouvre
+/* Choix du mode : thyroïde (par défaut), diabète de type 1 (#dt1), diabète de type 2 (#dt2), cas commentés (#cas), schéma dynamique de physiologie (#physio) ; #cas-insuline ouvre
    directement le cas guidé d'initiation de l'insuline. */
 (function () {
   'use strict';
   const S = window.HV.simu;
-  const tabs = { sand: document.getElementById('svTabSand'), dt2: document.getElementById('svTabDt2'), cases: document.getElementById('svTabCases'), physio: document.getElementById('svTabPhysio') };
+  const tabs = { sand: document.getElementById('svTabSand'), dt1: document.getElementById('svTabDt1'), dt2: document.getElementById('svTabDt2'), cases: document.getElementById('svTabCases'), physio: document.getElementById('svTabPhysio') };
   function show(mode) {
     for (const k in tabs) tabs[k].setAttribute('aria-selected', String(k === mode));
     document.getElementById('svHome').hidden = true;
-    if (mode === 'cases') { S.casesUI.home(); if (location.hash === '#cas-insuline' && S.dt2case) S.dt2case.start(); } else if (mode === 'dt2') S.dt2ui.setup(); else if (mode === 'physio') S.dt2ui.physio(); else S.sandbox.setup();
+    if (mode === 'cases') { S.casesUI.home(); if (location.hash === '#cas-insuline' && S.dt2case) S.dt2case.start(); } else if (mode === 'dt1') S.dt1.setup(); else if (mode === 'dt2') S.dt2ui.setup(); else if (mode === 'physio') S.dt2ui.physio(); else S.sandbox.setup();
   }
   for (const k in tabs) tabs[k].addEventListener('click', () => show(k));
-  show(location.hash.startsWith('#cas') ? 'cases' : location.hash === '#dt2' ? 'dt2' : location.hash === '#physio' ? 'physio' : 'sand');
+  show(location.hash.startsWith('#cas') ? 'cases' : location.hash === '#dt2' ? 'dt2' : location.hash === '#dt1' ? 'dt1' : location.hash === '#physio' ? 'physio' : 'sand');
 })();
