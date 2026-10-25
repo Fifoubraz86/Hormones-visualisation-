@@ -120,6 +120,12 @@
     }
   };
   const sim = HV.makeSim('surrenale', SIM);
+  // Sous Synacthène, la surrénale part de l'état d'équilibre du même bloc sans stimulation (et non du scénario précédent).
+  const setSc = sim.setScenario;
+  sim.setScenario = function (id) {
+    setSc(id);
+    if (sim.p.syn > 0) { const syn = sim.p.syn; sim.p.syn = 0; Object.assign(sim.s, SIM.init); sim.settle(); sim.p.syn = syn; }
+  };
 
   /* ===================== Formules des stéroïdes ===================== */
   // Noyau stérane en unités de liaison (L) : cycles A, B, C hexagonaux, D pentagonal ; y vers le bas.
