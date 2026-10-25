@@ -227,7 +227,7 @@
   function gameCard() {
     const GAMES = [['libre', '🩺', 'Consultation libre', 'Un patient, vos ordonnances, vos bilans.'], ['histoire', '📖', 'Mode histoire', 'Quatre vies de patients, de la découverte du diabète aux vieux jours.'], ['sansfilet', '🎪', 'Sans filet', 'Tout est permis, même 100 U d\'un coup. Le simulateur commente.']];
     const seg = (id, key, opts) => h('div', { class: 'sv-seg', role: 'radiogroup', id }, opts.map(([k, t]) => h('button', { type: 'button', role: 'radio', 'aria-checked': String(cfg[key] === k), class: 'sv-segb' + (cfg[key] === k ? ' on' : ''), onclick: () => { cfg[key] = k; if (key === 'level' && k === 'externe' && !['sird', 'mard'].includes(cfg.profile)) cfg.profile = 'sird'; setup(true); } }, t)));
-    return h('section', { class: 'sv-card sv-game', id: 'dtGame' }, [
+    return h('section', { class: 'sv-card sv-gamecfg', id: 'dtGame' }, [
       h('div', { class: 'sv-games' }, GAMES.map(([k, ic, t, sub]) => h('button', { type: 'button', class: 'sv-gamebtn' + (cfg.game === k ? ' on' : ''), id: 'dtGame-' + k, 'aria-pressed': String(cfg.game === k), onclick: () => { cfg.game = k; setup(true); } }, [h('span', { class: 'sv-game-ic', 'aria-hidden': 'true' }, ic), h('strong', null, t), h('span', null, sub)]))),
       h('div', { class: 'sv-gameopts' }, [
         h('div', null, [h('p', { class: 'sv-stage-h' }, 'Niveau'), seg('dtLevel', 'level', [['externe', 'Externe (DFASM2 : item 247, fiche LiSA, CEEDMM)'], ['interne', 'Interne (tous les patients, toutes les options)']])]),
@@ -264,7 +264,9 @@
   }
 
   /* ---------- Partie ---------- */
-  function begin() {
+  function begin(story) {
+    story = story && story.chapters ? story : null;
+    if (story) cfg = Object.assign({}, BASE, { level: cfg.level, humor: cfg.humor, game: 'histoire', mode: 'decouverte', variab: 'moyen' }, story.cfg);
     const c = Object.assign({}, cfg);
     if (c.profile === 'gck') c.a1c = Math.min(c.a1c, 7);
     const pt = D.create(Object.assign({}, c, { adh: c.adh === 'cachee' ? (c.variab === 'reel' ? 'cachee' : 'bonne') : c.adh }));
@@ -287,8 +289,71 @@
     // Quatorze jours de glycémies avant la première consultation (carnet, capteur).
     for (let k = 14; k > 0; k--) { pt.day = -k; recordDay(); }
     pt.day = 0;
-    doLabs(new Set(['a1c', 'fpg', 'creat'].concat(G.cgm ? ['agp'] : [])), 'Bilan initial');
+    if (story) G.story = { s: story, ch: 0, res: [], start: chStart() };
+    doLabs(new Set(['a1c', 'fpg', 'creat'].concat(G.cgm ? ['agp'] : [])), story ? 'Chapitre 1 : ' + story.chapters[0].title : 'Bilan initial', story ? story.chapters[0].text : undefined);
     render();
+  }
+
+  /* ---------- Mode histoire (chapitres de js/simu/dt2-story.js) ---------- */
+  function chStart() { const pt = G.pt; return { day: pt.day, hypo: pt.st.hypo, sev: pt.st.hypoSev, basal: bas(pt.rx), fo: false, retino: !!G.ev.retinoDone }; }
+  function storyCtx() {
+    const pt = G.pt, S0 = G.story.start;
+    return { rx: pt.rx, c: G.cfg, st: pt.st, a1c: lastA1c(), goal: G.goal, hypo: pt.st.hypo - S0.hypo, sev: pt.st.hypoSev - S0.sev, rx0Basal: S0.basal, cgm: G.cgm, asg: G.asg, titr: G.titr, fo: S0.fo, ppr: G.ev.ppr != null, retinoEvent: !!G.ev.retinoDone && !S0.retino, dead: !!G.dead };
+  }
+  function nextChapter() {
+    const Gs = G.story, st = Gs.s, chap = st.chapters[Gs.ch], x = storyCtx();
+    const ok = chap.checks.map(([f, lab, why, ref]) => ({ ok: !!f(x), lab, why, ref }));
+    Gs.res.push({ title: chap.title, age: chap.age, ok, sev: x.sev, hypo: x.hypo });
+    Gs.ch++;
+    if (Gs.ch >= st.chapters.length) { Gs.done = true; render(); return; }
+    const nx = st.chapters[Gs.ch], pt = G.pt, d = G.draft;
+    G.undo.push(snapshot());
+    // Le temps passe : traitement en cours, titration par le patient, événements graves possibles.
+    let dead = null;
+    const days = Math.round((nx.age - chap.age) * 365);
+    D.advance(pt, days, () => { recordDay(true); glpStep(); const e = daily(); if (e && e.death) { dead = e; return false; } return true; }, null);
+    G.cfg.age = nx.age; pt.par.age = nx.age; G.cfg.duration = (G.cfg.duration || 0) + (nx.age - chap.age);
+    if (!dead && nx.apply) nx.apply({
+      set: (k, v) => { G.cfg[k] = v; if (k === 'alb') pt.par.albRate = D.ALB[v].rate; else pt.par[k] = v; },
+      dfg: (v) => { pt.st.dfg = v; pt.par.dfg0Eff = v; G.cfg.dfg = v; },
+      weight: (dk) => { pt.st.W += dk; pt.par.weight0 += dk; G.cfg.weight = Math.round(pt.st.W); },
+      beta: (f) => { pt.par.B0 *= f; },
+      hypos: (n) => { pt.st.hypo += n; },
+      ensureBasal: (ukg) => { if (!(bas(pt.rx) > 0)) { pt.rx.basal = Math.round(ukg * pt.st.W); G.titr.who = 'patient'; } }
+    });
+    d.basal = bas(pt.rx); d.rapidM = pt.rx.rapidM.slice(); d.rapid = pt.rx.rapid; d.met = pt.rx.met; d.su = pt.rx.su; d.sglt2 = pt.rx.sglt2; d.glp = pt.rx.glp; d.glpDose = pt.rx.glpDose; d.titr = JSON.parse(JSON.stringify(G.titr));
+    G.story.start = chStart();
+    if (dead) { G.dead = dead; G.ev.eventToon = 'death'; G.ev.epitaphe = dead.epitaphe; Gs.done = true; Gs.deadAt = nx.age; }
+    doLabs(new Set(['a1c', 'fpg', 'creat'].concat(G.cgm ? ['agp'] : [])), dead ? 'Décès' : 'Chapitre ' + (Gs.ch + 1) + ' : ' + nx.title + ' (' + nx.age + ' ans)', dead ? dead.text : nx.text);
+    render();
+    window.scrollTo(0, 0);
+  }
+  function storyCard() {
+    const Gs = G.story, st = Gs.s, N = st.chapters.length;
+    const evalList = (r) => h('ul', { class: 'sv-storyeval' }, r.ok.map((o) => h('li', { class: o.ok ? 'ok' : 'ko' }, [h('b', null, (o.ok ? '✔ ' : '✘ ') + o.lab), o.ok ? null : ' — ' + o.why, h('span', { class: 'sv-muted' }, ' (' + o.ref + ')')])));
+    const pts = Gs.res.reduce((a, r) => a + r.ok.filter((o) => o.ok).length, 0), tot = Gs.res.reduce((a, r) => a + r.ok.length, 0);
+    const last = Gs.res[Gs.res.length - 1];
+    if (Gs.done) {
+      const pc = tot ? pts / tot : 0, H = HUM();
+      const end = Gs.deadAt ? (H === 'noir' ? 'Fin prématurée de l\'histoire, à ' + Gs.deadAt + ' ans. Le scénariste avait pourtant prévu la suite.' : 'L\'histoire s\'arrête à ' + Gs.deadAt + ' ans.') : pc >= 0.8 ? st.end.good : pc >= 0.5 ? st.end.mid : st.end.bad;
+      return h('div', { class: 'sv-card sv-storycard done', id: 'dtStory' }, [
+        h('p', { class: 'sv-eyebrow' }, st.icon + ' Histoire de ' + st.name + ' · épilogue'),
+        h('h3', null, 'Score : ' + pts + ' / ' + tot + ' (' + Math.round(pc * 100) + ' %)'),
+        h('p', { class: 'sv-storytext' }, end),
+        h('details', null, [h('summary', null, 'Détail par chapitre')].concat(Gs.res.map((r) => h('div', null, [h('p', null, h('b', null, r.age + ' ans · ' + r.title)), evalList(r)])))),
+        h('div', { class: 'sv-actions' }, [h('button', { type: 'button', class: 'sv-secondary', onclick: () => { cfg.game = 'histoire'; setup(); } }, 'Autre histoire')])
+      ]);
+    }
+    const chap = st.chapters[Gs.ch], nx = st.chapters[Gs.ch + 1];
+    return h('div', { class: 'sv-card sv-storycard', id: 'dtStory' }, [
+      h('p', { class: 'sv-eyebrow' }, st.icon + ' Histoire de ' + st.name + ' · chapitre ' + (Gs.ch + 1) + ' / ' + N + ' · ' + chap.age + ' ans'),
+      h('h3', null, chap.title),
+      h('p', { class: 'sv-storytext' }, chap.text),
+      h('p', { class: 'sv-storygoal' }, [h('b', null, '🎯 Objectif : '), chap.goal]),
+      last ? h('details', { class: 'sv-storylast' }, [h('summary', null, 'Évaluation du chapitre précédent (' + last.title + ') : ' + last.ok.filter((o) => o.ok).length + ' / ' + last.ok.length)].concat([evalList(last)])) : null,
+      h('div', { class: 'sv-actions' }, [h('button', { type: 'button', class: 'sv-primary', id: 'dtStoryNext', disabled: G.dead ? true : null, onclick: nextChapter }, nx ? 'Chapitre suivant : ' + nx.title + ' (' + nx.age + ' ans) →' : 'Terminer l\'histoire →'),
+        h('span', { class: 'sv-muted' }, 'Prescrivez (une ou plusieurs consultations), puis passez au chapitre suivant : votre ordonnance en cours sera évaluée.')])
+    ]);
   }
 
   // Titration des aGLP1 et du tirzépatide entre les consultations : un palier par intervalle (4 semaines ;
@@ -591,11 +656,12 @@
 
   function snapshot() {
     const pt = G.pt;
-    return JSON.stringify({ metRamp: pt.metRamp, st: pt.st, day: pt.day, rx: pt.rx, take: pt.take, par: Object.assign({}, pt.par), logLen: pt.log.length, hist: G.history.length, vis: G.visits.length, ev: G.ev, lastHypo: G.lastHypo,
+    return JSON.stringify({ story: G.story ? { ch: G.story.ch, res: G.story.res, start: G.story.start, done: !!G.story.done, deadAt: G.story.deadAt || null, cfg: { age: G.cfg.age, dfg: G.cfg.dfg, weight: G.cfg.weight, duration: G.cfg.duration, geria: G.cfg.geria, cvd: G.cfg.cvd, hfail: G.cfg.hfail, hcvr: G.cfg.hcvr, retino: G.cfg.retino, irregular: G.cfg.irregular, alb: G.cfg.alb } } : null, metRamp: pt.metRamp, st: pt.st, day: pt.day, rx: pt.rx, take: pt.take, par: Object.assign({}, pt.par), logLen: pt.log.length, hist: G.history.length, vis: G.visits.length, ev: G.ev, lastHypo: G.lastHypo,
       gly: G.glyDays, titrState: G.titrState, titrLog: G.titrLog.length, starts: G.starts, titr: G.titr, cgm: G.cgm, cgmStart: G.cgmStart, cgmAcq: !!G.cgmAcquired, asg: G.asg, goal: G.goal, lastH: G.lastH, lastS: G.lastS, glpLog: (G.glpLog || []).length, glpUp: G.glpUp || null });
   }
   function restore(js) {
     const s = JSON.parse(js), pt = G.pt;
+    if (s.story && G.story) { Object.assign(G.story, s.story); G.story.done = s.story.done; G.story.deadAt = s.story.deadAt; Object.assign(G.cfg, s.story.cfg); delete G.story.cfg; }
     pt.st = s.st; pt.day = s.day; pt.rx = s.rx; pt.take = s.take; pt.metRamp = s.metRamp; Object.assign(pt.par, s.par);
     pt.log.length = s.logLen; G.history.length = s.hist; G.visits.length = s.vis; G.ev = s.ev; G.lastHypo = s.lastHypo;
     G.glyDays = s.gly; G.titrState = s.titrState; G.titrLog.length = s.titrLog; G.starts = s.starts; G.titr = s.titr; G.cgm = s.cgm; G.cgmStart = s.cgmStart; G.cgmAcquired = s.cgmAcq; G.asg = s.asg; G.goal = s.goal; G.lastH = s.lastH; G.lastS = s.lastS; if (G.glpLog) G.glpLog.length = s.glpLog || 0; G.glpUp = s.glpUp;
@@ -635,6 +701,7 @@
     if (onInsD && d.titr.who !== 'none' && d.asg === '0' && !d.cgm) block.push('Titration de l\'insuline sans autosurveillance ni capteur : impossible ; il faut au moins la glycémie du réveil chaque jour.');
     if (onInsD && d.titr.who !== 'none' && d.rapid > 0 && d.titr.bolusCtl === 'pp' && d.asg !== '6' && !d.cgm) block.push('Bolus adaptés sur la glycémie post-prandiale : prescrire l\'autosurveillance 6 fois par jour (avant et 2 h après les repas) ou un capteur.');
     if (block.length && !SF()) { say(block); return; }
+    if (G.story && d.tests.has('fo')) G.story.start.fo = true;
     G.sfWarn = SF() && block.length ? block : null;
     // Entraînement : arbre des décisions au moment de la décision (avant l'ordonnance), pour la correction.
     const treeAt = G.cfg.mode === 'entrainement' && S.dt2tree ? S.dt2tree.build(pt, G.cfg) : null;
@@ -707,7 +774,7 @@
     main.textContent = '';
     main.className = 'sv-main sv-game sv-sandbox';
     const left = h('aside', { class: 'sv-dossier' }, [patientCard(), G.dead ? deathCard() : rxCard()]);
-    const right = h('section', { class: 'sv-consult' }, TRAIN() ? [journeyCard(), physioEntry(), latestCard(), chartCard(), historyCard(), refCard()] : [journeyCard(), physioEntry(), latestCard(), sfdCard(), chartCard(), marginCard(), historyCard(), treeCard(), guideCard(), factorsCard(), refCard(), effectsCard(), revealCard()]);
+    const right = h('section', { class: 'sv-consult' }, (G.story ? [storyCard()] : []).concat(TRAIN() ? [journeyCard(), physioEntry(), latestCard(), chartCard(), historyCard(), refCard()] : [journeyCard(), physioEntry(), latestCard(), sfdCard(), chartCard(), marginCard(), historyCard(), treeCard(), guideCard(), factorsCard(), refCard(), effectsCard(), revealCard()]));
     main.append(left, right);
     const box = right.querySelector('.sv-chartbox');
     if (box) requestAnimationFrame(() => chart(box));

@@ -676,3 +676,14 @@ body.ph-noscroll { overflow: hidden; }
 .sv-segb { font: 600 0.88rem var(--font-body); padding: 6px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer; }
 .sv-segb.on { background: var(--accent); border-color: var(--accent); color: var(--panel); }
 .sv-sf { border-left: 3px solid var(--warn); padding-left: 8px; }
+/* Mode histoire */
+.sv-storygrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 700px) { .sv-storygrid { grid-template-columns: 1fr; } }
+.sv-story { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; padding: 12px 14px; border-radius: 14px; border: 2px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer; font: inherit; }
+.sv-story:hover { border-color: var(--accent); }
+.sv-story span { color: var(--muted); font-size: 0.9rem; } .sv-story .sv-story-ch { color: var(--accent); font-weight: 600; font-size: 0.82rem; }
+.sv-storycard { border: 2px solid var(--accent); background: color-mix(in srgb, var(--accent) 6%, var(--panel)); }
+.sv-storytext { font-size: 1.02rem; line-height: 1.5; }
+.sv-storygoal { padding: 8px 10px; border-radius: 10px; background: var(--panel); border: 1px dashed var(--accent); }
+.sv-storyeval { margin: 6px 0; padding-left: 0; list-style: none; }
+.sv-storyeval li { margin: 4px 0; } .sv-storyeval li.ok b { color: var(--good); } .sv-storyeval li.ko b { color: var(--bad); }
