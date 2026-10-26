@@ -390,6 +390,7 @@
     draw(a) {
       a.path('M 660,450 C 820,540 1000,540 1196,620', 'connector');
       a.childCaption('islet', 'Îlot et cellule β ⊕');
+      a.text(600, 560, 'Pancréas exocrine, endocrine et TNE ⊕', 'loupe-cap', { anchor: 'middle', attrs: { 'data-zoom': 'pancreas' } });
     },
     nodes: [
       { id: 'glc', x: 240, y: 400, label: 'Glycémie', color: 'p-lime', live: (T) => n2(gly(T)) + ' g/L', info: 'Résulte de l\'absorption alimentaire, de la production hépatique (glycogénolyse, néoglucogenèse) et de la consommation par les tissus.' },
@@ -397,7 +398,7 @@
       { id: 'liver', zoom: 'liver-fast', x: 980, y: 230, organ: 'liver', label: 'Foie', sub: 'glycogène, néoglucogenèse', color: 'p-lime' },
       { id: 'muscle', zoom: 'insulin-rec', x: 980, y: 470, organ: 'muscle', label: 'Muscle', sub: 'GLUT4', color: 'p-lime' },
       { id: 'fat', x: 980, y: 700, organ: 'fat', label: 'Tissu adipeux', sub: 'GLUT4 · lipolyse', color: 'p-amber' },
-      { id: 'gut', x: 240, y: 760, organ: 'intestine', s: 0.9, label: 'Intestin', sub: 'repas', color: 'p-lime' },
+      { id: 'gut', zoom: 'panc-gi', x: 240, y: 760, organ: 'intestine', s: 0.9, label: 'Intestin', sub: 'repas · hormones digestives', color: 'p-lime' },
       { id: 'kidney', x: 600, y: 780, organ: 'kidney', s: 0.85, label: 'Rein', sub: 'SGLT2 · seuil 1,80 g/L', color: 'p-lime' },
       { id: 'keto', x: 1360, y: 230, label: 'Corps cétoniques', w: 230, color: 'p-red2', info: 'Cétogenèse hépatique : limitée par l\'insuline (cétose de jeûne), emballée en cas de carence (acidocétose).' },
       { id: 'contre', x: 1360, y: 480, label: 'Contre-régulation', w: 240, sub: ['glucagon · catécholamines', 'GH · cortisol (tardif)'], color: 'p-red', zoom: 'medullo', info: 'Mise en jeu quand la glycémie baisse ; altérée dans le diabète, avec risque d\'hypoglycémie non ressentie.' }

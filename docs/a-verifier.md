@@ -127,3 +127,16 @@ Les étiquettes marquées « (complément) » portent surtout sur la physiologie
 ## Notions transversales (loupes signalisation, interactions, rythmes, NEM, dosages, médicaments)
 
 Marqué « (complément) » : voies de signalisation (AMPc, Gq, JAK-STAT, récepteurs nucléaires) ; dénutrition et axes en épargne ; insuffisance surrénale démasquée par la lévothyroxine ; hyponatrémie de l'insuffisance corticotrope ; rythmes (GH, mélatonine, TSH, prolactine la nuit) ; NEM 1 et NEM 2, von Hippel-Lindau, gènes SDHx, morphotype marfanoïde ; immunodosages (compétition et sandwich), effet crochet, macroprolactinémie, anticorps hétérophiles, biotine ; horaires et conditions de prélèvement. Références : Williams Textbook of Endocrinology ; recommandations SFE ; Thakker, J Clin Endocrinol Metab 2012 (NEM 1) ; Wells, Thyroid 2015 (CMT, NEM 2).
+
+## Pancréas (module satellite et loupes : exocrine, pancréatites, hormones digestives, classification des TNE, gastrinome, insulinome, glucagonome, VIPome, somatostatinome)
+
+Sources principales, citées avec leur page : SNFGE / CDU-HGE, *Les fondamentaux de la pathologie digestive*, chapitre 7 « Pancréas » (octobre 2014, « SNFGE p. ») ; CEEDMM / SFE, item 308 « Tumeurs neuroendocrines du pancréas » (2022, « SFE ») ; TNCD, chapitre 11 « Néoplasies neuroendocrines digestives » (mise à jour du 07/09/2026, « TNCD p. »).
+
+Marqué « (complément) » et à confirmer :
+
+- **Physiologie gastrique** : boucle gastrine – acide – somatostatine (cellules G, D, ECL), freinage des cellules G par un pH antral bas, effet trophique de la gastrine, pompe H⁺/K⁺-ATPase. Référence : Schubert et Rehfeld, *Physiol Rev* 2023 ; référentiel de physiologie digestive.
+- **Hormones digestives hors sécrétine et CCK** : ghréline, histamine, GIP, motiline, GLP-1, PYY, sérotonine, VIP, polypeptide pancréatique (siège, stimulus, actions). Référence : Gribble et Reimann, *Nat Rev Endocrinol* 2019.
+- **Mécanismes des syndromes** : stimulation paradoxale du gastrinome par la sécrétine ; inactivation de la lipase par le pH duodénal acide ; hypoaminoacidémie et carences (zinc, acides gras) dans l'érythème nécrolytique migrateur ; récepteurs VPAC et sécrétion de chlore dans le VIPome ; hypochlorhydrie du VIPome et du somatostatinome ; siège corps-queue du glucagonome et du VIPome ; « triangle des gastrinomes » ; anticoagulation préventive du glucagonome. Référence : Hofland et al., ENETS 2023 (*J Neuroendocrinol*) ; Metz et Jensen, *Gastroenterology* 2008.
+- **Normes** : gastrinémie < 100 pg/mL, pH gastrique à jeun 1,5–3,5, glucagon 50–150 pg/mL, VIP < 100 pg/mL, somatostatine < 25 pg/mL, insuline 2–25 mU/L, peptide C 0,8–3 ng/mL, bicarbonates 22–29 mmol/L, volume des selles < 0,3 L/24 h. Les seuils pathologiques (gastrine > 3 N, glucagon et VIP > 2 N, glycémie < 0,45 g/L, insuline ≥ 3 mU/L, proinsuline ≥ 5 pmol/L, sécrétine ≥ 120 pg/mL) viennent du TNCD p. 6. Valeurs selon le laboratoire.
+- **Test à la sécrétine** : dose et temps de prélèvement (2, 5, 10, 15 min) ; seul le seuil de 120 pg/mL est tiré du TNCD.
+- **Modèle** : grandeurs normalisées et temps accéléré ; l'effet des analogues de la somatostatine (stéatorrhée, lithiase) et la pente de la stéatorrhée autour de 80 % de perte de fonction sont illustratifs.

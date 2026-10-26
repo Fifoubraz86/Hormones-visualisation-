@@ -76,7 +76,7 @@
       gland(839, 452, 5, 't3', 'cortico', 'Surrénales', 'start', 'adrenal');
       gland(760, 474, 5, 'tbg', 'raa', null, null, 'kidney');
       gland(840, 474, 5, 'rbc', 'raa', 'Reins', 'start', 'kidney');
-      gland(812, 484, 5, 'iod', 'glyc', null, null, 'pancreas');
+      gland(812, 484, 5, 'iod', 'pancreas', null, null, 'pancreas');
       gland(768, 592, 5, 'trh', 'gonadoF', null, null, 'ovary');
       gland(832, 592, 5, 'trh', 'gonadoF', 'Ovaires', 'start', 'ovary');
       gland(800, 638, 5, 'trh', 'gonadoM', 'Testicules', 'start', 'testis');

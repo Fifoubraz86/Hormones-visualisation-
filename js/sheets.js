@@ -91,6 +91,7 @@
     phospho: /calci|\bPTH\b|vitamine D|phosph|FGF23|ostéo/i,
     raa: /rénine|angiotens|aldostérone|potassium|sodium|\bNa⁺|\bK⁺/i,
     glyc: /glucose|glycog|insulin|glucagon|GLUT\d|SGLT|cétogenèse|néoglucogenèse|lipolyse|glyc|incrétine|GLP-1|\bGIP\b|\bDT[12]\b|îlot/i,
+    pancreas: /pancréa|exocrine|acini|îlot|insulin|glucagon|somatostatine|gastrine|sécrétine|CCK|VIP|duodén|TNE|neuroendocrine|stéatorrhée|lipase|trypsine|vésicule|chol[ée]doque/i,
     lipid: /LDL|VLDL|HDL|cholest|lipid|lipoprot|PCSK9|chylomicron|triglyc/i
   };
   // Organe principal du chapitre : sa fiche s'affiche en entier, sans repli.
@@ -98,7 +99,7 @@
   const MAIN_ORGANS = {
     thyro: ['thyroid'].concat(HP), cortico: ['adrenal'].concat(HP), surrenale: ['adrenal'], somato: HP, lacto: ['breast'].concat(HP),
     adh: ['kidney'].concat(HP), medullo: ['adrenal'], gonadoF: ['ovary', 'uterus'].concat(HP), gonadoM: ['testis'].concat(HP),
-    phospho: ['parathyroid'], raa: ['kidney', 'adrenal'], glyc: ['pancreas'], lipid: ['liver']
+    phospho: ['parathyroid'], raa: ['kidney', 'adrenal'], glyc: ['pancreas'], pancreas: ['pancreas'], lipid: ['liver']
   };
   HV.currentChapter = function () {
     let sc = HV.app && HV.app.current;
