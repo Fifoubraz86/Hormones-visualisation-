@@ -23,6 +23,8 @@ Chaque test se lance depuis la carte « Tests dynamiques » du panneau, sur le s
 | Glycémie | Épreuve de jeûne de 72 h | sain, insulinome (non indiquée chez le diabétique traité) |
 | Posthypophyse | Restriction hydrique + desmopressine (P ; desmopressine en complément) | sain, diabète insipide central, néphrogénique ; SIADH : restriction partielle, sans desmopressine, correction lente |
 | Posthypophyse | Charge en eau, marche dans le désert (situations physiologiques, complément) | sain, diabète insipide, SIADH |
+| Gonadotrope masculin | Test à la GnRH (complément) | sain (LH × 3 à 5), déficit gonadotrope (réponse faible, sans en préciser le niveau) ; non indiqué dans l'hypogonadisme primaire ni sous androgènes |
+| Gonadotrope masculin | Test à l'hCG (complément) | déficit gonadotrope (hausse franche : cellules de Leydig fonctionnelles), hypogonadisme primaire (hausse faible) ; non interprétable sous androgènes |
 
 ## Axe corticotrope et corticosurrénale
 
