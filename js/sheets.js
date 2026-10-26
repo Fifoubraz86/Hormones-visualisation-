@@ -60,7 +60,7 @@
     const top = h('div', 'sheet-top', null, body);
     figure(top, (svg) => {
       const u = document.createElementNS(NS, 'use');
-      u.setAttribute('href', '#mol-' + key);
+      u.setAttribute('href', '#mol-' + (S.glyph || key));
       svg.appendChild(u);
     }, '-17 -15 34 30');
     const t = h('div', null, null, top);
@@ -72,7 +72,32 @@
     rows(body, S.rows);
     if (I.live) h('p', 'sheet-live', I.live(), body);
     if (I.src) h('p', 'sheet-src', I.src, body);
+    if (S.eta && HV.LT4_ETA) etaTables(body, HV.LT4_ETA);
     links(body, S.links);
+  }
+
+  // Lévothyroxine : interférences (aliments, médicaments, comorbidités), recommandations de l'ETA 2025.
+  function etaTables(body, E) {
+    h('h3', null, 'Bien la prendre (ETA 2025)', body);
+    rows(body, E.take);
+    const table = (title, head, list) => {
+      const det = h('details', 'sheet-det', null, body);
+      h('summary', null, title + ' (' + list.filter((r) => r.length > 1).length + ')', det);
+      const wrap = h('div', 'sheet-tablewrap', null, det);
+      const t = h('table', 'sheet-table', null, wrap);
+      const tr = h('tr', null, null, h('thead', null, null, t));
+      head.forEach((x) => h('th', null, x, tr));
+      const tb = h('tbody', null, null, t);
+      list.forEach((r) => {
+        const row = h('tr', r.length === 1 ? 'sheet-tgroup' : null, null, tb);
+        if (r.length === 1) { const c = h('td', null, r[0], row); c.colSpan = head.length; return; }
+        head.forEach((_, i) => h('td', null, r[i] || '', row));
+      });
+    };
+    table('Aliments, boissons, compléments', ['Aliment', 'Mécanisme', 'Conduite', 'Forme liquide / capsule molle'], E.food);
+    table('Médicaments', ['Médicament', 'Mécanisme', 'Conduite'], E.drugs);
+    table('Comorbidités', ['Trouble', 'Mécanisme', 'Conduite', 'Forme liquide / capsule molle'], E.comorb);
+    h('p', 'sheet-src', 'Source : ' + E.src + '.', body);
   }
 
   /* Chapitre en cours : l'axe (ou la scène racine) dont dépend la scène affichée. */

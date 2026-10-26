@@ -43,6 +43,8 @@
   const QUAL_TESTS = [['tpo', 'Anti-TPO'], ['crp', 'CRP'], ['hepat', 'Bilan hépatique'], ['ecg', 'ECG'], ['echo', 'Échographie'], ['scinti', 'Scintigraphie']];
   const QUAL_LABEL = { tpo: 'Anti-TPO', crp: 'CRP', hepat: 'Bilan hépatique', ecg: 'ECG', echo: 'Échographie thyroïdienne', scinti: 'Scintigraphie thyroïdienne' };
   const AE = S.adverse;
+  const LH = S.lt4hard;
+  if (LH) LH.TESTS.forEach(([k, t]) => { QUAL_LABEL[k] = t; });
   const PRESETS = [
     { label: 'Hashimoto, TSH 40, 75 kg', cfg: { sit: 'hashi', sex: 'F', age: 46, weight: 75, start: 40 } },
     { label: 'Hypothyroïdie fruste, TSH 7', cfg: { sit: 'hashi', sex: 'F', age: 58, weight: 64, start: 7 } },
@@ -167,7 +169,21 @@
     const num = (id, val, step, min, max, on) => h('input', { type: 'number', id, value: val, step, min, max, inputmode: 'decimal', class: 'sv-num', oninput: (e) => on(parseFloat(String(e.target.value).replace(',', '.'))) });
     const sel = (id, val, opts, on) => h('select', { id, onchange: (e) => on(e.target.value) }, opts.map(([k, t]) => h('option', { value: k, selected: String(val) === String(k) }, t)));
     const pregOK = cfg.sex === 'F' && (cfg.sit === 'hashi' || cfg.sit === 'thyro' || cfg.sit === 'central');
+    const modeBar = h('section', { class: 'sv-card sv-gamecfg', id: 'sbModeBar' }, [
+      h('div', { class: 'sv-games' }, [['libre', '🩺', 'Patient libre', 'Créez un patient, prescrivez, dosez.'], ['difficile', '🧩', 'Hypothyroïdie difficile à substituer', 'Neuf histoires : médicament, aliment, maladie ou observance qui fait remonter la TSH (ETA 2025).']].map(([k, ic, t, sub]) => h('button', { type: 'button', class: 'sv-gamebtn' + ((cfg.mode || 'libre') === k ? ' on' : ''), id: 'sbMode-' + k, onclick: () => { cfg.mode = k; setup(); } }, [h('span', { class: 'sv-game-ic', 'aria-hidden': 'true' }, ic), h('strong', null, t), h('span', null, sub)])))
+    ]);
+    if (cfg.mode === 'difficile' && LH) {
+      main.append(
+        h('section', { class: 'sv-intro' }, [h('p', { class: 'sv-eyebrow' }, 'Hypothyroïdie difficile à substituer'), h('h1', null, 'La TSH remonte. Pourquoi ?'), h('p', { class: 'sv-lead' }, 'Un patient jusque-là équilibré, ou qui « résiste » à la lévothyroxine. Interrogez-le, demandez les examens utiles, agissez sur la cause : moment de la prise, espacement, médicament en cause, forme liquide ou capsule molle, traitement d\'une maladie digestive, observance. Monter la dose à l\'aveugle marche parfois… jusqu\'au surdosage.')]),
+        modeBar,
+        h('section', { class: 'sv-card' }, [h('h3', null, 'Choisissez une histoire'), h('div', { class: 'sv-storygrid' }, LH.STORIES.map((st) => h('button', { type: 'button', class: 'sv-story', id: 'sbStory-' + st.id, onclick: () => beginHard(st) }, [h('span', { class: 'sv-game-ic', 'aria-hidden': 'true' }, st.icon), h('strong', null, st.title), h('span', null, st.who), h('span', null, st.pre)])))]),
+        h('p', { class: 'sv-disc' }, 'Repères : recommandations de l\'European Thyroid Association 2025 sur la lévothyroxine (Centanni et al., Eur Thyroid J 2025;14:e250123), item EDN 243. Ordres de grandeur des interférences : tableaux de l\'ETA ; modèle pédagogique simplifié.')
+      );
+      window.scrollTo(0, 0);
+      return;
+    }
     main.append(
+      modeBar,
       h('section', { class: 'sv-intro' }, [
         h('p', { class: 'sv-eyebrow' }, 'Mode thérapeutique'),
         h('h1', null, 'Prescrivez, attendez, dosez.'),
@@ -217,8 +233,46 @@
     render();
   }
 
+  // Hypothyroïdie difficile à substituer : patient équilibré, puis interférence depuis « ago » jours (js/simu/lt4-hard.js).
+  function beginHard(story) {
+    const c = Object.assign({}, cfg, BASE_CFG, { sit: story.cfg.r > 0 ? 'hashi' : 'thyro', sex: story.cfg.sex, age: story.cfg.age, weight: story.cfg.weight, variab: 'moyen', mode: 'difficile' });
+    const par = { weight: c.weight, hr0: c.age > 70 ? 66 : 74, r: story.cfg.r };
+    // Dose d'équilibre (TSH ≈ 1,5) avec une absorption normale, arrondie au comprimé de 12,5 µg.
+    const dEq = bisect((dz) => M.create({ par, rx0: { lt4: dz, lt4Abs: 1 } }), (p) => p.st.TSH, 1.5, 10, 500, false);
+    // Équilibré avant l'interférence (dose adaptée à sa prise d'alors), ou dose déjà montée par les confrères.
+    const snap = (v) => LT4_STRENGTHS.reduce((a, x) => (Math.abs(x - v) < Math.abs(a - v) ? x : a));
+    const xPre = { time: story.preTime || story.habit, form: 'cp', space: false, stop: false, cause: 'none', weekly: false, causeDay: null };
+    const pre = LH.absOf(story, xPre, -story.ago - 1);
+    const D0 = snap(Math.min(300, story.ago > 0 ? dEq / pre : dEq * (story.doseMul || 1)));
+    const x0 = Object.assign({}, xPre, { time: story.habit });
+    const pt = M.create({ par, rx0: { lt4: D0, lt4Abs: pre } });
+    pt.rx.lt4Text = fmt(D0, D0 % 1 ? 1 : 0) + ' µg/j';
+    G = {
+      cfg: c, pt, hidden: { r: story.cfg.r }, visits: [], current: null, history: [], undo: [], truth: false,
+      hard: { s: story, cur: x0, D0, asked: false, doseUp: false, exams: new Set(), won: false },
+      draft: { lt4: D0, alt: false, altDays: 1, altDose: 0, intake: 'jeun', ats: 'none', atsDose: 0, propra: 0, hc: false, ains: false, geste: 'none', wait: 8, unit: 'sem', tests: new Set(['tsh']), time: x0.time, form: 'cp', space: false, stop: false, cause: 'none', weekly: false }
+    };
+    pt.par.need = (day) => LH.needOf(story, G.hard.cur, day);
+    if (story.ago > 0) { pt.day = -story.ago; pt.log = []; M.advance(pt, story.ago, () => { pt.rx.lt4Abs = LH.absOf(story, G.hard.cur, pt.day); return true; }); }
+    pt.day = 0; pt.log = []; M.record(pt);
+    c.start = pt.st.TSH;
+    AE.init(G);
+    doLabs(new Set(['tsh', 't4']), 'Consultation');
+    render();
+  }
+  function hardLabel(x) {
+    const t = [LH.TIMES[x.time][0].toLowerCase()];
+    if (x.form !== 'cp') t.push(LH.FORMS[x.form].toLowerCase());
+    if (x.space) t.push('interférents espacés de 4 h');
+    if (x.stop) t.push((G.hard.s.drug || G.hard.s.need || {}).name + ' arrêté');
+    if (x.cause !== 'none') t.push(LH.CAUSES[x.cause].toLowerCase());
+    if (x.weekly) t.push('prise hebdomadaire supervisée');
+    return t.join(', ');
+  }
+
   // Résultats qualitatifs selon la situation et l'état du patient.
   function qualitative(k) {
+    if (G.hard && QUAL_LABEL[k] && LH.TESTS.some(([x]) => x === k)) return LH.qual(G.hard.s, k);
     const c = G.cfg, pt = G.pt, f = pt.flags;
     const tLys = pt.par.lysis ? pt.day - pt.par.lysis.day0 : null;
     if (k === 'tpo') {
@@ -328,7 +382,15 @@
       ats: d.ats, atsDose: d.ats === 'none' ? 0 : d.atsDose,
       bb: d.propra === 0 ? 'none' : d.propra <= 80 ? 'pro80' : 'pro120', propraMg: d.propra, hc: d.hc, ains: d.ains
     };
-    if (d.intake !== 'jeun' && lt4 > 0) rx.lt4Text += ', ' + INTAKE[d.intake].label.toLowerCase();
+    if (d.intake !== 'jeun' && lt4 > 0 && !G.hard) rx.lt4Text += ', ' + INTAKE[d.intake].label.toLowerCase();
+    if (G.hard) {
+      const H = G.hard, prevX = H.cur;
+      H.cur = { time: d.time, form: d.form, space: d.space, stop: d.stop, cause: d.cause, weekly: d.weekly, causeDay: d.cause !== 'none' ? (prevX.cause === d.cause ? prevX.causeDay : pt.day) : null };
+      if (lt4 > H.D0 + 1) H.doseUp = true;
+      d.tests.forEach((k) => { if (LH.TESTS.some(([x]) => x === k)) H.exams.add(k); });
+      rx.lt4Abs = LH.absOf(H.s, H.cur, pt.day);
+      if (lt4 > 0) rx.lt4Text += (d.weekly ? ' (soit ' + fmt(lt4 * 7, 0) + ' µg une fois par semaine)' : '') + ', ' + hardLabel(H.cur);
+    }
     if (d.ains && G.ainsSince == null) G.ainsSince = pt.day;
     if (!d.ains) G.ainsSince = null;
     const prevEq = M.atsEq(pt.rx);
@@ -341,7 +403,8 @@
     let interrupt = null;
     M.advance(pt, days, () => {
       // Patient réel : la thyroïdite de Hashimoto continue de détruire la glande (≈ 10 % par an, complément).
-      if (c.variab === 'reel' && c.sit === 'hashi' && !pt.flags.surgeryDone) pt.par.r = r0 * Math.exp(-pt.day / 3500);
+      if (c.variab === 'reel' && c.sit === 'hashi' && !pt.flags.surgeryDone && !G.hard) pt.par.r = r0 * Math.exp(-pt.day / 3500);
+      if (G.hard) pt.rx.lt4Abs = LH.absOf(G.hard.s, G.hard.cur, pt.day);
       // Iode 131 : effet en 1 à 3 mois ; hypothyroïdie définitive fréquente (Basedow), plus rare après un adénome toxique.
       if (G.rai) {
         const t = pt.day - G.rai.day, e = Math.exp(-t / 30);
@@ -368,6 +431,12 @@
     if (c.preg > 0) { const sa = c.preg + pt.day / 7; note += sa >= 40 ? ' · post-partum (accouchement à 40 SA)' : ' · ' + fmt(sa, 0) + ' SA'; }
     if (c.sit === 'gesta') note += ' · ' + fmt(8 + pt.day / 7, 0) + ' SA';
     doLabs(tests, note);
+    if (G.hard && !G.hard.won) {
+      const t = G.history.filter((e) => !e.prescription && e.labs.tsh != null).map((e) => e.labs.tsh);
+      // Après le traitement d'une cause digestive, les besoins baissent pendant des mois : on attend la fin de l'effet.
+      const cm = G.hard.s.comorb, cur = G.hard.cur, settling = cm && cm.cure && cur.cause === cm.cure && cur.causeDay != null && pt.day - cur.causeDay < 2.5 * cm.tau;
+      if (t.length >= 3 && t.slice(-2).every((v) => v >= 0.4 && v <= 4) && !settling) G.hard.won = true;
+    }
     render();
     const res = main.querySelector('.sv-latest');
     if (res && window.innerWidth < 860) res.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -412,10 +481,26 @@
     main.textContent = '';
     main.className = 'sv-main sv-game sv-sandbox';
     const left = h('aside', { class: 'sv-dossier' }, [patientCard(), G.dead ? deathCard() : rxCard()]);
-    const right = h('section', { class: 'sv-consult' }, [latestCard(), chartCard(), historyCard(), refCard(), revealCard()]);
+    const right = h('section', { class: 'sv-consult' }, (G.hard ? [hardCard()] : []).concat([latestCard(), chartCard(), historyCard(), refCard(), revealCard()]));
     main.append(left, right);
     const box = right.querySelector('.sv-chartbox');
     if (box) requestAnimationFrame(() => S.chart.render(box, G, { truth: G.truth }));
+  }
+
+  function hardCard() {
+    const H = G.hard, s = H.s;
+    const parts = [h('p', { class: 'sv-eyebrow' }, s.icon + ' Hypothyroïdie difficile à substituer'), h('h3', null, s.title + ' · ' + s.who), h('p', { class: 'sv-storytext' }, s.pre),
+      h('p', { class: 'sv-storygoal' }, [h('b', null, '🎯 Objectif : '), 'TSH entre 0,4 et 4 mUI/L (idéalement 0,5–2,5) à deux bilans successifs, en traitant la cause plutôt qu\'en montant la dose à l\'aveugle.'])];
+    if (!H.asked) parts.push(h('div', { class: 'sv-actions' }, h('button', { type: 'button', class: 'sv-primary', id: 'sbAsk', onclick: () => { H.asked = true; render(); } }, '🗣 Interroger le patient')));
+    else parts.push(h('div', { class: 'sv-ask' }, [h('p', null, [h('b', null, 'Interrogatoire : '), s.clue]), h('p', null, h('b', null, 'Traitements et prise :')), h('ul', null, s.meds.map((m) => h('li', null, m)))]));
+    if (H.won) {
+      const r = LH.debrief(G);
+      parts.push(h('div', { class: 'sv-storycard done' }, [h('h3', null, '✅ TSH normalisée en ' + r.months + ' mois (' + r.n + ' bilans)'),
+        h('ul', { class: 'sv-storyeval' }, r.ok.map(([ok, lab, why]) => h('li', { class: ok ? 'ok' : 'ko' }, [h('b', null, (ok ? '✔ ' : '✘ ') + lab), ok ? null : ' — ' + why]))),
+        h('p', null, [h('b', null, 'À retenir : '), s.key]),
+        h('div', { class: 'sv-actions' }, h('button', { type: 'button', class: 'sv-secondary', onclick: () => { cfg.mode = 'difficile'; setup(); } }, 'Autre histoire'))]));
+    }
+    return h('div', { class: 'sv-card sv-storycard', id: 'sbHard' }, parts);
   }
 
   function patientCard() {
@@ -462,7 +547,8 @@
         h('select', { id: 'sbAltDose', 'aria-label': 'Dose ces jours-là', onchange: (e) => { d.altDose = +e.target.value; re(); } }, lt4Opts(d.altDose))
       ]) : null,
       avg > 0 ? h('p', { class: 'sv-note' }, 'Dose moyenne : ' + fmt(avg, avg % 1 ? 1 : 0) + ' µg/j, soit ' + fmt(avg / c.weight, 2) + ' µg/kg/j.') : null,
-      avg > 0 ? h('div', { class: 'sv-field' }, [h('label', { for: 'sbIntake' }, 'Conditions de prise'), h('select', { id: 'sbIntake', onchange: (e) => { d.intake = e.target.value; } }, Object.entries(INTAKE).map(([k, t]) => h('option', { value: k, selected: d.intake === k }, t.label)))]) : null,
+      G.hard ? hardRx(d) : null,
+      avg > 0 && !G.hard ? h('div', { class: 'sv-field' }, [h('label', { for: 'sbIntake' }, 'Conditions de prise'), h('select', { id: 'sbIntake', onchange: (e) => { d.intake = e.target.value; } }, Object.entries(INTAKE).map(([k, t]) => h('option', { value: k, selected: d.intake === k }, t.label)))]) : null,
       showAts ? h('div', { class: 'sv-field' }, [h('label', { for: 'sbAts' }, 'Antithyroïdien de synthèse'), h('div', { class: 'sv-inline' }, [
         h('select', { id: 'sbAts', onchange: (e) => { d.ats = e.target.value; d.atsDose = d.ats === 'none' ? 0 : { cbz: 30, tmz: 20, ptu: 300 }[d.ats]; re(); } }, Object.entries(M.ATS).map(([k, A]) => h('option', { value: k, selected: d.ats === k }, A.name))),
         atsUnit ? h('span', { class: 'sv-numwrap' }, [h('input', { type: 'number', id: 'sbAtsDose', class: 'sv-num', value: d.atsDose, step: ATS_STEP[d.ats], min: 0, max: d.ats === 'ptu' ? 900 : 80, inputmode: 'decimal', 'aria-label': 'Dose quotidienne', oninput: (e) => { d.atsDose = Math.max(0, parseFloat(String(e.target.value).replace(',', '.')) || 0); } }), ' mg/j']) : null
@@ -471,7 +557,7 @@
       hyper ? h('div', { class: 'sv-field' }, [h('label', { for: 'sbPro' }, 'Propranolol'), h('select', { id: 'sbPro', onchange: (e) => { d.propra = +e.target.value; } }, PROPRA.map((x) => h('option', { value: x, selected: d.propra === x }, x ? x + ' mg/j' : 'Aucun')))]) : null,
       c.sit === 'thyroidite' ? h('label', { class: 'sv-check' }, [h('input', { type: 'checkbox', id: 'sbAins', checked: d.ains, onchange: (e) => { d.ains = e.target.checked; } }), ' Antalgiques, AINS ou corticoïdes']) : null,
       c.sit === 'central' ? h('label', { class: 'sv-check' }, [h('input', { type: 'checkbox', id: 'sbHc', checked: d.hc, onchange: (e) => { d.hc = e.target.checked; } }), ' Hydrocortisone 20 mg/j']) : null,
-      !hyper && !showAts ? h('button', { type: 'button', class: 'sv-link sv-more', onclick: () => { d.ats = 'cbz'; d.atsDose = 0; re(); } }, '+ Antithyroïdien de synthèse') : null,
+      !hyper && !showAts && !G.hard ? h('button', { type: 'button', class: 'sv-link sv-more', onclick: () => { d.ats = 'cbz'; d.atsDose = 0; re(); } }, '+ Antithyroïdien de synthèse') : null,
       gestes.length > 1 ? h('div', { class: 'sv-field' }, [h('label', { for: 'sbGeste' }, 'Geste radical (réalisé aujourd\'hui)'), h('select', { id: 'sbGeste', onchange: (e) => { d.geste = e.target.value; } }, gestes.map(([k, t]) => h('option', { value: k, selected: d.geste === k }, t)))]) : null,
       h('h3', null, 'Prochain bilan'),
       h('div', { class: 'sv-inline' }, [
@@ -480,9 +566,23 @@
         h('select', { id: 'sbUnit', 'aria-label': 'Unité', onchange: (e) => { d.unit = e.target.value; } }, [h('option', { value: 'sem', selected: d.unit === 'sem' }, 'semaines'), h('option', { value: 'j', selected: d.unit === 'j' }, 'jours')])
       ]),
       h('div', { class: 'sv-chips', role: 'group', 'aria-label': 'Dosages' }, NUM_TESTS.filter(([k]) => k !== 'trab' || hyper).map(([k, t]) => chipCheck(d, k, t))),
-      h('div', { class: 'sv-chips', role: 'group', 'aria-label': 'Autres examens' }, QUAL_TESTS.filter(([k]) => k !== 'crp' || hyper).map(([k, t]) => chipCheck(d, k, t))),
+      h('div', { class: 'sv-chips', role: 'group', 'aria-label': 'Autres examens' }, QUAL_TESTS.filter(([k]) => k !== 'crp' || hyper).concat(G.hard ? LH.TESTS : []).map(([k, t]) => chipCheck(d, k, t))),
       h('p', { class: 'sv-alert', hidden: true }),
       h('div', { class: 'sv-actions' }, h('button', { type: 'button', class: 'sv-primary', onclick: submit }, 'Prescrire et voir le bilan →'))
+    ]);
+  }
+  function hardRx(d) {
+    const s = G.hard.s, stopper = (s.drug && s.drug.stoppable) || (s.need && s.need.stoppable);
+    const sel = (id, lab, val, obj, on) => h('div', { class: 'sv-field' }, [h('label', { for: id }, lab), h('select', { id, onchange: (e) => on(e.target.value) }, Object.entries(obj).map(([k, v]) => h('option', { value: k, selected: val === k }, Array.isArray(v) ? v[0] : v)))]);
+    const chk = (id, lab, key) => h('label', { class: 'sv-check' }, [h('input', { type: 'checkbox', id, checked: !!d[key], onchange: (e) => { d[key] = e.target.checked; } }), ' ' + lab]);
+    return h('div', { class: 'sv-hardrx' }, [
+      h('h4', null, 'Prise et interférences'),
+      sel('sbTime', 'Moment de la prise', d.time, LH.TIMES, (v) => { d.time = v; }),
+      sel('sbForm', 'Forme', d.form, LH.FORMS, (v) => { d.form = v; }),
+      chk('sbSpace', 'Espacer d\'au moins 4 h les médicaments et aliments interférents (fer, calcium, antiacides, IPP, café, soja…)', 'space'),
+      stopper ? chk('sbStop', (s.drug || s.need).stopLab || 'Arrêter ou remplacer le médicament en cause', 'stop') : null,
+      sel('sbCause', 'Traiter une cause digestive', d.cause, LH.CAUSES, (v) => { d.cause = v; }),
+      chk('sbWeekly', 'Prise hebdomadaire supervisée (7 fois la dose quotidienne, une fois par semaine, devant une infirmière)', 'weekly')
     ]);
   }
   function chipCheck(d, k, t) {
@@ -609,6 +709,7 @@
       if (c.preg) items = items.concat(REF.preg);
     }
     if (pt.flags.surgeryDone && c.sit !== 'thyro') items = REF.thyro.concat(REF.hypo.slice(1, 2), items);
+    if (G.hard && window.HV.LT4_ETA) items = window.HV.LT4_ETA.take.map(([k, v]) => ({ t: k + ' : ' + v, src: 'ETA 2025', rang: '' })).concat(items);
     const since = pt.flags.lastChange != null ? pt.day - pt.flags.lastChange : null;
     return h('details', { class: 'sv-card sv-det' }, [
       h('summary', null, 'Référentiel (items 241 à 243)'),
@@ -629,6 +730,7 @@
     if (x.hcg != null) items.push('Stimulation par l\'hCG : pic vers 10 SA, disparition au 2e trimestre ; TRAb négatifs.');
     if (x.pit != null) items.push('Réserve thyréotrope : ' + Math.round(x.pit * 100) + ' %.');
     if (c.sit === 'thyro') items.push('Aucun tissu thyroïdien résiduel : toute la T4 vient du comprimé.');
+    if (G.hard) { const s = G.hard.s; items.push('Cause : ' + ((s.drug || s.comorb || s.need) ? (s.drug || s.comorb || s.need).name : s.id === 'cafe' ? 'café pris avec le comprimé' : 'inobservance (pseudo-malabsorption)') + '. Absorption actuelle : ' + Math.round(LH.absOf(s, G.hard.cur, pt.day) * 100) + ' % ; besoins × ' + fmt(LH.needOf(s, G.hard.cur, pt.day), 2) + '.'); items.push(s.key); }
     AE.reveal(G).forEach((t) => items.push(t));
     if (G.rai) items.push('Iode 131 à J' + G.rai.day + (G.rai.a0 > 0 ? ' : le nodule s\'éteint, le parenchyme reprend.' : ' : fonction résiduelle finale ≈ ' + Math.round(G.rai.floor * 100) + ' %.'));
     return h('details', { class: 'sv-card sv-det' }, [h('summary', null, 'Révéler le patient'), h('ul', { class: 'sv-keys' }, items.map((t) => h('li', null, t)))]);

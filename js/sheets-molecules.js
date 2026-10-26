@@ -43,6 +43,14 @@
       ['Dosage', 'T4 libre 12–22 pmol/L'],
       ['Pharmacologie', 'Lévothyroxine, 1 à 1,5 µg/kg/j (item 243)']
     ], links: [pc(5819)] },
+    levo: { cls: 'Médicament · T4 de synthèse', glyph: 't4', eta: true, rows: [
+      ['Molécule', 'Lévothyroxine sodique (sel pentahydraté), identique à la T4 endogène'],
+      ['Formes', 'Comprimés ; solution buvable (gouttes) ; capsule molle (gel) : pas d\'étape de dissolution à pH acide'],
+      ['Absorption', '60 à 80 %, surtout au jéjunum et à l\'iléon ; la dissolution du comprimé exige un pH gastrique acide'],
+      ['Dose', '1 à 1,5 µg/kg/j ; 12,5–25 µg/j chez le sujet âgé ou coronarien (item 243)'],
+      ['Demi-vie', '≈ 7 jours : TSH à contrôler 6 à 8 semaines après un changement'],
+      ['Marge thérapeutique', 'Étroite : environ la moitié des patients traités sont sous- ou surdosés (ETA 2025)']
+    ], links: [{ label: 'ETA 2025 (Eur Thyroid J, accès libre)', url: 'https://doi.org/10.1530/ETJ-25-0123' }] },
     t3: { cls: 'Iodothyronine (hormone active)', rows: [
       ['Structure', '3,5,3′-triiodothyronine'],
       ['Formule, masse', 'C₁₅H₁₂I₃NO₄ · 651,0 g/mol'],
