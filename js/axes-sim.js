@@ -308,10 +308,13 @@
   SIMS.adh = {
     title: 'Bilan hydrique simulé',
     defaults: { hypo: 1, kidney: 1, siadh: 0, drug: 0, restrict: 0, ddavp: 0, drink: 0, sweat: 0 },
-    init: { na: 140, adh: 1, eff: 1, W: 0 },
-    tau: { na: 1.5, W: 1, adh: 0.5, eff: 0.5 },
+    init: { na: 140, adh: 1, adhP: 1, eff: 1, W: 0 },
+    tau: { na: 1.5, W: 1, adh: 0.5, adhP: 0.5, eff: 0.5 },
     targets(p, s) {
-      const adh = p.hypo * clamp(ex((s.na - 140) / (s.na < 140 ? 1.2 : 3)) * (1 + 1.2 * p.sweat), 0, 12) + p.siadh + 3 * p.drug; // osmolalité (effondrée sous la consigne), volémie ; SIADH paranéoplasique (ADH ectopique) ou médicamenteux (libération hypothalamique stimulée)
+      // ADH hypothalamo-hypophysaire : réglée par l'osmolalité (effondrée sous la consigne) et la volémie ; un médicament inducteur de SIADH stimule sa libération.
+      // ADH ectopique d'une tumeur : autonome, elle s'ajoute dans le sang mais ne passe pas par la posthypophyse ; l'hypo-osmolalité qu'elle provoque éteint la sécrétion hypophysaire.
+      const adhP = p.hypo * clamp(ex((s.na - 140) / (s.na < 140 ? 1.2 : 3)) * (1 + 1.2 * p.sweat), 0, 12) + 3 * p.drug;
+      const adh = adhP + p.siadh; // ADH plasmatique totale
       const a2 = adh + 5 * p.ddavp; // desmopressine : agoniste V2
       const eff = clamp((p.kidney * a2) / (a2 + 0.5) * 1.5 * (1 + 0.15 * p.drug), 0, 1.5); // certains médicaments potentialisent aussi l'effet rénal (complément)
       // Excès d'eau éliminé quand l'ADH s'effondre ; déficit corrigé par la soif si le patient peut boire.
@@ -323,7 +326,7 @@
       let na = 140 + 3 * p.restrict + (eff >= 1 ? -40 * (eff - 1) * canDrink : (5 + 12 * p.restrict) * (1 - eff)) - 2.6 * s.W;
       // Sans boisson, la natrémie ne peut pas redescendre : la desmopressine arrête la perte d'eau, elle ne la rend pas.
       if (p.restrict >= 1) na = Math.max(na, s.na);
-      return { adh, eff, na, W };
+      return { adh, adhP, eff, na, W };
     },
     labs: [
       { key: 'na', name: 'Natrémie', unit: 'mmol/L', k: 1, lo: 135, hi: 145, min: 110, max: 160, dec: 0 },
@@ -345,7 +348,7 @@
       { id: 'hyper', name: 'Hyperhydratation : 1,5 L d\'eau bus', note: 'Apport d\'eau abondant : l\'osmolalité baisse, l\'ADH s\'effondre, le rein élimine l\'excès par des urines abondantes et diluées.', p: { drink: 1 } },
       { id: 'dic', name: 'Diabète insipide central', note: 'Défaut d\'ADH : polyurie > 3 L/24 h, polydipsie, urines diluées < 200 mosmol/kg ; natrémie conservée tant que le patient boit, un peu augmentée si les sorties dépassent les apports (polycopié p. 64).', p: { hypo: 0.01 } },
       { id: 'din', name: 'Diabète insipide néphrogénique', note: 'Résistance rénale à l\'ADH (complément) : même tableau, ADH élevée.', p: { kidney: 0.05 } },
-      { id: 'siadh', name: 'SIADH paranéoplasique', note: 'Une tumeur sécrète de l\'ADH de façon autonome (syndrome paranéoplasique) : rétention d\'eau sans œdème, hyponatrémie en règle très basse (< 120 mmol/L), urines inappropriément concentrées.', p: { siadh: 5 } },
+      { id: 'siadh', name: 'SIADH paranéoplasique', note: 'Une tumeur sécrète de l\'ADH de façon autonome (syndrome paranéoplasique) : rétention d\'eau sans œdème, hyponatrémie en règle très basse (< 120 mmol/L), urines inappropriément concentrées. L\'hypo-osmolalité éteint la sécrétion hypothalamo-hypophysaire : l\'ADH plasmatique vient uniquement de la tumeur.', p: { siadh: 5 } },
       { id: 'siadhm', name: 'SIADH médicamenteux', note: 'De nombreux médicaments (polycopié p. 64) : ils stimulent surtout la libération hypothalamique d\'ADH ou potentialisent son effet rénal (complément). Même tableau ; l\'éviction du médicament confirme rétrospectivement le diagnostic.', p: { drug: 1.6 } }
     ],
     interpret(s, p, L) {
@@ -357,7 +360,7 @@
       return { tone: 'good', label: 'Équilibre hydrique normal', text: 'Natrémie normale, diurèse normale.' };
     },
     hooks: {
-      links: { 'hypo>post>adh': 'adh', 'post>kidney>adh': 'adh', 'post>vessel>adh': 'adh', 'kidney>osm>water': 'eff', 'kidney>urine>water': 'urineRate', 'thirst>osm>water': 'thirstRate' },
+      links: { 'hypo>post>adh': 'adhP', 'post>kidney>adh': 'adhP', 'post>vessel>adh': 'adhP', 'kidney>osm>water': 'eff', 'kidney>urine>water': 'urineRate', 'thirst>osm>water': 'thirstRate' },
       rates: { siadhRate: (s, p) => p.siadh / 2, ddavpRate: (s, p) => 2 * p.ddavp, urineRate: (s) => 900 / uosmOf(s.eff, s.na) / 1.5, thirstRate: (s, p) => Math.max(0, 1 - p.restrict - p.sweat) * clamp(0.6 + (s.na - 140) / 2, 0.15, 3) + 3 * p.drink },
       liveNode: {
         osm: (s) => Math.round(2 * s.na + 10) + ' mosmol/kg · Na ' + Math.round(s.na),
@@ -370,13 +373,13 @@
       extraNodes: [
         { id: 'restr', x: 700, y: 570, label: 'Restriction hydrique', w: 250, color: 'p-sky', show: (p) => p.restrict > 0.02, info: 'Arrêt des boissons en milieu hospitalier : l\'osmolalité monte et l\'ADH doit concentrer les urines.' },
         { id: 'ddavp', x: 1090, y: 560, label: 'Desmopressine', w: 220, color: 'p-sky', show: (p) => p.ddavp > 0.02, info: 'Agoniste V2 : concentre les urines si le rein répond (diabète insipide central), pas dans le diabète insipide néphrogénique.' },
-        { id: 'ectoadh', x: 960, y: 588, label: 'Tumeur : ADH ectopique', w: 290, color: 'bad', show: (p) => p.siadh > 0.02, info: 'SIADH paranéoplasique : la tumeur sécrète elle-même l\'ADH, sans passer par l\'hypothalamus ni la posthypophyse.' },
+        { id: 'ectoadh', x: 960, y: 588, label: 'Tumeur : ADH ectopique', w: 290, color: 'bad', show: (p) => p.siadh > 0.02, info: 'SIADH paranéoplasique : la tumeur sécrète elle-même l\'ADH, sans passer par l\'hypothalamus ni la posthypophyse. L\'hypo-osmolalité freine l\'ADH hypophysaire, qui devient quasi nulle.' },
         { id: 'drugadh', x: 960, y: 588, label: 'Médicament', w: 210, color: 'bad', show: (p) => p.drug > 0.02, info: 'De nombreux médicaments peuvent entraîner un SIADH (polycopié p. 64). Mécanismes (complément) : stimulation de la libération hypothalamique d\'ADH, potentialisation de son effet sur le rein.' },
         { id: 'sun', x: 1000, y: 140, label: 'Chaleur, sueur, pas d\'eau', w: 300, color: 'p-amber', show: (p) => p.sweat > 0.02, info: 'Marche prolongée au soleil sans boire : perte d\'eau par la sueur et la respiration, que la soif ne peut compenser.' },
         { id: 'glass', x: 1000, y: 140, label: 'Boissons', w: 170, color: 'p-sky', show: (p) => p.drink > 0.02, info: 'Apport rapide d\'eau libre (par exemple 1,5 L en 30 minutes).' }
       ],
       extraLinks: [{ from: 'ectoadh', to: 'kidney', kind: 'stim', mol: 'adh', v: 'siadhRate', label: '' }, { from: 'drugadh', to: 'hypo', kind: 'stim', color: 'bad', label: 'libération ↑' }, { from: 'drugadh', to: 'kidney', kind: 'stim', color: 'bad', label: 'potentialisation' }, { from: 'restr', to: 'osm', kind: 'stim', color: 'p-sky', label: '' }, { from: 'ddavp', to: 'kidney', kind: 'stim', mol: 'adh', v: 'ddavpRate', label: '' }, { from: 'sun', to: 'osm', kind: 'stim', color: 'p-amber', label: 'perte d\'eau' }, { from: 'glass', to: 'osm', kind: 'inhib', mol: 'water', v: 'thirstRate', label: '' }],
-      levels: [{ label: 'ADH', mol: 'adh', v: 'adh', max: 6 }, { label: 'Ocytocine', mol: 'oxy', fn: () => 0.6, max: 2 }]
+      levels: [{ label: 'ADH plasmatique', mol: 'adh', v: 'adh', max: 6 }, { label: 'ADH hypophysaire', mol: 'adh', v: 'adhP', max: 6 }, { label: 'Ocytocine', mol: 'oxy', fn: () => 0.6, max: 2 }]
     }
   };
 
