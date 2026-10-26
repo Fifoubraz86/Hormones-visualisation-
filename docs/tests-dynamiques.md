@@ -103,7 +103,7 @@ Chaque test se lance depuis la carte « Tests dynamiques » du panneau, sur le s
 | Test | Principe | Ce que l'on cherche | Réponse normale / pathologique |
 | --- | --- | --- | --- |
 | Calcium + PTH simultanés, 25-OH-vitamine D | Interprétation couplée (P) | Hyperparathyroïdie primaire ou secondaire, hypoparathyroïdie | PTH élevée ou inadaptée face à une hypercalcémie : HPT primaire |
-| Calciurie des 24 h, rapport clairance Ca / créatinine | Recueil urinaire | Hypercalcémie hypocalciurique familiale (mutation du CaSR) | Rapport < 0,01 : évoque la mutation du CaSR (complément ; SFE, 5e atelier international sur l'HPT primaire, 2022). Affiché dans le bilan simulé (créatinine supposée normale) ; c'est lui, et non la calciurie des 24 h seule, qui fonde l'interprétation. Une carence en vitamine D l'abaisse aussi |
+| Calciurie des 24 h, rapport clairance Ca / créatinine | Recueil urinaire | Hypercalcémie hypocalciurique familiale (mutation du CaSR) | Rapport < 0,01 : évoque la mutation du CaSR (complément ; recommandations SFE ; 5e atelier international sur l'HPT primaire, 2022). Affiché dans le bilan simulé (créatinine supposée normale) ; c'est lui, et non la calciurie des 24 h seule, qui fonde l'interprétation. Une carence en vitamine D l'abaisse aussi |
 | Imagerie : échographie, scintigraphie au MIBI, TEP-choline | Localisation | Adénome parathyroïdien avant chirurgie | Fixation focale persistante |
 
 ## Métabolisme glucidique

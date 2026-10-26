@@ -339,7 +339,7 @@
         const head = `Testostérone de ${f1g(t0)} à ${f1g(t3)} nmol/L (× ${f1g(r)}). `;
         if (st.base.exoT > 0.05) return { tone: 'warn', text: head + 'Sous testostérone exogène, le dosage mêle hormone injectée et production testiculaire : test non interprétable (complément).' };
         if (r >= 2) return { tone: 'good', text: head + 'Hausse franche : cellules de Leydig fonctionnelles.' + (st.base.hypo < 0.5 ? ' Avec des gonadotrophines basses, l\'atteinte est située en amont (hypothalamo-hypophysaire).' : '') + ' (Complément.)' };
-        return { tone: 'bad', text: head + 'Hausse faible : réserve des cellules de Leydig diminuée, en faveur d\'une atteinte testiculaire (complément). Après une longue privation en LH, la réponse peut aussi être retardée : une stimulation prolongée est parfois nécessaire (complément).' };
+        return { tone: 'bad', text: head + 'Hausse faible : réserve des cellules de Leydig diminuée, en faveur d\'une atteinte testiculaire (complément).' + (st.base.hypo < 0.5 ? ' Après une longue privation en LH, la réponse peut aussi être retardée : une stimulation prolongée est parfois nécessaire (complément).' : '') };
       }
     }
   ];

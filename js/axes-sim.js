@@ -303,29 +303,40 @@
   };
 
   /* ===================== Posthypophyse ===================== */
-  // Bilan d'eau W (litres d'eau libre en excès ; négatif = déficit) : les boissons l'augmentent, la sueur
-  // le diminue ; le rein élimine l'excès d'autant plus vite que l'ADH est basse, la soif corrige le déficit.
-  // En hyponatrémie, le pouvoir de concentration maximal baisse (lavage médullaire) : SIADH ≈ 500–600 mosmol/kg.
-  const uosmOf = (eff, na) => clamp((50 + 700 * pw(eff, 1.5)) * clamp(1 - 0.05 * Math.max(0, 135 - (na || 140)), 0.4, 1), 40, 1200);
+  // Bilan d'eau libre W (litres en excès ; négatif = déficit), intégré en litres par heure (complément) :
+  // entrées = boissons habituelles (≈ 2,5 L/24 h) + soif (si Na > 140) + excès de boissons + eau métabolique ;
+  // sorties = urines (charge osmolaire ≈ 900 mosmol/24 h ÷ osmolalité urinaire) + pertes insensibles + sueur.
+  // Natrémie = 140 × eau totale / (eau totale + W), eau totale ≈ 0,6 × poids (complément).
+  // p.hps : heures simulées par seconde (12 dans le panneau ; les tests imposent le temps de leur protocole).
+  // Pouvoir de concentration maximal : abaissé par l'hyponatrémie et par le lavage médullaire d'une polyurie
+  // chronique (diabète insipide, polydipsie primaire ; s.med), d'où une réponse plafonnée à la desmopressine.
+  const ADH_SOL = 900;
+  const uosmOf = (s) => {
+    const g = pw(clamp(s.eff, 0, 1.5) / 1.5, 2.7);
+    const hypoF = clamp(1 - 0.05 * Math.max(0, 135 - (s.na || 140)), 0.35, 1);
+    return clamp(80 + (1200 * (s.med || 1) * hypoF - 80) * g, 60, 1200);
+  };
+  const diurOf = (s) => clamp(ADH_SOL / uosmOf(s), 0.4, 14); // L/24 h
   SIMS.adh = {
     title: 'Bilan hydrique simulé',
-    defaults: { hypo: 1, kidney: 1, siadh: 0, drug: 0, restrict: 0, ddavp: 0, drink: 0, sweat: 0 },
-    init: { na: 140, adh: 1, eff: 1, W: 0 },
-    tau: { na: 1.5, W: 1, adh: 0.5, eff: 0.5 },
+    defaults: { hypo: 1, kidney: 1, siadh: 0, drug: 0, restrict: 0, ddavp: 0, drink: 0, poto: 0, sweat: 0, poids: 70, hps: 12 },
+    init: { na: 140, adh: 1, eff: 1, W: 0, med: 1 },
+    tau: { na: 0.3, W: 1, adh: 0.5, eff: 0.5, med: 0.5 },
     targets(p, s) {
-      const adh = p.hypo * clamp(ex((s.na - 140) / (s.na < 140 ? 1.2 : 3)) * (1 + 1.2 * p.sweat), 0, 12) + p.siadh + 3 * p.drug; // osmolalité (effondrée sous la consigne), volémie ; SIADH paranéoplasique (ADH ectopique) ou médicamenteux (libération hypothalamique stimulée)
+      const adh = p.hypo * clamp(ex((s.na - 140) / (s.na < 140 ? 1.2 : 2)) * (1 + 1.2 * p.sweat), 0, 12) + p.siadh + 3 * p.drug; // osmolalité (effondrée sous la consigne), volémie ; SIADH paranéoplasique (ADH ectopique) ou médicamenteux (libération hypothalamique stimulée)
       const a2 = adh + 5 * p.ddavp; // desmopressine : agoniste V2
       const eff = clamp((p.kidney * a2) / (a2 + 0.5) * 1.5 * (1 + 0.15 * p.drug), 0, 1.5); // certains médicaments potentialisent aussi l'effet rénal (complément)
-      // Excès d'eau éliminé quand l'ADH s'effondre ; déficit corrigé par la soif si le patient peut boire.
+      // Lavage médullaire d'une polyurie chronique (complément) : concentration maximale réduite de moitié au plus.
+      const med = 1 - 0.5 * clamp(Math.max(p.poto, 1 - p.hypo, 1 - p.kidney), 0, 1);
+      const tbw = 0.6 * p.poids; // eau totale (complément)
+      // Entrées et sorties d'eau libre (L/h). La restriction et la marche sans eau suppriment les boissons.
       const canDrink = Math.max(0, 1 - p.restrict - p.sweat);
-      const dW = 2.4 * p.drink - 0.45 * p.sweat - (s.W > 0 ? s.W * 0.8 * clamp(1.15 - eff, 0.03, 1.15) : 0) + (s.W < 0 ? -s.W * 0.8 * canDrink : 0);
-      const W = clamp(s.W + dW, -4, 6);
-      // Rétention d'eau libre → baisse de la natrémie ; perte d'eau compensée par la soif, sauf en restriction hydrique.
-      // Tant que le patient boit, la natrémie du diabète insipide reste à peine augmentée (polycopié p. 64).
-      let na = 140 + 3 * p.restrict + (eff >= 1 ? -40 * (eff - 1) * canDrink : (5 + 12 * p.restrict) * (1 - eff)) - 2.6 * s.W;
-      // Sans boisson, la natrémie ne peut pas redescendre : la desmopressine arrête la perte d'eau, elle ne la rend pas.
-      if (p.restrict >= 1) na = Math.max(na, s.na);
-      return { adh, eff, na, W };
+      const intake = canDrink * (0.105 + 0.3 * p.drink + 0.3 * p.poto + clamp(0.15 * (s.na - 140), 0, 1.5)) + 0.013;
+      const out = diurOf(s) / 24 + 0.033 + 0.5 * p.sweat;
+      const W = clamp(s.W + (intake - out) * p.hps, -0.12 * tbw, 0.2 * tbw);
+      // ΔNa ≈ Na × Δeau / eau totale : tant que le patient boit, la natrémie du diabète insipide reste à peine augmentée (polycopié p. 64).
+      const na = 140 * tbw / (tbw + s.W);
+      return { adh, eff, na, W, med };
     },
     labs: [
       { key: 'na', name: 'Natrémie', unit: 'mmol/L', k: 1, lo: 135, hi: 145, min: 110, max: 160, dec: 0 },
@@ -608,7 +619,7 @@
       { key: 'cau', name: 'Calciurie', unit: 'mmol/24 h', range: '2,5–7,5 mmol/24 h (complément)', lo: 2.5, hi: 7.5, min: 0, max: 16, dec: 1, fn: (s, p) => caU(s, p) },
       // Rapport de clairance calcium/créatinine = (CaU × créatininémie) / (calcémie × créatininurie), soit la fraction d'excrétion
       // du calcium ; créatinine supposée normale dans le modèle (clairance ≈ 150 L/24 h, soit ≈ 100 mL/min ; complément).
-      { key: 'fec', name: 'Rapport de clairance Ca / créatinine', unit: '', range: '< 0,01 : en faveur d\'une HHF (complément ; SFE, 5e atelier international sur l\'HPT primaire 2022) ; créatinine supposée normale', lo: 0.01, hi: 0.05, min: 0, max: 0.06, dec: 3, fn: (s, p) => caU(s, p) / s.ca / 150 },
+      { key: 'fec', name: 'Rapport de clairance Ca / créatinine', unit: '', range: '< 0,01 : en faveur d\'une HHF (complément ; recommandations SFE ; 5e atelier international sur l\'HPT primaire, 2022) ; créatinine supposée normale', lo: 0.01, hi: 0.05, min: 0, max: 0.06, dec: 3, fn: (s, p) => caU(s, p) / s.ca / 150 },
       { key: 'phos', name: 'Phosphatémie', unit: 'mmol/L', range: '0,8–1,45 mmol/L (complément)', lo: 0.8, hi: 1.45, min: 0.3, max: 2.4, dec: 2, fn: (s, p) => clamp(1.1 - 0.3 * ln(Math.max(s.pth + 1.5 * p.pthrp, 0.05)) + 0.12 * (s.d - 1), 0.4, 2.3) }
     ],
     params: [
@@ -629,7 +640,7 @@
     interpret(s, p, L) {
       const ca = L('ca'), pth = L('pth');
       // HHF : on se fonde sur le rapport de clairance Ca/créatinine (fraction d'excrétion du calcium), pas sur la calciurie des 24 h seule.
-      if (ca > 2.6 && L('fec') < 0.01) return { tone: 'warn', label: 'Hypercalcémie avec fraction d\'excrétion du calcium basse', text: 'PTH normale ou peu élevée et rapport de clairance calcium/créatinine < 0,01 : évoquer une hypercalcémie hypocalciurique familiale (complément ; recommandations SFE, 5e atelier international sur l\'HPT primaire 2022), bénigne, qui ne s\'opère pas. Une carence en vitamine D abaisse aussi ce rapport : la corriger avant de conclure ; confirmation par l\'étude génétique du CaSR (complément).' };
+      if (ca > 2.6 && L('fec') < 0.01) return { tone: 'warn', label: 'Hypercalcémie avec fraction d\'excrétion du calcium basse', text: 'PTH normale ou peu élevée et rapport de clairance calcium/créatinine < 0,01 : évoquer une hypercalcémie hypocalciurique familiale (complément ; recommandations recommandations SFE ; 5e atelier international sur l\'HPT primaire, 2022), bénigne, qui ne s\'opère pas. Une carence en vitamine D abaisse aussi ce rapport : la corriger avant de conclure ; confirmation par l\'étude génétique du CaSR (complément).' };
       // Face à une hypercalcémie, une PTH « normale » (20–65 pg/mL) est déjà inadaptée (polycopié p. 42) ; seule une PTH freinée oriente ailleurs.
       if (ca > 2.6 && pth >= 20) return { tone: 'bad', label: 'Hypercalcémie PTH-dépendante', text: 'PTH élevée, ou normale donc inadaptée face à l\'hypercalcémie : hyperparathyroïdie primaire. Calciurie élevée : la charge filtrée de calcium dépasse les capacités de réabsorption (polycopié p. 40–41).' };
       if (ca > 2.6) return { tone: 'bad', label: 'Hypercalcémie non parathyroïdienne', text: 'PTH freinée (< 20 pg/mL, seuil indicatif ; complément) : rechercher une cause tumorale (PTHrP, métastases osseuses) ou une intoxication en vitamine D (complément).' };
