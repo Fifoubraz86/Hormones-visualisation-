@@ -105,3 +105,23 @@ Contrôles conformes (non signalés) : pages des figures 20, 31-37 ; Ferriman-Ga
 Vérifications : `node --check` passe sur les 7 fichiers JS touchés. Scénarios gonadoF et gonadoM inchangés (simtest.js, cycle complet, allscen.js dans le navigateur, 0 erreur de page). Captures Playwright : loupes Cycle (SOPK), Tube séminifère (sertoli 0,3) et Folliculogenèse, axe gonadotrope féminin.
 
 État au 25/10/2026 : toutes les corrections « fait » ci-dessus sont présentes dans les fichiers actuels (contrôle par recherche de texte après le commit c0b3330). Rien ne restait à appliquer. Nouvelle vérification : node --check OK, allscen.js sans changement d'interprétation pour gonadoF et gonadoM, 0 erreur de page.
+
+## Décisions appliquées (quiz du 2e audit)
+
+| Décision | Statut | Détail |
+| --- | --- | --- |
+| G1 Testostérone du SOPK | fait | axes-sim.js, lab `testo` : `(0,65 + 0,35 × réserve) × (1 + 0,8 × sopk)`, donc SOPK = 1,8 × N (élévation modérée). |
+| G2 Testostérone après la ménopause | fait | Même formule : ménopause = 0,65 × N, avec une note en commentaire sur la production androgénique du stroma (complément). |
+| G3 Tests à la GnRH et à l'hCG | fait (axe masculin) | **Modèle gonadoM** : paramètres de test `gnrh` et `hcg` (nuls hors test). La réponse à la GnRH est pondérée par l'activité habituelle de la GnRH : après une longue privation, réponse faible (complément). La GnRH injectée est moins freinée par la testostérone que la GnRH hypothalamique. L'hCG agit comme la LH sur les cellules de Leydig. `tau.t = 3` : la testostérone suit la LH avec retard ; les valeurs stabilisées sont inchangées. **Tests** (`js/tests.js`, `T.gonadoM`, marqués complément) : GnRH IV avec LH et FSH à T0, 30, 60 et 90 min, réponse indicative LH × 3 à 5 ; hCG IM avec testostérone à 0, 24, 48 et 72 h, hausse indicative × 2. Textes nuancés comme dans docs/tests-dynamiques.md, ajoutés au tableau « Tests déjà animés ». Le test à la GnRH n'est **pas** animé dans l'axe féminin : le cycle simulé avance d'environ 9 jours pendant les 14 s du test, et le pic de LH spontané se confondrait avec la réponse. |
+| G5 Prolactine légèrement élevée | fait | Si le cycle est conservé et la PRL > 25 ng/mL : « Cycle ovulatoire, prolactine un peu élevée » ; contrôler le dosage, éliminer une macroprolactinémie et les causes connues (polycopié, partie 1, p. 56). Vérifié avec prl = 0,3 (PRL 26 ng/mL). |
+| G6 Seuil de FSH à J3 | fait | `HV.rhythm.fsh` recalé (axis-builder.js : 0,55 → 0,35) : FSH maximale du cycle normal en début de phase folliculaire = 8,0 UI/L. Seuil d'alerte abaissé de 12 à 10 UI/L « (dosage à J3) ». Réserve à 0,5 : FSH 12,7 UI/L à J4, d'où « Cycle ovulatoire, FSH élevée ». |
+| G4 | non | Décision de l'auteur. |
+
+Résultats des tests (tools/verif/testsim_settled.js) :
+
+| Test | Sain | Primaire (Klinefelter) | Kallmann | Testostérone exogène |
+| --- | --- | --- | --- | --- |
+| GnRH, LH | 4,5 → 19,2 UI/L (× 4,3), réponse franche | LH de base > 9 UI/L : test non indiqué | 0,7 → 1,1 UI/L (× 1,7), réponse faible, niveau non précisé | non interprétable |
+| hCG, testostérone | 18 → 40 nmol/L (× 2,2), réponse franche | 6,4 → 9,9 nmol/L (× 1,6), atteinte testiculaire | 4,8 → 38,5 nmol/L (× 8,1), Leydig fonctionnelles, atteinte en amont | non interprétable |
+
+Vérifications : `node --check` OK. allscen.js : les 9 scénarios gonadiques gardent la même interprétation (testo meno 0,65, SOPK 1,8 × N) et la page ne renvoie aucune erreur. stepcheck.js OK pour gonadoF et gonadoM. Les captures Playwright de la carte des tests (GnRH chez le sujet sain, hCG dans le primaire) sont lisibles. Rien n'est commité de mon côté.

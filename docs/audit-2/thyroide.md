@@ -95,3 +95,14 @@ Exploration des curseurs (grille de 3^9 combinaisons, Node) : aucun réglage ne 
 | Points à trancher | non faits | laissés à l'auteur. |
 
 Contrôles : `node --check` OK sur les 10 fichiers touchés ; allscen.js : interprétations des 10 scénarios thyroïdiens inchangées, 0 erreur de page ; captures Playwright de la vignette (Basedow, surdosage en LT4) vérifiées.
+
+## Décisions appliquées (quiz « Arbitrages du 2e audit »)
+
+| Décision | Statut | Détail |
+| --- | --- | --- |
+| T1 (TSH ≥ 10, T4L normale) | fait | model.js interpret : seuil `tsh >= 10`, libellé « Hypothyroïdie infraclinique sévère », texte « TSH ≥ 10 ; ETA 2013, complément », le plus souvent traitée ; rappel de la borne 4–10 du polycopié (p. 23). |
+| T3 (adénome thyréotrope, résistance) | fait | model.js : paramètre `tsho` (« Adénome thyréotrope (TSH autonome) », curseur), sécrétion de TSH non freinée ajoutée à la TSH régulée ; scénario « Adénome thyréotrope » (tsho 2,5) : TSH 3,76 (normale, inadaptée), T4L 28,3, T3L 8,7, goitre 1,18. Branche d'interprétation en tête : TSH ≥ 0,4 et T4L > 22 → « TSH non freinée, T4L élevée » : adénome thyréotrope (p. 24, 30, 59), IRM hypophysaire ; diagnostic différentiel résistance aux hormones thyroïdiennes, interférence, prise récente de LT4 (complément). Elle remplace l'ancienne branche « T4L élevée, TSH normale ». anat() : « adénome hypophysaire thyréotrope » (+ « goitre diffus (complément) » si goitre > 1,15). thyroid-axis.js : masse hypophysaire affichée avec la fiche « les-tsho » (HV.INFO, p. 24, 30, 59 ; résistance en complément). |
+| T4 (P3 médiastinale 40 %) | fait | zoom-thyro.js (fiche zt-p3, point clé, étiquette avec astérisque « * variable selon les séries (complément) », pas à pas) et sheets-organs.js:29 : « 40 % selon le polycopié, p. 34 ; fréquence variable selon les séries, complément ». |
+| T2, T5 | sans objet | « sans importance » : rien fait. |
+
+Contrôles : `node --check` OK ; tools/verif/allscen.js : 11 scénarios thyroïdiens, interprétations des 10 anciens inchangées, nouveau scénario « TSH non freinée, T4L élevée », 0 erreur de page ; testsim_settled.js : sans objet (aucun test dynamique thyroïdien dans HV.TESTS) ; overlap.js : aucun chevauchement nouveau (les signalements tirads sont antérieurs : titre × sous-titre) ; captures Playwright de l'axe (scénario adénome thyréotrope, masse hypophysaire, vignette « non indiquée ») et de la loupe Embryologie (note astérisque, figure 10 dans le panneau) vérifiées.

@@ -21,7 +21,7 @@ Chaque test se lance depuis la carte « Tests dynamiques » du panneau, sur le s
 | Glycémie | HGPO à 75 g (P) | sain, intolérance (curseurs) ; non indiquée quand la glycémie à jeun est déjà ≥ 1,26 g/L (DT2, DT1) |
 | Glycémie | HGPO prolongée sur 5 heures (P, partie 2 p. 70) | sain, insulinome (hypoglycémie tardive après le pic, < 0,50 g/L) ; non indiquée chez le diabétique traité |
 | Glycémie | Épreuve de jeûne de 72 h | sain, insulinome (non indiquée chez le diabétique traité) |
-| Posthypophyse | Restriction hydrique + desmopressine (P ; desmopressine en complément) | sain, diabète insipide central, néphrogénique ; SIADH : restriction partielle, sans desmopressine, correction lente |
+| Posthypophyse | Restriction hydrique + desmopressine (P ; desmopressine en complément) | sain, diabète insipide central (complet, partiel), néphrogénique, polydipsie primaire (complément) ; SIADH : restriction partielle, sans desmopressine, correction lente |
 | Posthypophyse | Charge en eau, marche dans le désert (situations physiologiques, complément) | sain, diabète insipide, SIADH |
 | Gonadotrope masculin | Test à la GnRH (complément) | sain (LH × 3 à 5), déficit gonadotrope (réponse faible, sans en préciser le niveau) ; non indiqué dans l'hypogonadisme primaire ni sous androgènes |
 | Gonadotrope masculin | Test à l'hCG (complément) | déficit gonadotrope (hausse franche : cellules de Leydig fonctionnelles), hypogonadisme primaire (hausse faible) ; non interprétable sous androgènes |
@@ -95,7 +95,7 @@ Chaque test se lance depuis la carte « Tests dynamiques » du panneau, sur le s
 | Test | Principe | Ce que l'on cherche | Réponse normale / pathologique |
 | --- | --- | --- | --- |
 | **Épreuve de restriction hydrique** (P) | Arrêt des boissons en milieu hospitalier ; poids, diurèse, osmolalités, natrémie (après imagerie) | Diabète insipide | Normal : urines concentrées (> 600 mosmol/kg, complément). Diabète insipide : diurèse qui baisse insuffisamment, urines non concentrées. Dans le SIADH (P), la restriction (partielle, 500 à 800 mL/j, complément) est aussi le traitement, sans desmopressine, avec une correction ≤ 8 à 10 mmol/L par 24 h (complément) |
-| Test à la desmopressine | En fin de restriction | Distinguer DI central et néphrogénique | Concentration des urines : central. Pas de réponse : néphrogénique |
+| Test à la desmopressine | En fin de restriction | Distinguer DI central et néphrogénique | Hausse de l'osmolalité urinaire > 50 % : central ; 10 à 50 % : réponse partielle (DI partiel ou polydipsie primaire, qui se chevauchent ; une natrémie de départ basse-normale oriente vers la polydipsie primaire) ; < 10 % : néphrogénique (complément, Miller 1970). Le lavage médullaire d'une polyurie chronique limite la réponse |
 | Copeptine stimulée (sérum salé hypertonique ou arginine) | Copeptine, marqueur stable de l'ADH | Diabète insipide et polydipsie primaire | Copeptine de base > 21,4 pmol/L, sans restriction préalable : DI néphrogénique (Timper, JCEM 2015). Après sérum salé hypertonique (natrémie ≥ 150 mmol/L), copeptine > 4,9 pmol/L : polydipsie primaire, ≤ 4,9 : DI central (Fenske, NEJM 2018). Après arginine, ≤ 3,8 pmol/L : DI central (Winzeler, Lancet 2019). Complément |
 
 ## Métabolisme phosphocalcique

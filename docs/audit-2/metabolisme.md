@@ -120,3 +120,14 @@ Toutes les modifications ont été faites avec Edit, sans commit. `node --check`
 | F1 | fait | axes-steps.js : étape « Les îlots détectent le glucose ». |
 | F2 | fait | islet.js : fiche glp1r (deux récepteurs ; mode d'action des gliptines). |
 | F3–F6 | non fait | Confiance basse. |
+
+## Décisions appliquées (quiz du 2e audit)
+
+| Point | Décision | Ce qui a changé | Vérification |
+| --- | --- | --- | --- |
+| C1 Hypercalcémie tumorale | Oui | axes-sim.js : scénario `pthrp: 16` (curseur max 20) et note « hypercalcémie franche (≈ 3 mmol/L) ». | Ca 3,01, PTH effondrée, Pi 0,40, CaU 15 ; interprétation « non parathyroïdienne ». Les 5 autres scénarios sont inchangés. |
+| C2 HHF sur la FE du calcium | Oui | axes-sim.js : calcul de la calciurie mis en commun (`caU`) ; nouvelle ligne du bilan « Rapport de clairance Ca / créatinine » = CaU / calcémie / 150 L/24 h (créatinine supposée normale ; complément ; SFE, 5e atelier international sur l'HPT primaire 2022). L'interprétation de l'HHF repose sur un rapport < 0,01, et non plus sur la calciurie des 24 h ; elle rappelle que la carence en vitamine D l'abaisse aussi. Note du scénario HHF et docs/tests-dynamiques.md mises à jour. | eu 0,013 ; HPT 0,031 ; PTHrP 0,033 ; HHF 0,005 → « fraction d'excrétion du calcium basse ». Rendu du panneau vérifié (« 0,005 ↓ »). |
+| C6 Hypoglycémie tardive de l'insulinome | Oui | axes-sim.js : sécrétion de l'insulinome amplifiée avec retard par une charge en glucose (variable lente `tl`, complément ; sans effet hors insulinome). tests.js : nouveau test « HGPO prolongée sur 5 heures » (P2 p. 70), prélèvements toutes les heures ; le message de l'HGPO standard de l'insulinome donne la valeur à 2 h et renvoie vers ce test. docs/tests-dynamiques.md complété. | Insulinome : 0,46 → pic 0,87 → 0,49 / 0,44 / 0,43 g/L à 3–5 h → « hypoglycémie tardive ». Sain : minimum 0,85 ; DT2 1,50 ; DT1 2,25 → pas d'hypoglycémie ; DT1 traité → non indiquée. |
+| C3, C4, C5 | Non | — | — |
+
+`node --check` passe ; allscen : 0 erreur de page, aucune autre interprétation changée. L'insulinome est désormais classé « Hypoglycémie » en régime établi (0,36–0,54 g/L sur la journée).

@@ -84,3 +84,14 @@ Pages = pages PDF du polycopié CEEDMM (P1 = partie 1, P2 = partie 2).
 | F6 | non fait | Confiance basse : il faudrait ajouter une fiche HV.INFO.breast dans info.js, qui est un fichier partagé. |
 
 Vérifications : `node --check` passe sur sheets.js, poly-figs.js, sheets-molecules.js, sheets-organs.js, axes-data.js, zoom-transv.js et info.js. allscen.js donne 0 erreur de page, et aucun modèle n'a été touché. Captures Playwright : fiches parathyroïdes, thyroïde, hypophyse, surrénales et cortisol ; scènes NEM, cortico et gonadoM.
+
+## Décisions appliquées (quiz « Arbitrages du 2e audit », partie Molécules, transversal)
+
+| Décision | Fichier | Modification |
+|---|---|---|
+| M1 (signaler la coquille du cortisol) | js/scenes/zoom-transv.js (pas à pas « Cortisol : pic du matin ») ; js/sheets-molecules.js (fiche cortisol, ligne Dosage) | « (p. 88 ; le polycopié indique 80 nmol/L pour 5 µg/dL, coquille) ». Les textes de axes-sim.js (axe corticotrope, autre domaine) n'ont pas été touchés. |
+| M2 (seuil du DN4) | js/poly-figs.js (figure 49) | Légende : « … neuropathie algique ; seuil ≥ 4/10 selon la validation originale, Bouhassira 2005 : complément ». |
+| M3 (fiche des inhibines) | js/axes-data.js (HV.INFO.inhib) ; js/sheets-molecules.js (`inhib`) | Titre « Inhibines A et B ». Inhibine B : Sertoli et cellules folliculaires, frein de la FSH (partie 2, p. 4). Inhibine A : follicule dominant et corps jaune (complément). Les libellés des liens restent « inhibine B → FSH » (explicites) ; la légende de l'axe affiche « Inhibines A et B ». |
+| M4 (pastilles mammaires) | js/scenes/atlas.js ; js/info.js | Les pastilles mammaires portent le libellé « Seins » et `data-info="breast"`. Nouvelle fiche au survol HV.INFO.breast (p. 49, 55, figure 20 p. 56). Maj + clic ouvre la fiche organe « Glande mammaire ». Capture vérifiée. |
+
+Vérifications : `node --check` passe sur les six fichiers. tools/verif/allscen.js : tous les scénarios tournent, 0 erreur de page. tools/verif/testsim_settled.js : les 108 combinaisons axe × scénario × test tournent sans erreur (aucun modèle ni test modifié). Captures : survol des seins dans la vue d'ensemble, axe gonadotrope féminin (légende « Inhibines A et B »).

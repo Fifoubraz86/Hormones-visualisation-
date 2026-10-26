@@ -234,13 +234,16 @@
       unit: 'L/24 h', label: 'Débit urinaire', thr: 3, thrDir: 'below', thrLabel: 'débit urinaire habituel < 3 L/24 h',
       span: 4, xUnit: 'h', duration: 16,
       samples: [{ x: 0.03, label: '0 h' }, { x: 0.25, label: '1 h' }, { x: 0.5, label: '2 h' }, { x: 0.75, label: '3 h' }, { x: 1, label: '4 h' }],
-      apply(p, x) { p.drink = x > 0.04 && x < 0.16 ? 1.6 : 0; },
+      // Temps du protocole : 4 h en 16 s ; 3 L/h pendant 0,48 h ≈ 1,5 L.
+      apply(p, x) { p.hps = 4 / 16; p.drink = x > 0.04 && x < 0.16 ? 10 : 0; },
       measure: (sim) => sim.lab('diur'),
       interpret(v, sim, st) {
         const peak = Math.max(...v), na = sim.lab('na');
         if (st.base.siadh > 0.02 || st.base.drug > 0.02) return { tone: 'bad', text: `L'ADH reste élevée : le rein ne peut pas éliminer l'eau bue, les urines restent concentrées et la natrémie chute à ${n0(na)} mmol/L. C'est pourquoi le SIADH se traite par restriction hydrique.` };
+        if (peak < 3) return { tone: 'warn', text: `Chez ce patient déshydraté, l'eau bue corrige d'abord le déficit : l'ADH reste stimulée et les urines restent rares (${n2(peak)} L/24 h au plus). Natrémie ${n0(na)} mmol/L.` };
+        if (st.base.poto > 0.02 && st.base.hypo >= 0.5 && st.base.kidney >= 0.5) return { tone: 'warn', text: `Ce patient boit déjà beaucoup : sa diurèse est proche du maximum (${n2(peak)} L/24 h en débit) et la charge supplémentaire fait baisser la natrémie à ${n0(na)} mmol/L. Dans la polydipsie primaire, des apports qui dépassent le pouvoir d'excrétion du rein exposent à l'hyponatrémie (complément).` };
         if (st.base.hypo < 0.5 || st.base.kidney < 0.5) return { tone: 'warn', text: `Les urines sont déjà abondantes et diluées en permanence (diabète insipide) : la charge en eau ne modifie guère la diurèse, déjà maximale (${n2(peak)} L/24 h en débit). Natrémie ${n0(na)} mmol/L.` };
-        return { tone: 'good', text: `L'eau bue abaisse l'osmolalité : l'ADH s'effondre, les urines deviennent abondantes (jusqu'à ${n2(peak)} L/24 h en débit) et diluées, puis tout revient à la normale en quelques heures (natrémie ${n0(na)} mmol/L). C'est le rétrocontrôle négatif de l'osmostat. Si le rein ne pouvait pas éliminer l'eau (SIADH), la même charge ferait chuter la natrémie.` };
+        return { tone: 'good', text: `L'eau bue abaisse l'osmolalité : l'ADH s'effondre, les urines deviennent abondantes (jusqu'à ${n2(peak)} L/24 h en débit) et diluées, puis l'excès d'eau est éliminé en quelques heures (natrémie ${n0(na)} mmol/L). C'est le rétrocontrôle négatif de l'osmostat. Si le rein ne pouvait pas éliminer l'eau (SIADH), la même charge ferait chuter la natrémie.` };
       }
     },
     {
@@ -250,11 +253,12 @@
       unit: 'mosmol/kg', label: 'Osmolalité urinaire', thr: 600, thrDir: 'above', thrLabel: 'urines concentrées > 600 mosmol/kg (complément)',
       span: 6, xUnit: 'h', duration: 16,
       samples: [{ x: 0.03, label: '0 h' }, { x: 0.33, label: '2 h' }, { x: 0.67, label: '4 h' }, { x: 1, label: '6 h' }],
-      apply(p, x) { if (x > 0.04) p.sweat = Math.min(1, (x - 0.04) * 3); },
+      apply(p, x) { p.hps = 6 / 16; if (x > 0.04) p.sweat = Math.min(1, (x - 0.04) * 3); }, // 6 h en 16 s
       measure: (sim) => sim.lab('uosm'),
       interpret(v, sim) {
         const u = v[v.length - 1], na = sim.lab('na'), d = sim.lab('diur');
         if (u < 300) return { tone: 'bad', text: `Malgré la déshydratation (natrémie ${n0(na)} mmol/L), les urines restent diluées (${n0(u)} mosmol/kg) : le rein ne peut pas économiser l'eau. Chez un patient atteint de diabète insipide, une telle situation est dangereuse (déshydratation hypernatrémique) s'il ne peut pas boire.` };
+        if (u < 600) return { tone: 'warn', text: `La sueur fait monter l'osmolalité (natrémie ${n0(na)} mmol/L) mais les urines se concentrent mal (${n0(u)} mosmol/kg, ${n2(d)} L/24 h) : pouvoir de concentration réduit, par un défaut partiel d'ADH ou par le lavage médullaire d'une polyurie chronique (complément). Seule la boisson peut corriger le déficit en eau.` };
         return { tone: 'warn', text: `La sueur fait monter l'osmolalité (natrémie ${n0(na)} mmol/L) : l'ADH s'élève, les urines deviennent rares (${n2(d)} L/24 h) et très concentrées (${n0(u)} mosmol/kg). Le rein limite les pertes, mais seule la boisson (soif) peut corriger le déficit en eau.` };
       }
     }
@@ -270,19 +274,21 @@
       apply(p, x) {
         const siadh = p.siadh > 0.02 || p.drug > 0.02;
         // SIADH : restriction partielle (500 à 800 mL/j) et correction lente ; jamais de desmopressine.
+        // Temps du protocole : 10 h en 20 s. La polydipsie primaire (p.poto) garde son lavage médullaire.
+        p.hps = 10 / 20;
         if (x > 0.05) { p.restrict = siadh ? 0.2 : 1; if (!siadh) { p.drink = 0; p.sweat = 0; } }
         if (x > 0.8 && !siadh) p.ddavp = 1;
       },
       measure: (sim) => {
         const st = HV.Tests.state();
-        if (st && !st.trace.length) st.na0 = sim.lab('na'); // natrémie de départ
+        if (st && !st.trace.length) { st.na0 = sim.lab('na'); st.W0 = sim.s.W; } // natrémie et bilan d'eau de départ
         if (st) st.naMax = Math.max(st.naMax || 0, sim.lab('na')); // natrémie la plus haute de l'épreuve
         return sim.lab('uosm');
       },
-      track: (sim) => sim.lab('diur') / 24, // litres par heure
       interpret(v, sim, st) {
         const u8 = v[4], ud = v[5], na = sim.lab('na');
-        const loss = (st.acc / 70) * 100;
+        // Perte de poids = eau libre perdue (bilan du modèle) rapportée au poids du patient.
+        const kg = sim.p.poids || 70, loss = Math.max(0, ((st.W0 != null ? st.W0 : 0) - sim.s.W) / kg * 100);
         const naMax = Math.max(st.naMax || 0, na);
         const extra = ` Natrémie maximale ${n0(naMax)} mmol/L ; perte de poids ≈ ${loss.toFixed(1).replace('.', ',')} %.` + (loss > 3 || naMax > 148 ? ' En pratique, l\'épreuve est interrompue avant ce stade (perte de poids > 3 à 5 % ou natrémie qui dépasse la normale ; complément).' : '');
         if (st.base.siadh > 0.02 || st.base.drug > 0.02) {
@@ -292,8 +298,16 @@
         if (u8 >= 600) {
           return { tone: 'good', text: `Osmolalité urinaire à ${n0(u8)} mosmol/kg à 8 h : concentration normale, pas de diabète insipide.` + extra };
         }
-        if (ud > u8 * 1.5 && ud > 400) return { tone: 'bad', text: `Urines non concentrées (${n0(u8)} mosmol/kg) puis concentration après desmopressine (${n0(ud)}) : diabète insipide central.` + extra };
-        return { tone: 'bad', text: `Urines non concentrées (${n0(u8)} mosmol/kg) et pas de réponse à la desmopressine (${n0(ud)}) : diabète insipide néphrogénique.` + extra };
+        // Réponse à la desmopressine (complément, Miller 1970) : hausse > 50 % central ; 10 à 50 % partielle ; < 10 % aucune.
+        const na0 = st.na0 != null ? st.na0 : na, r = (ud - u8) / Math.max(u8, 1), rTxt = `${r >= 0 ? '+' : ''}${Math.round(r * 100)} %`;
+        const crit = ' Critère : hausse de l\'osmolalité urinaire après desmopressine > 50 % : origine centrale ; 10 à 50 % : réponse partielle ; < 10 % : pas de réponse (complément).';
+        const cop = ' La copeptine aide à trancher (complément).';
+        if (r > 0.5) return { tone: 'bad', text: `Urines ${u8 < 300 ? 'non concentrées' : 'insuffisamment concentrées'} (${n0(u8)} mosmol/kg) puis concentration après desmopressine (${n0(ud)}, ${rTxt}) : diabète insipide central${u8 < 300 ? '' : ' partiel'}. Le lavage médullaire de la polyurie limite la réponse, qui n'atteint pas celle du sujet sain (complément).` + crit + extra };
+        if (r > 0.1 || u8 >= 300) {
+          if (na0 < 139) return { tone: 'warn', text: `Concentration partielle (${n0(u8)} mosmol/kg à 8 h) et réponse partielle à la desmopressine (${n0(ud)}, ${rTxt}), avec une natrémie de départ basse-normale (${n0(na0)} mmol/L) : en faveur d'une polydipsie primaire (complément) ; les formes partielles de diabète insipide donnent un profil proche.` + cop + crit + extra };
+          return { tone: 'bad', text: `Concentration partielle (${n0(u8)} mosmol/kg à 8 h) et réponse partielle à la desmopressine (${n0(ud)}, ${rTxt}), avec une natrémie de départ normale haute (${n0(na0)} mmol/L) : diabète insipide partiel probable (complément) ; à distinguer d'une polydipsie primaire.` + cop + crit + extra };
+        }
+        return { tone: 'bad', text: `Urines non concentrées (${n0(u8)} mosmol/kg) et pas de réponse à la desmopressine (${n0(ud)}, ${rTxt}) : diabète insipide néphrogénique.` + crit + extra };
       }
     }
   ].concat(T.adh_situations);
