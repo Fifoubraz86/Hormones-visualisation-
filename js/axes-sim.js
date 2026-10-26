@@ -363,6 +363,8 @@
       links: { 'hypo>post>adh': 'adhP', 'post>kidney>adh': 'adhP', 'post>vessel>adh': 'adhP', 'kidney>osm>water': 'eff', 'kidney>urine>water': 'urineRate', 'thirst>osm>water': 'thirstRate' },
       rates: { siadhRate: (s, p) => p.siadh / 2, ddavpRate: (s, p) => 2 * p.ddavp, urineRate: (s) => 900 / uosmOf(s.eff, s.na) / 1.5, thirstRate: (s, p) => Math.max(0, 1 - p.restrict - p.sweat) * clamp(0.6 + (s.na - 140) / 2, 0.15, 3) + 3 * p.drink },
       liveNode: {
+        hypo: (s) => (s.adhP < 0.05 ? 'ADH hypophysaire éteinte (freinée par l\'hypo-osmolalité)' : 'ADH hypophysaire × ' + f1(s.adhP)),
+        post: (s) => (s.adhP < 0.05 ? 'aucune libération d\'ADH' : 'libération d\'ADH × ' + f1(s.adhP)),
         osm: (s) => Math.round(2 * s.na + 10) + ' mosmol/kg · Na ' + Math.round(s.na),
         urine: (s) => f1(clamp(900 / uosmOf(s.eff, s.na), 0.4, 14)) + ' L/24 h · ' + Math.round(uosmOf(s.eff, s.na)) + ' mosmol/kg'
       },
@@ -393,11 +395,11 @@
     tau: { A: 0.4, N: 0.8, D: 0.8 },
     targets(p, s, T) {
       const parox = 0.35 + 1.65 * G(T.h % 6, 1.2, 0.35); // paroxysmes
-      return { A: p.sym + 3 * p.pheoA * parox, N: p.sym + 2.4 * (p.pheoN + 0.4 * p.pheoA) * (0.7 + 0.3 * parox), D: 1 + 3 * p.pheoD };
+      return { A: p.sym + 3 * p.pheoA * parox, N: p.sym + 2.4 * p.pheoN * (0.7 + 0.3 * parox), D: 1 + 3 * p.pheoD };
     },
     labs: [
       { key: 'mn', name: 'Métanéphrine', unit: '× limite sup.', range: '< 1 × LSN', lo: 0, hi: 1, min: 0, max: 15, dec: 1, fn: (s, p) => 0.45 * p.sym + 2.4 * p.pheoA },
-      { key: 'nmn', name: 'Normétanéphrine', unit: '× limite sup.', range: '< 1 × LSN', lo: 0, hi: 1, min: 0, max: 15, dec: 1, fn: (s, p) => 0.45 * p.sym + 2.4 * (p.pheoN + 0.4 * p.pheoA) },
+      { key: 'nmn', name: 'Normétanéphrine', unit: '× limite sup.', range: '< 1 × LSN', lo: 0, hi: 1, min: 0, max: 15, dec: 1, fn: (s, p) => 0.45 * p.sym + 2.4 * p.pheoN },
       { key: 'mt', name: '3-méthoxytyramine', unit: '× limite sup.', range: '< 1 × LSN', lo: 0, hi: 1, min: 0, max: 15, dec: 1, fn: (s, p) => 0.5 + 2.4 * p.pheoD },
       { key: 'fc', name: 'Fréquence cardiaque', unit: '/min', range: '60–100 /min (indicatif, complément)', lo: 60, hi: 100, min: 40, max: 180, dec: 0, fn: (s) => clamp(70 + 22 * ln(Math.max(s.A, 0.2)) + 6 * ln(Math.max(s.N, 0.2)), 45, 170) },
       { key: 'pas', name: 'PA systolique', unit: 'mmHg', range: '100–140 mmHg (indicatif, complément)', lo: 100, hi: 140, min: 80, max: 260, dec: 0, fn: (s) => clamp(120 + 10 * ln(Math.max(s.A, 0.2)) + 22 * ln(Math.max(s.N, 0.2)), 85, 250) },
@@ -412,14 +414,15 @@
     scenarios: [
       { id: 'eu', name: 'Repos', note: 'Faible sécrétion basale.', p: {} },
       { id: 'stress', name: 'Stress aigu', note: 'Réaction de combat ou de fuite : FC et PA ↑, glycémie ↑ ; métanéphrines au plus discrètement augmentées.', p: { sym: 3 } },
-      { id: 'pheoA', name: 'Phéochromocytome à adrénaline', note: 'Triade de Ménard (céphalées, sueurs, palpitations), HTA généralement permanente avec parfois des crises paroxystiques ; profil adrénergique (complément) : tachycardie, hyperglycémie, métanéphrine très élevée, normétanéphrine souvent aussi augmentée (sécrétion mixte).', p: { pheoA: 2.6 } },
+      { id: 'pheoA', name: 'Phéochromocytome à adrénaline', note: 'Triade de Ménard (céphalées, sueurs, palpitations), HTA généralement permanente avec parfois des crises paroxystiques ; profil adrénergique pur (complément) : tachycardie, hyperglycémie, métanéphrine très élevée, normétanéphrine normale (la tumeur ne fabrique pas de noradrénaline sécrétée).', p: { pheoA: 2.6 } },
       { id: 'pheoN', name: 'Phéochromocytome à noradrénaline', note: 'Profil noradrénergique : HTA plus permanente, moins de tachycardie ; normétanéphrine très élevée. Profil aussi des paragangliomes (complément).', p: { pheoN: 2.6 } },
+      { id: 'pheoM', name: 'Phéochromocytome mixte (adrénaline et noradrénaline)', note: 'Les deux catécholamines sont sécrétées (complément) : métanéphrine et normétanéphrine toutes deux élevées ; tachycardie, HTA et hyperglycémie intermédiaires entre les deux profils purs.', p: { pheoA: 1.8, pheoN: 1.8 } },
       { id: 'pheoD', name: 'Tumeur à dopamine', note: 'Rare, surtout paragangliome (souvent SDHB, risque de malignité) : peu ou pas d\'HTA ; 3-méthoxytyramine élevée (complément).', p: { pheoD: 2.6 } }
     ],
     interpret(s, p, L) {
       const mn = L('mn'), nmn = L('nmn'), mt = L('mt'), top = Math.max(mn, nmn, mt);
       if (top >= 3) {
-        const kind = mt === top ? 'dopaminergique (3-méthoxytyramine) : penser à un paragangliome, rechercher une mutation SDHB' : mn === top ? 'adrénergique (métanéphrine) : origine surrénalienne quasi certaine' : 'noradrénergique (normétanéphrine) : surrénale ou paragangliome';
+        const kind = mn >= 3 && nmn >= 3 ? 'mixte (métanéphrine et normétanéphrine toutes deux élevées) : surrénale le plus souvent' : mt === top ? 'dopaminergique (3-méthoxytyramine) : penser à un paragangliome, rechercher une mutation SDHB' : mn === top ? 'adrénergique (métanéphrine) : origine surrénalienne quasi certaine' : 'noradrénergique (normétanéphrine) : surrénale ou paragangliome';
         return { tone: 'bad', label: 'Métanéphrines ≥ 3 × LSN', text: `Évoquer un phéochromocytome ou un paragangliome : HTA généralement permanente, parfois paroxystique ; céphalées, sueurs, palpitations. Profil ${kind} (complément ; seuil de 3 × LSN indicatif). Imagerie ensuite : scanner ou IRM, puis imagerie fonctionnelle (polycopié p. 79).` };
       }
       if (top > 1) return { tone: 'warn', label: 'Élévation modérée des métanéphrines', text: 'Élévation discrète (< 3 × LSN) : faux positifs (stress, affection aiguë grave, médicaments, alimentation ; polycopié p. 79 ; prélèvement en position assise : complément). Contrôler au repos avant de conclure.' };
@@ -428,7 +431,7 @@
     },
     hooks: {
       links: { 'med>heart>adre': 'A', 'med>vessel>nora': 'N', 'med>liver>adre': 'A', 'med>assay>adre': 'mnRate', 'med>assay>nora': 'nmnRate', 'med>assay>dopa': 'mtRate' },
-      rates: { mnRate: (s, p) => 0.45 * p.sym + 2.4 * p.pheoA, nmnRate: (s, p) => 0.45 * p.sym + 2.4 * (p.pheoN + 0.4 * p.pheoA), mtRate: (s, p) => 0.5 + 2.4 * p.pheoD },
+      rates: { mnRate: (s, p) => 0.45 * p.sym + 2.4 * p.pheoA, nmnRate: (s, p) => 0.45 * p.sym + 2.4 * p.pheoN, mtRate: (s, p) => 0.5 + 2.4 * p.pheoD },
       lesions: [
         { node: 'med', kind: 'mass', tone: 'brown', dx: -6, dy: -28, show: (p) => p.pheoA + p.pheoN > 0.02, size: (p) => clamp(0.6 + 0.08 * (p.pheoA + p.pheoN), 0.6, 1.2), label: 'phéochromocytome', ly: -42, title: 'Phéochromocytome', text: 'Tumeur des cellules chromaffines de la médullosurrénale. Le profil sécrétoire (adrénaline, noradrénaline, dopamine) oriente la clinique et le bilan.' },
         { node: 'nerve', kind: 'mass', tone: 'brown', dx: 30, dy: 40, show: (p) => p.pheoD > 0.02, size: () => 0.8, label: 'paragangliome', ly: 50, title: 'Paragangliome', text: 'Tumeur chromaffine extra-surrénalienne (chaîne sympathique abdominale, thorax, tête et cou). Les formes dopaminergiques sont souvent liées à SDHB (complément).' }

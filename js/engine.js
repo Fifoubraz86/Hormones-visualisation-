@@ -89,8 +89,10 @@
     });
   };
   Flow.prototype.step = function (dt) {
+    // Un flux dont le débit tombe à zéro se vide vite : l'hormone effondrée ne doit plus défiler.
+    const r0 = this.rate(), drain = r0 < 0.02 ? 5 : 1;
     if (dt > 0) {
-      this.acc += Math.max(0, this.rate()) * dt;
+      this.acc += Math.max(0, r0) * dt;
       while (this.acc >= 1) {
         this.acc -= 1;
         if (this.ps.length < this.max) this.spawn(0);
@@ -98,7 +100,7 @@
     }
     for (let i = this.ps.length - 1; i >= 0; i--) {
       const p = this.ps[i];
-      p.t += (dt / this.dur) * p.v * HV.flowPace * (this.o.pace ? this.o.pace() : 1);
+      p.t += (dt / this.dur) * p.v * HV.flowPace * (this.o.pace ? this.o.pace() : 1) * drain;
       if (p.t >= 1) {
         p.e.style.display = 'none';
         this.pool.push(p.e);
