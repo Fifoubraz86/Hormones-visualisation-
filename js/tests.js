@@ -305,10 +305,10 @@
       id: 'gnrh', name: 'Test à la GnRH', poly: false,
       what: 'Les cellules gonadotropes répondent-elles à une injection de GnRH ? Utile surtout chez l\'enfant (puberté précoce centrale) ; chez l\'adulte, il ne précise pas le niveau d\'un déficit gonadotrope.',
       proto: 'Gonadoréline (GnRH) 100 µg IV ; LH et FSH à T0, 30, 60 et 90 min (complément, non détaillé dans le polycopié ; protocoles et seuils variables selon les centres).',
-      unit: 'UI/L', label: 'LH', thrFn: (st) => (st.values.length ? st.values[0] * 3 : null), thrDir: 'above', thrLabel: 'réponse indicative : LH × 3 au pic (complément)',
+      unit: 'UI/L', label: 'LH', thrFn: (st) => (st.values.length ? st.values[0] * 3 : null), thrDir: 'above', thrLabel: 'réponse indicative : LH × 3 à 5 au pic (complément)',
       span: 90, xUnit: 'min', duration: 14,
       samples: [{ x: 0.04, label: 'T0' }, { x: 0.34, label: '30' }, { x: 0.67, label: '60' }, { x: 1, label: '90' }],
-      apply(p, x) { if (x > 0.06) p.gnrh = 3 * Math.exp(-(x - 0.06) / 0.3); }, // bolus IV, éliminé en quelques minutes
+      apply(p, x) { if (x > 0.06) p.gnrh = 8 * (x < 0.36 ? 1 : Math.exp(-(x - 0.36) / 0.12)); }, // bolus IV : pic de LH vers 30 min, retour à la base en 60 à 90 min
       measure: (sim) => {
         const st = HV.Tests.state();
         if (st && !st.trace.length) st.fsh0 = sim.lab('fsh');
@@ -332,13 +332,13 @@
       unit: 'nmol/L', label: 'Testostérone', thrFn: (st) => (st.values.length ? st.values[0] * 2 : null), thrDir: 'above', thrLabel: 'hausse indicative : testostérone × 2 (complément)',
       span: 72, xUnit: 'h', duration: 14,
       samples: [{ x: 0.04, label: '0 h' }, { x: 0.34, label: '24 h' }, { x: 0.67, label: '48 h' }, { x: 1, label: '72 h' }],
-      apply(p, x) { if (x > 0.06) p.hcg = 2; }, // demi-vie longue : stimulation soutenue sur 72 h
+      apply(p, x) { if (x > 0.06) p.hcg = 3; }, // demi-vie longue : stimulation soutenue sur 72 h
       measure: (sim) => sim.lab('tt'),
       interpret(v, sim, st) {
         const t0 = v[0], t3 = v[v.length - 1], r = t3 / Math.max(t0, 0.1);
         const head = `Testostérone de ${f1g(t0)} à ${f1g(t3)} nmol/L (× ${f1g(r)}). `;
         if (st.base.exoT > 0.05) return { tone: 'warn', text: head + 'Sous testostérone exogène, le dosage mêle hormone injectée et production testiculaire : test non interprétable (complément).' };
-        if (r >= 2) return { tone: 'good', text: head + 'Hausse franche : cellules de Leydig fonctionnelles.' + (sim.lab('lh') < 9 && st.base.hypo < 0.5 ? ' Avec des gonadotrophines basses, l\'atteinte est située en amont (hypothalamo-hypophysaire).' : '') + ' (Complément.)' };
+        if (r >= 2) return { tone: 'good', text: head + 'Hausse franche : cellules de Leydig fonctionnelles.' + (st.base.hypo < 0.5 ? ' Avec des gonadotrophines basses, l\'atteinte est située en amont (hypothalamo-hypophysaire).' : '') + ' (Complément.)' };
         return { tone: 'bad', text: head + 'Hausse faible : réserve des cellules de Leydig diminuée, en faveur d\'une atteinte testiculaire (complément). Après une longue privation en LH, la réponse peut aussi être retardée : une stimulation prolongée est parfois nécessaire (complément).' };
       }
     }

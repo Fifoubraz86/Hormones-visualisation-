@@ -19,6 +19,7 @@ Chaque test se lance depuis la carte « Tests dynamiques » du panneau, sur le s
 | Somatotrope | Hypoglycémie insulinique (P) | sain (pic ≥ 6 ng/mL), déficit partiel (3–6), complet (< 3) |
 | Rénine-aldostérone | Charge sodée (P) | sain, hyperaldostéronisme primaire |
 | Glycémie | HGPO à 75 g (P) | sain, intolérance (curseurs) ; non indiquée quand la glycémie à jeun est déjà ≥ 1,26 g/L (DT2, DT1) |
+| Glycémie | HGPO prolongée sur 5 heures (P, partie 2 p. 70) | sain, insulinome (hypoglycémie tardive après le pic, < 0,50 g/L) ; non indiquée chez le diabétique traité |
 | Glycémie | Épreuve de jeûne de 72 h | sain, insulinome (non indiquée chez le diabétique traité) |
 | Posthypophyse | Restriction hydrique + desmopressine (P ; desmopressine en complément) | sain, diabète insipide central, néphrogénique ; SIADH : restriction partielle, sans desmopressine, correction lente |
 | Posthypophyse | Charge en eau, marche dans le désert (situations physiologiques, complément) | sain, diabète insipide, SIADH |
@@ -100,7 +101,7 @@ Chaque test se lance depuis la carte « Tests dynamiques » du panneau, sur le s
 | Test | Principe | Ce que l'on cherche | Réponse normale / pathologique |
 | --- | --- | --- | --- |
 | Calcium + PTH simultanés, 25-OH-vitamine D | Interprétation couplée (P) | Hyperparathyroïdie primaire ou secondaire, hypoparathyroïdie | PTH élevée ou inadaptée face à une hypercalcémie : HPT primaire |
-| Calciurie des 24 h, rapport clairance Ca / créatinine | Recueil urinaire | Hypercalcémie hypocalciurique familiale (mutation du CaSR) | Rapport < 0,01 : évoque la mutation du CaSR |
+| Calciurie des 24 h, rapport clairance Ca / créatinine | Recueil urinaire | Hypercalcémie hypocalciurique familiale (mutation du CaSR) | Rapport < 0,01 : évoque la mutation du CaSR (complément ; SFE, 5e atelier international sur l'HPT primaire, 2022). Affiché dans le bilan simulé (créatinine supposée normale) ; c'est lui, et non la calciurie des 24 h seule, qui fonde l'interprétation. Une carence en vitamine D l'abaisse aussi |
 | Imagerie : échographie, scintigraphie au MIBI, TEP-choline | Localisation | Adénome parathyroïdien avant chirurgie | Fixation focale persistante |
 
 ## Métabolisme glucidique
