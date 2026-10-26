@@ -17,7 +17,8 @@
     ca: 'p-green', renin: 'p-red', angio: 'p-red', aldo: 'p-teal', k: 'p-violet', nai: 'p-amber', adre: 'p-red', nora: 'p-red2',
     insulin: 'p-blue2', glucagon: 'p-orange', glucose: 'p-lime', ffa: 'p-amber', ketone: 'p-red2', chylo: 'p-amber', vldl: 'p-gold',
     ldl: 'p-orange', hdl: 'p-teal', chol: 'p-gold', pcsk9: 'p-magenta', ldlr: 'p-teal', t4: 't4', t3: 't3', dot: 'accent',
-    angio1: 'p-red', calcitonin: 'tg'
+    angio1: 'p-red', calcitonin: 'tg',
+    gastrin: 'p-red2', cck: 'p-gold', secretin: 'p-teal', vip: 'p-magenta', ppol: 'p-violet', hplus: 'p-red', hco3: 'p-sky', enzyme: 'p-amber'
   };
 
   /* Fiches des hormones (d'après le polycopié) */

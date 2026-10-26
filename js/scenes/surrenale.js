@@ -237,7 +237,7 @@
   ];
 
   const def = HV.scene({
-    id: 'surrenale', parent: 'atlas', x: 608, y: 1168, scale: 0.24, loupe: 'Physiologie surrénalienne (axe corticotrope · SRAA)',
+    id: 'surrenale', parent: 'atlas', x: 360, y: 1168, scale: 0.24, loupe: 'Physiologie surrénalienne (axe corticotrope · SRAA)',
     title: 'Physiologie surrénalienne', level: 'Organe',
     lead: 'Du cholestérol aux trois familles de stéroïdes : aldostérone (zone glomérulée, sous angiotensine II et kaliémie), cortisol (zone fasciculée, sous ACTH) et androgènes surrénaliens (zone réticulée, sous ACTH). Choisissez un scénario pour voir les précurseurs s\'accumuler en amont d\'un bloc et les produits chuter en aval.',
     points: [
