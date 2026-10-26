@@ -35,18 +35,18 @@
       best: (x) => x.stop || x.form !== 'cp' },
     { id: 'calcium', icon: '🦴', title: 'Le calcium du rhumatologue', who: 'M. Roux, 67 ans, 82 kg', cfg: { sex: 'M', age: 67, weight: 82, r: 0 },
       pre: 'Thyroïdectomie totale pour cancer papillaire il y a 6 ans, lévothyroxine stable. TSH à 9 au bilan systématique.',
-      clue: 'Ostéoporose découverte cette année : carbonate de calcium 1 g et vitamine D, « avec le petit-déjeuner, comme le reste ». Il prend la lévothyroxine en même temps, pour ne pas oublier.',
-      meds: ['Lévothyroxine (avec le petit-déjeuner, en même temps que le calcium)', 'Carbonate de calcium 1 g + vitamine D3 depuis 5 mois', 'Alendronate 70 mg/semaine'],
+      clue: 'Ostéoporose découverte cette année : carbonate de calcium 1 g et vitamine D. Il prend tous ses comprimés ensemble au réveil, lévothyroxine comprise, « pour ne pas oublier ».',
+      meds: ['Lévothyroxine (au réveil, en même temps que le calcium)', 'Carbonate de calcium 1 g + vitamine D3 depuis 5 mois', 'Alendronate 70 mg/semaine'],
       drug: { name: 'carbonate de calcium', loss: 0.2, spaceResid: 0.08, liquidFix: 0.35, stoppable: false },
-      ago: 150, habit: 'repas', preTime: 'jeun30',
+      ago: 150, habit: 'jeun30',
       tests: { fer: 'ferritine 140 µg/L', ttg: 'anticorps anti-transglutaminase négatifs', b12: 'vitamine B12 normale', hp: 'test respiratoire négatif' },
       key: 'Sels de calcium : liaison à la LT4 dans l\'estomac. Conduite ETA : LT4 au moins 4 à 6 h avant (calcium le midi ou le soir), ou forme liquide ou capsule molle ; à jeun, à distance du petit-déjeuner (rec. 4, tableau 1). Le calcium reste indiqué.',
-      best: (x) => x.space && x.time !== 'repas' },
+      best: (x) => x.space || x.form !== 'cp' },
     { id: 'cafe', icon: '☕', title: 'L\'espresso du matin', who: 'M. Bernard, 45 ans, 80 kg', cfg: { sex: 'M', age: 45, weight: 80, r: 0.1 },
       pre: 'Hashimoto, TSH entre 5 et 8 depuis deux ans malgré des hausses de dose successives. « Je prends mon comprimé tous les matins, sans faute. »',
       clue: 'Il avale le comprimé avec son espresso, debout, à 6 h 30, avant de partir au travail : « Sans café, je ne démarre pas. » Pas de médicament, pas de trouble digestif.',
       meds: ['Lévothyroxine (avec le café du matin)'],
-      ago: 0, habit: 'cafe', doseMul: 1.05,
+      ago: 0, habit: 'cafe', eff: 0.8,
       tests: { ttg: 'anticorps anti-transglutaminase négatifs', fer: 'ferritine 160 µg/L', b12: 'vitamine B12 normale', hp: 'test respiratoire négatif' },
       key: 'Café : liaison à la LT4, absorption réduite d\'environ un quart. Conduite ETA : LT4 au moins 1 h avant le café (60 min avant le petit-déjeuner), ou au coucher ; la capsule molle n\'est pas gênée par le café (rec. 4, tableau 1).',
       best: (x) => x.time === 'jeun60' || x.time === 'coucher' || x.form === 'caps' },
@@ -55,7 +55,7 @@
       clue: 'Ballonnements, selles molles depuis des années, « c\'est le côlon irritable ». Elle est fatiguée, a des aphtes. Sa sœur a un diabète de type 1. Elle prend son comprimé correctement, à jeun.',
       meds: ['Lévothyroxine (à jeun, 30 min avant le petit-déjeuner)'],
       comorb: { name: 'maladie cœliaque', loss: 0.4, liquidFix: 0.85, cure: 'ssg', tau: 75 },
-      ago: 0, habit: 'jeun30', doseMul: 1.3,
+      ago: 0, habit: 'jeun30', eff: 0.68,
       tests: { ttg: 'anticorps anti-transglutaminase IgA 180 U/mL (N < 10), IgA totales normales : biopsies duodénales = atrophie villositaire totale', fer: 'ferritine 6 µg/L, anémie microcytaire', b12: 'folates bas, vitamine B12 normale', hp: 'test respiratoire négatif' },
       key: 'Maladie cœliaque (plus fréquente en cas d\'auto-immunité thyroïdienne) : atrophie villositaire, besoins jusqu\'à + 49 %. Conduite ETA : régime sans gluten, qui normalise les besoins ; il faut alors redescendre la dose, sinon surdosage (rec. 15, tableau 3).',
       best: (x) => x.cause === 'ssg' },
@@ -64,7 +64,7 @@
       clue: 'Épigastralgies, satiété précoce. Elle a été traitée par IPP « par périodes ». Pas de médicament en cours. Origine : née au Portugal, a vécu au Maroc.',
       meds: ['Lévothyroxine (à jeun, 30 min avant le petit-déjeuner)'],
       comorb: { name: 'gastrite à Helicobacter pylori', loss: 0.3, liquidFix: 0.3, cure: 'hp', tau: 40 },
-      ago: 0, habit: 'jeun30', doseMul: 1.15,
+      ago: 0, habit: 'jeun30', eff: 0.7,
       tests: { hp: 'test respiratoire à l\'urée positif ; gastroscopie : gastrite chronique active à H. pylori', b12: 'vitamine B12 normale, anticorps anti-cellules pariétales négatifs', ttg: 'anticorps anti-transglutaminase négatifs', fer: 'ferritine 18 µg/L' },
       key: 'Gastrite à H. pylori : alcalinisation du suc gastrique, dissolution du comprimé réduite. Conduite ETA : éradication (les besoins baissent ensuite : contrôler la TSH et réduire la dose) ; forme liquide ou capsule molle en attendant (rec. 15-16c, tableau 3).',
       best: (x) => x.cause === 'hp' || x.form !== 'cp' },
@@ -73,7 +73,7 @@
       clue: 'Il prend son comprimé à jeun, correctement. Petits repas fractionnés, compléments vitaminiques le soir. Diarrhées fréquentes.',
       meds: ['Lévothyroxine (à jeun, 30 min avant le petit-déjeuner)', 'Multivitamines, fer et calcium le soir'],
       comorb: { name: 'bypass gastrique (montage malabsorptif)', loss: 0.42, liquidFix: 0.3, cure: null },
-      ago: 0, habit: 'jeun30', doseMul: 1.25,
+      ago: 0, habit: 'jeun30', eff: 0.76,
       tests: { fer: 'ferritine 12 µg/L', b12: 'vitamine B12 basse (substitution à renforcer)', ttg: 'anticorps anti-transglutaminase négatifs', hp: 'non réalisable (estomac exclu)' },
       key: 'Chirurgie bariatrique : brassage, pH et vidange modifiés ; dans les montages malabsorptifs, les besoins peuvent tripler. Conduite ETA : forme liquide en première intention (rec. 16b-c), adapter la dose au poids qui baisse, TSH rapprochée.',
       best: (x) => x.form === 'liq' || x.form === 'caps' },
@@ -100,37 +100,40 @@
       clue: 'Aucun médicament, aucun trouble digestif. Il vit seul depuis une rupture, a perdu son travail. Sa mère, venue avec lui, glisse que « les boîtes s\'accumulent dans le placard ».',
       meds: ['Lévothyroxine (selon lui, tous les matins à jeun)'],
       pseudo: 0.4,
-      ago: 0, habit: 'jeun30', doseMul: 1.5,
+      ago: 0, habit: 'jeun30', eff: 0.62,
       tests: { ttg: 'anticorps anti-transglutaminase négatifs', fer: 'ferritine 120 µg/L', b12: 'vitamine B12 normale', hp: 'test respiratoire négatif', absorp: 'test d\'absorption : 1 000 µg de LT4 pris devant l\'infirmière ; T4L 6 → 34 pmol/L à 2 h et 39 à 4 h : absorption normale → pseudo-malabsorption' },
       key: 'Pseudo-malabsorption : la non-prise est la cause la plus fréquente de « résistance » à la lévothyroxine. Conduite ETA : au-delà de 1,5–1,7 µg/kg/j, rechercher l\'inobservance (rec. 2a) ; test d\'absorption chez les patients réfractaires (rec. 2b) ; prise hebdomadaire supervisée (7 fois la dose quotidienne, une fois par semaine) et prise en charge psychologique, puis dose ramenée à environ 1,6 µg/kg/j.',
       best: (x) => x.weekly }
   ];
 
-  // Fraction absorbée du jour, selon l'histoire et les choix en cours (x).
+  // Traduction de l'histoire et des choix en cours (x) en situation pour le moteur physiologique (js/simu/lt4-physio.js).
+  const PHYS = { ipp: 'ipp', calcium: 'calcium', coeliaque: 'celiac', hp: 'hp', bypass: 'bypass', pilule: 'estro', carba: 'carba' };
+  function presetOf(story, x, day) {
+    const items = {}, id = PHYS[story.id], on = (k) => { items[k] = { on: true, delay: 0 }; };
+    const active = day == null || !story.ago || day >= -story.ago;
+    if (id && active && !(x.stop && ((story.drug && story.drug.stoppable) || (story.need && story.need.stoppable)))) on(id);
+    let time = x.time || story.habit;
+    if (time === 'cafe') { on('coffee'); time = 'jeun30'; }
+    if (x.space) Object.keys(items).forEach((k) => { if (S.lt4physio.BY[k].at) items[k].delay = 4; });
+    return { form: x.form || 'cp', time, items };
+  }
+  const cache = {};
+  function relF(sc) { const P = S.lt4physio, k = JSON.stringify(sc); if (!(k in cache)) cache[k] = P.simulate(sc).F / P.simulate({ form: 'cp', time: 'jeun60', items: {} }).F; return cache[k]; }
+  // Fraction absorbée relative (1 = prise à jeun de référence), observance comprise.
   function absOf(story, x, day) {
-    let f = TIMES[x.time || story.habit][1];
-    if (x.form !== 'cp') f = Math.max(f, x.form === 'caps' ? 0.97 : 0.93); // forme non comprimée : moins sensible au moment et au café
-    const d = story.drug;
-    if (d && day >= -story.ago) {
-      let loss = d.loss;
-      if (x.stop && d.stoppable) loss = 0;
-      else { if (x.space) loss *= d.spaceResid; if (x.form !== 'cp') loss *= d.liquidFix; }
-      f *= 1 - loss;
-    }
-    const c = story.comorb;
-    if (c) {
-      let loss = c.loss;
-      if (c.cure && x.cause === c.cure && x.causeDay != null) loss *= Math.exp(-Math.max(0, day - x.causeDay) / c.tau);
-      if (x.form !== 'cp') loss *= c.liquidFix;
-      f *= 1 - loss;
+    const sc = presetOf(story, x, day);
+    let f = relF(sc);
+    const c = story.comorb, id = PHYS[story.id];
+    // Après traitement de la cause (régime sans gluten, éradication), l'effet de la maladie s'efface en quelques mois.
+    if (c && c.cure && x.cause === c.cure && x.causeDay != null && sc.items[id]) {
+      const off = JSON.parse(JSON.stringify(sc)); delete off.items[id];
+      const w = Math.exp(-Math.max(0, day - x.causeDay) / c.tau);
+      f = relF(off) + (f - relF(off)) * w;
     }
     if (story.pseudo) f *= x.weekly ? 0.96 : story.pseudo;
     return f;
   }
-  function needOf(story, x, day) {
-    const n = story.need;
-    return n && day >= -story.ago && !(x.stop && n.stoppable) ? n.N : 1;
-  }
+  function needOf(story, x, day) { return S.lt4physio.systemic(presetOf(story, x, day)).need; }
 
   const TESTS = [['ttg', 'Anti-transglutaminase'], ['fer', 'Ferritine'], ['b12', 'B12, anti-cellules pariétales'], ['hp', 'Recherche d\'H. pylori'], ['absorp', 'Test d\'absorption LT4']];
   function qual(story, k) { return story.tests[k] || 'normal'; }
@@ -149,5 +152,5 @@
     return { ok, months, n: tshs.length, over };
   }
 
-  S.lt4hard = { STORIES, TIMES, FORMS, CAUSES, TESTS, absOf, needOf, qual, debrief };
+  S.lt4hard = { presetOf, STORIES, TIMES, FORMS, CAUSES, TESTS, absOf, needOf, qual, debrief };
 })();

@@ -66,6 +66,7 @@
 
   let cfg = Object.assign({ sit: 'hashi', sex: 'F', age: 46, weight: 75, start: 40, variab: 'moyen' }, BASE_CFG);
   let G = null;
+  const physioFree = {};
 
   function h(tag, attrs, kids) {
     const e = document.createElement(tag);
@@ -170,8 +171,17 @@
     const sel = (id, val, opts, on) => h('select', { id, onchange: (e) => on(e.target.value) }, opts.map(([k, t]) => h('option', { value: k, selected: String(val) === String(k) }, t)));
     const pregOK = cfg.sex === 'F' && (cfg.sit === 'hashi' || cfg.sit === 'thyro' || cfg.sit === 'central');
     const modeBar = h('section', { class: 'sv-card sv-gamecfg', id: 'sbModeBar' }, [
-      h('div', { class: 'sv-games' }, [['libre', '🩺', 'Patient libre', 'Créez un patient, prescrivez, dosez.'], ['difficile', '🧩', 'Hypothyroïdie difficile à substituer', 'Neuf histoires : médicament, aliment, maladie ou observance qui fait remonter la TSH (ETA 2025).']].map(([k, ic, t, sub]) => h('button', { type: 'button', class: 'sv-gamebtn' + ((cfg.mode || 'libre') === k ? ' on' : ''), id: 'sbMode-' + k, onclick: () => { cfg.mode = k; setup(); } }, [h('span', { class: 'sv-game-ic', 'aria-hidden': 'true' }, ic), h('strong', null, t), h('span', null, sub)])))
+      h('div', { class: 'sv-games' }, [['libre', '🩺', 'Patient libre', 'Créez un patient, prescrivez, dosez.'], ['difficile', '🧩', 'Hypothyroïdie difficile à substituer', 'Neuf histoires : médicament, aliment, maladie ou observance qui fait remonter la TSH (ETA 2025).'], ['physio', '🔬', 'Physiologie de la LT4', 'Composez librement toutes les situations de l\'ETA et voyez l\'absorption, minute par minute.']].map(([k, ic, t, sub]) => h('button', { type: 'button', class: 'sv-gamebtn' + ((cfg.mode || 'libre') === k ? ' on' : ''), id: 'sbMode-' + k, onclick: () => { cfg.mode = k; setup(); } }, [h('span', { class: 'sv-game-ic', 'aria-hidden': 'true' }, ic), h('strong', null, t), h('span', null, sub)])))
     ]);
+    if (cfg.mode === 'physio' && S.lt4physio) {
+      main.append(
+        h('section', { class: 'sv-intro' }, [h('p', { class: 'sv-eyebrow' }, 'Physiologie de la lévothyroxine'), h('h1', null, 'Du comprimé à la TSH.'), h('p', { class: 'sv-lead' }, 'Dissolution dans l\'estomac, vidange, absorption intestinale, liaison à la TBG, catabolisme, rétrocontrôle : cochez les aliments, médicaments, maladies et situations des tableaux de l\'ETA 2025, choisissez le délai de chaque prise, la forme et le moment de la lévothyroxine.')]),
+        modeBar,
+        S.lt4physio.card({ h, state: physioFree })
+      );
+      window.scrollTo(0, 0);
+      return;
+    }
     if (cfg.mode === 'difficile' && LH) {
       main.append(
         h('section', { class: 'sv-intro' }, [h('p', { class: 'sv-eyebrow' }, 'Hypothyroïdie difficile à substituer'), h('h1', null, 'La TSH remonte. Pourquoi ?'), h('p', { class: 'sv-lead' }, 'Un patient jusque-là équilibré, ou qui « résiste » à la lévothyroxine. Interrogez-le, demandez les examens utiles, agissez sur la cause : moment de la prise, espacement, médicament en cause, forme liquide ou capsule molle, traitement d\'une maladie digestive, observance. Monter la dose à l\'aveugle marche parfois… jusqu\'au surdosage.')]),
@@ -243,7 +253,7 @@
     const snap = (v) => LT4_STRENGTHS.reduce((a, x) => (Math.abs(x - v) < Math.abs(a - v) ? x : a));
     const xPre = { time: story.preTime || story.habit, form: 'cp', space: false, stop: false, cause: 'none', weekly: false, causeDay: null };
     const pre = LH.absOf(story, xPre, -story.ago - 1);
-    const D0 = snap(Math.min(300, story.ago > 0 ? dEq / pre : dEq * (story.doseMul || 1)));
+    const D0 = snap(Math.min(300, story.ago > 0 ? dEq / pre : dEq * (story.eff || 0.8) / LH.absOf(story, Object.assign({}, xPre), 0)));
     const x0 = Object.assign({}, xPre, { time: story.habit });
     const pt = M.create({ par, rx0: { lt4: D0, lt4Abs: pre } });
     pt.rx.lt4Text = fmt(D0, D0 % 1 ? 1 : 0) + ' µg/j';
@@ -259,6 +269,13 @@
     AE.init(G);
     doLabs(new Set(['tsh', 't4']), 'Consultation');
     render();
+  }
+  // Situation de l'histoire et choix en cours, traduits pour le module de physiologie (js/simu/lt4-physio.js).
+  function hardPreset() {
+    const H = G.hard, s = H.s, x = H.cur, sc = LH.presetOf(s, x, G.pt.day);
+    const c = s.comorb;
+    if (c && c.cure && x.cause === c.cure && x.causeDay != null && G.pt.day - x.causeDay > 2 * c.tau) sc.items = {};
+    return { sc, pat: { weight: G.cfg.weight, r: G.hidden.r > 0.15 ? 0.25 : G.hidden.r > 0 ? 0.1 : 0, dose: [25, 50, 75, 88, 100, 112, 125, 137, 150, 175, 200, 225, 250, 300].reduce((a, v) => (Math.abs(v - G.pt.rx.lt4) < Math.abs(a - G.pt.rx.lt4) ? v : a)), adh: s.pseudo && !x.weekly ? Math.round(s.pseudo * 100) : 100 } };
   }
   function hardLabel(x) {
     const t = [LH.TIMES[x.time][0].toLowerCase()];
@@ -491,8 +508,9 @@
     const H = G.hard, s = H.s;
     const parts = [h('p', { class: 'sv-eyebrow' }, s.icon + ' Hypothyroïdie difficile à substituer'), h('h3', null, s.title + ' · ' + s.who), h('p', { class: 'sv-storytext' }, s.pre),
       h('p', { class: 'sv-storygoal' }, [h('b', null, '🎯 Objectif : '), 'TSH entre 0,4 et 4 mUI/L (idéalement 0,5–2,5) à deux bilans successifs, en traitant la cause plutôt qu\'en montant la dose à l\'aveugle.'])];
-    if (!H.asked) parts.push(h('div', { class: 'sv-actions' }, h('button', { type: 'button', class: 'sv-primary', id: 'sbAsk', onclick: () => { H.asked = true; render(); } }, '🗣 Interroger le patient')));
-    else parts.push(h('div', { class: 'sv-ask' }, [h('p', null, [h('b', null, 'Interrogatoire : '), s.clue]), h('p', null, h('b', null, 'Traitements et prise :')), h('ul', null, s.meds.map((m) => h('li', null, m)))]));
+    parts.push(h('div', { class: 'sv-actions' }, [H.asked ? null : h('button', { type: 'button', class: 'sv-primary', id: 'sbAsk', onclick: () => { H.asked = true; render(); } }, '🗣 Interroger le patient'),
+      S.lt4physio ? h('button', { type: 'button', class: 'sv-secondary', id: 'sbPhysio', onclick: () => { H.physio = H.physio ? null : {}; render(); } }, H.physio ? 'Fermer la physiologie' : '🔬 Physiologie de l\'absorption') : null]));
+    if (H.asked) parts.push(h('div', { class: 'sv-ask' }, [h('p', null, [h('b', null, 'Interrogatoire : '), s.clue]), h('p', null, h('b', null, 'Traitements et prise :')), h('ul', null, s.meds.map((m) => h('li', null, m)))]));
     if (H.won) {
       const r = LH.debrief(G);
       parts.push(h('div', { class: 'sv-storycard done' }, [h('h3', null, '✅ TSH normalisée en ' + r.months + ' mois (' + r.n + ' bilans)'),
@@ -500,6 +518,7 @@
         h('p', null, [h('b', null, 'À retenir : '), s.key]),
         h('div', { class: 'sv-actions' }, h('button', { type: 'button', class: 'sv-secondary', onclick: () => { cfg.mode = 'difficile'; setup(); } }, 'Autre histoire'))]));
     }
+    if (H.physio && S.lt4physio) parts.push(S.lt4physio.card({ h, state: H.physio, preset: hardPreset(), onClose: () => { H.physio = null; render(); } }));
     return h('div', { class: 'sv-card sv-storycard', id: 'sbHard' }, parts);
   }
 
