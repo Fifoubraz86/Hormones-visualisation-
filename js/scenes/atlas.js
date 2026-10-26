@@ -70,8 +70,8 @@
       gland(800, 264, 9, 't4', 'foll', 'Thyroïde', 'start', 'thyroid');
       gland(786, 258, 3, 'tg', 'phospho', null, null, 'parathyroid');
       gland(814, 258, 3, 'tg', 'phospho', null, null, 'parathyroid');
-      gland(764, 352, 4, 'trab', 'lacto');
-      gland(836, 352, 4, 'trab', 'lacto');
+      gland(764, 352, 4, 'trab', 'lacto', null, null, 'breast');
+      gland(836, 352, 4, 'trab', 'lacto', 'Seins', 'start', 'breast');
       gland(761, 452, 5, 't3', 'cortico', null, null, 'adrenal');
       gland(839, 452, 5, 't3', 'cortico', 'Surrénales', 'start', 'adrenal');
       gland(760, 474, 5, 'tbg', 'raa', null, null, 'kidney');

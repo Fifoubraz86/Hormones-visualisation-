@@ -23,15 +23,36 @@
       samples: [{ x: 0.06, label: 'T0' }, { x: 0.55, label: '30 min' }, { x: 1, label: '60 min' }],
       apply(p, x) { if (x > 0.08) p.syn = 6; },
       measure: (sim) => sim.lab('cort'),
-      interpret(v, sim) {
+      interpret(v, sim, st) {
         // Seules les valeurs prélevées aux temps du protocole comptent (T0, 30 et 60 min).
         const peak = Math.max(...v);
         // Bloc en 21-hydroxylase : le test sert surtout à doser la 17-OHP stimulée (polycopié p. 82).
         const b21 = sim.p && sim.p.cyp21 < 0.9;
         const ohp = b21 ? ` 17-OHP après stimulation : ${sim.lab('ohp').toFixed(1).replace('.', ',')} × N : élévation en faveur d'un bloc en 21-hydroxylase (polycopié p. 82).` : '';
+        // Insuffisance corticotrope récente : surrénales pas encore atrophiées, réponse faussement normale (polycopié p. 61).
+        const recent = (st && st.base && st.base.recent) || (v[0] < 275 && sim.lab('acth') < 20);
+        if (peak >= 500 && recent) return { tone: 'warn', text: `Cortisol maximal sur les prélèvements : ${n0(peak)} nmol/L (≥ 500 nmol/L) : réponse faussement rassurante. Cortisol de base bas (${n0(v[0])} nmol/L) avec une ACTH basse : une insuffisance corticotrope récente est possible, les surrénales ne sont pas encore atrophiées et répondent encore à l'ACTH exogène (polycopié p. 61). Le test au Synacthène ne l'exclut pas : hypoglycémie insulinique, qui explore tout l'axe, ou nouveau test à distance (complément).` };
         if (peak >= 500) return { tone: b21 ? 'warn' : 'good', text: `Cortisol maximal sur les prélèvements : ${n0(peak)} nmol/L (≥ 500 nmol/L, 18 µg/dL) : réponse normale. Une insuffisance surrénale est éliminée (sauf insuffisance corticotrope récente, avant l'atrophie surrénalienne).` + ohp };
         const acth = sim.lab('acth') > 52; // ACTH endogène (le Synacthène n'est pas dosé comme ACTH)
         return { tone: 'bad', text: `Cortisol maximal sur les prélèvements : ${n0(peak)} nmol/L (< 500) : réponse insuffisante. ` + (acth ? (b21 ? 'Avec une ACTH élevée : insuffisance surrénale périphérique, ici par bloc en 21-hydroxylase.' : 'Avec une ACTH élevée : insuffisance surrénale périphérique.') : 'Avec une ACTH basse ou normale : insuffisance corticotrope ancienne, avec atrophie surrénalienne.') + ohp };
+      }
+    },
+    {
+      id: 'synacthene-17ohp', name: 'Synacthène : 17-OHP', poly: true,
+      what: 'Recherche un bloc en 21-hydroxylase non classique devant une hyperandrogénie : la 17-OHP s\'élève-t-elle anormalement sous ACTH (polycopié p. 82) ?',
+      proto: '250 µg de tétracosactide (ACTH 1-24) IV ou IM ; 17-OHP à T0 et à 60 min. Valeurs relatives (× N) ; en pratique, une 17-OHP stimulée > 10 ng/mL (≈ 30 nmol/L) est en faveur du bloc (complément, Endocrine Society 2018).',
+      unit: '× N', label: '17-OHP', thr: 5, thrDir: 'below', thrLabel: 'seuil pédagogique 5 × N (valeur relative)',
+      span: 60, xUnit: 'min', duration: 14,
+      samples: [{ x: 0.06, label: 'T0' }, { x: 1, label: '60 min' }],
+      apply(p, x) { if (x > 0.08) p.syn = 6; },
+      measure: (sim) => sim.lab('ohp'),
+      interpret(v, sim) {
+        const f = (x) => x.toFixed(1).replace('.', ',');
+        const base = v[0], peak = Math.max(...v);
+        if (peak < 0.67) return { tone: 'warn', text: `17-OHP basse et non stimulable (${f(peak)} × N) : la corticosurrénale ne répond pas (insuffisance surrénale ou atrophie) ; le test n'apporte rien pour un bloc enzymatique.` };
+        if (peak < 5) return { tone: 'good', text: `17-OHP : ${f(base)} × N à T0, ${f(peak)} × N après stimulation : réponse normale, un bloc en 21-hydroxylase non classique est peu probable.` };
+        if (base > 20 && sim.lab('cort') < 275) return { tone: 'bad', text: `17-OHP déjà très élevée à T0 (${f(base)} × N), cortisol bas : bloc en 21-hydroxylase classique ; le test n'est pas nécessaire (dépistage néonatal à J3, polycopié p. 81).` };
+        return { tone: 'bad', text: `17-OHP : ${f(base)} × N à T0, ${f(peak)} × N après stimulation : élévation anormale, en faveur d'un bloc en 21-hydroxylase non classique (polycopié p. 82). Confirmation par l'étude du gène CYP21A2 (complément).` };
       }
     },
     {
@@ -154,7 +175,7 @@
       interpret(v) {
         const g0 = v[0], g2 = v[v.length - 1], f = (x) => x.toFixed(2).replace('.', ',');
         // Glycémie à jeun basse : l'HGPO n'est pas l'examen adapté (normale à jeun 0,80–1,10 g/L ; hypoglycémie < 0,50 g/L hors diabète, polycopié partie 2 p. 32 et 66).
-        if (g0 < 0.7) return { tone: 'bad', text: `À jeun : ${f(g0)} g/L : glycémie basse (hypoglycémie si < 0,50 g/L hors diabète). L'HGPO n'est pas l'examen adapté : rechercher une hypoglycémie organique (triade de Whipple, épreuve de jeûne).` };
+        if (g0 < 0.7) return { tone: 'bad', text: `À jeun : ${f(g0)} g/L : glycémie basse (hypoglycémie si < 0,50 g/L hors diabète). À 2 h : ${f(g2)} g/L. L'HGPO standard n'est pas l'examen adapté : rechercher une hypoglycémie organique (triade de Whipple, épreuve de jeûne) ; l'HGPO prolongée sur 5 heures montre la chute tardive de la glycémie après le pic.` };
         // On classe d'abord sur la glycémie à jeun, puis à 2 h ; on retient la catégorie la plus haute (polycopié, tableau 8).
         const c0 = g0 >= 1.26 ? 3 : g0 >= 1.1 ? 1 : 0;
         const c2 = g2 >= 2 ? 3 : g2 >= 1.4 ? 2 : 0;
@@ -167,6 +188,23 @@
         if (c === 2) return { tone: 'warn', text: head + 'Conclusion : intolérance au glucose (prédiabète)' + (c0 === 1 ? ', avec hyperglycémie modérée à jeun.' : '.') };
         if (c === 1) return { tone: 'warn', text: head + 'Conclusion : hyperglycémie modérée à jeun (prédiabète).' };
         return { tone: 'good', text: head + 'Conclusion : tolérance normale au glucose.' };
+      }
+    },
+    {
+      id: 'hgpo5', name: 'HGPO prolongée sur 5 heures', poly: true,
+      what: 'Recherche une hypoglycémie post-stimulative : la glycémie descend-elle sous 0,50 g/L dans les heures qui suivent la charge (polycopié, partie 2 p. 70) ?',
+      proto: '75 g de glucose per os à jeun ; glycémie toutes les heures pendant 5 heures (polycopié, partie 2 p. 70 ; rythme des prélèvements : complément).',
+      unit: 'g/L', label: 'Glycémie', thr: 0.5, thrDir: 'above', thrLabel: 'hypoglycémie < 0,50 g/L',
+      span: 300, xUnit: 'min', duration: 26,
+      samples: [{ x: 0.02, label: 'T0' }, { x: 0.2, label: '60' }, { x: 0.4, label: '120' }, { x: 0.6, label: '180' }, { x: 0.8, label: '240' }, { x: 1, label: '300' }],
+      apply(p, x) { p.fast = 1; const u = (x - 0.03) / 0.14; p.ogtt = u > 0 ? u * Math.exp(1 - u) : 0; /* absorption digestive */ },
+      measure: (sim) => sim.lab('g'),
+      interpret(v, sim) {
+        const f = (x) => x.toFixed(2).replace('.', ','), g0 = v[0];
+        const late = v.slice(2), m = Math.min(...late), at = [120, 180, 240, 300][late.indexOf(m)];
+        if (sim.p && sim.p.exo > 0.05) return { tone: 'warn', text: 'Examen non indiqué chez le diabétique traité par insuline : l\'hypoglycémie est iatrogène (polycopié, partie 2 p. 70).' };
+        if (m < 0.5) return { tone: 'bad', text: `Hypoglycémie tardive à ${f(m)} g/L (${at} min) après la charge` + (g0 < 0.7 ? `, avec une glycémie déjà basse à jeun (${f(g0)} g/L) : la sécrétion d'insuline, autonome, se prolonge après le pic glycémique. Évoque un hyperinsulinisme organique (insulinome) : épreuve de jeûne avec insuline et peptide C (complément).` : ' : hypoglycémie post-stimulative ; à confronter aux symptômes (triade de Whipple, polycopié partie 2 p. 72).') };
+        return { tone: 'good', text: `Glycémie minimale ${f(m)} g/L entre 2 et 5 heures : pas de glycémie inférieure à 0,50 g/L (polycopié, partie 2 p. 70).` };
       }
     },
     {
@@ -260,6 +298,51 @@
     }
   ].concat(T.adh_situations);
   delete T.adh_situations;
+  /* Axe gonadotrope masculin : tests hors polycopié (complément), textes nuancés comme dans docs/tests-dynamiques.md. */
+  const f1g = (v) => v.toFixed(1).replace('.', ',');
+  T.gonadoM = [
+    {
+      id: 'gnrh', name: 'Test à la GnRH', poly: false,
+      what: 'Les cellules gonadotropes répondent-elles à une injection de GnRH ? Utile surtout chez l\'enfant (puberté précoce centrale) ; chez l\'adulte, il ne précise pas le niveau d\'un déficit gonadotrope.',
+      proto: 'Gonadoréline (GnRH) 100 µg IV ; LH et FSH à T0, 30, 60 et 90 min (complément, non détaillé dans le polycopié ; protocoles et seuils variables selon les centres).',
+      unit: 'UI/L', label: 'LH', thrFn: (st) => (st.values.length ? st.values[0] * 3 : null), thrDir: 'above', thrLabel: 'réponse indicative : LH × 3 au pic (complément)',
+      span: 90, xUnit: 'min', duration: 14,
+      samples: [{ x: 0.04, label: 'T0' }, { x: 0.34, label: '30' }, { x: 0.67, label: '60' }, { x: 1, label: '90' }],
+      apply(p, x) { if (x > 0.06) p.gnrh = 3 * Math.exp(-(x - 0.06) / 0.3); }, // bolus IV, éliminé en quelques minutes
+      measure: (sim) => {
+        const st = HV.Tests.state();
+        if (st && !st.trace.length) st.fsh0 = sim.lab('fsh');
+        if (st) st.fshMax = Math.max(st.fshMax || 0, sim.lab('fsh'));
+        return sim.lab('lh');
+      },
+      interpret(v, sim, st) {
+        const lh0 = v[0], peak = Math.max(...v.slice(1)), r = peak / Math.max(lh0, 0.05);
+        const fsh = st && st.fsh0 != null ? ` ; FSH de ${f1g(st.fsh0)} à ${f1g(st.fshMax)} UI/L` : '';
+        const head = `LH de ${f1g(lh0)} à ${f1g(peak)} UI/L au pic (× ${f1g(r)})${fsh}. `;
+        if (st.base.exoT > 0.05) return { tone: 'warn', text: head + 'Axe freiné par des androgènes exogènes : le test n\'est pas interprétable. Arrêter les androgènes puis réévaluer l\'axe (complément).' };
+        if (lh0 > 9) return { tone: 'warn', text: head + 'LH déjà élevée à l\'état basal : hypogonadisme primaire (testiculaire). Le test n\'apporte rien : le dosage de base de la testostérone, de la LH et de la FSH suffit (polycopié, partie 2, p. 10).' };
+        if (r >= 3) return { tone: 'good', text: head + 'Réponse franche : les cellules gonadotropes sont fonctionnelles. Une réponse normale n\'élimine pas un déficit d\'origine hypothalamique (complément).' };
+        return { tone: 'bad', text: head + 'Réponse faible : déficit gonadotrope, sans en préciser le niveau. Après une longue privation en GnRH, une hypophyse intacte peut répondre peu ; le test distingue mal le retard pubertaire simple du déficit congénital (complément).' };
+      }
+    },
+    {
+      id: 'hcg', name: 'Test à l\'hCG', poly: false,
+      what: 'Les cellules de Leydig répondent-elles à une stimulation de type LH ? Utile surtout chez l\'enfant (cryptorchidie, anomalie de la différenciation sexuelle) ; chez l\'adulte, testostérone et LH de base suffisent le plus souvent.',
+      proto: 'hCG en IM (agit sur le récepteur de la LH) ; testostérone avant puis à J3 (ou J5 selon le protocole) (complément, non détaillé dans le polycopié ; doses et seuils variables selon l\'âge et les centres).',
+      unit: 'nmol/L', label: 'Testostérone', thrFn: (st) => (st.values.length ? st.values[0] * 2 : null), thrDir: 'above', thrLabel: 'hausse indicative : testostérone × 2 (complément)',
+      span: 72, xUnit: 'h', duration: 14,
+      samples: [{ x: 0.04, label: '0 h' }, { x: 0.34, label: '24 h' }, { x: 0.67, label: '48 h' }, { x: 1, label: '72 h' }],
+      apply(p, x) { if (x > 0.06) p.hcg = 2; }, // demi-vie longue : stimulation soutenue sur 72 h
+      measure: (sim) => sim.lab('tt'),
+      interpret(v, sim, st) {
+        const t0 = v[0], t3 = v[v.length - 1], r = t3 / Math.max(t0, 0.1);
+        const head = `Testostérone de ${f1g(t0)} à ${f1g(t3)} nmol/L (× ${f1g(r)}). `;
+        if (st.base.exoT > 0.05) return { tone: 'warn', text: head + 'Sous testostérone exogène, le dosage mêle hormone injectée et production testiculaire : test non interprétable (complément).' };
+        if (r >= 2) return { tone: 'good', text: head + 'Hausse franche : cellules de Leydig fonctionnelles.' + (sim.lab('lh') < 9 && st.base.hypo < 0.5 ? ' Avec des gonadotrophines basses, l\'atteinte est située en amont (hypothalamo-hypophysaire).' : '') + ' (Complément.)' };
+        return { tone: 'bad', text: head + 'Hausse faible : réserve des cellules de Leydig diminuée, en faveur d\'une atteinte testiculaire (complément). Après une longue privation en LH, la réponse peut aussi être retardée : une stimulation prolongée est parfois nécessaire (complément).' };
+      }
+    }
+  ];
   HV.TESTS = T;
 
   /* ---------------- Moteur ---------------- */

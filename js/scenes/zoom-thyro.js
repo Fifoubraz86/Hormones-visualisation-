@@ -54,7 +54,7 @@
     'zt-pyr': { t: 'Pyramide de Lalouette', k: 'Lobe pyramidal · polycopié p. 6', d: 'L\'isthme comporte parfois un vestige embryonnaire, la pyramide de l\'alouette (polycopié p. 6) : reliquat de la partie basse du canal thyréoglosse (complément).' },
     'zt-hyoid': { t: 'Os hyoïde', k: 'Repère du trajet du canal (complément)', d: 'Le canal thyréoglosse passe à son contact : l\'exérèse d\'un kyste du tractus emporte la partie moyenne de l\'os hyoïde (complément).' },
     'zt-pouch': { t: 'Poches pharyngées (endobranchiales)', k: 'Endoderme · polycopié p. 33', d: 'Les parathyroïdes sont d\'origine endodermique : la 3e poche donne les parathyroïdes inférieures (P3) et le thymus, la 4e poche les parathyroïdes supérieures (P4) (polycopié p. 33, figure 10).' },
-    'zt-p3': { t: 'Parathyroïde inférieure (P3)', k: '3e poche · polycopié p. 33-34', d: 'Elle naît avec le thymus de la 3e poche et descend avec lui : elle termine plus bas que P4. Elle est à la face postérieure du pôle inférieur du lobe, en dehors du récurrent, mais peut être dans le médiastin supérieur (40 % des cas) (p. 34).' },
+    'zt-p3': { t: 'Parathyroïde inférieure (P3)', k: '3e poche · polycopié p. 33-34', d: 'Elle naît avec le thymus de la 3e poche et descend avec lui : elle termine plus bas que P4. Elle est à la face postérieure du pôle inférieur du lobe, en dehors du récurrent, mais peut être dans le médiastin supérieur (40 % des cas selon le polycopié, p. 34 ; fréquence variable selon les séries, complément).' },
     'zt-p4': { t: 'Parathyroïde supérieure (P4)', k: '4e poche · polycopié p. 33-34', d: 'Derrière le pôle supérieur du lobe thyroïdien, à hauteur du cartilage cricoïde ; elle peut se placer en arrière du récurrent, au contact de l\'œsophage (p. 34).' },
     'zt-thymus': { t: 'Thymus', k: '3e poche · polycopié p. 33', d: 'Issu de la 3e poche avec P3, il descend dans le médiastin et entraîne P3 vers le bas (migration lors de la flexion cervicale, figure 10).' },
     'zt-ub': { t: 'Corps ultimobranchial', k: 'Issu de la 4e poche (complément)', d: 'Il fusionne avec la face postérieure des lobes thyroïdiens et y apporte les cellules C (parafolliculaires), qui dérivent de la crête neurale (complément).' },
@@ -123,7 +123,7 @@
     lead: 'La thyroïde a deux origines. L\'ébauche médiane naît du plancher du pharynx, au foramen caecum de la langue, et descend dans le cou le long du canal thyréoglosse : elle donne les thyréocytes. Les poches pharyngées donnent les parathyroïdes (3e et 4e poches), le thymus et le corps ultimobranchial, qui apporte les cellules C (complément, sauf parathyroïdes : polycopié p. 33).',
     points: [
       'Parathyroïdes d\'origine endodermique : 3e poche → parathyroïdes inférieures (P3) et thymus ; 4e poche → parathyroïdes supérieures (P4) (polycopié p. 33, figure 10).',
-      'P3 naît plus haut que P4 mais, entraînée par le thymus, termine plus bas : elle peut être dans le médiastin supérieur (40 % des cas, p. 34).',
+      'P3 naît plus haut que P4 mais, entraînée par le thymus, termine plus bas : elle peut être dans le médiastin supérieur (40 % des cas, p. 34 ; fréquence variable selon les séries, complément).',
       'Arrêt de la descente : thyroïde linguale ; persistance du canal : kyste du tractus thyréoglosse ; reliquat bas : pyramide de Lalouette (p. 6) (complément pour le mécanisme).',
       'Cellules C (calcitonine) : apportées par le corps ultimobranchial (complément).'
     ],
@@ -223,7 +223,8 @@
       a.text(1222, 756, 'P4 : derrière le pôle supérieur,', 'note strong', { attrs: { 'data-info': 'zt-p4' } });
       a.text(1222, 778, 'hauteur du cricoïde (p. 34)', 'note');
       a.text(1222, 900, 'P3 : pôle inférieur, ou', 'note strong', { attrs: { 'data-info': 'zt-p3' } });
-      a.text(1222, 922, 'médiastin sup. (40 %, p. 34)', 'note');
+      a.text(1222, 922, 'médiastin sup. (40 %*, p. 34)', 'note');
+      a.text(1222, 944, '* variable selon les séries (complément)', 'note');
       a.text(956, 972, 'thymus → médiastin', 'note', { attrs: { 'data-info': 'zt-thymus' } });
 
       /* ---------- Animation (cycle de 12 s) ---------- */
@@ -259,7 +260,7 @@
         { t: 'La descente le long du canal thyréoglosse', d: 'L\'ébauche descend en avant du pharynx, passe au contact de l\'os hyoïde et du larynx, et se place devant la trachée vers la 7e semaine (ordre de grandeur, complément).', spot: [[430, 520, 260]] },
         { t: 'Les anomalies de la descente', d: 'Arrêt en haut : thyroïde linguale. Canal persistant : kyste du tractus thyréoglosse, masse médiane qui monte à la protraction de la langue. Reliquat bas : pyramide de Lalouette (p. 6) (complément pour le mécanisme).', spot: [[472, 290, 50], [380, 548, 60], [392, 715, 50]] },
         { t: 'Les poches pharyngées', d: 'La 3e poche donne les parathyroïdes inférieures (P3) et le thymus, la 4e les parathyroïdes supérieures (P4) (polycopié p. 33, figure 10).', spot: [[960, 512, 150]] },
-        { t: 'Le croisement de P3 et P4', d: 'Entraînée par le thymus, P3 descend plus bas que P4 : elle finit au pôle inférieur, voire dans le médiastin supérieur (40 %) ; P4 reste au pôle supérieur, à hauteur du cricoïde (p. 34).', spot: [[1180, 830, 170]] },
+        { t: 'Le croisement de P3 et P4', d: 'Entraînée par le thymus, P3 descend plus bas que P4 : elle finit au pôle inférieur, voire dans le médiastin supérieur (40 % selon le polycopié ; fréquence variable selon les séries, complément) ; P4 reste au pôle supérieur, à hauteur du cricoïde (p. 34).', spot: [[1180, 830, 170]] },
         { t: 'Les cellules C', d: 'Le corps ultimobranchial, issu de la 4e poche, fusionne avec le lobe et y apporte les cellules C, qui sécrètent la calcitonine (p. 7) ; leur origine est la crête neurale (complément).', spot: [[1140, 805, 90]] }
       ]);
     }

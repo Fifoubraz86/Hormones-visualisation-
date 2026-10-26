@@ -83,6 +83,7 @@
     { id: 'lt4x', name: 'Surdosage en lévothyroxine', note: 'Excès de T4 exogène : TSH effondrée, thyrotoxicose iatrogène (sans hyperthyroïdie).', p: { thy: 0.12, levo: 2 } },
     { id: 'graves', name: 'Maladie de Basedow', note: 'Les TRAb stimulent le récepteur de la TSH sans rétrocontrôle possible.', p: { trab: 1.5 } },
     { id: 'nodule', name: 'Adénome toxique', note: 'Un nodule autonome sécrète indépendamment de la TSH, qui s\'effondre.', p: { auto: 1.6 } },
+    { id: 'tsho', name: 'Adénome thyréotrope', note: 'Adénome hypophysaire sécrétant de la TSH, non freinée par le rétrocontrôle : TSH normale ou élevée, inadaptée, avec T4L et T3L élevées. Hyperthyroïdie centrale rare, signes souvent plus modérés (polycopié p. 24, 30, 59).', p: { tsho: 2.5 } },
     { id: 'central', name: 'Hypothyroïdie centrale', note: 'Insuffisance hypophysaire : T4L basse avec une TSH normale ou basse, inadaptée.', p: { pit: 0.08 } },
     { id: 'iodine', name: 'Carence iodée', note: 'La TSH stimule la glande qui grossit (goitre) et privilégie la T3 (complément).', p: { iodine: 0.12 } },
     { id: 'nti', name: 'Syndrome de basse T3', note: 'Maladie aiguë ou chronique sévère : syndrome de basse T3L lié au stress somatique, sans dysfonction thyroïdienne (polycopié p. 22). Mécanisme : moins de conversion T4 → T3, plus de T3 reverse (complément).', p: { d12: 0.45, d3: 2.2, hypo: 0.75 } }
@@ -101,11 +102,13 @@
 
   function interpret() {
     const tsh = lab('tsh'), t4 = lab('t4'), t3 = lab('t3'), rt3 = lab('rt3');
+    // TSH non freinée (normale ou élevée) avec T4L élevée : TSH inadaptée (polycopié p. 59).
+    if (tsh >= 0.4 && t4 > 22) return { tone: 'bad', label: 'TSH non freinée, T4L élevée', text: 'TSH ' + (tsh > 4 ? 'élevée' : 'normale') + ', donc inadaptée, face à une T4L élevée : évoquer un adénome thyréotrope (hyperthyroïdie centrale, polycopié p. 24, 30, 59) et demander une IRM hypophysaire. Diagnostic différentiel : résistance aux hormones thyroïdiennes (complément), après avoir écarté une interférence de dosage ou une prise récente de LT4 (complément).' };
     if (tsh > 4) {
       // Garde-fou : une hypophyse lésée peut sécréter une TSH peu active, modérément élevée (complément).
       if (t4 < 8 && tsh < 10) return { tone: 'warn', label: 'T4L très basse, TSH peu élevée', text: 'Une TSH à peine élevée (< 10 mUI/L) face à une T4L très basse est inadaptée : évoquer aussi une origine centrale, l\'hypophyse lésée sécrétant une TSH moins active (complément). IRM hypophysaire et bilan des autres axes si le contexte s\'y prête.' };
       if (t4 < 12) return { tone: 'bad', label: 'Hypothyroïdie primaire', text: 'TSH élevée et T4L basse : la thyroïde ne suit plus, l\'hypophyse compense.' };
-      if (tsh > 10) return { tone: 'warn', label: 'TSH > 10 mUI/L, T4L normale', text: 'Au-delà du seuil de l\'hypothyroïdie infraclinique (TSH 4–10 mUI/L) : hypothyroïdie à confirmer sur un 2ᵉ dosage, le plus souvent traitée (complément).' };
+      if (tsh >= 10) return { tone: 'warn', label: 'Hypothyroïdie infraclinique sévère', text: 'TSH ≥ 10 mUI/L avec T4L normale : hypothyroïdie infraclinique sévère (TSH ≥ 10 ; ETA 2013, complément), à confirmer sur un 2ᵉ dosage, le plus souvent traitée. Le polycopié borne l\'infraclinique à une TSH entre 4 et 10 mU/L (p. 23).' };
       return { tone: 'warn', label: 'Hypothyroïdie infraclinique', text: 'TSH modérément élevée (4–10 mUI/L), T4L encore normale : à confirmer sur un 2ᵉ dosage à 6–8 semaines.' };
     }
     if (tsh < 0.4) {
@@ -120,7 +123,6 @@
     }
     if (t4 < 12) return { tone: 'bad', label: 'Hypothyroïdie centrale', text: 'T4L basse avec une TSH « normale » : la TSH est inadaptée au niveau de T4L.' };
     if (t3 < 3.1) return { tone: 'warn', label: 'Syndrome de basse T3', text: 'T3L basse, TSH normale' + (rt3 > 0.38 ? ', T3 reverse élevée' : '') + ' : conversion périphérique diminuée.' };
-    if (t4 > 22) return { tone: 'warn', label: 'T4L élevée, TSH normale', text: 'Discordance à explorer : adénome thyréotrope (hyperthyroïdie centrale) ; complément : prise récente de LT4, interférence de dosage, résistance aux hormones thyroïdiennes.' };
     return { tone: 'good', label: 'Euthyroïdie', text: 'TSH, T4L et T3L dans les valeurs de référence.' };
   }
 
@@ -132,6 +134,7 @@
     if (p.thy < 0.6) out.push(p.atro > 0.5 ? 'thyroïdite chronique auto-immune atrophique' : (s.goitre > 1.15 ? 'maladie de Hashimoto : thyroïde augmentée de volume, infiltrat lymphocytaire' : 'maladie de Hashimoto, infiltrat lymphocytaire'));
     if (p.iodine < 0.5) out.push('goitre multinodulaire');
     if (p.pit < 0.5) out.push('macroadénome hypophysaire non sécrétant');
+    if (p.tsho > 0.05) out.push('adénome hypophysaire thyréotrope (sécrétion autonome de TSH)' + (s.goitre > 1.15 ? ' ; goitre diffus (complément)' : ''));
     return out.join(' · ');
   }
 

@@ -67,7 +67,8 @@
       SIM.J = r.J;
       // Rétrocontrôle du cortisol sur la CRH et l'ACTH ; activité minéralocorticoïde (aldostérone, et DOC
       // en excès) qui freine la rénine et règle la kaliémie.
-      const acth = clamp(p.pit * ex(-1.6 * (s.cort - 1)), 0, 14);
+      // Gain réglé pour une ACTH franchement élevée (> 150 pg/mL) dans l'HCS classique, comme dans l'axe corticotrope.
+      const acth = clamp(p.pit * ex(-3.6 * (s.cort - 1)), 0, 14);
       const mc = 0.8 * s.aldo + 0.2 * s.doc;
       const ang = clamp(ex(-1.8 * (mc - 1)), 0.03, 12);
       const k = clamp(4.2 - 1.1 * ln(Math.max(mc, 0.05)), 2.6, 6.8);
@@ -99,7 +100,7 @@
     ],
     scenarios: [
       { id: 'eu', name: 'Surrénale normale', note: 'L\'ACTH commande les zones fasciculée et réticulée, l\'angiotensine II et la kaliémie la zone glomérulée.', p: {} },
-      { id: 'cortico', name: 'Insuffisance corticotrope', note: 'Atteinte hypothalamo-hypophysaire : ACTH basse, cortisol et androgènes surrénaliens bas ; aldostérone et rénine normales, la zone glomérulée dépendant du SRAA (polycopié p. 85 et 88).', p: { pit: 0.05 } },
+      { id: 'cortico', name: 'Insuffisance corticotrope', note: 'Atteinte hypothalamo-hypophysaire : ACTH basse, cortisol et androgènes surrénaliens bas ; aldostérone et rénine normales, la zone glomérulée dépendant du SRAA (polycopié p. 85 et 88).', p: { pit: 0.03 } },
       { id: 'periph', name: 'Insuffisance surrénale périphérique', note: 'Destruction des deux surrénales : tous les stéroïdes baissent (minéralocorticoïdes, glucocorticoïdes, androgènes) ; ACTH et rénine élevées, hyperkaliémie, hyponatrémie (polycopié p. 85).', p: { adr: 0.06 } },
       { id: 'b21', name: 'Bloc en 21-hydroxylase, forme classique', note: 'CYP21A2, 95 % des HCS : cortisol et aldostérone effondrés, 17-OHP et progestérone accumulées et détournées vers les androgènes ; ACTH et rénine élevées, perte de sel (polycopié p. 80-81).', p: { cyp21: 0.03 } },
       { id: 'b21nc', name: 'Bloc en 21-hydroxylase, forme non classique', note: 'Cortisol conservé avec une ACTH normale ou discrètement augmentée ; 17-OHP et androstènedione modérément élevées ; diagnostic par la 17-OHP de base ou après Synacthène (polycopié p. 82).', p: { cyp21: 0.35 } },

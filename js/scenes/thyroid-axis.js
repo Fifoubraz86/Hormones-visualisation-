@@ -6,6 +6,8 @@
   const S = M.s, P = M.p;
   const cap = (v, m) => Math.min(m, Math.max(0, v));
 
+  HV.INFO['les-tsho'] = { t: 'Adénome thyréotrope', k: 'Sécrétion autonome de TSH · polycopié p. 24, 30, 59', d: 'Cause rare d\'hyperthyroïdie centrale : l\'adénome sécrète de la TSH que le rétrocontrôle ne freine pas. Signes d\'hyperthyroïdie souvent plus modérés à sécrétion égale ; T4L élevée avec une TSH inadaptée, normale ou élevée (p. 59). IRM hypophysaire. Diagnostic différentiel : résistance aux hormones thyroïdiennes (complément).' };
+
   HV.scene({
     id: 'thyro',
     parent: 'atlas',
@@ -83,7 +85,8 @@
         on(vasc, P.trab > 0.05);
         on(lymph, P.thy < 0.6);
         on(gmn, P.iodine < 0.5);
-        on(pitMass, P.pit < 0.5);
+        on(pitMass, P.pit < 0.5 || P.tsho > 0.05);
+        pitMass.setAttribute('data-info', P.tsho > 0.05 && !(P.pit < 0.5) ? 'les-tsho' : 'les-pitmass');
         // Parenchyme « éteint » quand la TSH est effondrée (adénome toxique, surdosage en LT4)
         lobes.classList.toggle('quiet', S.tsh < 0.15 && P.trab < 0.05);
         lesLbl.textContent = P.auto > 0.02 ? 'nodule autonome, reste du parenchyme éteint' : P.trab > 0.05 ? 'goitre diffus hypervasculaire' : P.thy < 0.6 ? (P.atro > 0.5 ? 'thyroïde atrophique' : S.goitre > 1.15 ? 'goitre de Hashimoto, infiltrat lymphocytaire' : 'Hashimoto, infiltrat lymphocytaire') : P.iodine < 0.5 ? 'goitre multinodulaire' : '';

@@ -26,7 +26,7 @@
     parathyroid: { title: 'Parathyroïdes', cls: 'Glandes endocrines', organ: 'parathyroidBack', rows: [
       ['Nombre', '4 dans 80 % des cas (2 supérieures, 2 inférieures)'],
       ['Taille, poids', '4 à 6 mm de long, ≈ 40 mg chacune ; couleur brun chamois'],
-      ['Situation', 'Face postérieure des pôles thyroïdiens ; P3 (inférieures) parfois dans le médiastin supérieur (40 %), P4 (supérieures) près du cricoïde'],
+      ['Situation', 'Face postérieure des pôles thyroïdiens ; P3 (inférieures) parfois dans le médiastin supérieur (40 % selon le polycopié, p. 34 ; fréquence variable selon les séries, complément), P4 (supérieures) près du cricoïde'],
       ['Embryologie', 'P3 : 3ᵉ poche branchiale (avec le thymus) ; P4 : 4ᵉ poche'],
       ['Vascularisation', 'Artère unique et terminale, le plus souvent thyroïdienne inférieure'],
       ['Histologie', 'Cellules principales (riches en adipocytes), rares cellules oxyphiles'],

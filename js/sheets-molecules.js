@@ -252,7 +252,7 @@
       ['Effets', 'Sertoli : spermatogenèse, inhibine B ; granulosa : croissance folliculaire, aromatase'],
       ['Régulation', 'Freinée sélectivement par l\'inhibine B']
     ], links: [pdb('4AY9')] },
-    inhib: { cls: 'Glycoprotéine dimérique (famille TGF-β)', rows: [['Structure', 'Sous-unité α + sous-unité βA (inhibine A) ou βB (inhibine B), reliées par un pont disulfure'], ['Synthèse', 'Sertoli (homme), granulosa (femme)'], ['Effets', 'Freine la FSH au niveau hypophysaire'], ['Dosage', 'Inhibine B : marqueur de la spermatogenèse (complément) ; la réserve ovarienne s\'évalue plutôt par l\'AMH et le compte des follicules antraux (complément)']], links: [] },
+    inhib: { cls: 'Glycoprotéine dimérique (famille TGF-β)', rows: [['Structure', 'Sous-unité α + sous-unité βA (inhibine A) ou βB (inhibine B), reliées par un pont disulfure'], ['Synthèse', 'Inhibine B : Sertoli (homme), cellules folliculaires (femme) (partie 2, p. 4) ; inhibine A : follicule dominant et corps jaune (complément)'], ['Effets', 'Freinent la FSH au niveau hypophysaire (inhibine B : partie 2, p. 4)'], ['Dosage', 'Inhibine B : marqueur de la spermatogenèse (complément) ; la réserve ovarienne s\'évalue plutôt par l\'AMH et le compte des follicules antraux (complément)']], links: [] },
 
     /* ---------------- Phosphocalcique ---------------- */
     pth: { cls: 'Peptide', rows: [

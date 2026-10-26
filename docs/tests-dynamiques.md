@@ -10,7 +10,8 @@ Chaque test se lance depuis la carte « Tests dynamiques » du panneau, sur le s
 
 | Axe | Test | Scénarios où le résultat est discriminant |
 | --- | --- | --- |
-| Corticotrope | Synacthène immédiat (P) | sain, Addison, insuffisance corticotrope, corticothérapie |
+| Corticotrope | Synacthène immédiat (P) | sain, Addison, insuffisance corticotrope, insuffisance corticotrope récente (faussement normal), corticothérapie |
+| Corticotrope | Synacthène : 17-OHP (P, p. 82) | sain, bloc en 21-hydroxylase non classique et classique |
 | Corticotrope | Freinage minute à 1 mg (P) | sain, Cushing hypophysaire, surrénalien, ectopique |
 | Corticotrope | Hypoglycémie insulinique (P) | sain, insuffisance corticotrope, Addison |
 | Corticotrope | Freinage fort à 8 mg | Cushing hypophysaire (freinage ≥ 50 %), ectopique (pas de freinage) |

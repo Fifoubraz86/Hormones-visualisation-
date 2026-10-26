@@ -28,7 +28,8 @@
     glycemia: (T) => 0.85 + HV.rhythm.meals.reduce((a, m) => a + 0.55 * G(((T.h - m + 24) % 24), 0.9, 0.7), 0),
     e2: (T) => 0.25 + 1.2 * G(T.d, 12.5, 2.6) + 0.55 * G(T.d, 21, 3.5),
     lh: (T) => 0.35 + 2.4 * G(T.d, 14, 0.7),
-    fsh: (T) => 0.45 + 0.55 * G(T.d, 2.5, 3) + 0.9 * G(T.d, 14, 0.8),
+    // FSH de début de phase folliculaire ≈ 8 UI/L chez la femme normale : sous le seuil indicatif de 10 UI/L à J3 (complément).
+    fsh: (T) => 0.45 + 0.35 * G(T.d, 2.5, 3) + 0.9 * G(T.d, 14, 0.8),
     prog: (T) => 0.08 + 1.4 * G(T.d, 21, 3.4),
     // Rétrocontrôle de l'estradiol : positif en milieu de cycle (pic de LH), négatif le reste du temps.
     e2Positive: (T) => T.d >= 12 && T.d < 14.6
