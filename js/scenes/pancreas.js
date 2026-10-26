@@ -4,8 +4,8 @@
  * Un modèle commun (estomac, duodénum, pancréas exocrine, îlots, intestin) anime la scène et ses loupes
  * (zoom-pancreas.js) : chaque TNE y est une sécrétion hormonale autonome qui dérègle le tube digestif.
  * Sources : Les fondamentaux de la pathologie digestive, CDU-HGE / SNFGE, chapitre 7 « Pancréas »
- * (octobre 2014, pages citées « SNFGE p. ») ; polycopié CEEDMM ; référentiels SFE (item 308) et TNCD
- * (chapitre 11, néoplasies neuroendocrines) pour les TNE, signalés « (complément, TNCD/SFE) ».
+ * (octobre 2014, « SNFGE p. ») ; CEEDMM / SFE, item 308 « Tumeurs neuroendocrines du pancréas » (2022, « SFE ») ;
+ * TNCD, chapitre 11 « Néoplasies neuroendocrines digestives » (07/09/2026, « TNCD p. »). Le reste est « (complément) ».
  */
 (function () {
   'use strict';
@@ -79,13 +79,13 @@
       return { gastrin, acid, sec, cck, enz, bic, duo, lip, gb, steat, insE, ins, glucagon, g, vip, sstp, stool, k, hco3, cga, aa, elast };
     },
     labs: [
-      { key: 'gastrin', name: 'Gastrinémie à jeun', unit: 'pg/mL', range: '< 100 pg/mL (complément)', k: 60, lo: 0, hi: 100, min: 10, max: 8000, log: true, dec: 0 },
-      { key: 'ph', name: 'pH gastrique', unit: '', range: '1,5–3,5 à jeun (complément)', lo: 1.5, hi: 3.5, min: 0.5, max: 8, dec: 1, fn: (s, p) => clamp(2 - 2 * lg(Math.max(s.acid, 0.02)) + 0.8 * p.meal, 0.8, 7.5) },
+      { key: 'gastrin', name: 'Gastrinémie à jeun', unit: 'pg/mL', range: '< 100 pg/mL ; gastrinome > 3 N (TNCD p. 6)', k: 60, lo: 0, hi: 100, min: 10, max: 8000, log: true, dec: 0 },
+      { key: 'ph', name: 'pH gastrique', unit: '', range: '1,5–3,5 à jeun (complément) ; gastrinome ≤ 2', lo: 1.5, hi: 3.5, min: 0.5, max: 8, dec: 1, fn: (s, p) => clamp(2 - 2 * lg(Math.max(s.acid, 0.02)) + 0.8 * p.meal, 0.8, 7.5) },
       { key: 'g', name: 'Glycémie', unit: 'g/L', range: 'à jeun 0,80–1,10 g/L', k: 1, lo: 0.7, hi: 1.26, min: 0.2, max: 4, dec: 2 },
-      { key: 'ins', name: 'Insulinémie', unit: 'µUI/mL', range: '2–25 µUI/mL (complément)', k: 8, lo: 2, hi: 25, min: 0.5, max: 200, log: true, dec: 1 },
+      { key: 'ins', name: 'Insulinémie', unit: 'mU/L', range: '2–25 mU/L (complément)', k: 8, lo: 2, hi: 25, min: 0.5, max: 200, log: true, dec: 1 },
       { key: 'pepc', name: 'Peptide C', unit: 'ng/mL', range: '0,8–3 ng/mL à jeun (complément)', lo: 0.8, hi: 3, min: 0.05, max: 30, log: true, dec: 1, fn: (s) => 1.8 * s.ins },
-      { key: 'glucagon', name: 'Glucagonémie', unit: 'pg/mL', range: '50–150 pg/mL (complément)', k: 80, lo: 30, hi: 150, min: 10, max: 4000, log: true, dec: 0 },
-      { key: 'vip', name: 'VIP plasmatique', unit: 'pg/mL', range: '< 100 pg/mL (complément)', k: 35, lo: 0, hi: 100, min: 5, max: 2000, log: true, dec: 0 },
+      { key: 'glucagon', name: 'Glucagonémie', unit: 'pg/mL', range: '50–150 pg/mL (complément) ; glucagonome > 2 N', k: 80, lo: 30, hi: 150, min: 10, max: 4000, log: true, dec: 0 },
+      { key: 'vip', name: 'VIP plasmatique', unit: 'pg/mL', range: '< 100 pg/mL (complément) ; VIPome > 2 N', k: 35, lo: 0, hi: 100, min: 5, max: 2000, log: true, dec: 0 },
       { key: 'sstp', name: 'Somatostatine plasmatique', unit: 'pg/mL', range: '< 25 pg/mL (complément)', k: 12, lo: 0, hi: 25, min: 2, max: 2000, log: true, dec: 0 },
       { key: 'k', name: 'Kaliémie', unit: 'mmol/L', range: '3,5–5,0 mmol/L', k: 1, lo: 3.5, hi: 5, min: 2, max: 6.5, dec: 1 },
       { key: 'hco3', name: 'Bicarbonates plasmatiques', unit: 'mmol/L', range: '22–29 mmol/L (complément)', k: 1, lo: 22, hi: 29, min: 8, max: 34, dec: 0 },
@@ -109,27 +109,28 @@
     scenarios: [
       { id: 'eu', name: 'Sujet sain à jeun', note: 'Sécrétions de base : gastrine et acide modérés, pancréas au repos, insuline et glucagon équilibrés.', p: {} },
       { id: 'repas', name: 'Après un repas', note: 'Phase intestinale : l\'acide libère la sécrétine (bicarbonates), les graisses et protéines la CCK (enzymes, contraction vésiculaire) ; l\'insuline monte (SNFGE p. 10).', p: { meal: 1 } },
-      { id: 'ipp', name: 'Sujet sain sous IPP', note: 'Piège : l\'achlorhydrie lève le frein acide sur les cellules G. Gastrine et chromogranine A montent sans tumeur (complément, TNCD).', p: { ipp: 1 } },
-      { id: 'gastrinome', name: 'Gastrinome (Zollinger-Ellison)', note: 'Gastrine autonome : hypersécrétion acide, ulcères multiples ou atypiques, diarrhée ; gastrinémie > 10 N avec pH gastrique < 2 (complément, TNCD/SFE).', p: { gas: 20 } },
-      { id: 'gastrinomeT', name: 'Gastrinome sous IPP à forte dose', note: 'Les IPP contrôlent l\'hypersécrétion acide (ulcères, diarrhée) mais la gastrinémie reste très élevée (complément, TNCD).', p: { gas: 20, ipp: 1 } },
-      { id: 'insulinome', name: 'Insulinome', note: 'Insuline autonome, non freinée par l\'hypoglycémie : hypoglycémies de jeûne, insuline et peptide C inappropriés (triade de Whipple).', p: { ins: 7 } },
-      { id: 'glucagonome', name: 'Glucagonome', note: 'Glucagon très élevé : diabète, catabolisme (amaigrissement, acides aminés effondrés), érythème nécrolytique migrateur, thromboses (complément, SFE).', p: { glu: 14 } },
-      { id: 'vipome', name: 'VIPome (Verner-Morrison)', note: 'VIP en excès : diarrhée hydrique sécrétoire > 3 L/j persistant au jeûne, hypokaliémie, achlorhydrie, acidose (syndrome WDHA ; complément, SFE).', p: { vip: 12 } },
-      { id: 'vipomeT', name: 'VIPome sous analogue de la somatostatine', note: 'Les analogues (octréotide, lanréotide) freinent la sécrétion de VIP et la diarrhée (complément, TNCD).', p: { vip: 12, asm: 1 } },
-      { id: 'somato', name: 'Somatostatinome', note: 'Somatostatine en excès : diabète, lithiase biliaire, stéatorrhée, hypochlorhydrie (triade inhibitrice ; complément, SFE).', p: { sst: 25 } },
+      { id: 'ipp', name: 'Sujet sain sous IPP', note: 'Piège : l\'achlorhydrie lève le frein acide sur les cellules G. Gastrine et chromogranine A montent sans tumeur ; arrêter les IPP 7 à 14 jours avant un dosage de chromogranine A, sauf syndrome de Zollinger-Ellison (TNCD p. 12).', p: { ipp: 1 } },
+      { id: 'gastrinome', name: 'Gastrinome (Zollinger-Ellison)', note: 'Gastrine autonome : hypersécrétion acide, ulcères œso-gastro-duodénaux récidivants, diarrhée résolutive sous IPP (SFE) ; gastrinémie à jeun > 3 N avec pH gastrique ≤ 2 (TNCD p. 6).', p: { gas: 20 } },
+      { id: 'gastrinomeT', name: 'Gastrinome sous IPP à forte dose', note: 'IPP à forte dose (40 à 60 mg deux fois par jour d\'équivalent oméprazole), à ne jamais interrompre : l\'acide et la diarrhée sont contrôlés, la gastrinémie reste > 10 N (TNCD p. 6 et 18).', p: { gas: 20, ipp: 1 } },
+      { id: 'insulinome', name: 'Insulinome', note: 'TNE fonctionnelle la plus fréquente : insuline autonome, hypoglycémies de jeûne avec insuline ≥ 3 mU/L et peptide C élevé devant une glycémie < 0,45 g/L (TNCD p. 5-6).', p: { ins: 7 } },
+      { id: 'glucagonome', name: 'Glucagonome', note: 'Glucagon > 2 N : diabète déséquilibré, perte de poids, érythème nécrolytique migrateur, diarrhée, thromboses, anémie (SFE ; TNCD p. 6).', p: { glu: 14 } },
+      { id: 'glucagonomeT', name: 'Glucagonome sous analogue de la somatostatine', note: 'Les analogues de la somatostatine, traitement antisécrétoire de première intention, améliorent le syndrome dans plus de 60 % des cas ; corriger aussi la glycémie et les carences (TNCD p. 20).', p: { glu: 14, asm: 1 } },
+      { id: 'vipome', name: 'VIPome (Verner-Morrison)', note: 'VIP > 2 N : diarrhée sécrétoire profuse, déshydratation, hypokaliémie, acidose métabolique, flushs, hypercalcémie (SFE ; TNCD p. 6).', p: { vip: 12 } },
+      { id: 'vipomeT', name: 'VIPome sous analogue de la somatostatine', note: 'Hydratation intensive et correction hydroélectrolytique ; les analogues de la somatostatine, en première intention, améliorent la diarrhée dans environ 67 % des cas (TNCD p. 19).', p: { vip: 12, asm: 1 } },
+      { id: 'somato', name: 'Somatostatinome', note: 'Hypersécrétion de somatostatine, très rare : diarrhée avec stéatorrhée, hyperglycémie, lithiase vésiculaire (TNCD p. 6) ; hypochlorhydrie (complément).', p: { sst: 25 } },
       { id: 'ipe', name: 'Insuffisance pancréatique exocrine', note: 'Pancréatite chronique évoluée : plus de 80 % de la fonction perdue, stéatorrhée > 6 g/24 h, élastase fécale < 100 µg/g (SNFGE p. 13 et 16).', p: { exo: 0.07, meal: 1 } },
       { id: 'ipeT', name: 'IPE traitée par extraits pancréatiques', note: 'Les extraits apportés au repas corrigent l\'essentiel de la stéatorrhée (SNFGE p. 17) ; l\'élastase fécale reste basse (enzyme humaine non apportée).', p: { exo: 0.07, meal: 1, pert: 1 } }
     ],
     interpret(s, p, L) {
       const gas = L('gastrin'), ph = L('ph'), g = L('g'), ins = L('ins'), glu = L('glucagon'), vip = L('vip'), sst = L('sstp');
       const st = L('stool'), fat = L('steat'), el = L('elast');
-      if (g < 0.45 && ins >= 3) return { tone: 'bad', label: 'Hypoglycémie hyperinsulinique', text: 'Glycémie < 0,45 g/L avec insuline ≥ 3 µUI/mL et peptide C non freiné : hyperinsulinisme endogène, évocateur d\'insulinome (critères de l\'épreuve de jeûne ; complément, SFE). Éliminer une prise de sulfamides.' };
-      if (gas > 1000 && ph < 2) return { tone: 'bad', label: 'Gastrinome (Zollinger-Ellison)', text: 'Gastrinémie > 10 N avec pH gastrique < 2 : diagnostic de syndrome de Zollinger-Ellison (complément, TNCD/SFE). Rechercher une NEM 1 (calcémie, PTH).' };
-      if (gas > 100 && ph >= 4 && p.gas > 0) return { tone: 'warn', label: 'Hypergastrinémie sous IPP', text: 'Gastrine élevée sous IPP : ininterprétable seule. L\'arrêt des IPP pour le diagnostic expose à des complications ulcéreuses et se fait en milieu spécialisé (complément, TNCD).' };
-      if (vip > 150 && st > 1) return { tone: 'bad', label: 'VIPome (syndrome de Verner-Morrison)', text: 'Diarrhée hydrique sécrétoire abondante, hypokaliémie, acidose métabolique et VIP élevé : syndrome WDHA (complément, SFE).' };
-      if (glu > 500) return { tone: 'bad', label: 'Glucagonome', text: 'Glucagonémie > 500 pg/mL' + (g >= 1.26 ? ', diabète' : '') + ', acides aminés effondrés (' + Math.round(s.aa * 100) + ' % de la normale) : érythème nécrolytique migrateur, amaigrissement, thromboses (complément, SFE).' };
-      if (sst > 100) return { tone: 'bad', label: 'Somatostatinome', text: 'Somatostatine très élevée : diabète, stéatorrhée (' + Math.round(fat) + ' g/24 h), stase vésiculaire et lithiase, hypochlorhydrie (complément, SFE).' };
-      if (gas > 100 && ph >= 4) return { tone: 'warn', label: 'Hypergastrinémie réactionnelle', text: 'IPP : achlorhydrie, gastrine et chromogranine A élevées sans tumeur. Les doser sous IPP expose à un faux diagnostic de TNE (complément, TNCD).' };
+      if (g < 0.45 && ins >= 3) return { tone: 'bad', label: 'Hypoglycémie hyperinsulinique', text: 'Glycémie < 0,45 g/L avec insuline ≥ 3 mU/L et peptide C élevé, sans sulfamide ni glinide : insulinome (TNCD p. 6 et 13). Prévenir les hypoglycémies dès le diagnostic évoqué.' };
+      if (gas > 1000 && p.ipp > 0) return { tone: 'bad', label: 'Gastrinome sous IPP', text: 'Gastrinémie > 10 N sous IPP : syndrome de Zollinger-Ellison. Les IPP ne doivent jamais être arrêtés (risque d\'hémorragie et de perforation) ; test à la sécrétine en centre expert si besoin (TNCD p. 6 et 14).' };
+      if (gas > 300 && ph <= 2) return { tone: 'bad', label: 'Gastrinome (Zollinger-Ellison)', text: 'Gastrinémie à jeun > 3 N avec pH gastrique ≤ 2 : syndrome de Zollinger-Ellison (TNCD p. 6). Rechercher une NEM 1 (probabilité ≈ 25 % ; TNCD p. 14).' };
+      if (vip > 200 && st > 1) return { tone: 'bad', label: 'VIPome (syndrome de Verner-Morrison)', text: 'Diarrhée sécrétoire profuse, hypokaliémie, acidose métabolique et VIP > 2 N (TNCD p. 6). Urgence hydroélectrolytique.' };
+      if (glu > 300) return { tone: 'bad', label: 'Glucagonome', text: 'Glucagon > 2 N' + (g >= 1.26 ? ', diabète' : '') + ', acides aminés effondrés (' + Math.round(s.aa * 100) + ' % de la normale) : érythème nécrolytique migrateur, perte de poids, thromboses (TNCD p. 6).' };
+      if (sst > 100) return { tone: 'bad', label: 'Somatostatinome', text: 'Somatostatine très élevée : hyperglycémie, stéatorrhée (' + Math.round(fat) + ' g/24 h), lithiase vésiculaire (TNCD p. 6) ; hypochlorhydrie (complément).' };
+      if (gas > 100 && ph >= 4) return { tone: 'warn', label: 'Hypergastrinémie réactionnelle', text: 'IPP : achlorhydrie, gastrine et chromogranine A élevées sans tumeur. Toute hypergastrinémie fausse la chromogranine A (TNCD p. 12).' };
       if (fat > 6 && el < 200) return { tone: p.pert > 0 ? 'warn' : 'bad', label: 'Insuffisance pancréatique exocrine', text: 'Stéatorrhée ' + Math.round(fat) + ' g/24 h (> 6 g) et élastase fécale ' + Math.round(el) + ' µg/g' + (el < 100 ? ' (< 100 : IPE)' : '') + ' : maldigestion des graisses, la lipase n\'étant produite que par le pancréas (SNFGE p. 16).' };
       if (el < 100) return { tone: 'good', label: 'IPE compensée par les extraits', text: 'Élastase fécale basse (fonction exocrine détruite), mais stéatorrhée corrigée par les extraits pancréatiques pris au repas (SNFGE p. 17).' };
       if (p.meal > 0.3) return { tone: 'good', label: 'Digestion normale', text: 'Sécrétine → bicarbonates, CCK → enzymes et vésicule ; le suc pancréatique (≈ 1,5 L/j, pH 8,2–8,4) neutralise l\'acide (SNFGE p. 7).' };
@@ -162,8 +163,8 @@
   HV.TESTS.pancreas = [
     {
       id: 'secretine', name: 'Test à la sécrétine', poly: false,
-      what: 'Gastrinémie limite (moins de 10 N) avec acidité gastrique : la sécrétine stimule paradoxalement le gastrinome, alors qu\'elle freine les cellules G normales (complément, TNCD/SFE).',
-      proto: 'Sécrétine IV (2 UI/kg) ; gastrinémie avant puis à 2, 5, 10 et 15 min. Positif si la gastrine augmente d\'au moins 120 pg/mL (complément).',
+      what: 'Suspicion de syndrome de Zollinger-Ellison avec gastrinémie peu élevée : la sécrétine stimule paradoxalement le gastrinome, alors qu\'elle freine les cellules G normales (mécanisme : complément).',
+      proto: 'Sécrétine IV ; gastrinémie avant puis à 2, 5, 10 et 15 min (complément). Positif si la gastrine augmente d\'au moins 120 pg/mL. Si disponible, en centre expert : modifier les IPP expose à l\'hémorragie et à la perforation (TNCD p. 6 et 14).',
       unit: 'pg/mL', label: 'Gastrine', span: 15, xUnit: 'min', duration: 12,
       thrFn: (st) => (st.values.length ? st.values[0] + 120 : null), thrDir: 'below', thrLabel: 'base + 120 pg/mL',
       samples: [{ x: 0.05, label: 'T0' }, { x: 0.2, label: '2' }, { x: 0.4, label: '5' }, { x: 0.7, label: '10' }, { x: 1, label: '15' }],
@@ -171,14 +172,14 @@
       measure: (s) => s.lab('gastrin'),
       interpret(v) {
         const d = Math.max(...v) - v[0];
-        if (d >= 120) return { tone: 'bad', text: `Gastrine de base ${n0(v[0])} pg/mL, augmentation maximale de ${n0(d)} pg/mL (≥ 120) : réponse paradoxale, en faveur d'un gastrinome (complément).` };
+        if (d >= 120) return { tone: 'bad', text: `Gastrine de base ${n0(v[0])} pg/mL, augmentation maximale de ${n0(d)} pg/mL (≥ 120) : réponse paradoxale, en faveur d'un gastrinome (TNCD p. 6).` };
         return { tone: 'good', text: `Gastrine de base ${n0(v[0])} pg/mL, variation maximale ${n0(d)} pg/mL (< 120) : pas de réponse paradoxale. Une hypergastrinémie réactionnelle (IPP, gastrite atrophique) est plus probable.` };
       }
     },
     {
       id: 'jeune', name: 'Épreuve de jeûne de 72 h', poly: false,
       what: 'Recherche d\'un hyperinsulinisme endogène : au jeûne, l\'insuline doit s\'effondrer et la glycémie se maintenir.',
-      proto: 'Jeûne surveillé à l\'hôpital ; glycémie toutes les 6 h puis plus souvent ; arrêt si glycémie < 0,45 g/L avec symptômes : insuline, peptide C, proinsuline, recherche de sulfamides (complément, SFE).',
+      proto: 'Jeûne en hospitalisation, dans un service spécialisé ; au malaise ou si glycémie < 0,45 g/L : insuline, proinsuline, peptide C, dosage des sulfamides et glinides (TNCD p. 6 et 13).',
       unit: 'g/L', label: 'Glycémie', thr: 0.45, thrDir: 'above', thrLabel: 'seuil 0,45 g/L (2,5 mmol/L)',
       span: 72, xUnit: 'h', duration: 16,
       samples: [{ x: 0.03, label: '0 h' }, { x: 0.33, label: '24 h' }, { x: 0.67, label: '48 h' }, { x: 1, label: '72 h' }],
@@ -186,8 +187,8 @@
       measure: (s) => s.lab('g'),
       interpret(v, s) {
         const min = Math.min(...v), ins = s.lab('ins'), pc = s.lab('pepc');
-        if (min >= 0.45) return { tone: 'good', text: `Glycémie minimale ${f2(min)} g/L sans hypoglycémie, insuline freinée (${f1(ins)} µUI/mL) : pas d'hyperinsulinisme.` };
-        if (ins >= 3) return { tone: 'bad', text: `Hypoglycémie ${f2(min)} g/L avec insuline ${f1(ins)} µUI/mL (≥ 3) et peptide C ${f1(pc)} ng/mL (≥ 0,6) : hyperinsulinisme endogène. Sulfamides négatifs : insulinome, à localiser (scanner, IRM, échoendoscopie ; complément, SFE).` };
+        if (min >= 0.45) return { tone: 'good', text: `Glycémie minimale ${f2(min)} g/L sans hypoglycémie, insuline freinée (${f1(ins)} mU/L) : pas d'hyperinsulinisme.` };
+        if (ins >= 3) return { tone: 'bad', text: `Hypoglycémie ${f2(min)} g/L avec insuline ${f1(ins)} mU/L (≥ 3) et peptide C ${f1(pc)} ng/mL : hyperinsulinisme endogène (insuline ≥ 3 mU/L, proinsuline ≥ 5 pmol/L, peptide C élevé). Sulfamides et glinides négatifs : insulinome, à localiser (scanner, IRM, échoendoscopie, TEP au 68Ga-exendine si besoin ; TNCD p. 6 et 8).` };
         return { tone: 'warn', text: `Hypoglycémie ${f2(min)} g/L avec insuline freinée : cause non insulinique.` };
       }
     }
@@ -260,11 +261,12 @@
       'Sécrétine (cellules S, acide duodénal) → eau et bicarbonates ; CCK (cellules I, graisses et acides aminés) → enzymes et contraction vésiculaire (SNFGE p. 10).',
       'Suc pancréatique ≈ 1,5 L/j, pH 8,2–8,4 ; acini 85 %, îlots 1 à 2 % de la masse (SNFGE p. 6-7).',
       'Stéatorrhée (> 6 g/24 h) quand plus de 80 % de la fonction exocrine est perdue ; élastase fécale < 100 µg/g (SNFGE p. 13 et 16).',
-      'Gastrinome : ulcères et diarrhée ; insulinome : hypoglycémies de jeûne ; glucagonome : diabète, érythème nécrolytique migrateur ; VIPome : diarrhée hydrique, hypokaliémie ; somatostatinome : diabète, lithiase, stéatorrhée (complément, TNCD/SFE).',
-      'Pièges : les IPP élèvent la gastrine et la chromogranine A (complément, TNCD).',
+      'TNE duodéno-pancréatiques : non fonctionnelles dans 80 % des cas, révélées par une sécrétion hormonale dans 20 % (SFE).',
+      'Gastrinome : ulcères et diarrhée ; insulinome : hypoglycémies de jeûne ; glucagonome : diabète, érythème nécrolytique migrateur ; VIPome : diarrhée profuse, hypokaliémie ; somatostatinome : stéatorrhée, hyperglycémie, lithiase (TNCD p. 6).',
+      'Pièges : les IPP élèvent la gastrine et la chromogranine A (TNCD p. 12).',
       'Loupes : pancréas exocrine, pancréatites, hormones digestives, classification des TNE et un modèle par tumeur.'
     ],
-    source: 'Sources : Les fondamentaux de la pathologie digestive (CDU-HGE, SNFGE), chapitre 7 « Pancréas », octobre 2014 (pages citées « SNFGE p. ») ; Polycopié de sémiologie endocrinienne, CEEDMM, 2023 ; référentiels SFE (item 308, TNE du pancréas) et TNCD (chapitre 11, néoplasies neuroendocrines), signalés « complément ».',
+    source: 'Sources : Les fondamentaux de la pathologie digestive (CDU-HGE, SNFGE), chapitre 7 « Pancréas », octobre 2014 (« SNFGE p. ») ; CEEDMM / SFE, item 308 « Tumeurs neuroendocrines du pancréas », 2022 (« SFE ») ; TNCD, chapitre 11 « Néoplasies neuroendocrines digestives », 07/09/2026 (« TNCD p. ») ; polycopié CEEDMM 2023. Le reste est marqué « complément ».',
     legend: new Set(['gastrin', 'hplus', 'secretin', 'cck', 'hco3', 'enzyme', 'insulin', 'glucagon', 'sst', 'vip', 'water']),
     build(g, a) {
       def.sim = sim;
@@ -450,7 +452,7 @@
         const Pp = sim.p;
         bilTxt.forEach(([k, t]) => {
           const L = sim.LABS.find((x) => x.key === k), v = sim.lab(k);
-          const unit = { gastrin: ' pg/mL', ph: '', g: ' g/L', ins: ' µUI/mL', glucagon: ' pg/mL', vip: ' pg/mL', sstp: ' pg/mL', k: '', stool: ' L/j', steat: ' g/j' }[k];
+          const unit = { gastrin: ' pg/mL', ph: '', g: ' g/L', ins: ' mU/L', glucagon: ' pg/mL', vip: ' pg/mL', sstp: ' pg/mL', k: '', stool: ' L/j', steat: ' g/j' }[k];
           t.textContent = (L.dec ? (L.dec === 2 ? f2(v) : f1(v)) : Math.round(v).toLocaleString('fr-FR')) + unit + (v > L.hi ? ' ↑' : v < L.lo ? ' ↓' : '');
           t.classList.toggle('hi', v > L.hi);
           t.classList.toggle('lo', v < L.lo);
