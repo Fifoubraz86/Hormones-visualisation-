@@ -341,8 +341,8 @@
     labs: [
       { key: 'na', name: 'Natrémie', unit: 'mmol/L', k: 1, lo: 135, hi: 145, min: 110, max: 160, dec: 0 },
       { key: 'posm', name: 'Osmolalité plasmatique', unit: 'mosmol/kg', range: '285–295 mosmol/kg (complément)', lo: 285, hi: 295, min: 240, max: 330, dec: 0, fn: (s) => 2 * s.na + 10 },
-      { key: 'uosm', name: 'Osmolalité urinaire', unit: 'mosmol/kg', range: '100–1200 selon l\'apport', lo: 100, hi: 1200, min: 0, max: 1300, dec: 0, fn: (s) => uosmOf(s.eff, s.na) },
-      { key: 'diur', name: 'Diurèse', unit: 'L/24 h', range: '< 3 L/24 h', lo: 0.5, hi: 3, min: 0, max: 14, dec: 1, fn: (s) => clamp(900 / uosmOf(s.eff, s.na), 0.4, 14) }
+      { key: 'uosm', name: 'Osmolalité urinaire', unit: 'mosmol/kg', range: '100–1200 selon l\'apport', lo: 100, hi: 1200, min: 0, max: 1300, dec: 0, fn: (s) => uosmOf(s) },
+      { key: 'diur', name: 'Diurèse', unit: 'L/24 h', range: '< 3 L/24 h', lo: 0.5, hi: 3, min: 0, max: 14, dec: 1, fn: (s) => diurOf(s) }
     ],
     params: [
       { key: 'hypo', label: 'Sécrétion d\'ADH', min: 0.01, max: 1.5, step: 0.01, fmt: pct },
@@ -350,7 +350,9 @@
       { key: 'siadh', label: 'ADH ectopique (tumeur)', min: 0, max: 6, step: 0.1, fmt: x100 },
       { key: 'drug', label: 'Médicament inducteur de SIADH', min: 0, max: 2, step: 0.05, fmt: x100 },
       { key: 'drink', label: 'Boissons en excès', min: 0, max: 1, step: 0.05, fmt: pct },
-      { key: 'sweat', label: 'Pertes sudorales sans boire', min: 0, max: 1, step: 0.05, fmt: pct }
+      { key: 'poto', label: 'Polydipsie primaire (chronique)', min: 0, max: 1, step: 0.05, fmt: pct },
+      { key: 'sweat', label: 'Pertes sudorales sans boire', min: 0, max: 1, step: 0.05, fmt: pct },
+      { key: 'poids', label: 'Poids (kg)', min: 40, max: 120, step: 1, fmt: (v) => Math.round(v) + ' kg' }
     ],
     scenarios: [
       { id: 'eu', name: 'Équilibre hydrique normal', note: 'Natrémie stable, urines concentrées selon les besoins.', p: {} },
