@@ -376,7 +376,7 @@
       });
       const lane = (i, n) => [[40, Y0 + i * LH - 12, X1 - 20, LH * (n || 1)]];
       HV.spotlight(rhDef, a, [
-        { t: 'Cortisol : pic du matin', d: 'Le cortisol est maximal en début de matinée, en raison du rythme circadien de l\'ACTH (p. 73). Le dosage pour une insuffisance surrénale se fait à 8 h : < 5 µg/dL (≈ 138 nmol/L) est fortement évocateur, > 18 µg/dL (≈ 500 nmol/L) exclut le diagnostic (p. 88).', spot: [...lane(0), [1100, 215, 450, 80]], h: 8 },
+        { t: 'Cortisol : pic du matin', d: 'Le cortisol est maximal en début de matinée, en raison du rythme circadien de l\'ACTH (p. 73). Le dosage pour une insuffisance surrénale se fait à 8 h : < 5 µg/dL (≈ 138 nmol/L) est fortement évocateur, > 18 µg/dL (≈ 500 nmol/L) exclut le diagnostic (p. 88 ; le polycopié indique 80 nmol/L pour 5 µg/dL, coquille).', spot: [...lane(0), [1100, 215, 450, 80]], h: 8 },
         { t: 'Cortisol : nadir de minuit', d: 'Le soir, le cortisol est au plus bas. Dans le syndrome de Cushing, ce nadir disparaît : d\'où le cortisol salivaire à minuit et le freinage minute (1 mg de dexaméthasone à 23 h, cortisol à 8 h) (p. 59).', spot: [...lane(0), [1100, 295, 450, 170]], h: 0 },
         { t: 'La nuit : GH, mélatonine, TSH, prolactine', d: 'La GH est pulsatile, surtout la nuit (p. 49), avec un grand pic après l\'endormissement (complément). La mélatonine, la TSH et la prolactine s\'élèvent aussi la nuit (complément).', spot: lane(1, 4), h: 0.5 },
         { t: 'Testostérone : le matin', d: 'La testostérone est plus élevée le matin : on la dose le matin (complément).', spot: [...lane(5), [1100, 830, 450, 70]], h: 8 },

@@ -115,7 +115,7 @@
       ['Demi-vie', '≈ 60 à 90 min'],
       ['Récepteur', 'Récepteur nucléaire des glucocorticoïdes (GR) ; aussi le récepteur minéralocorticoïde, protégé dans le rein par la 11β-HSD2'],
       ['Rythme', 'Pic en début de matinée, nadir le soir'],
-      ['Dosage', 'Cortisol à 8 h (habituellement 10–20 µg/dL, 275–550 nmol/L ; < 5 µg/dL, ≈ 138 nmol/L : évocateur d\'insuffisance surrénale ; > 18 µg/dL, ≈ 500 nmol/L : l\'exclut) ; cortisol libre urinaire ; cortisol salivaire à minuit'],
+      ['Dosage', 'Cortisol à 8 h (habituellement 10–20 µg/dL, 275–550 nmol/L ; < 5 µg/dL, ≈ 138 nmol/L : évocateur d\'insuffisance surrénale ; > 18 µg/dL, ≈ 500 nmol/L : l\'exclut ; p. 88, où le polycopié indique 80 nmol/L pour 5 µg/dL, coquille) ; cortisol libre urinaire ; cortisol salivaire à minuit'],
       ['Pharmacologie', 'Hydrocortisone ; corticoïdes de synthèse (prednisone, dexaméthasone)']
     ], links: [pc(5754)] },
     aldo: { cls: 'Minéralocorticoïde (stéroïde en C21)', rows: [

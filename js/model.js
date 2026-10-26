@@ -9,7 +9,7 @@
   const HV = (window.HV = window.HV || {});
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
-  const DEFAULTS = { iodine: 1, thy: 1, pit: 1, hypo: 1, trab: 0, auto: 0, levo: 0, d12: 1, d3: 1, atro: 0 };
+  const DEFAULTS = { iodine: 1, thy: 1, pit: 1, hypo: 1, trab: 0, auto: 0, levo: 0, d12: 1, d3: 1, atro: 0, tsho: 0 };
   const p = Object.assign({}, DEFAULTS);
   const s = { trh: 1, tsh: 1, t4: 1, t3: 1, rt3: 1, goitre: 1, fb: 1, stim: 1, t4prod: 1, t3prod: 1, iF: 1 };
   const TAU = { trh: 0.6, tsh: 1.2, t4: 4, t3: 2, rt3: 2.5, goitre: 12 };
@@ -21,7 +21,8 @@
     // Relation TSH / T4L log-linéaire, plafonnée par la réserve hypophysaire.
     const raw = p.pit * Math.pow(Math.max(s.trh, 0), 0.7) * Math.exp(-5 * (fb - 1));
     const cap = 40 * Math.pow(p.pit, 1.5);
-    const tsh = Math.min(200, (1.025 * raw * cap) / (raw + cap + 1e-9));
+    // Adénome thyréotrope : sécrétion autonome de TSH, non freinée par le rétrocontrôle (polycopié p. 59).
+    const tsh = Math.min(200, (1.025 * raw * cap) / (raw + cap + 1e-9) + p.tsho);
     // Une hypophyse lésée sécrète une TSH moins active (glycosylation anormale).
     const bio = 0.45 + 0.55 * Math.min(1, p.pit);
     const iF = (1.6 * p.iodine) / (p.iodine + 0.6);
@@ -70,7 +71,8 @@
     { key: 'auto', label: 'Autonomie nodulaire', min: 0, max: 3, step: 0.05, fmt: (v) => (v === 0 ? 'aucune' : '×' + v.toFixed(2).replace('.', ',')) },
     { key: 'levo', label: 'Lévothyroxine (70 kg)', min: 0, max: 2.5, step: 0.05, fmt: (v) => Math.round((v * 112) / 12.5) * 12.5 + ' µg/j' },
     { key: 'd12', label: 'Désiodases activatrices D1/D2', min: 0.2, max: 1.6, step: 0.05, fmt: (v) => Math.round(v * 100) + ' %' },
-    { key: 'd3', label: 'Désiodase inactivatrice D3', min: 0.5, max: 3, step: 0.05, fmt: (v) => Math.round(v * 100) + ' %' }
+    { key: 'd3', label: 'Désiodase inactivatrice D3', min: 0.5, max: 3, step: 0.05, fmt: (v) => Math.round(v * 100) + ' %' },
+    { key: 'tsho', label: 'Adénome thyréotrope (TSH autonome)', min: 0, max: 4, step: 0.05, fmt: (v) => (v === 0 ? 'aucun' : '+' + (v * 1.5).toFixed(1).replace('.', ',') + ' mUI/L') }
   ];
 
   const SCENARIOS = [

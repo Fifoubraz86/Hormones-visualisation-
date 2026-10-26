@@ -64,7 +64,7 @@
     ['46', 'Taux de prévalence standardisé du diabète traité pharmacologiquement en France en 2020', 2, 33, ['glyc']],
     ['47', 'Physiopathologie simplifiée de la rétinopathie diabétique', 2, 44, ['glyc']],
     ['48', 'Évolution de l\'excrétion urinaire d\'albumine et de la filtration glomérulaire au cours du diabète, d\'après Roussel R. (Médecine des maladies métaboliques, 2020)', 2, 46, ['glyc']],
-    ['49', 'Questionnaire DN4 (un score supérieur à 4 est en faveur d\'une neuropathie algique)', 2, 50, ['glyc']],
+    ['49', 'Questionnaire DN4 (un score supérieur à 4 est en faveur d\'une neuropathie algique ; seuil ≥ 4/10 selon la validation originale, Bouhassira 2005 : complément)', 2, 50, ['glyc']],
     ['50', 'Dépistage par le monofilament d\'un trouble de la sensibilité superficielle du pied', 2, 51, ['glyc']],
     ['51', 'Histoire naturelle du mal perforant plantaire', 2, 55, ['glyc']],
     ['52A', 'Pied neuro-ischémique : hyperkératose sur un point d\'appui pathologique (a)', 2, 56, ['glyc']],
