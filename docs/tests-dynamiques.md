@@ -22,6 +22,7 @@ Chaque test se lance depuis la carte « Tests dynamiques » du panneau, sur le s
 | Glycémie | HGPO prolongée sur 5 heures (P, partie 2 p. 70) | sain, insulinome (hypoglycémie tardive après le pic, < 0,50 g/L) ; non indiquée chez le diabétique traité |
 | Glycémie | Épreuve de jeûne de 72 h | sain, insulinome (non indiquée chez le diabétique traité) |
 | Posthypophyse | Restriction hydrique + desmopressine (P ; desmopressine en complément) | sain, diabète insipide central (complet, partiel), néphrogénique, polydipsie primaire (complément) ; SIADH : restriction partielle, sans desmopressine, correction lente |
+| Posthypophyse | Restriction hydrique du SIADH sur 3 jours (P ; ≈ 700 mL/j, complément) | SIADH paranéoplasique ou médicamenteux : natrémie ≈ 119 → 129 mmol/L en 3 jours (≈ +3 mmol/L par 24 h), urines toujours concentrées |
 | Posthypophyse | Charge en eau, marche dans le désert (situations physiologiques, complément) | sain, diabète insipide, SIADH |
 | Gonadotrope masculin | Test à la GnRH (complément) | sain (LH × 3 à 5), déficit gonadotrope (réponse faible, sans en préciser le niveau) ; non indiqué dans l'hypogonadisme primaire ni sous androgènes |
 | Gonadotrope masculin | Test à l'hCG (complément) | déficit gonadotrope (hausse franche : cellules de Leydig fonctionnelles), hypogonadisme primaire (hausse faible) ; non interprétable sous androgènes |

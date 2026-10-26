@@ -276,7 +276,8 @@
         // SIADH : restriction partielle (500 à 800 mL/j) et correction lente ; jamais de desmopressine.
         // Temps du protocole : 10 h en 20 s. La polydipsie primaire (p.poto) garde son lavage médullaire.
         p.hps = 10 / 20;
-        if (x > 0.05) { p.restrict = siadh ? 0.2 : 1; if (!siadh) { p.drink = 0; p.sweat = 0; } }
+        // SIADH : apports limités à ≈ 700 mL/j (500 à 800 mL/j, complément), soit environ 28 % des apports habituels.
+        if (x > 0.05) { p.restrict = siadh ? 0.72 : 1; if (!siadh) { p.drink = 0; p.sweat = 0; } }
         if (x > 0.8 && !siadh) p.ddavp = 1;
       },
       measure: (sim) => {
@@ -293,7 +294,7 @@
         const extra = ` Natrémie maximale ${n0(naMax)} mmol/L ; perte de poids ≈ ${loss.toFixed(1).replace('.', ',')} %.` + (loss > 3 || naMax > 148 ? ' En pratique, l\'épreuve est interrompue avant ce stade (perte de poids > 3 à 5 % ou natrémie qui dépasse la normale ; complément).' : '');
         if (st.base.siadh > 0.02 || st.base.drug > 0.02) {
           const na0 = st.na0 != null ? st.na0 : na, d = na - na0;
-          return { tone: 'warn', text: `Restriction hydrique partielle (500 à 800 mL/j ; complément) : les urines restent inappropriément concentrées et la natrémie remonte lentement, de ${n0(na0)} à ${n0(na)} mmol/L (+${d.toFixed(1).replace('.', ',')} mmol/L) : argument pour un SIADH (épreuve diagnostique et thérapeutique). Pas de desmopressine dans un SIADH. Mise en garde : corriger de 8 à 10 mmol/L par 24 h au plus (risque de myélinolyse osmotique ; complément).` };
+          return { tone: 'warn', text: `Restriction hydrique partielle (500 à 800 mL/j ; complément) : les urines restent inappropriément concentrées et la natrémie remonte lentement, de ${n0(na0)} à ${n0(na)} mmol/L (+${d.toFixed(1).replace('.', ',')} mmol/L) : argument pour un SIADH (épreuve diagnostique et thérapeutique ; voir la restriction sur 3 jours, plus parlante). Pas de desmopressine dans un SIADH. Mise en garde : corriger de 8 à 10 mmol/L par 24 h au plus (risque de myélinolyse osmotique ; complément).` };
         }
         if (u8 >= 600) {
           return { tone: 'good', text: `Osmolalité urinaire à ${n0(u8)} mosmol/kg à 8 h : concentration normale, pas de diabète insipide.` + extra };
@@ -308,6 +309,26 @@
           return { tone: 'bad', text: `Concentration partielle (${n0(u8)} mosmol/kg à 8 h) et réponse partielle à la desmopressine (${n0(ud)}, ${rTxt}), avec une natrémie de départ normale haute (${n0(na0)} mmol/L) : diabète insipide partiel probable (complément) ; à distinguer d'une polydipsie primaire.` + cop + crit + extra };
         }
         return { tone: 'bad', text: `Urines non concentrées (${n0(u8)} mosmol/kg) et pas de réponse à la desmopressine (${n0(ud)}, ${rTxt}) : diabète insipide néphrogénique.` + crit + extra };
+      }
+    },
+    {
+      id: 'restriction-siadh', name: 'Restriction hydrique du SIADH (3 jours)', poly: true,
+      what: 'Dans un SIADH, la restriction hydrique est à la fois diagnostique et thérapeutique (polycopié p. 64) : la natrémie remonte-t-elle quand on limite les apports ?',
+      proto: 'Apports limités à 500 à 800 mL/j (ici ≈ 700 mL/j, complément) pendant 3 jours ; natrémie, osmolalités et diurèse chaque jour ; pas de desmopressine. Correction de 8 à 10 mmol/L par 24 h au plus (complément).',
+      unit: 'mmol/L', label: 'Natrémie', thr: 135, thrDir: 'above', thrLabel: 'natrémie normale ≥ 135 mmol/L',
+      span: 72, xUnit: 'h', duration: 20,
+      samples: [{ x: 0.03, label: 'J0' }, { x: 0.34, label: 'J1' }, { x: 0.67, label: 'J2' }, { x: 1, label: 'J3' }],
+      apply(p, x) {
+        p.hps = 72 / 20; // 3 jours en 20 s
+        if (x > 0.03) { p.restrict = 0.72; p.drink = 0; }
+      },
+      measure: (sim) => sim.lab('na'),
+      interpret(v, sim, st) {
+        const siadh = st.base.siadh > 0.02 || st.base.drug > 0.02;
+        const d = v[v.length - 1] - v[0], perDay = d / 3;
+        const f = (x) => x.toFixed(1).replace('.', ',');
+        if (!siadh) return { tone: 'warn', text: `Sans SIADH, la restriction modérée change peu la natrémie (${n0(v[0])} → ${n0(v[v.length - 1])} mmol/L) : ce test ne s'adresse qu'à une hyponatrémie avec urines inappropriément concentrées.` };
+        return { tone: d > 2 ? 'good' : 'warn', text: `Natrémie ${n0(v[0])} → ${n0(v[1])} → ${n0(v[2])} → ${n0(v[3])} mmol/L en 3 jours (+${f(d)} mmol/L, ≈ +${f(perDay)} par 24 h) sous restriction à ≈ 700 mL/j : la remontée confirme a posteriori le SIADH et en est le traitement (polycopié p. 64). Les urines restent concentrées (${n0(sim.lab('uosm'))} mosmol/kg). Rechercher et traiter la cause (tumeur, médicament). Vitesse de correction ≤ 8 à 10 mmol/L par 24 h (myélinolyse osmotique ; complément).` };
       }
     }
   ].concat(T.adh_situations);

@@ -313,7 +313,7 @@
   const ADH_SOL = 900;
   const uosmOf = (s) => {
     const g = pw(clamp(s.eff, 0, 1.5) / 1.5, 2.7);
-    const hypoF = clamp(1 - 0.05 * Math.max(0, 135 - (s.na || 140)), 0.35, 1);
+    const hypoF = clamp(1 - 0.035 * Math.max(0, 135 - (s.na || 140)), 0.35, 1);
     return clamp(80 + (1200 * (s.med || 1) * hypoF - 80) * g, 60, 1200);
   };
   const diurOf = (s) => clamp(ADH_SOL / uosmOf(s), 0.4, 14); // L/24 h
