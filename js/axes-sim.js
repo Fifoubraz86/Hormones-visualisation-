@@ -261,7 +261,7 @@
     init: { prl: 1, inh: 1 },
     targets(p, s) {
       const inh = clamp(p.dopa * p.stalk * (1 - 0.85 * p.drug), 0, 1.5);
-      const prl = (1 + 5 * p.preg) * (1 + 5 * Math.max(0, 1 - inh)) + p.autoPit;
+      const prl = (1 + 13 * p.preg) * (1 + 5 * Math.max(0, 1 - inh)) + p.autoPit; // fin de grossesse ≈ 150–200 ng/mL (complément)
       return { prl, inh };
     },
     labs: [
@@ -281,7 +281,7 @@
       { id: 'macro', name: 'Macroadénome à prolactine', note: 'Prolactine > 200 ng/mL.', p: { autoPit: 25 } },
       { id: 'decon', name: 'Hyperprolactinémie de déconnexion', note: 'Tumeur comprimant la tige : levée du tonus dopaminergique, prolactine < 200 ng/mL.', p: { stalk: 0.2 } },
       { id: 'nl', name: 'Neuroleptique', note: 'Cause iatrogène à écarter avant tout bilan.', p: { drug: 1 } },
-      { id: 'preg', name: 'Grossesse', note: 'Élévation physiologique sous l\'effet des œstrogènes.', p: { preg: 1 } }
+      { id: 'preg', name: 'Grossesse (fin de grossesse)', note: 'Élévation physiologique sous l\'effet des œstrogènes (polycopié p. 49) : prolactine ≈ 150–200 ng/mL en fin de grossesse (complément).', p: { preg: 1 } }
     ],
     interpret(s, p, L) {
       const v = L('prl');
@@ -356,9 +356,11 @@
     ],
     scenarios: [
       { id: 'eu', name: 'Équilibre hydrique normal', note: 'Natrémie stable, urines concentrées selon les besoins.', p: {} },
-      { id: 'deshy', name: 'Déshydratation : marche dans le désert', note: 'Plusieurs heures de sueur sans boire : l\'osmolalité monte, l\'ADH et la soif s\'élèvent, les urines deviennent rares et très concentrées.', p: { sweat: 1 } },
+      { id: 'deshy', name: 'Déshydratation : marche dans le désert', note: 'Plusieurs heures de sueur sans boire : l\'osmolalité monte, l\'ADH et la soif s\'élèvent, les urines deviennent rares et très concentrées.', p: { sweat: 0.72 } },
       { id: 'hyper', name: 'Hyperhydratation : 1,5 L d\'eau bus', note: 'Apport d\'eau abondant : l\'osmolalité baisse, l\'ADH s\'effondre, le rein élimine l\'excès par des urines abondantes et diluées.', p: { drink: 1 } },
       { id: 'dic', name: 'Diabète insipide central', note: 'Défaut d\'ADH : polyurie > 3 L/24 h, polydipsie, urines diluées < 200 mosmol/kg ; natrémie conservée tant que le patient boit, un peu augmentée si les sorties dépassent les apports (polycopié p. 64).', p: { hypo: 0.01 } },
+      { id: 'dicp', name: 'Diabète insipide central partiel (complément)', note: 'Sécrétion d\'ADH réduite sans être abolie : polyurie moins marquée, natrémie normale haute ; sous restriction, les urines se concentrent partiellement, puis la desmopressine les concentre encore, sans atteindre le niveau du sujet sain (complément).', p: { hypo: 0.15 } },
+      { id: 'poto', name: 'Polydipsie primaire (complément)', note: 'Apports d\'eau excessifs et chroniques (potomanie) : l\'ADH est freinée, polyurie hypotonique avec une natrémie basse-normale. Le lavage médullaire limite la concentration sous restriction ; réponse partielle à la desmopressine (complément).', p: { poto: 1 } },
       { id: 'din', name: 'Diabète insipide néphrogénique', note: 'Résistance rénale à l\'ADH (complément) : même tableau, ADH élevée.', p: { kidney: 0.05 } },
       { id: 'siadh', name: 'SIADH paranéoplasique', note: 'Une tumeur sécrète de l\'ADH de façon autonome (syndrome paranéoplasique) : rétention d\'eau sans œdème, hyponatrémie en règle très basse (< 120 mmol/L), urines inappropriément concentrées.', p: { siadh: 5 } },
       { id: 'siadhm', name: 'SIADH médicamenteux', note: 'De nombreux médicaments (polycopié p. 64) : ils stimulent surtout la libération hypothalamique d\'ADH ou potentialisent son effet rénal (complément). Même tableau ; l\'éviction du médicament confirme rétrospectivement le diagnostic.', p: { drug: 1.6 } }
@@ -367,16 +369,17 @@
       const na = L('na'), u = L('uosm'), d = L('diur');
       if (na < 135 && u > 100) return { tone: 'bad', label: 'Hyponatrémie, urines concentrées', text: 'Profil de SIADH (osmolalité urinaire > 100 mosmol/kg, complément ; natriurèse conservée) en l\'absence d\'insuffisance cardiaque, rénale ou hépatique (polycopié p. 63), d\'insuffisance corticotrope (p. 60-61) et d\'hypothyroïdie (complément) : restriction hydrique.' };
       if (L('posm') > 295 && u > 600) return { tone: 'warn', label: 'Déshydratation, ADH stimulée', text: 'Hypernatrémie avec urines rares et concentrées : le rein économise l\'eau au maximum ; seule la boisson corrige le déficit.' };
+      if (p.poto > 0.02 && d > 3 && u < 300) return { tone: 'warn', label: 'Polyurie hypotonique, natrémie basse-normale', text: 'Apports d\'eau excessifs et chroniques : évoquer une polydipsie primaire (complément). L\'épreuve de restriction montre une concentration partielle des urines ; la copeptine aide à la distinguer d\'un diabète insipide partiel (complément).' };
       if (d > 2.5 && u < 300 && na < 141) return { tone: 'warn', label: 'Diurèse aqueuse', text: 'Urines abondantes et diluées avec une natrémie normale basse : réponse adaptée à un apport d\'eau (à distinguer d\'une potomanie si elle est permanente).' };
       if (d > 3 && u < 200) return { tone: 'bad', label: 'Polyurie hypotonique', text: 'Diabète insipide : confirmer par une épreuve de restriction hydrique, après IRM.' };
       return { tone: 'good', label: 'Équilibre hydrique normal', text: 'Natrémie normale, diurèse normale.' };
     },
     hooks: {
       links: { 'hypo>post>adh': 'adh', 'post>kidney>adh': 'adh', 'post>vessel>adh': 'adh', 'kidney>osm>water': 'eff', 'kidney>urine>water': 'urineRate', 'thirst>osm>water': 'thirstRate' },
-      rates: { siadhRate: (s, p) => p.siadh / 2, ddavpRate: (s, p) => 2 * p.ddavp, urineRate: (s) => 900 / uosmOf(s.eff, s.na) / 1.5, thirstRate: (s, p) => Math.max(0, 1 - p.restrict - p.sweat) * clamp(0.6 + (s.na - 140) / 2, 0.15, 3) + 3 * p.drink },
+      rates: { siadhRate: (s, p) => p.siadh / 2, ddavpRate: (s, p) => 2 * p.ddavp, urineRate: (s) => ADH_SOL / uosmOf(s) / 1.5, thirstRate: (s, p) => Math.max(0, 1 - p.restrict - p.sweat) * (clamp(0.6 + (s.na - 140) / 2, 0.15, 3) + 3 * clamp(p.drink, 0, 1) + 2 * p.poto) },
       liveNode: {
         osm: (s) => Math.round(2 * s.na + 10) + ' mosmol/kg · Na ' + Math.round(s.na),
-        urine: (s) => f1(clamp(900 / uosmOf(s.eff, s.na), 0.4, 14)) + ' L/24 h · ' + Math.round(uosmOf(s.eff, s.na)) + ' mosmol/kg'
+        urine: (s) => f1(diurOf(s)) + ' L/24 h · ' + Math.round(uosmOf(s)) + ' mosmol/kg'
       },
       lesions: [
         { node: 'post', kind: 'mass', tone: 'grey', dx: -40, dy: -110, size: () => 0.75, show: (p) => p.hypo < 0.5, label: 'lésion de la tige', lx: 120, ly: 0, title: 'Lésion hypothalamo-tigellaire', text: 'Le polycopié cite : hypophysite, craniopharyngiome, gliome du chiasma, méningiome, pathologie infiltrative, métastase. Un adénome hypophysaire n\'en donne pas, sauf apoplexie ou chirurgie.' },
@@ -388,7 +391,7 @@
         { id: 'ectoadh', x: 960, y: 588, label: 'Tumeur : ADH ectopique', w: 290, color: 'bad', show: (p) => p.siadh > 0.02, info: 'SIADH paranéoplasique : la tumeur sécrète elle-même l\'ADH, sans passer par l\'hypothalamus ni la posthypophyse.' },
         { id: 'drugadh', x: 960, y: 588, label: 'Médicament', w: 210, color: 'bad', show: (p) => p.drug > 0.02, info: 'De nombreux médicaments peuvent entraîner un SIADH (polycopié p. 64). Mécanismes (complément) : stimulation de la libération hypothalamique d\'ADH, potentialisation de son effet sur le rein.' },
         { id: 'sun', x: 1000, y: 140, label: 'Chaleur, sueur, pas d\'eau', w: 300, color: 'p-amber', show: (p) => p.sweat > 0.02, info: 'Marche prolongée au soleil sans boire : perte d\'eau par la sueur et la respiration, que la soif ne peut compenser.' },
-        { id: 'glass', x: 1000, y: 140, label: 'Boissons', w: 170, color: 'p-sky', show: (p) => p.drink > 0.02, info: 'Apport rapide d\'eau libre (par exemple 1,5 L en 30 minutes).' }
+        { id: 'glass', x: 1000, y: 140, label: 'Boissons', w: 170, color: 'p-sky', show: (p) => p.drink > 0.02 || p.poto > 0.02, info: 'Apport rapide d\'eau libre (par exemple 1,5 L en 30 minutes), ou apports excessifs et chroniques de la polydipsie primaire (complément).' }
       ],
       extraLinks: [{ from: 'ectoadh', to: 'kidney', kind: 'stim', mol: 'adh', v: 'siadhRate', label: '' }, { from: 'drugadh', to: 'hypo', kind: 'stim', color: 'bad', label: 'libération ↑' }, { from: 'drugadh', to: 'kidney', kind: 'stim', color: 'bad', label: 'potentialisation' }, { from: 'restr', to: 'osm', kind: 'stim', color: 'p-sky', label: '' }, { from: 'ddavp', to: 'kidney', kind: 'stim', mol: 'adh', v: 'ddavpRate', label: '' }, { from: 'sun', to: 'osm', kind: 'stim', color: 'p-amber', label: 'perte d\'eau' }, { from: 'glass', to: 'osm', kind: 'inhib', mol: 'water', v: 'thirstRate', label: '' }],
       levels: [{ label: 'ADH', mol: 'adh', v: 'adh', max: 6 }, { label: 'Ocytocine', mol: 'oxy', fn: () => 0.6, max: 2 }]
