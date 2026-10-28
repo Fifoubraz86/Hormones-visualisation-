@@ -320,10 +320,13 @@
   SIMS.adh = {
     title: 'Bilan hydrique simulé',
     defaults: { hypo: 1, kidney: 1, siadh: 0, drug: 0, restrict: 0, ddavp: 0, drink: 0, poto: 0, sweat: 0, poids: 70, hps: 12 },
-    init: { na: 140, adh: 1, eff: 1, W: 0, med: 1 },
-    tau: { na: 0.3, W: 1, adh: 0.5, eff: 0.5, med: 0.5 },
+    init: { na: 140, adh: 1, adhP: 1, eff: 1, W: 0, med: 1 },
+    tau: { na: 0.3, W: 1, adh: 0.5, adhP: 0.5, eff: 0.5, med: 0.5 },
     targets(p, s) {
-      const adh = p.hypo * clamp(ex((s.na - 140) / (s.na < 140 ? 1.2 : 2)) * (1 + 1.2 * p.sweat), 0, 12) + p.siadh + 3 * p.drug; // osmolalité (effondrée sous la consigne), volémie ; SIADH paranéoplasique (ADH ectopique) ou médicamenteux (libération hypothalamique stimulée)
+      // ADH hypothalamo-hypophysaire : réglée par l'osmolalité (effondrée sous la consigne) et la volémie ; un médicament inducteur de SIADH stimule sa libération.
+      // ADH ectopique d'une tumeur : autonome, elle s'ajoute dans le sang mais ne passe pas par la posthypophyse ; l'hypo-osmolalité qu'elle provoque éteint la sécrétion hypophysaire.
+      const adhP = p.hypo * clamp(ex((s.na - 140) / (s.na < 140 ? 1.2 : 2)) * (1 + 1.2 * p.sweat), 0, 12) + 3 * p.drug;
+      const adh = adhP + p.siadh; // ADH plasmatique totale
       const a2 = adh + 5 * p.ddavp; // desmopressine : agoniste V2
       const eff = clamp((p.kidney * a2) / (a2 + 0.5) * 1.5 * (1 + 0.15 * p.drug), 0, 1.5); // certains médicaments potentialisent aussi l'effet rénal (complément)
       // Lavage médullaire d'une polyurie chronique (complément) : concentration maximale réduite de moitié au plus.
@@ -336,7 +339,7 @@
       const W = clamp(s.W + (intake - out) * p.hps, -0.12 * tbw, 0.2 * tbw);
       // ΔNa ≈ Na × Δeau / eau totale : tant que le patient boit, la natrémie du diabète insipide reste à peine augmentée (polycopié p. 64).
       const na = 140 * tbw / (tbw + s.W);
-      return { adh, eff, na, W, med };
+      return { adh, adhP, eff, na, W, med };
     },
     labs: [
       { key: 'na', name: 'Natrémie', unit: 'mmol/L', k: 1, lo: 135, hi: 145, min: 110, max: 160, dec: 0 },
@@ -362,7 +365,7 @@
       { id: 'dicp', name: 'Diabète insipide central partiel (complément)', note: 'Sécrétion d\'ADH réduite sans être abolie : polyurie moins marquée, natrémie normale haute ; sous restriction, les urines se concentrent partiellement, puis la desmopressine les concentre encore, sans atteindre le niveau du sujet sain (complément).', p: { hypo: 0.15 } },
       { id: 'poto', name: 'Polydipsie primaire (complément)', note: 'Apports d\'eau excessifs et chroniques (potomanie) : l\'ADH est freinée, polyurie hypotonique avec une natrémie basse-normale. Le lavage médullaire limite la concentration sous restriction ; réponse partielle à la desmopressine (complément).', p: { poto: 1 } },
       { id: 'din', name: 'Diabète insipide néphrogénique', note: 'Résistance rénale à l\'ADH (complément) : même tableau, ADH élevée.', p: { kidney: 0.05 } },
-      { id: 'siadh', name: 'SIADH paranéoplasique', note: 'Une tumeur sécrète de l\'ADH de façon autonome (syndrome paranéoplasique) : rétention d\'eau sans œdème, hyponatrémie en règle très basse (< 120 mmol/L), urines inappropriément concentrées.', p: { siadh: 5 } },
+      { id: 'siadh', name: 'SIADH paranéoplasique', note: 'Une tumeur sécrète de l\'ADH de façon autonome (syndrome paranéoplasique) : rétention d\'eau sans œdème, hyponatrémie en règle très basse (< 120 mmol/L), urines inappropriément concentrées. L\'hypo-osmolalité éteint la sécrétion hypothalamo-hypophysaire : l\'ADH plasmatique vient uniquement de la tumeur.', p: { siadh: 5 } },
       { id: 'siadhm', name: 'SIADH médicamenteux', note: 'De nombreux médicaments (polycopié p. 64) : ils stimulent surtout la libération hypothalamique d\'ADH ou potentialisent son effet rénal (complément). Même tableau ; l\'éviction du médicament confirme rétrospectivement le diagnostic.', p: { drug: 1.6 } }
     ],
     interpret(s, p, L) {
@@ -375,9 +378,11 @@
       return { tone: 'good', label: 'Équilibre hydrique normal', text: 'Natrémie normale, diurèse normale.' };
     },
     hooks: {
-      links: { 'hypo>post>adh': 'adh', 'post>kidney>adh': 'adh', 'post>vessel>adh': 'adh', 'kidney>osm>water': 'eff', 'kidney>urine>water': 'urineRate', 'thirst>osm>water': 'thirstRate' },
+      links: { 'hypo>post>adh': 'adhP', 'post>kidney>adh': 'adhP', 'post>vessel>adh': 'adhP', 'kidney>osm>water': 'eff', 'kidney>urine>water': 'urineRate', 'thirst>osm>water': 'thirstRate' },
       rates: { siadhRate: (s, p) => p.siadh / 2, ddavpRate: (s, p) => 2 * p.ddavp, urineRate: (s) => ADH_SOL / uosmOf(s) / 1.5, thirstRate: (s, p) => Math.max(0, 1 - p.restrict - p.sweat) * (clamp(0.6 + (s.na - 140) / 2, 0.15, 3) + 3 * clamp(p.drink, 0, 1) + 2 * p.poto) },
       liveNode: {
+        hypo: (s) => (s.adhP < 0.05 ? 'ADH hypophysaire éteinte (freinée par l\'hypo-osmolalité)' : 'ADH hypophysaire × ' + f1(s.adhP)),
+        post: (s) => (s.adhP < 0.05 ? 'aucune libération d\'ADH' : 'libération d\'ADH × ' + f1(s.adhP)),
         osm: (s) => Math.round(2 * s.na + 10) + ' mosmol/kg · Na ' + Math.round(s.na),
         urine: (s) => f1(diurOf(s)) + ' L/24 h · ' + Math.round(uosmOf(s)) + ' mosmol/kg'
       },
@@ -388,13 +393,13 @@
       extraNodes: [
         { id: 'restr', x: 700, y: 570, label: 'Restriction hydrique', w: 250, color: 'p-sky', show: (p) => p.restrict > 0.02, info: 'Arrêt des boissons en milieu hospitalier : l\'osmolalité monte et l\'ADH doit concentrer les urines.' },
         { id: 'ddavp', x: 1090, y: 560, label: 'Desmopressine', w: 220, color: 'p-sky', show: (p) => p.ddavp > 0.02, info: 'Agoniste V2 : concentre les urines si le rein répond (diabète insipide central), pas dans le diabète insipide néphrogénique.' },
-        { id: 'ectoadh', x: 960, y: 588, label: 'Tumeur : ADH ectopique', w: 290, color: 'bad', show: (p) => p.siadh > 0.02, info: 'SIADH paranéoplasique : la tumeur sécrète elle-même l\'ADH, sans passer par l\'hypothalamus ni la posthypophyse.' },
+        { id: 'ectoadh', x: 960, y: 588, label: 'Tumeur : ADH ectopique', w: 290, color: 'bad', show: (p) => p.siadh > 0.02, info: 'SIADH paranéoplasique : la tumeur sécrète elle-même l\'ADH, sans passer par l\'hypothalamus ni la posthypophyse. L\'hypo-osmolalité freine l\'ADH hypophysaire, qui devient quasi nulle.' },
         { id: 'drugadh', x: 960, y: 588, label: 'Médicament', w: 210, color: 'bad', show: (p) => p.drug > 0.02, info: 'De nombreux médicaments peuvent entraîner un SIADH (polycopié p. 64). Mécanismes (complément) : stimulation de la libération hypothalamique d\'ADH, potentialisation de son effet sur le rein.' },
         { id: 'sun', x: 1000, y: 140, label: 'Chaleur, sueur, pas d\'eau', w: 300, color: 'p-amber', show: (p) => p.sweat > 0.02, info: 'Marche prolongée au soleil sans boire : perte d\'eau par la sueur et la respiration, que la soif ne peut compenser.' },
         { id: 'glass', x: 1000, y: 140, label: 'Boissons', w: 170, color: 'p-sky', show: (p) => p.drink > 0.02 || p.poto > 0.02, info: 'Apport rapide d\'eau libre (par exemple 1,5 L en 30 minutes), ou apports excessifs et chroniques de la polydipsie primaire (complément).' }
       ],
       extraLinks: [{ from: 'ectoadh', to: 'kidney', kind: 'stim', mol: 'adh', v: 'siadhRate', label: '' }, { from: 'drugadh', to: 'hypo', kind: 'stim', color: 'bad', label: 'libération ↑' }, { from: 'drugadh', to: 'kidney', kind: 'stim', color: 'bad', label: 'potentialisation' }, { from: 'restr', to: 'osm', kind: 'stim', color: 'p-sky', label: '' }, { from: 'ddavp', to: 'kidney', kind: 'stim', mol: 'adh', v: 'ddavpRate', label: '' }, { from: 'sun', to: 'osm', kind: 'stim', color: 'p-amber', label: 'perte d\'eau' }, { from: 'glass', to: 'osm', kind: 'inhib', mol: 'water', v: 'thirstRate', label: '' }],
-      levels: [{ label: 'ADH', mol: 'adh', v: 'adh', max: 6 }, { label: 'Ocytocine', mol: 'oxy', fn: () => 0.6, max: 2 }]
+      levels: [{ label: 'ADH plasmatique', mol: 'adh', v: 'adh', max: 6 }, { label: 'ADH hypophysaire', mol: 'adh', v: 'adhP', max: 6 }, { label: 'Ocytocine', mol: 'oxy', fn: () => 0.6, max: 2 }]
     }
   };
 
@@ -408,11 +413,11 @@
     tau: { A: 0.4, N: 0.8, D: 0.8 },
     targets(p, s, T) {
       const parox = 0.35 + 1.65 * G(T.h % 6, 1.2, 0.35); // paroxysmes
-      return { A: p.sym + 3 * p.pheoA * parox, N: p.sym + 2.4 * (p.pheoN + 0.4 * p.pheoA) * (0.7 + 0.3 * parox), D: 1 + 3 * p.pheoD };
+      return { A: p.sym + 3 * p.pheoA * parox, N: p.sym + 2.4 * p.pheoN * (0.7 + 0.3 * parox), D: 1 + 3 * p.pheoD };
     },
     labs: [
       { key: 'mn', name: 'Métanéphrine', unit: '× limite sup.', range: '< 1 × LSN', lo: 0, hi: 1, min: 0, max: 15, dec: 1, fn: (s, p) => 0.45 * p.sym + 2.4 * p.pheoA },
-      { key: 'nmn', name: 'Normétanéphrine', unit: '× limite sup.', range: '< 1 × LSN', lo: 0, hi: 1, min: 0, max: 15, dec: 1, fn: (s, p) => 0.45 * p.sym + 2.4 * (p.pheoN + 0.4 * p.pheoA) },
+      { key: 'nmn', name: 'Normétanéphrine', unit: '× limite sup.', range: '< 1 × LSN', lo: 0, hi: 1, min: 0, max: 15, dec: 1, fn: (s, p) => 0.45 * p.sym + 2.4 * p.pheoN },
       { key: 'mt', name: '3-méthoxytyramine', unit: '× limite sup.', range: '< 1 × LSN', lo: 0, hi: 1, min: 0, max: 15, dec: 1, fn: (s, p) => 0.5 + 2.4 * p.pheoD },
       { key: 'fc', name: 'Fréquence cardiaque', unit: '/min', range: '60–100 /min (indicatif, complément)', lo: 60, hi: 100, min: 40, max: 180, dec: 0, fn: (s) => clamp(70 + 22 * ln(Math.max(s.A, 0.2)) + 6 * ln(Math.max(s.N, 0.2)), 45, 170) },
       { key: 'pas', name: 'PA systolique', unit: 'mmHg', range: '100–140 mmHg (indicatif, complément)', lo: 100, hi: 140, min: 80, max: 260, dec: 0, fn: (s) => clamp(120 + 10 * ln(Math.max(s.A, 0.2)) + 22 * ln(Math.max(s.N, 0.2)), 85, 250) },
@@ -427,14 +432,15 @@
     scenarios: [
       { id: 'eu', name: 'Repos', note: 'Faible sécrétion basale.', p: {} },
       { id: 'stress', name: 'Stress aigu', note: 'Réaction de combat ou de fuite : FC et PA ↑, glycémie ↑ ; métanéphrines au plus discrètement augmentées.', p: { sym: 3 } },
-      { id: 'pheoA', name: 'Phéochromocytome à adrénaline', note: 'Triade de Ménard (céphalées, sueurs, palpitations), HTA généralement permanente avec parfois des crises paroxystiques ; profil adrénergique (complément) : tachycardie, hyperglycémie, métanéphrine très élevée, normétanéphrine souvent aussi augmentée (sécrétion mixte).', p: { pheoA: 2.6 } },
+      { id: 'pheoA', name: 'Phéochromocytome à adrénaline', note: 'Triade de Ménard (céphalées, sueurs, palpitations), HTA généralement permanente avec parfois des crises paroxystiques ; profil adrénergique pur (complément) : tachycardie, hyperglycémie, métanéphrine très élevée, normétanéphrine normale (la tumeur ne fabrique pas de noradrénaline sécrétée).', p: { pheoA: 2.6 } },
       { id: 'pheoN', name: 'Phéochromocytome à noradrénaline', note: 'Profil noradrénergique : HTA plus permanente, moins de tachycardie ; normétanéphrine très élevée. Profil aussi des paragangliomes (complément).', p: { pheoN: 2.6 } },
+      { id: 'pheoM', name: 'Phéochromocytome mixte (adrénaline et noradrénaline)', note: 'Les deux catécholamines sont sécrétées (complément) : métanéphrine et normétanéphrine toutes deux élevées ; tachycardie, HTA et hyperglycémie intermédiaires entre les deux profils purs.', p: { pheoA: 1.8, pheoN: 1.8 } },
       { id: 'pheoD', name: 'Tumeur à dopamine', note: 'Rare, surtout paragangliome (souvent SDHB, risque de malignité) : peu ou pas d\'HTA ; 3-méthoxytyramine élevée (complément).', p: { pheoD: 2.6 } }
     ],
     interpret(s, p, L) {
       const mn = L('mn'), nmn = L('nmn'), mt = L('mt'), top = Math.max(mn, nmn, mt);
       if (top >= 3) {
-        const kind = mt === top ? 'dopaminergique (3-méthoxytyramine) : penser à un paragangliome, rechercher une mutation SDHB' : mn === top ? 'adrénergique (métanéphrine) : origine surrénalienne quasi certaine' : 'noradrénergique (normétanéphrine) : surrénale ou paragangliome';
+        const kind = mn >= 3 && nmn >= 3 ? 'mixte (métanéphrine et normétanéphrine toutes deux élevées) : surrénale le plus souvent' : mt === top ? 'dopaminergique (3-méthoxytyramine) : penser à un paragangliome, rechercher une mutation SDHB' : mn === top ? 'adrénergique (métanéphrine) : origine surrénalienne quasi certaine' : 'noradrénergique (normétanéphrine) : surrénale ou paragangliome';
         return { tone: 'bad', label: 'Métanéphrines ≥ 3 × LSN', text: `Évoquer un phéochromocytome ou un paragangliome : HTA généralement permanente, parfois paroxystique ; céphalées, sueurs, palpitations. Profil ${kind} (complément ; seuil de 3 × LSN indicatif). Imagerie ensuite : scanner ou IRM, puis imagerie fonctionnelle (polycopié p. 79).` };
       }
       if (top > 1) return { tone: 'warn', label: 'Élévation modérée des métanéphrines', text: 'Élévation discrète (< 3 × LSN) : faux positifs (stress, affection aiguë grave, médicaments, alimentation ; polycopié p. 79 ; prélèvement en position assise : complément). Contrôler au repos avant de conclure.' };
@@ -443,7 +449,7 @@
     },
     hooks: {
       links: { 'med>heart>adre': 'A', 'med>vessel>nora': 'N', 'med>liver>adre': 'A', 'med>assay>adre': 'mnRate', 'med>assay>nora': 'nmnRate', 'med>assay>dopa': 'mtRate' },
-      rates: { mnRate: (s, p) => 0.45 * p.sym + 2.4 * p.pheoA, nmnRate: (s, p) => 0.45 * p.sym + 2.4 * (p.pheoN + 0.4 * p.pheoA), mtRate: (s, p) => 0.5 + 2.4 * p.pheoD },
+      rates: { mnRate: (s, p) => 0.45 * p.sym + 2.4 * p.pheoA, nmnRate: (s, p) => 0.45 * p.sym + 2.4 * p.pheoN, mtRate: (s, p) => 0.5 + 2.4 * p.pheoD },
       lesions: [
         { node: 'med', kind: 'mass', tone: 'brown', dx: -6, dy: -28, show: (p) => p.pheoA + p.pheoN > 0.02, size: (p) => clamp(0.6 + 0.08 * (p.pheoA + p.pheoN), 0.6, 1.2), label: 'phéochromocytome', ly: -42, title: 'Phéochromocytome', text: 'Tumeur des cellules chromaffines de la médullosurrénale. Le profil sécrétoire (adrénaline, noradrénaline, dopamine) oriente la clinique et le bilan.' },
         { node: 'nerve', kind: 'mass', tone: 'brown', dx: 30, dy: 40, show: (p) => p.pheoD > 0.02, size: () => 0.8, label: 'paragangliome', ly: 50, title: 'Paragangliome', text: 'Tumeur chromaffine extra-surrénalienne (chaîne sympathique abdominale, thorax, tête et cou). Les formes dopaminergiques sont souvent liées à SDHB (complément).' }

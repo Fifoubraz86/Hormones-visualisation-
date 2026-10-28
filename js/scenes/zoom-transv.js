@@ -408,7 +408,7 @@
     'ztr-nem1': { t: 'NEM 1', k: 'Gène MEN1 (ménine, suppresseur de tumeur) · transmission autosomique dominante (complément)', d: 'Association d\'hyperparathyroïdie primaire (la plus fréquente, souvent plusieurs glandes), de tumeurs neuroendocrines duodéno-pancréatiques et d\'adénomes hypophysaires.' },
     'ztr-nem1-hpt': { t: 'Hyperparathyroïdie primaire (NEM 1)', k: 'Manifestation la plus fréquente (complément)', d: 'Atteinte de plusieurs parathyroïdes (hyperplasie ou adénomes multiples), souvent plus précoce que l\'hyperparathyroïdie sporadique.' },
     'ztr-nem1-pit': { t: 'Adénome hypophysaire (NEM 1)', k: 'Surtout prolactinome (complément)', d: 'Les autres adénomes (somatotropes, corticotropes, non sécrétants) sont possibles.' },
-    'ztr-nem1-tne': { t: 'Tumeurs neuroendocrines duodéno-pancréatiques', k: 'NEM 1 (complément)', d: 'Gastrinome (souvent duodénal), insulinome, tumeurs non sécrétantes. Elles conditionnent une grande part du pronostic.' },
+    'ztr-nem1-tne': { t: 'Tumeurs neuroendocrines duodéno-pancréatiques', k: 'NEM 1 (complément ; TNCD 2026, p. 14)', d: 'Incidence cumulée ≈ 90 %, souvent multiples, fonctionnelles dans 40 % des cas : gastrinome (souvent duodénal), plus rarement insulinome ; tumeurs non sécrétantes. Elles conditionnent une grande part du pronostic. Clic : classification et modèles des TNE pancréatiques.' },
     'ztr-nem2': { t: 'NEM 2', k: 'Gène RET (proto-oncogène, mutation activatrice) · autosomique dominante (complément)', d: 'NEM 2A : cancer médullaire de la thyroïde, phéochromocytome, hyperparathyroïdie. NEM 2B : cancer médullaire, phéochromocytome, névromes muqueux, morphotype marfanoïde, sans hyperparathyroïdie.' },
     'ztr-nem2-cmt': { t: 'Cancer médullaire de la thyroïde', k: 'NEM 2A et 2B : quasi constant (complément)', d: 'Tumeur des cellules C, marquée par la calcitonine. Le polycopié recommande le dosage systématique de la calcitonine dans un contexte héréditaire connu de CMT (p. 18).', src: 'Polycopié p. 18' },
     'ztr-nem2-pheo': { t: 'Phéochromocytome', k: 'NEM 2A et 2B, souvent bilatéral (complément)', d: 'À rechercher devant un syndrome de prédisposition génétique (p. 79), et à éliminer avant toute chirurgie, en particulier la thyroïdectomie (complément).', src: 'Polycopié p. 79' },
@@ -477,7 +477,7 @@
       a.text(150, 184, 'gène MEN1 · autosomique dominante', 'note', { attrs: { 'data-info': 'ztr-nem1' } });
       card(60, 205, 420, 84, 'p-teal', 'Hyperparathyroïdie primaire', 'plusieurs glandes · la plus fréquente', 'ztr-nem1-hpt', ['n1'], [M.ptL]);
       card(60, 300, 420, 84, 'p-teal', 'Adénome hypophysaire', 'surtout prolactinome', 'ztr-nem1-pit', ['n1'], [M.hyp]);
-      card(60, 395, 420, 84, 'p-teal', 'Tumeurs neuroendocrines', 'pancréas, duodénum (gastrinome, insulinome)', 'ztr-nem1-tne', ['n1'], [M.panc]);
+      a.zoomable(card(60, 395, 420, 84, 'p-teal', 'Tumeurs neuroendocrines ⊕', 'pancréas, duodénum (gastrinome, insulinome)', 'ztr-nem1-tne', ['n1'], [M.panc]), 'panc-tne');
       mark(M.ptL, 'p-teal', 'ztr-nem1-hpt', ['n1'], 7); mark(M.ptL2, 'p-teal', 'ztr-nem1-hpt', ['n1'], 7);
       mark(M.hyp, 'p-teal', 'ztr-nem1-pit', ['n1']);
       mark(M.panc, 'p-teal', 'ztr-nem1-tne', ['n1']);

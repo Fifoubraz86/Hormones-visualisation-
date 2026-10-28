@@ -20,7 +20,7 @@
   // Molécules de l'axe thyréotrope proposées en fiches dans toutes ses scènes
   ['thyro', 'hypo', 'pit', 'foll', 'transp', 'cell'].forEach((id) => { HV.scenes[id].legend = new Set(['trh', 'tsh', 't4', 't3', 'rt3', 'iod', 'tg', 'trab', 'tbg', 'ttr', 'alb']); });
   const scenes = HV.sceneList;
-  const TOUR = ['atlas', 'thyro', 'hypo', 'pit', 'foll', 'transp', 'cell', 'cortico', 'somato', 'gonadoF', 'gonadoM', 'lacto', 'adh', 'medullo', 'phospho', 'raa', 'glyc', 'islet', 'lipid'];
+  const TOUR = ['atlas', 'thyro', 'hypo', 'pit', 'foll', 'transp', 'cell', 'cortico', 'somato', 'gonadoF', 'gonadoM', 'lacto', 'adh', 'medullo', 'phospho', 'raa', 'glyc', 'islet', 'pancreas', 'lipid'];
 
   /* ---------- Caméra ---------- */
   const cam = { cx: 800, cy: 500, w: 1700 };

@@ -873,3 +873,15 @@ line.m-db { stroke: var(--mc); stroke-width: 0.9; }
 
 .warn-author { font-size: 14px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
 .warn-author strong { color: var(--fg); }
+
+/* Illustrations d'organes (Servier Medical Art via Bioicons) */
+.org-art { image-rendering: auto; }
+/* Zones de survol posées sur un dessin Servier (js/organs.js) */
+.art-hit { fill-opacity: 0; stroke-opacity: 0; }
+.org-art { pointer-events: none; }
+.thy-lobes .thy-art { transition: filter 0.8s; }
+.thy-lobes.quiet .thy-art { filter: saturate(0.25) brightness(0.8); }
+.body-skin .org-art { filter: drop-shadow(0 0 0.8px rgba(120, 80, 70, 0.55)) drop-shadow(0 2px 6px rgba(60, 40, 40, 0.12)); }
+/* Hypophyse Servier : lobes teintés (code couleur) et tige couleur du dessin */
+.pit-tint { fill-opacity: 0.42; stroke-opacity: 0.8; }
+.pit-stalk { fill: #fdd08e; }

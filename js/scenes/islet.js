@@ -11,7 +11,7 @@
     'cell-delta': { t: 'Cellule δ', k: '5 à 10 % (complément)', d: 'Sécrète la somatostatine, qui freine localement l\'insuline et le glucagon (action paracrine).' },
     'cell-pp': { t: 'Cellule PP', k: '< 5 %, surtout dans la tête du pancréas (complément)', d: 'Sécrète le polypeptide pancréatique (satiété, sécrétion exocrine).' },
     'cell-eps': { t: 'Cellule ε', k: '< 1 % (complément)', d: 'Sécrète la ghréline, en petite quantité chez l\'adulte.' },
-    acini: { t: 'Pancréas exocrine', k: '≈ 99 % du pancréas', d: 'Les acini sécrètent les enzymes digestives dans les canaux pancréatiques. Les îlots, dispersés entre eux, ne représentent qu\'environ 1 % du tissu.' },
+    acini: { t: 'Pancréas exocrine', k: 'Acini : 85 % de la masse pancréatique (SNFGE, chap. 7 p. 6)', d: 'Les acini sécrètent les enzymes digestives dans les canaux pancréatiques. Les îlots, dispersés entre eux, ne représentent qu\'environ 1 % du tissu (polycopié ; 1 à 2 % selon le SNFGE). Clic : le pancréas exocrine.' },
     'islet-cap': { t: 'Capillaires fenêtrés de l\'îlot', k: 'Drainage portal vers le foie', d: 'L\'îlot est très vascularisé. L\'insuline et le glucagon gagnent la veine porte : le foie reçoit les concentrations les plus fortes (complément).' },
     glut2: { t: 'GLUT2', k: 'Transporteur du glucose à faible affinité (complément)', d: 'Laisse entrer le glucose proportionnellement à la glycémie : la concentration intracellulaire suit la concentration plasmatique. Chez l\'homme, GLUT1 est même prédominant sur GLUT2 (complément).' },
     gk: { t: 'Glucokinase', k: 'Le « capteur de glucose » de la cellule β (complément)', d: 'Phosphoryle le glucose en glucose-6-phosphate. Non freinée par son produit, son activité suit la glycémie dans la zone physiologique. Ses mutations donnent un diabète MODY 2.' },
@@ -53,7 +53,7 @@
 
       /* ================= À gauche : l'îlot dans le pancréas exocrine ================= */
       const C = [400, 575], R = 230;
-      const acG = a.el('g', { class: 'acini', 'data-info': 'acini' });
+      const acG = a.zoomable(a.el('g', { class: 'acini', 'data-info': 'acini' }), 'panc-exo');
       for (let k = 0; k < 34; k++) {
         const an = (k / 34) * Math.PI * 2 + rnd() * 0.12, rr = R + 70 + rnd() * 45;
         const cx = C[0] + Math.cos(an) * rr, cy = C[1] + Math.sin(an) * rr * 0.92;
@@ -91,6 +91,7 @@
       a.el('circle', { r: 64, class: 'les-cap' }, tumor);
       a.el('circle', { r: 58, class: 'les-nod blue' }, tumor);
       a.text(0, 92, 'insulinome', 'les-lbl', { anchor: 'middle' }, tumor);
+      a.zoomable(tumor, 'tne-insulinome');
 
       // Sécrétions dans les capillaires (insuline, glucagon) et paracrinie.
       a.flow(caps[0], { mol: 'insulin', rate: () => 1.6 * S().insE, pace: () => HV.paceOf(S().insE), size: 1.4, speed: 110, track: false, max: 30 });

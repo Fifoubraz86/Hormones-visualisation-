@@ -146,6 +146,12 @@
     peptide('adh', 'p-sky', 9, { ring: 6, ss: [0, 5] });
     peptide('oxy', 'p-rose', 9, { ring: 6, ss: [0, 5] });
     peptide('glucagon', 'p-orange', 29, { helix: true });
+    // Hormones digestives et pancréatiques (module pancréas)
+    peptide('gastrin', 'p-red2', 17); // gastrine-17 (« petite gastrine »)
+    peptide('cck', 'p-gold', 8); // CCK-8, forme circulante la plus active
+    peptide('secretin', 'p-teal', 27, { helix: true });
+    peptide('vip', 'p-magenta', 28, { helix: true });
+    peptide('ppol', 'p-violet', 36, { helix: true }); // polypeptide pancréatique
 
     /* ---------- Protéines ---------- */
     function bundle(id, color) { // faisceau de 4 hélices (GH, prolactine)
@@ -220,6 +226,11 @@
     ion('ca', 'p-green', '2+', 4.8);
     ion('k', 'p-violet', '+', 4.4);
     ion('nai', 'p-amber', '+', 3.6);
+    ion('hplus', 'p-red', '+', 3.4); // proton (acide chlorhydrique)
+    ion('hco3', 'p-sky', '−', 4.2); // bicarbonate
+    g = root('enzyme', 'p-amber'); // enzyme pancréatique : globule bilobé, site actif
+    el('path', { d: 'M -10,-1 C -10,-9 -2,-10 0,-4 C 2,-10 10,-9 10,-1 C 10,7 2,9 0,4 C -2,9 -10,7 -10,-1 Z', class: 'm-prot' }, g);
+    el('circle', { cx: 0, cy: 0, r: 2, class: 'm-loop' }, g);
     g = root('water', 'p-sky'); // H2O
     atom(g, 0, 0, 3, 'm-O');
     atom(g, -3.2, 2.4, 1.8, 'm-H');
