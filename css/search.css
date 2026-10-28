@@ -1,0 +1,41 @@
+/* Recherche par mot-clé (barre du haut, js/search.js). */
+.search { position: relative; margin-left: auto; align-self: center; flex: 0 1 165px; min-width: 120px; }
+.search + .warn-link { margin-left: 0; }
+.search input {
+  width: 100%; box-sizing: border-box;
+  padding: 5px 12px 5px 30px; border-radius: 999px;
+  border: 1px solid var(--line-2); background: var(--panel-2); color: var(--fg);
+  font: 400 13px var(--font-body);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2395a6c0' stroke-width='1.8'%3E%3Ccircle cx='6.8' cy='6.8' r='4.6'/%3E%3Cpath d='M10.3 10.3 14 14' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: 10px 50%; background-size: 14px;
+}
+.search input::placeholder { color: var(--faint); }
+.search input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+.search-list {
+  position: absolute; z-index: 60; top: calc(100% + 6px); right: 0;
+  width: min(460px, calc(100vw - 32px)); max-height: min(70vh, 520px); overflow-y: auto;
+  margin: 0; padding: 4px; list-style: none;
+  background: var(--panel); border: 1px solid var(--line-2); border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+.search-item { padding: 7px 10px; border-radius: 8px; cursor: pointer; }
+.search-item[aria-selected="true"] { background: var(--panel-2); }
+.search-top { display: flex; align-items: baseline; gap: 8px; }
+.search-type {
+  flex: none; font: 500 10.5px var(--font-body); letter-spacing: 0.03em; text-transform: uppercase;
+  color: var(--accent); white-space: nowrap;
+}
+.search-title { font: 500 13.5px var(--font-body); color: var(--fg); min-width: 0; }
+.search-sub, .search-snip { margin-top: 2px; font-size: 12px; line-height: 1.4; color: var(--muted); }
+.search-sub { color: var(--faint); }
+.search-list mark { background: color-mix(in srgb, var(--accent) 28%, transparent); color: inherit; border-radius: 2px; padding: 0 1px; }
+.search-none { padding: 10px; font-size: 13px; color: var(--muted); }
+
+/* Repère trouvé : clignote quelques secondes dans sa scène. */
+.search-hit { animation: search-hit 0.9s ease-in-out 4; }
+@keyframes search-hit {
+  0%, 100% { filter: none; }
+  50% { filter: drop-shadow(0 0 5px var(--accent)) drop-shadow(0 0 10px var(--accent)); }
+}
+@media (prefers-reduced-motion: reduce) { .search-hit { animation: none; filter: drop-shadow(0 0 6px var(--accent)); } }
+@media (max-width: 860px) { .search { flex: 1 1 200px; } }

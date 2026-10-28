@@ -39,7 +39,9 @@ Aucune dépendance, aucune compilation : HTML, CSS et JavaScript « vanilla » s
 ## 3. Architecture technique
 
 ### 3.1 Ordre de chargement (`index.html`)
-`engine.js` → `model.js` (modèle dédié de l'axe « vedette », ici la thyroïde) → `molecules*.js` → `organs.js` → `info.js` → `sheets-molecules.js` → `sheets-organs.js` → `imaging.js` → `poly-figs.js` → `sheets.js` → `axis-builder.js` → `axes-data.js` → `axes-sim.js` → `axes-steps.js` → `tests.js` → `protein-*.js` → `scenes/atlas.js` → autres scènes et loupes → `app.js` → `video-export.js` → `warning.js`. Les CSS : `style.css` puis `zoom-*.css`, `surrenale.css`, `video-export.css`.
+`engine.js` → `model.js` (modèle dédié de l'axe « vedette », ici la thyroïde) → `molecules*.js` → `organs.js` → `info.js` → `sheets-molecules.js` → `sheets-organs.js` → `imaging.js` → `poly-figs.js` → `sheets.js` → `axis-builder.js` → `axes-data.js` → `axes-sim.js` → `axes-steps.js` → `tests.js` → `protein-*.js` → `scenes/atlas.js` → autres scènes et loupes → `app.js` → `search.js` → `video-export.js` → `warning.js`. Les CSS : `style.css` puis `zoom-*.css`, `surrenale.css`, `search.css`, `video-export.css`.
+
+**Recherche par mot-clé** (`js/search.js`, barre du haut ; raccourcis « / » et Ctrl + K) : index construit au premier usage à partir des scènes (titre, chapeau, points, source, libellés dessinés), des étapes des pas à pas, des fiches (`MOL_SHEETS`, `ORGAN_SHEETS`), des repères `HV.INFO` présents dans une scène et des figures du polycopié. Insensible aux accents ; tous les mots doivent figurer. Un clic vole vers la scène, lance l'étape, ouvre la fiche ou la figure ; un repère clignote dans sa scène. Rien à déclarer : tout nouveau contenu est indexé automatiquement. L'atlas ne contient **pas** de lien vers le simulateur (choix de l'auteur) ; le simulateur, lui, renvoie vers l'atlas.
 
 ### 3.2 Moteur (`engine.js`)
 - Chaque scène est un repère **1600 × 1000** (`HV.W`, `HV.H`) placé dans sa scène parente par `x`, `y`, `scale`. `HV.mount` crée pour chaque scène `sc.g` > `sc.content` (le dessin) + `sc.childLayer` (les enfants) + `sc.pLayer` (particules).
