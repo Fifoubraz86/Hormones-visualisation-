@@ -29,23 +29,18 @@
   /* Thyroïde vue de face, avec larynx, trachée, isthme, lobe pyramidal et parathyroïdes.
      Repère : centre de l'isthme en (0, 0), lobes ≈ 200 de large. */
   O.thyroidNeck = function (g, info) {
-    const cart = el('g', { 'data-info': 'larynx' }, g);
-    solid(cart, 'M -36,-130 L 36,-130 L 31,-104 C 22,-84 9,-74 0,-72 C -9,-74 -22,-84 -31,-104 Z', 'o-cart');
-    line(cart, 'M -10,-130 L 0,-118 L 10,-130', 'org-detail');
-    solid(cart, 'M -26,-66 C -12,-60 12,-60 26,-66 L 26,-54 C 12,-48 -12,-48 -26,-54 Z', 'o-cart');
-    const tr = el('g', { 'data-info': 'trachea' }, g);
-    el('rect', { x: -24, y: -50, width: 48, height: 210, rx: 14, class: 'org o-trachea' }, tr);
-    for (let y = -42; y < 156; y += 17) line(tr, `M -22,${y} C -8,${y + 6} 8,${y + 6} 22,${y}`, 'o-ring');
+    // Larynx et trachée : dessin Servier (le repère suit l'ancien dessin : isthme en (0, 0)).
+    const air = el('g', { 'data-info': 'larynx' }, g);
+    art(air, 'servier/endo-larynx-trachea', -94, -150, 188, 250);
     const lobes = el('g', { class: 'thy-lobes' }, g);
     const right = 'M -22,-12 C -26,-42 -40,-72 -60,-78 C -82,-82 -98,-48 -100,-8 C -104,42 -88,84 -60,90 C -36,94 -20,70 -16,50 Z';
     solid(lobes, right, 'o-thyroid', { 'data-info': 'thyroid' });
     solid(lobes, mirror(right), 'o-thyroid', { 'data-info': 'thyroid' });
     solid(lobes, 'M -22,14 C -10,22 10,22 22,14 L 22,50 C 10,58 -10,58 -22,50 Z', 'o-thyroid', { 'data-info': 'thyroid' });
     solid(lobes, 'M 6,16 C 6,-6 10,-28 14,-50 C 19,-46 18,-8 14,18 Z', 'o-thyroid', { 'data-info': 'pyramidal' });
-    [[-70, -40], [-82, 0], [-74, 44], [-56, 70], [-56, -10]].forEach(([x, y]) => {
-      line(lobes, `M ${x - 8},${y} q 8,-8 16,0`, 'o-lobule');
-      line(lobes, `M ${-x - 8},${y} q 8,-8 16,0`, 'o-lobule');
-    });
+    // Les tracés ci-dessus servent de zones de survol ; l'image est le dessin Servier.
+    lobes.querySelectorAll('.o-thyroid, .org-shine').forEach((p) => p.classList.add('art-hit'));
+    art(lobes, 'servier/endo-thyroid-front', -104, -92, 208, 201).classList.add('thy-art');
     const para = el('g', { 'data-info': 'parathyroid' }, g);
     [[-92, -46], [-90, 64], [92, -46], [90, 64]].forEach(([x, y]) => el('ellipse', { cx: x, cy: y, rx: 8, ry: 6, class: 'org o-parathyroid' }, para));
     return lobes;
@@ -59,6 +54,9 @@
   /* Encéphale en coupe sagittale (face à gauche), avec hypothalamus, chiasma, tige et hypophyse dans la selle turcique.
      Repère : hypothalamus en (0, 0). Retourne { hypo, ant, post }. */
   O.brainSagittal = function (g) {
+    // Encéphale : dessin Servier (coupe sagittale, hypothalamus placé en (0, 0)) ; les tracés propres
+    // restent en dessous comme zones de survol. Hypothalamus, tige, selle et hypophyse (agrandie) restent dessinés.
+    const brainArt = art(g, 'servier/nerv-brain-sagittal', -131, -171, 340, 329);
     solid(g, 'M -140,6 C -160,-30 -152,-86 -110,-114 C -70,-142 0,-152 60,-140 C 120,-128 168,-92 178,-42 C 184,-16 172,2 152,6 C 120,10 90,6 70,8 C 40,12 0,14 -32,12 C -80,12 -124,20 -140,6 Z', 'o-brain', { 'data-info': 'brain' });
     line(g, 'M -120,-40 C -100,-70 -80,-60 -70,-90 M -60,-110 C -40,-90 -20,-120 0,-100 C 20,-80 40,-120 60,-104 M 80,-110 C 90,-80 120,-100 130,-70 M 140,-50 C 120,-40 150,-20 130,-10 M -110,-10 C -90,-30 -70,-14 -60,-34', 'o-gyrus');
     solid(g, 'M -60,-42 C -40,-70 60,-76 90,-50 C 96,-42 88,-34 80,-38 C 50,-58 -30,-54 -48,-34 C -54,-30 -64,-34 -60,-42 Z', 'o-callosum', { 'data-info': 'callosum' });
@@ -66,6 +64,8 @@
     solid(cb, 'M 118,6 C 120,-16 150,-24 172,-12 C 188,0 184,30 162,38 C 140,44 120,32 118,6 Z', 'o-cerebellum');
     line(cb, 'M 128,0 C 140,-10 160,-10 174,-2 M 126,12 C 140,4 162,4 180,12 M 130,24 C 144,18 162,20 174,28', 'o-gyrus');
     solid(g, 'M 76,6 C 82,34 86,64 90,94 L 112,94 C 108,62 106,34 106,6 Z', 'o-brainstem', { 'data-info': 'brainstem' });
+    g.querySelectorAll('.o-brain, .o-gyrus, .o-callosum, .o-cerebellum, .o-brainstem, .org-shine').forEach((p) => p.classList.add('art-hit'));
+    g.appendChild(brainArt);
     const hypo = solid(g, 'M -40,0 C -40,-14 -16,-22 6,-20 C 30,-18 44,-8 42,4 C 40,16 14,20 -6,18 C -26,16 -40,12 -40,0 Z', 'o-hypo');
     el('ellipse', { cx: -54, cy: 16, rx: 16, ry: 7, class: 'org o-chiasm', 'data-info': 'chiasm' }, g);
     solid(g, 'M -6,16 C -10,50 4,80 8,118 L 22,118 C 18,80 14,48 12,16 Z', 'o-stalk', { 'data-info': 'stalk' });
