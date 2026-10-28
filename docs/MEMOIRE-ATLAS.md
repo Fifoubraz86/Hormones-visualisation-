@@ -175,6 +175,7 @@ Plus : recalcul des formules brutes depuis les structures dessinées, recherche 
 - Un réservoir enzymatique « niveau = apport / (activité + c) » compense trop si `c` est petit : régler l'exposant de l'activité et le plafond de l'ACTH pour qu'un bloc complet fasse vraiment baisser le produit.
 - Les loupes d'agents différents réutilisent parfois la même clé d'info-bulle (doublon dans `HV.INFO`) : préfixer chaque clé par la loupe.
 - L'avertissement d'ouverture intercepte les clics dans les tests Playwright : cliquer `#warnOk` d'abord.
+- **Plusieurs sessions, plusieurs branches** : chaque session de travail pousse sur sa propre branche (`claude/…`). L'atlas publié ne contient que la branche de la session qui publie : avant de republier, faire `git fetch` et fusionner les branches des autres sessions (ex. module pancréas développé à part), puis tout revérifier avec `tools/verif/`.
 - Les sous-agents peuvent s'arrêter sur une limite d'usage : leur travail est conservé ; les relancer par message au lieu d'en créer de nouveaux.
 
 ---
