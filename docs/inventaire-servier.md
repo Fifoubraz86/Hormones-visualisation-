@@ -45,6 +45,19 @@ Le dessin garde les couleurs et dégradés Servier ; le fond blanc de la diaposi
 | endo-thyroid-small, endo-goiter-small | petites thyroïdes normale et goitreuse | réserve |
 | endo-neck-cancer, endo-thyroid-cancer | cancer thyroïdien | réserve (NEM 2, nodule) |
 
+## Déjà extrait : kit Diabetes → `assets/organs/servier/diab-*`
+
+| Fichier | Contenu (diapositive) | Utilisé |
+| --- | --- | --- |
+| diab-eye, diab-fundus | œil en coupe, fond d'œil (7) | loupe « Complications », planche du pas à pas |
+| diab-kidney-normal, diab-kidney-nephro | rein normal, néphropathie (8) | silhouette et planche des complications |
+| diab-neuro-periph, diab-neuro-auto | neuropathies périphérique et végétative (13) | planche des complications |
+| diab-monofilament | test au monofilament (11) | planche des complications |
+| diab-sole-ulcer, diab-foot | plante du pied avec ulcère (9), pied (10) | planche des complications |
+| diab-islet | îlot entre les acini (3) | réserve |
+
+Autres images utilisées dans les loupes de la glycémie : `dig-stomach`, `dig-duodenum`, `dig-small-intestine` (incrétines, appétit), `veins-body-skin` (silhouette des complications).
+
 Non copiés (trop lourds, > 300 Ko après svgo) : la zonation corticosurrénalienne en histologie
 (diapositive 8, six groupes) et sa version vascularisée (diapositive 7). À extraire en PNG si besoin.
 
