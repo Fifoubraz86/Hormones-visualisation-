@@ -366,7 +366,11 @@
       fl(pD, 'insulin', () => 0.8 * clamp(S.ins, 0.05, 8), { speed: 85 });
       fl(pD, 'glucagon', () => 0.7 * clamp(S.glucagon, 0.05, 8), { speed: 85 });
       const vD = 'M 1020,730 C 980,760 900,780 820,800';
-      fl(vD, 'vip', () => 0.6 * clamp(S.vip, 0.5, 15));
+      // VIP des plexus : sécrétion physiologique, constante ; le VIP en excès vient de la tumeur (VIPome).
+      fl(vD, 'vip', () => 0.6 * clamp(S.vip, 0.5, 1));
+      const vtD = 'M 902,582 C 910,660 890,740 850,800';
+      track(vtD, 'p-magenta');
+      fl(vtD, 'vip', () => 0.6 * clamp(S.vip - 1, 0, 14));
       fl(gutD, 'water', () => 2.5 * clamp(S.stool, 0.1, 6), { speed: 110, size: 1.1, max: 40 });
       // Somatostatine : frein paracrine (cellules D)
       const sstD = 'M 720,470 C 700,475 685,470 675,466';
@@ -380,7 +384,7 @@
         ['gas', 452, 562, 'tne-gastrinome', 'gastrinome', 330, 590],
         ['ins', 700, 600, 'tne-insulinome', 'insulinome', 700, 655],
         ['glu', 1080, 520, 'tne-glucagonome', 'glucagonome', 1080, 580],
-        ['vip', 900, 560, 'tne-vipome', 'VIPome', 900, 615],
+        ['vip', 900, 560, 'tne-vipome', 'VIPome', 968, 600],
         ['sst', 500, 690, 'tne-somatostatinome', 'somatostatinome', 600, 820]
       ].map(([k, x, y, zid, lbl, lx, ly]) => {
         const tg = a.el('g', { class: 'pz-tum', opacity: 0, 'data-info': 'pz-t-' + k });
@@ -485,7 +489,7 @@
         { t: 'Sécrétine : les bicarbonates', d: 'L\'acide qui arrive dans le duodénum libère la sécrétine (cellules S). Elle fait sécréter par les canaux pancréatiques l\'eau et les bicarbonates, par l\'AMPc et le canal CFTR : le suc pancréatique (≈ 1,5 L/j, pH 8,2–8,4) neutralise l\'acide (SNFGE p. 7 et 10).', spot: [[470, 540, 130], [620, 590, 70]] },
         { t: 'CCK : les enzymes et la bile', d: 'Les acides gras et acides aminés libèrent la CCK (cellules I). Elle fait libérer les enzymes des acini et contracter la vésicule biliaire. Enzymes et bile rejoignent le duodénum par l\'ampoule de Vater (SNFGE p. 10).', spot: [[440, 650, 110], [320, 440, 90], [760, 560, 330]] },
         { t: 'Les îlots : insuline et glucagon', d: 'Les îlots (1 à 2 % de la masse, surtout dans la queue) sécrètent insuline, glucagon, somatostatine et polypeptide pancréatique dans la veine porte : le foie les reçoit en premier (SNFGE p. 7 et 11).', spot: [[900, 540, 200], [450, 310, 130]] },
-        { t: 'Somatostatine, VIP : freins et accélérateurs', d: 'La somatostatine freine presque toutes les sécrétions digestives et pancréatiques. Le VIP des plexus fait sécréter l\'eau et les électrolytes par l\'intestin (complément).', spot: [[715, 480, 70], [1000, 740, 120]] },
+        { t: 'Somatostatine, VIP : freins et accélérateurs', d: 'La somatostatine freine presque toutes les sécrétions digestives et pancréatiques. Le VIP des plexus fait sécréter l\'eau et les électrolytes par l\'intestin ; dans le VIPome, l\'excès de VIP vient de la tumeur pancréatique (complément).', spot: [[715, 480, 70], [1000, 740, 120]] },
         { t: 'Tumeurs neuroendocrines', d: 'Une TNE fonctionnelle sécrète son hormone sans rétrocontrôle : gastrinome (ulcères, diarrhée), insulinome (hypoglycémies), glucagonome (diabète, érythème), VIPome (diarrhée hydrique), somatostatinome (diabète, lithiase, stéatorrhée). Choisissez un scénario, ou cliquez une tumeur pour son modèle.', spot: [[1280, 880, 260]] }
       ]);
     }
