@@ -1,8 +1,13 @@
 # Illustrations d'organes
 
+Toutes les illustrations de ce dossier, sauf les dessins originaux listés en fin de page, sont de
+**Servier Medical Art** (https://smart.servier.com/). Attribution : « Servier Medical Art (smart.servier.com) ».
+
+## Via Bioicons (CC BY 3.0)
+
 Fichiers SVG repris sans modification de la collection [Bioicons](https://bioicons.com) (dépôt duerrsimon/bioicons,
-dossier `static/icons/cc-by-3.0/Human_physiology/Servier/`). Auteur : **Servier Medical Art**
-(https://smart.servier.com/), licence **CC BY 3.0 Unported** (https://creativecommons.org/licenses/by/3.0/).
+dossier `static/icons/cc-by-3.0/Human_physiology/Servier/`), licence **CC BY 3.0 Unported**
+(https://creativecommons.org/licenses/by/3.0/).
 
 | Fichier de l'atlas | Fichier d'origine |
 | --- | --- |
@@ -16,10 +21,18 @@ dossier `static/icons/cc-by-3.0/Human_physiology/Servier/`). Auteur : **Servier 
 | pancreas.svg | pancreas.svg |
 | stomach.svg | stomach.svg |
 
+## Kits SMART (CC BY 4.0) : dossier `servier/`
+
+Dessins du kit PowerPoint *SMART Endocrinology* de Servier Medical Art, licence **CC BY 4.0**
+(https://creativecommons.org/licenses/by/4.0/). Modifications : chaque dessin est isolé de sa diapositive,
+converti en SVG (`tools/pptx2svg.py`), le fond blanc retiré et le fichier allégé avec svgo ; formes et
+couleurs inchangées. Liste et diapositives d'origine : `docs/inventaire-servier.md`.
+
 ## Dessins originaux de l'atlas
 
-Absents de Bioicons, dessinés pour l'atlas dans le même esprit (dégradé, ombre interne, texture), générés par `tools/organs_svg.py` :
-`thyroid.svg`, `parathyroid.svg`, `pituitary.svg`, `adrenal.svg`, `testis.svg`, `ovary.svg`, `uterus.svg`, `breast.svg`.
-Pour les modifier : éditer le script puis `python3 tools/organs_svg.py assets/organs`.
+Générés par `tools/organs_svg.py` dans le même esprit (dégradé, ombre interne, texture) : `pituitary.svg`
+(antéhypophyse et posthypophyse distinctes) et `ovary.svg` (absent du kit Endocrinologie). Le script sait
+aussi produire thyroïde, parathyroïdes, surrénale, testicule, utérus et sein, remplacés par les dessins Servier.
+Pour les modifier : éditer le script puis `python3 tools/organs_svg.py <dossier>`.
 
 Tous sont utilisés dans `js/organs.js` (fonction `art`) ; la scène du pancréas reprend aussi le foie, l'estomac et le pancréas.

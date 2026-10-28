@@ -77,6 +77,10 @@ satellites à y = 1168 (surrénale x = 360, pancréas x = 840). Un nouveau modul
   chemin `C:\Users\…` désigne l'ordinateur de l'auteur, hors du conteneur.
 - Déjà repérés dans Drive : « Item 308 - Tumeurs neuroendocrines du pancréas - SFE.pdf »,
   « tncd_chap-11-NNE_2026-09-07.pdf », « recommandations SFE GTE NEM1.pdf ».
+- Illustrations : kits Servier Medical Art (PPTX, CC BY 4.0) dans le Drive, dossier « ServierMedicalArt-all-kits » ;
+  extraction en SVG et inventaire dans `docs/inventaire-servier.md` ; icônes Bioicons dans
+  `docs/inventaire-illustrations.md`. Un organe s'affiche avec `art(g, 'servier/<fichier>', x, y, l, h)`
+  dans `js/organs.js` (fichiers dans `assets/organs/`).
 - Polycopié CEEDMM : figures dans `assets/poly/` (`js/poly-figs.js`) ; texte des pages si fourni.
 
 ## 6. Vérifier avant de livrer

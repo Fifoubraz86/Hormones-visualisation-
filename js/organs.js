@@ -14,7 +14,7 @@
     return p;
   }
   const line = (g, d, cls) => el('path', { d, class: cls || 'org-detail' }, g);
-  // Illustration vectorielle (Servier Medical Art, CC BY 3.0, via Bioicons ; voir assets/organs/CREDITS.md),
+  // Illustration vectorielle (Servier Medical Art, CC BY 3.0 via Bioicons ou CC BY 4.0 via les kits SMART ; voir assets/organs/CREDITS.md),
   // inscrite dans la boîte (x, y, w, h) du repère de l'organe ; `rot` la fait pivoter autour du centre.
   function art(g, name, x, y, w, h, rot) {
     const im = el('image', { href: 'assets/organs/' + name + '.svg', x, y, width: w, height: h, preserveAspectRatio: 'xMidYMid meet', class: 'org-art' }, g);
@@ -53,7 +53,7 @@
 
   /* Thyroïde seule, en papillon (vignettes) */
   O.thyroidSmall = function (g) {
-    art(g, 'thyroid', -20, -22, 40, 40);
+    art(g, 'servier/endo-thyroid-front', -22, -22, 44, 42);
   };
 
   /* Encéphale en coupe sagittale (face à gauche), avec hypothalamus, chiasma, tige et hypophyse dans la selle turcique.
@@ -198,26 +198,25 @@
     art(g, 'kidney', -30, -46, 60, 92);
   };
   O.adrenalKidney = function (g) {
-    art(g, 'kidney', -24, -18, 48, 70);
-    art(g, 'adrenal', -28, -46, 52, 36);
+    art(g, 'servier/endo-kidney-adrenal', -32, -50, 64, 104);
   };
   O.testis = function (g) {
-    art(g, 'testis', -30, -34, 62, 70);
+    art(g, 'servier/endo-testis', -24, -46, 48, 92);
   };
   O.ovary = function (g) {
     art(g, 'ovary', -36, -28, 72, 56);
   };
   O.uterus = function (g) {
-    art(g, 'uterus', -54, -38, 108, 76);
+    art(g, 'servier/endo-uterus', -56, -40, 112, 82);
   };
   O.breast = function (g) {
-    art(g, 'breast', -38, -38, 76, 76);
+    art(g, 'servier/endo-breast-section', -30, -46, 60, 92);
   };
   O.intestine = function (g) {
     art(g, 'intestine', -42, -40, 84, 80);
   };
   O.parathyroidBack = function (g) {
-    art(g, 'parathyroid', -50, -46, 100, 92);
+    art(g, 'servier/endo-thyroid-back', -50, -46, 100, 92);
   };
   O.islet = function (g) {
     art(g, 'pancreas', -52, -12, 104, 44);
