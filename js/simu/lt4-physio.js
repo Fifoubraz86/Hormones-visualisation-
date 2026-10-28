@@ -191,16 +191,12 @@
     tissue: { x: 1230, y: 640, t: 'Tissus (T3)', ic: 'tissue' }, pit: { x: 1230, y: 160, t: 'Hypophyse (TSH)', ic: 'pit' }
   };
   const LINKS = { diss: ['mouth', 'stomach', 0, 'dissolution'], empt: ['stomach', 'gut', -60, 'vidange'], abs: ['gut', 'blood', -50, 'absorption'], bind: ['stomach', 'feces', 70, 'complexes'], loss: ['gut', 'feces', 50, 'non absorbée'], clear: ['blood', 'liver', 0, 'catabolisme'], conv: ['blood', 'tissue', 40, 'T4 → T3'], fb: ['blood', 'pit', -40, 'T4 libre'], tsh: ['pit', 'tissue', 60, ''] };
+  // Organes : dessins de l'atlas (js/organs.js, illustrations Servier) ; prise et fèces restent dessinées ici.
   function drawIcon(g, ic) {
+    if (S.organIcon(g, ic)) return;
     const p = (d, cls) => el('path', { d, class: 'lp-org ' + cls }, g);
     if (ic === 'pill') { el('rect', { x: -26, y: -11, width: 52, height: 22, rx: 11, class: 'lp-org lp-pill' }, g); el('path', { d: 'M0,-11 V11', class: 'lp-line' }, g); }
-    else if (ic === 'stomach') p('M -10,-24 C 4,-34 26,-26 28,-6 C 30,16 12,32 -8,30 C -22,28 -30,20 -32,12 C -18,14 -10,6 -12,-4 C -14,-12 -16,-18 -10,-24 Z', 'lp-stomach');
-    else if (ic === 'gut') { p('M -40,-30 C -40,-40 40,-40 40,-30 L 40,30 C 40,40 -40,40 -40,30 Z', 'lp-colon'); p('M -28,-18 C -10,-30 10,-6 28,-18 C 34,-6 18,4 28,16 C 10,26 -10,4 -28,16 C -34,4 -18,-6 -28,-18 Z', 'lp-small'); }
     else if (ic === 'feces') p('M -24,14 C -30,2 -16,-6 -6,-4 C -6,-16 8,-20 14,-10 C 26,-12 30,4 22,12 C 12,20 -14,22 -24,14 Z', 'lp-feces');
-    else if (ic === 'blood') { el('path', { d: 'M -44,0 C -20,-10 20,10 44,0', class: 'lp-vwall' }, g); el('path', { d: 'M -44,0 C -20,-10 20,10 44,0', class: 'lp-vlum' }, g); [[-22, -2], [4, 1], [26, 2]].forEach(([x, y]) => el('ellipse', { cx: x, cy: y, rx: 7, ry: 5, class: 'lp-rbc' }, g)); }
-    else if (ic === 'liver') { p('M -50,-6 C -48,-26 -18,-34 10,-30 C 30,-28 48,-22 52,-14 C 54,-8 42,-4 28,2 C 12,10 -6,22 -22,26 C -38,30 -50,18 -50,-6 Z', 'lp-liver'); p('M -16,16 C -14,30 -2,32 0,24 C 0,18 -8,13 -16,16 Z', 'lp-gall'); }
-    else if (ic === 'tissue') { el('circle', { r: 30, class: 'lp-org lp-cell' }, g); el('circle', { r: 11, class: 'lp-org lp-nuc' }, g); }
-    else if (ic === 'pit') { p('M -34,2 C -34,-18 -6,-22 8,-14 C 16,-6 14,20 -2,26 C -18,32 -34,22 -34,2 Z', 'lp-pitant'); p('M 10,-12 C 22,-22 38,-16 38,0 C 38,16 22,24 12,18 C 16,8 16,-4 10,-12 Z', 'lp-pitpost'); }
   }
 
   function card(ctx) {
@@ -248,7 +244,7 @@
     root.append(
       h('div', { class: 'sv-card-head' }, [h('h3', null, '🔬 Physiologie de la lévothyroxine : absorption et besoins'), ctx.onClose ? h('button', { type: 'button', class: 'sv-secondary', onclick: ctx.onClose }, 'Fermer') : null]),
       h('p', { class: 'sv-muted' }, 'Composez la situation (tableaux 1 à 3 de l\'ETA 2025) : la prise est suivie minute par minute, de la dissolution dans l\'estomac à l\'absorption intestinale, puis le modèle thyroïdien donne la TSH et la T4L à l\'équilibre (6 à 8 semaines).'),
-      h('div', { class: 'lp-grid' }, [ctrl, h('div', { class: 'lp-main' }, [res, h('div', { class: 'ph-ctrl' }, [playBtn, slider, tLab]), h('div', { class: 'ph-diag' }, svg), h('div', { class: 'ph-chartbox' }, chart), contrib])]),
+      h('div', { class: 'lp-grid' }, [ctrl, h('div', { class: 'lp-main' }, [res, h('div', { class: 'ph-ctrl' }, [playBtn, slider, tLab]), h('div', { class: 'ph-diag' }, [svg, S.organCredit(h)]), h('div', { class: 'ph-chartbox' }, chart), contrib])]),
       h('p', { class: 'sv-note' }, 'Modèle pédagogique (complément) : constantes calées pour une biodisponibilité d\'environ 75 % à jeun ; effets des interférences ordonnés selon l\'ETA 2025 (Centanni et al., Eur Thyroid J 2025;14:e250123) et Nagy (Thyroid 2021) pour les formulations.')
     );
     const g = {};
@@ -259,15 +255,17 @@
       svg.textContent = ''; chart.textContent = '';
       const S0 = st.S, r = S0.r;
       const defs = el('defs', {}, svg);
+      S.organDefs(defs);
       ['a', 'l', 'k'].forEach((c) => { const m = el('marker', { id: 'lpA' + c, viewBox: '0 0 10 10', refX: 6, refY: 5, markerWidth: 18, markerHeight: 18, markerUnits: 'userSpaceOnUse', orient: 'auto' }, defs); el('path', { d: 'M0,0 L10,5 L0,10 z', class: 'lp-ah lp-' + c }, m); });
       const P = (id) => NODES[id];
+      const pillG = el('g', { class: 'px-pills' });
       Object.entries(LINKS).forEach(([id, [a, b, bend, lab]]) => {
         const A = P(a), B = P(b), dx = B.x - A.x, dy = B.y - A.y, L = Math.hypot(dx, dy), nx = -dy / L, ny = dx / L, R = 72;
         const p0 = [A.x + dx / L * R, A.y + dy / L * R], p3 = [B.x - dx / L * R, B.y - dy / L * R];
         const c1 = [p0[0] + dx / 3 + nx * bend, p0[1] + dy / 3 + ny * bend], c2 = [p0[0] + 2 * dx / 3 + nx * bend, p0[1] + 2 * dy / 3 + ny * bend];
         const cls = id === 'bind' || id === 'loss' ? 'l' : id === 'tsh' || id === 'fb' ? 'k' : 'a';
         g[id] = el('path', { d: 'M' + p0.join(',') + ' C' + c1.join(',') + ' ' + c2.join(',') + ' ' + p3.join(','), class: 'lp-flow lp-' + cls, 'marker-end': 'url(#lpA' + cls + ')' }, svg);
-        if (lab) { const u = 0.5, q = [(1 - u) ** 3 * p0[0] + 3 * (1 - u) ** 2 * u * c1[0] + 3 * (1 - u) * u * u * c2[0] + u ** 3 * p3[0], (1 - u) ** 3 * p0[1] + 3 * (1 - u) ** 2 * u * c1[1] + 3 * (1 - u) * u * u * c2[1] + u ** 3 * p3[1]], w = 18 + lab.length * 9.4; const pg = el('g', { class: 'px-pill lp-pill', transform: 'translate(' + q[0].toFixed(0) + ' ' + q[1].toFixed(0) + ')' }, svg); el('rect', { x: -w / 2, y: -14, width: w, height: 28, rx: 14 }, pg); el('text', { y: 6, 'text-anchor': 'middle' }, pg).textContent = lab; }
+        if (lab) { const u = 0.5, q = [(1 - u) ** 3 * p0[0] + 3 * (1 - u) ** 2 * u * c1[0] + 3 * (1 - u) * u * u * c2[0] + u ** 3 * p3[0], (1 - u) ** 3 * p0[1] + 3 * (1 - u) ** 2 * u * c1[1] + 3 * (1 - u) * u * u * c2[1] + u ** 3 * p3[1]], w = 18 + lab.length * 9.4; const pg = el('g', { class: 'px-pill lp-pill', transform: 'translate(' + q[0].toFixed(0) + ' ' + q[1].toFixed(0) + ')' }, pillG); el('rect', { x: -w / 2, y: -14, width: w, height: 28, rx: 14 }, pg); el('text', { y: 6, 'text-anchor': 'middle' }, pg).textContent = lab; }
       });
       g.mols = el('g', {}, svg);
       Object.entries(NODES).forEach(([id, n]) => {
@@ -278,6 +276,7 @@
         g['v_' + id] = el('text', { x: n.x, y: n.y + 120, class: 'px-v', 'text-anchor': 'middle' }, grp);
         g['s_' + id] = el('text', { x: n.x, y: n.y + 144, class: 'px-sub', 'text-anchor': 'middle' }, grp);
       });
+      svg.appendChild(pillG); // les noms des flux passent devant les organes
       // Badges : chaque élément actif sur son organe.
       const by = {};
       Object.entries(sc.items).forEach(([k, v]) => { if (v.on && BY[k]) (by[BY[k].site] = by[BY[k].site] || []).push(BY[k].t.split(' (')[0].split(',')[0]); });

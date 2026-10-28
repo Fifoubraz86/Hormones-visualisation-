@@ -362,45 +362,12 @@
   ];
   function el(tag, a, par) { const n = document.createElementNS(NS, tag); for (const k in a) n.setAttribute(k, a[k]); if (par) par.appendChild(n); return n; }
 
-  /* ---------- Médaillons des organes (dessins de l'atlas, js/organs.js) ---------- */
-  const mirrorX = (d) => d.replace(/(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/g, (m, x, y) => -parseFloat(x) + ',' + y);
+  /* ---------- Médaillons des organes (dessins de l'atlas : js/organs.js, illustrations Servier) ---------- */
   function drawIcon(gg, ic) {
-    const solid = (d, cls, par) => { el('path', { d, class: 'phb-org ' + cls }, par || gg); el('path', { d, class: 'phb-shine', fill: 'url(#phShine)' }, par || gg); };
-    const line = (d, cls) => el('path', { d, class: cls || 'phb-gyrus' }, gg);
-    if (ic === 'brain') {
-      solid('M -44,6 C -48,-18 -30,-38 -4,-40 C 22,-42 44,-28 46,-6 C 48,6 42,14 32,14 C 28,22 18,24 10,20 C 0,26 -16,26 -22,18 C -34,20 -44,16 -44,6 Z', 'o-brain');
-      solid('M 18,16 C 24,10 40,12 42,22 C 42,32 26,36 18,30 C 14,26 14,20 18,16 Z', 'o-cerebellum');
-      line('M -30,8 C -14,0 4,2 18,-6 M 4,-38 C -2,-24 8,-14 2,-2 M -30,-24 C -20,-18 -24,-8 -14,-6 M 20,-30 C 28,-22 22,-12 32,-8');
-      el('ellipse', { cx: -2, cy: 14, rx: 9, ry: 5, class: 'phb-org o-hypo' }, gg);
-    } else if (ic === 'stomach') {
-      el('path', { d: 'M -14,-44 C -14,-34 -10,-28 -6,-22', class: 'phb-tube' }, gg);
-      solid('M -10,-24 C 4,-34 26,-26 28,-6 C 30,16 12,32 -8,30 C -22,28 -30,20 -32,12 C -18,14 -10,6 -12,-4 C -14,-12 -16,-18 -10,-24 Z', 'o-stomach');
-      el('path', { d: 'M -32,12 C -36,22 -34,32 -26,38', class: 'phb-tube' }, gg);
-    } else if (ic === 'gut') {
-      solid('M -40,-30 C -40,-40 40,-40 40,-30 L 40,30 C 40,40 -40,40 -40,30 Z', 'o-colon');
-      solid('M -28,-18 C -10,-30 10,-6 28,-18 C 34,-6 18,4 28,16 C 10,26 -10,4 -28,16 C -34,4 -18,-6 -28,-18 Z', 'o-small');
-      line('M -20,-12 C -6,-20 8,-2 22,-12 M -22,10 C -6,0 8,18 22,8', 'phb-fiber');
-    } else if (ic === 'islet') {
-      solid('M -46,8 C -46,-6 -26,-10 -10,-6 C 10,-2 30,-14 44,-8 C 52,-2 42,10 26,12 C 8,14 -14,22 -32,20 C -42,19 -46,14 -46,8 Z', 'o-pancreas');
-      el('circle', { cx: 6, cy: -24, r: 20, class: 'phb-isletc' }, gg);
-      [[0, -30, 'b'], [10, -30, 'b'], [4, -20, 'b'], [14, -20, 'a'], [-4, -20, 'a'], [8, -38, 'a'], [-6, -30, 'b'], [16, -28, 'b']].forEach(([x, y, t]) => el('circle', { cx: x, cy: y, r: 3.6, class: 'phb-islet-' + t }, gg));
-    } else if (ic === 'liver') {
-      solid('M -50,-6 C -48,-26 -18,-34 10,-30 C 30,-28 48,-22 52,-14 C 54,-8 42,-4 28,2 C 12,10 -6,22 -22,26 C -38,30 -50,18 -50,-6 Z', 'o-liver');
-      solid('M -16,16 C -14,30 -2,32 0,24 C 0,18 -8,13 -16,16 Z', 'o-gall');
-    } else if (ic === 'muscle') {
-      el('path', { d: 'M -52,0 L -34,0 M 34,0 L 52,0', class: 'phb-tendon' }, gg);
-      solid('M -36,0 C -26,-20 26,-20 36,0 C 26,20 -26,20 -36,0 Z', 'o-muscle');
-      line('M -28,-6 C -10,-12 10,-12 28,-6 M -30,0 L 30,0 M -28,6 C -10,12 10,12 28,6', 'phb-fiber');
-    } else if (ic === 'fat') {
-      [[-20, -12, 15], [8, -18, 14], [26, 4, 14], [-2, 10, 15], [-26, 14, 12]].forEach(([x, y, r]) => { el('circle', { cx: x, cy: y, r, class: 'phb-org o-fat' }, gg); el('circle', { cx: x, cy: y, r, class: 'phb-shine', fill: 'url(#phShine)' }, gg); });
-    } else if (ic === 'kidney') {
-      solid('M -6,-40 C 18,-46 34,-22 34,0 C 34,26 16,46 -6,40 C -22,36 -14,16 -6,8 C -14,0 -14,-8 -6,-12 C -16,-20 -24,-34 -6,-40 Z', 'o-kidney');
-      el('path', { d: 'M -10,2 C -22,4 -30,10 -34,22', class: 'phb-ureter' }, gg);
-    } else if (ic === 'adrenal') {
-      const k = el('g', { transform: 'translate(0 16) scale(0.78)' }, gg);
-      solid('M -6,-40 C 18,-46 34,-22 34,0 C 34,26 16,46 -6,40 C -22,36 -14,16 -6,8 C -14,0 -14,-8 -6,-12 C -16,-20 -24,-34 -6,-40 Z', 'o-kidney', k);
-      solid('M -26,-12 C -24,-30 -6,-46 8,-44 C 20,-42 26,-28 22,-14 C 10,-8 -12,-6 -26,-12 Z', 'o-adrenal');
-    } else if (ic === 'bladder') {
+    if (S.organIcon(gg, ic)) return;
+    // Vessie : pas de dessin dans l'atlas.
+    const solid = (d, cls) => { el('path', { d, class: 'phb-org ' + cls }, gg); el('path', { d, class: 'phb-shine', fill: 'url(#phShine)' }, gg); };
+    if (ic === 'bladder') {
       el('path', { d: 'M -22,-44 C -20,-30 -16,-24 -12,-18 M 22,-44 C 20,-30 16,-24 12,-18', class: 'phb-ureter' }, gg);
       solid('M -30,-6 C -32,-26 -12,-24 0,-22 C 12,-24 32,-26 30,-6 C 28,16 14,30 0,30 C -14,30 -28,16 -30,-6 Z', 'o-bladder');
       el('path', { d: 'M -4,30 L -4,42 M 4,30 L 4,42', class: 'phb-ureter' }, gg);
@@ -558,7 +525,7 @@
           h('button', { type: 'button', class: 'sv-linkbtn', onclick: () => { reset(); compute(); ctx.rerender(); } }, 'Revenir au patient')])
       ]),
       symBox,
-      h('div', { class: 'ph-grid' }, [h('div', { class: 'ph-diag' }, [svg, legend]), h('div', { class: 'ph-side' }, [info, sum, h('div', { class: 'ph-predcol' }, [pred, h('div', { class: 'ph-trendbox' }, trend)])])]),
+      h('div', { class: 'ph-grid' }, [h('div', { class: 'ph-diag' }, [svg, legend, S.organCredit(h)]), h('div', { class: 'ph-side' }, [info, sum, h('div', { class: 'ph-predcol' }, [pred, h('div', { class: 'ph-trendbox' }, trend)])])]),
       h('div', { class: 'ph-chartbox' }, chart),
       h('p', { class: 'sv-note' }, 'Mécanismes : modèle « glyc » de l\'atlas enrichi des effets pharmacologiques (complément) ; la captation par le muscle et le tissu adipeux est calculée par bilan de masse. Chaque journée reprend la glycémie moyenne du modèle DT2, calé sur les essais.')
     );
@@ -569,6 +536,7 @@
       const k = st.res.k;
       const defs = el('defs', {}, svg);
       buildMols(defs);
+      S.organDefs(defs);
       ['g', 'i', 'x', 'n', 'u', 'k', 'f', 'a'].forEach((c) => { const m = el('marker', { id: 'phA' + c, viewBox: '0 0 10 10', refX: 6, refY: 5, markerWidth: 20, markerHeight: 20, markerUnits: 'userSpaceOnUse', orient: 'auto' }, defs); el('path', { d: 'M0,0 L10,5 L0,10 z', class: 'ph-ah ph-' + c }, m); });
       if (!NODES[st.sel]) st.sel = 'blood';
       const sh = el('radialGradient', { id: 'phShine', cx: '35%', cy: '30%', r: '75%' }, defs);
