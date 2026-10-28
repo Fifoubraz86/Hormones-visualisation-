@@ -16,18 +16,39 @@
 <link rel="stylesheet" href="css/zoom-gonad.css">
 <link rel="stylesheet" href="css/zoom-phospho.css">
 <link rel="stylesheet" href="css/zoom-glyc.css">
+<link rel="stylesheet" href="css/zoom-athero.css">
+<link rel="stylesheet" href="css/zoom-pk.css">
 <link rel="stylesheet" href="css/zoom-transv.css">
+<link rel="stylesheet" href="css/surrenale.css">
+<link rel="stylesheet" href="css/pancreas.css">
 <link rel="stylesheet" href="css/video-export.css">
 </head>
 <body>
+<div class="warn-back" id="warnBox" role="dialog" aria-modal="true" aria-labelledby="warnTitle">
+  <div class="warn-dlg">
+    <p class="warn-eyebrow">Avertissement</p>
+    <h2 id="warnTitle">Un outil pour apprendre, pas pour soigner</h2>
+    <p>Cet outil a été créé à visée didactique. Il reprend les grandes lignes de la physiologie et de la physiopathologie endocriniennes.</p>
+    <p>Les modélisations des cinétiques hormonales selon les profils de patients sont présentées à titre indicatif, dans un but pédagogique. Ce ne sont pas de vraies données de patients : elles ne doivent en aucun cas être utilisées dans un but médical (diagnostic, interprétation d'un bilan, décision thérapeutique).</p>
+    <ul>
+      <li>Source principale : <em>Polycopié de sémiologie endocrinienne</em>, CEEDMM, 2e édition (2023). Ce qui n'y figure pas est signalé « (complément) ».</li>
+      <li>Les valeurs de référence sont indicatives et varient selon le laboratoire et la technique.</li>
+      <li>Illustrations des organes : <em>Servier Medical Art</em> (smart.servier.com), licences CC BY 3.0 (via Bioicons) et CC BY 4.0 (kits SMART).</li>
+      <li>Pour la pratique, se référer aux recommandations en vigueur et aux normes de son laboratoire.</li>
+    </ul>
+    <p class="warn-author">Conception et réalisation : <strong>Philippe Thuillier</strong></p>
+    <button type="button" class="warn-ok" id="warnOk">J'ai compris</button>
+  </div>
+</div>
 <div class="app">
   <header class="topbar">
     <div class="brand">
       <span class="brand-name">Atlas endocrinien</span>
-      <span class="brand-sub">les hormones en mouvement</span>
+      <span class="brand-sub">les hormones en mouvement · par Philippe Thuillier</span>
     </div>
     <nav class="crumbs" id="crumbs" aria-label="Fil d'Ariane"></nav>
     <a class="sim-link" href="simulateur.html" title="Simulateur : initier et adapter les traitements thyroïdiens">Patient virtuel →</a>
+    <button type="button" class="warn-link" id="warnOpen">Outil pédagogique · usage non médical</button>
   </header>
 
   <main class="stage">
@@ -38,6 +59,8 @@
       <span class="ctrl-sep"></span>
       <button type="button" id="btnOut" class="icon" title="Zoom arrière (−)" aria-label="Zoom arrière">−</button>
       <button type="button" id="btnIn" class="icon" title="Zoom avant (+)" aria-label="Zoom avant">+</button>
+      <span class="ctrl-sep"></span>
+      <button type="button" id="btnPause" class="pause-btn" title="Arrêter ou reprendre l'animation (barre d'espace)" aria-pressed="true">❚❚ Pause</button>
     </div>
     <details class="legend" id="legend" open>
       <summary>Légende</summary>
@@ -136,6 +159,7 @@
 <script src="js/molecules-axes.js"></script>
 <script src="js/lt4-eta.js"></script>
 <script src="js/organs.js"></script>
+<script src="js/pk.js"></script>
 <script src="js/info.js"></script>
 <script src="js/sheets-molecules.js"></script>
 <script src="js/sheets-organs.js"></script>
@@ -164,8 +188,14 @@
 <script src="js/scenes/zoom-gonad.js"></script>
 <script src="js/scenes/zoom-phospho.js"></script>
 <script src="js/scenes/zoom-glyc.js"></script>
+<script src="js/scenes/zoom-athero.js"></script>
+<script src="js/scenes/zoom-pk.js"></script>
 <script src="js/scenes/zoom-transv.js"></script>
+<script src="js/scenes/surrenale.js"></script>
+<script src="js/scenes/pancreas.js"></script>
+<script src="js/scenes/zoom-pancreas.js"></script>
 <script src="js/app.js"></script>
 <script src="js/video-export.js"></script>
+<script src="js/warning.js"></script>
 </body>
 </html>

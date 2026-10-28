@@ -5,7 +5,7 @@
   const S = HV.model.s;
   const cap = (v, m) => Math.min(m, Math.max(0, v));
 
-  HV.scene({
+  const def = HV.scene({
     id: 'pit',
     parent: 'thyro',
     x: 110,
@@ -13,12 +13,12 @@
     scale: 0.15,
     title: 'Antéhypophyse · cellule thyréotrope',
     level: 'Organe',
-    lead: 'La TRH se fixe sur son récepteur couplé à Gq. La cellule thyréotrope synthétise alors la TSH, la glycosyle et la sécrète dans la circulation générale.',
+    lead: 'La TRH se fixe sur son récepteur couplé à Gq (complément).La cellule thyréotrope synthétise alors la TSH, la glycosyle et la sécrète dans la circulation générale.',
     points: [
       'TSH : glycoprotéine formée d\'une sous-unité α commune (avec LH, FSH et hCG) et d\'une sous-unité β spécifique.',
-      'La glycosylation conditionne l\'activité biologique de la TSH.',
-      'La T4 entre par MCT8, la D2 la convertit en T3, qui réprime TSHβ et αGSU via TRβ2.',
-      'Somatostatine, dopamine et glucocorticoïdes freinent la sécrétion de TSH.'
+      'La glycosylation conditionne l\'activité biologique de la TSH (complément).',
+      'La T4 entre par MCT8, la D2 la convertit en T3, qui réprime TSHβ et αGSU via TRβ2 (complément).',
+      'La somatostatine freine la TSH (polycopié p. 7) ; la dopamine et les glucocorticoïdes aussi (complément).'
     ],
     build(g, a) {
       a.frame('Antéhypophyse · cellule thyréotrope', 'TRH → récepteur → synthèse et sécrétion de TSH');
@@ -71,6 +71,15 @@
       const mg = a.el('g', { transform: 'translate(250 880)' });
       a.text(0, 0, '−', 'mod-inhib', null, mg);
       a.text(26, 0, 'Somatostatine · dopamine · glucocorticoïdes freinent la TSH', 'note', null, mg);
+      HV.spotlight(def, a, [
+        { t: 'La TRH arrive par le sang porte', d: 'Le sang du système porte apporte la TRH de l\'hypothalamus jusqu\'à la cellule thyréotrope.', spot: [[100, 160, 130, 420], [406, 540, 90]] },
+        { t: 'Le récepteur de la TRH', d: 'La TRH se fixe sur son récepteur à sept domaines transmembranaires, couplé à Gq : PLC → IP₃ et Ca²⁺, PKC (complément). La flèche s\'épaissit quand la TRH monte.', spot: [[406, 560, 110], [496, 670, 90]] },
+        { t: 'Les gènes de la TSH', d: 'Dans le noyau, la cellule transcrit les gènes des deux sous-unités : α (commune avec LH, FSH et hCG) et β, spécifique de la TSH.', spot: [[690, 590, 160]] },
+        { t: 'Glycosylation et sécrétion', d: 'Dans le réticulum et le Golgi, la TSH est glycosylée, ce qui conditionne son activité biologique (complément) ; stockée dans des granules, elle est sécrétée dans la circulation générale.', spot: [[800, 340, 660, 300]] },
+        { t: 'Le rétrocontrôle', d: 'La T4 entre par MCT8, la D2 la convertit en T3, qui réprime les gènes TSHβ et αGSU via TRβ2 (complément) : c\'est pour cela que la TSH est si sensible aux hormones thyroïdiennes.', spot: [[950, 700, 60], [1143, 722, 60], [814, 590, 60]] },
+        { t: 'Les autres freins', d: 'La somatostatine freine la TSH (polycopié p. 7) ; la dopamine et les glucocorticoïdes aussi (complément).', spot: [[230, 845, 980, 60]] },
+        { t: 'En résumé', d: 'TRH → récepteur Gq → transcription de α et β → glycosylation → TSH dans le sang. La T3 produite dans la cellule freine la synthèse : TSH haute si les hormones thyroïdiennes manquent, basse si elles sont en excès.', spot: [[60, 150, 1490, 800]] }
+      ]);
     }
   });
 })();

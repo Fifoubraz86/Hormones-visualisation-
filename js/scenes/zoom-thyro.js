@@ -54,7 +54,7 @@
     'zt-pyr': { t: 'Pyramide de Lalouette', k: 'Lobe pyramidal · polycopié p. 6', d: 'L\'isthme comporte parfois un vestige embryonnaire, la pyramide de l\'alouette (polycopié p. 6) : reliquat de la partie basse du canal thyréoglosse (complément).' },
     'zt-hyoid': { t: 'Os hyoïde', k: 'Repère du trajet du canal (complément)', d: 'Le canal thyréoglosse passe à son contact : l\'exérèse d\'un kyste du tractus emporte la partie moyenne de l\'os hyoïde (complément).' },
     'zt-pouch': { t: 'Poches pharyngées (endobranchiales)', k: 'Endoderme · polycopié p. 33', d: 'Les parathyroïdes sont d\'origine endodermique : la 3e poche donne les parathyroïdes inférieures (P3) et le thymus, la 4e poche les parathyroïdes supérieures (P4) (polycopié p. 33, figure 10).' },
-    'zt-p3': { t: 'Parathyroïde inférieure (P3)', k: '3e poche · polycopié p. 33-34', d: 'Elle naît avec le thymus de la 3e poche et descend avec lui : elle termine plus bas que P4. Elle est à la face postérieure du pôle inférieur du lobe, en dehors du récurrent, mais peut être dans le médiastin supérieur (40 % des cas) (p. 34).' },
+    'zt-p3': { t: 'Parathyroïde inférieure (P3)', k: '3e poche · polycopié p. 33-34', d: 'Elle naît avec le thymus de la 3e poche et descend avec lui : elle termine plus bas que P4. Elle est à la face postérieure du pôle inférieur du lobe, en dehors du récurrent, mais peut être dans le médiastin supérieur (40 % des cas selon le polycopié, p. 34 ; fréquence variable selon les séries, complément).' },
     'zt-p4': { t: 'Parathyroïde supérieure (P4)', k: '4e poche · polycopié p. 33-34', d: 'Derrière le pôle supérieur du lobe thyroïdien, à hauteur du cartilage cricoïde ; elle peut se placer en arrière du récurrent, au contact de l\'œsophage (p. 34).' },
     'zt-thymus': { t: 'Thymus', k: '3e poche · polycopié p. 33', d: 'Issu de la 3e poche avec P3, il descend dans le médiastin et entraîne P3 vers le bas (migration lors de la flexion cervicale, figure 10).' },
     'zt-ub': { t: 'Corps ultimobranchial', k: 'Issu de la 4e poche (complément)', d: 'Il fusionne avec la face postérieure des lobes thyroïdiens et y apporte les cellules C (parafolliculaires), qui dérivent de la crête neurale (complément).' },
@@ -62,14 +62,14 @@
     /* --- Anatomie chirurgicale --- */
     'zt-lobes': { t: 'Lobes et isthme', k: 'Polycopié p. 6', d: 'Deux lobes latéraux réunis par un isthme, à la base du cou. L\'isthme est en avant des premiers anneaux trachéaux (complément).' },
     'zt-sta': { t: 'Artère thyroïdienne supérieure', k: 'Branche de la carotide externe (complément)', d: 'Elle aborde le pôle supérieur du lobe. Sa ligature se fait au ras de la glande pour épargner la branche externe du nerf laryngé supérieur, qui chemine à son contact (complément).' },
-    'zt-ita': { t: 'Artère thyroïdienne inférieure', k: 'Tronc thyrocervical de la sous-clavière (complément)', d: 'Elle passe derrière la carotide commune puis aborde la face postérieure du lobe, où elle croise le nerf récurrent. Elle vascularise P3 et, dans 88 % des cas, P4 (polycopié p. 34).' },
+    'zt-ita': { t: 'Artère thyroïdienne inférieure', k: 'Tronc thyro-cervical de la sous-clavière (complément)', d: 'Elle passe derrière la carotide commune puis aborde la face postérieure du lobe, où elle croise le nerf récurrent. Elle vascularise P3 et, dans 88 % des cas, P4 (polycopié p. 34).' },
     'zt-carotid': { t: 'Artère carotide commune', k: 'Repère latéral (complément)', d: 'Se divise en carotides interne et externe à hauteur du bord supérieur du cartilage thyroïde (complément).' },
     'zt-arch': { t: 'Crosse de l\'aorte et sous-clavières', k: 'Boucles des récurrents (complément)', d: 'Le récurrent gauche passe sous la crosse aortique, le récurrent droit sous l\'artère sous-clavière droite, puis tous deux remontent vers le larynx (complément).' },
     'zt-vagus': { t: 'Nerf vague (X)', k: 'Origine des nerfs laryngés (complément)', d: 'Il descend dans la gaine carotidienne et donne le nerf laryngé supérieur (haut) et le nerf laryngé inférieur, dit récurrent (bas, après une boucle sous une artère) (complément).' },
-    'zt-rln': { t: 'Nerf laryngé inférieur (récurrent)', k: 'Motricité des cordes vocales (complément)', d: 'Il remonte dans l\'angle trachéo-œsophagien, croise l\'artère thyroïdienne inférieure, passe à la face postérieure du lobe et pénètre dans le larynx sous le cartilage cricoïde. Le droit est plus oblique, le gauche plus vertical (complément).' },
+    'zt-rln': { t: 'Nerf laryngé inférieur (récurrent)', k: 'Motricité des cordes vocales (complément)', d: 'Il remonte dans l\'angle trachéo-œsophagien, croise l\'artère thyroïdienne inférieure, passe à la face postérieure du lobe et pénètre dans le larynx en arrière de l\'articulation crico-thyroïdienne, sous le bord inférieur du constricteur inférieur du pharynx. Le droit est plus oblique, le gauche plus vertical (complément).' },
     'zt-sln': { t: 'Nerf laryngé supérieur', k: 'Branches interne et externe (complément)', d: 'La branche interne, sensitive, traverse la membrane thyro-hyoïdienne. La branche externe, motrice, innerve le muscle cricothyroïdien (tension des cordes vocales, voix aiguë) et longe l\'artère thyroïdienne supérieure (complément).' },
     'zt-ct': { t: 'Muscle cricothyroïdien', k: 'Innervé par la branche externe du nerf laryngé supérieur (complément)', d: 'Il tend les cordes vocales : sa paralysie donne une voix fatigable, sans aigus (complément).' },
-    'zt-para': { t: 'Parathyroïdes', k: 'Polycopié p. 34', d: '4 glandes dans 80 % des cas, brun chamois, 4 à 6 mm, accolées à la face postérieure des pôles thyroïdiens, extracapsulaires donc clivables. Chacune a une artère unique et terminale, branche de l\'artère thyroïdienne inférieure (p. 34).' },
+    'zt-para': { t: 'Parathyroïdes', k: 'Polycopié p. 34', d: '4 glandes dans 80 % des cas, brun chamois, 4 à 6 mm, accolées à la face postérieure des pôles thyroïdiens, extracapsulaires donc clivables. Chacune a une artère unique et terminale : thyroïdienne inférieure pour P3, et pour P4 dans 88 % des cas (supérieure dans 10 %) (p. 34).' },
     'zt-cx-rln': { t: 'Lésion d\'un nerf récurrent', k: 'Complication de la thyroïdectomie (complément)', d: 'Paralysie d\'une corde vocale : dysphonie (voix bitonale). Contrôle de la mobilité laryngée avant et après la chirurgie (complément). La dysphonie est aussi un signe de compression ou de malignité d\'un goitre (polycopié p. 11).' },
     'zt-cx-bil': { t: 'Atteinte récurrentielle bilatérale', k: 'Rare, grave (complément)', d: 'Les deux cordes vocales restent proches de la ligne médiane : dyspnée laryngée, urgence respiratoire (complément).' },
     'zt-cx-sln': { t: 'Lésion de la branche externe du laryngé supérieur', k: 'Complément', d: 'Paralysie du muscle cricothyroïdien : voix fatigable, perte des aigus (gênante chez les chanteurs) (complément).' },
@@ -96,7 +96,7 @@
     'zt-tshp': { t: 'TSH pendant la grossesse', k: 'Physiologiquement plus basse au 1er trimestre (complément)', d: 'Freinée par l\'effet thyréostimulant de l\'hCG ; on interprète avec des normes adaptées au trimestre, propres au laboratoire (complément).' },
     'zt-t4lp': { t: 'T4 libre pendant la grossesse', k: 'Complément', d: 'Légère hausse transitoire au pic d\'hCG, puis tendance à la baisse aux 2e et 3e trimestres, variable selon la méthode de dosage (complément).' },
     'zt-pla': { t: 'Placenta', k: 'Complément', d: 'L\'iode et les IgG (dont les TRAb) le franchissent. La désiodase D3 placentaire inactive une partie de la T4 maternelle (complément).' },
-    'zt-fetal': { t: 'Thyroïde fœtale', k: 'Complément', d: 'Elle devient fonctionnelle vers la fin du 1er trimestre ; avant, le fœtus dépend de la T4 maternelle, importante pour le développement cérébral (complément).' },
+    'zt-fetal': { t: 'Thyroïde fœtale', k: 'Complément', d: 'Elle commence à capter l\'iode et à synthétiser des hormones vers 10–12 SA, mais sa production ne devient importante que vers 18–20 SA : jusque-là, le fœtus dépend surtout de la T4 maternelle, importante pour le développement cérébral (complément).' },
     /* --- Auto-immunité --- */
     'zt-tshr': { t: 'Récepteur de la TSH', k: 'Membrane basolatérale du thyréocyte', d: 'Récepteur couplé aux protéines G (AMPc) (complément). La TSH active toutes les étapes du métabolisme iodé et a un effet mitogène (polycopié p. 7). Les TRAb s\'y fixent (p. 29, figure 9B).' },
     'zt-trab-s': { t: 'TRAb stimulants', k: 'Maladie de Basedow · polycopié p. 31', d: 'Auto-anticorps anti-récepteurs de la TSH qui stimulent la synthèse et la sécrétion des hormones thyroïdiennes (p. 31) : goitre diffus homogène et vasculaire (p. 26), fixation diffuse à la scintigraphie (figure 9B). Leur dosage confirme le diagnostic (p. 28).' },
@@ -123,7 +123,7 @@
     lead: 'La thyroïde a deux origines. L\'ébauche médiane naît du plancher du pharynx, au foramen caecum de la langue, et descend dans le cou le long du canal thyréoglosse : elle donne les thyréocytes. Les poches pharyngées donnent les parathyroïdes (3e et 4e poches), le thymus et le corps ultimobranchial, qui apporte les cellules C (complément, sauf parathyroïdes : polycopié p. 33).',
     points: [
       'Parathyroïdes d\'origine endodermique : 3e poche → parathyroïdes inférieures (P3) et thymus ; 4e poche → parathyroïdes supérieures (P4) (polycopié p. 33, figure 10).',
-      'P3 naît plus haut que P4 mais, entraînée par le thymus, termine plus bas : elle peut être dans le médiastin supérieur (40 % des cas, p. 34).',
+      'P3 naît plus haut que P4 mais, entraînée par le thymus, termine plus bas : elle peut être dans le médiastin supérieur (40 % des cas, p. 34 ; fréquence variable selon les séries, complément).',
       'Arrêt de la descente : thyroïde linguale ; persistance du canal : kyste du tractus thyréoglosse ; reliquat bas : pyramide de Lalouette (p. 6) (complément pour le mécanisme).',
       'Cellules C (calcitonine) : apportées par le corps ultimobranchial (complément).'
     ],
@@ -223,7 +223,8 @@
       a.text(1222, 756, 'P4 : derrière le pôle supérieur,', 'note strong', { attrs: { 'data-info': 'zt-p4' } });
       a.text(1222, 778, 'hauteur du cricoïde (p. 34)', 'note');
       a.text(1222, 900, 'P3 : pôle inférieur, ou', 'note strong', { attrs: { 'data-info': 'zt-p3' } });
-      a.text(1222, 922, 'médiastin sup. (40 %, p. 34)', 'note');
+      a.text(1222, 922, 'médiastin sup. (40 %*, p. 34)', 'note');
+      a.text(1222, 944, '* variable selon les séries (complément)', 'note');
       a.text(956, 972, 'thymus → médiastin', 'note', { attrs: { 'data-info': 'zt-thymus' } });
 
       /* ---------- Animation (cycle de 12 s) ---------- */
@@ -259,7 +260,7 @@
         { t: 'La descente le long du canal thyréoglosse', d: 'L\'ébauche descend en avant du pharynx, passe au contact de l\'os hyoïde et du larynx, et se place devant la trachée vers la 7e semaine (ordre de grandeur, complément).', spot: [[430, 520, 260]] },
         { t: 'Les anomalies de la descente', d: 'Arrêt en haut : thyroïde linguale. Canal persistant : kyste du tractus thyréoglosse, masse médiane qui monte à la protraction de la langue. Reliquat bas : pyramide de Lalouette (p. 6) (complément pour le mécanisme).', spot: [[472, 290, 50], [380, 548, 60], [392, 715, 50]] },
         { t: 'Les poches pharyngées', d: 'La 3e poche donne les parathyroïdes inférieures (P3) et le thymus, la 4e les parathyroïdes supérieures (P4) (polycopié p. 33, figure 10).', spot: [[960, 512, 150]] },
-        { t: 'Le croisement de P3 et P4', d: 'Entraînée par le thymus, P3 descend plus bas que P4 : elle finit au pôle inférieur, voire dans le médiastin supérieur (40 %) ; P4 reste au pôle supérieur, à hauteur du cricoïde (p. 34).', spot: [[1180, 830, 170]] },
+        { t: 'Le croisement de P3 et P4', d: 'Entraînée par le thymus, P3 descend plus bas que P4 : elle finit au pôle inférieur, voire dans le médiastin supérieur (40 % selon le polycopié ; fréquence variable selon les séries, complément) ; P4 reste au pôle supérieur, à hauteur du cricoïde (p. 34).', spot: [[1180, 830, 170]] },
         { t: 'Les cellules C', d: 'Le corps ultimobranchial, issu de la 4e poche, fusionne avec le lobe et y apporte les cellules C, qui sécrètent la calcitonine (p. 7) ; leur origine est la crête neurale (complément).', spot: [[1140, 805, 90]] }
       ]);
     }
@@ -273,7 +274,7 @@
     title: 'Anatomie chirurgicale de la thyroïde', level: 'Organe',
     lead: 'Deux lobes réunis par un isthme (polycopié p. 6), vascularisés par les artères thyroïdiennes supérieures et inférieures. En arrière, les nerfs récurrents et les parathyroïdes sont les deux structures que la thyroïdectomie doit préserver. Survolez les complications pour voir les structures en cause.',
     points: [
-      'Parathyroïdes : 4 dans 80 % des cas, à la face postérieure des pôles ; artère unique et terminale, issue de l\'artère thyroïdienne inférieure (p. 34).',
+      'Parathyroïdes : 4 dans 80 % des cas, à la face postérieure des pôles ; artère unique et terminale, thyroïdienne inférieure (pour P4 : 88 % des cas, supérieure dans 10 %) (p. 34).',
       'P3 : pôle inférieur, en dehors du récurrent, sous la bifurcation de l\'artère thyroïdienne inférieure ; P4 : pôle supérieur, à hauteur du cricoïde, parfois en arrière du récurrent (p. 34).',
       'Récurrent droit sous la sous-clavière droite, gauche sous la crosse aortique ; remontée dans l\'angle trachéo-œsophagien (complément).',
       'Hypoparathyroïdie post-chirurgicale : la cause la plus fréquente d\'hypoparathyroïdie (p. 46).'
@@ -414,9 +415,10 @@
         c.g.addEventListener('pointerleave', () => hl[key].forEach((e) => e.classList.remove('zt-hl')));
       });
 
+      surg.chipLeft = true; // complications de la thyroïdectomie en bas à droite
       HV.spotlight(surg, a, [
         { t: 'Lobes et isthme', d: 'Deux lobes latéraux réunis par un isthme, parfois surmonté de la pyramide de Lalouette (polycopié p. 6).', spot: [[470, 450, 140]] },
-        { t: 'Deux artères par lobe', d: 'L\'artère thyroïdienne supérieure (carotide externe) aborde le pôle supérieur ; l\'inférieure (tronc thyrocervical de la sous-clavière) passe derrière la carotide et aborde la face postérieure (complément).', spot: [[372, 270, 70], [290, 600, 100]] },
+        { t: 'Deux artères par lobe', d: 'L\'artère thyroïdienne supérieure (carotide externe) aborde le pôle supérieur ; l\'inférieure (tronc thyro-cervical de la sous-clavière) passe derrière la carotide et aborde la face postérieure (complément).', spot: [[372, 270, 70], [290, 600, 100]] },
         { t: 'Les nerfs récurrents', d: 'Le droit fait une boucle sous la sous-clavière droite, le gauche sous la crosse aortique ; tous deux remontent dans l\'angle trachéo-œsophagien, croisent l\'artère thyroïdienne inférieure et entrent dans le larynx (complément).', spot: [[270, 800, 70], [680, 920, 70], [1220, 564, 120]] },
         { t: 'Le nerf laryngé supérieur', d: 'Sa branche externe, motrice du muscle cricothyroïdien, longe l\'artère thyroïdienne supérieure : la ligature se fait au ras du pôle supérieur (complément).', spot: [[380, 240, 80]] },
         { t: 'Les parathyroïdes', d: 'À la face postérieure : P4 au pôle supérieur, près du récurrent ; P3 au pôle inférieur, sous l\'artère thyroïdienne inférieure. Chacune a une artère terminale, qu\'il faut respecter (p. 34).', spot: [[1290, 534, 230]] },
@@ -777,7 +779,7 @@
         ['1er trimestre : l\'hCG, proche de la TSH, stimule son récepteur : T4L un peu ↑, TSH ↓, de façon physiologique (complément).',
           'Vomissements incoercibles : thyrotoxicose gestationnelle transitoire, après avoir éliminé une maladie de Basedow (p. 27).',
           'Hyperthyroïdie maternelle : risque de fausse couche, pré-éclampsie, retard de croissance intra-utérin, prématurité (p. 26).',
-          'Jusqu\'à la fin du 1er trimestre, le fœtus dépend de la T4 maternelle ; sa thyroïde devient ensuite fonctionnelle (complément).'],
+          'Thyroïde fœtale : captation de l\'iode vers 10–12 SA, production importante vers 18–20 SA ; avant, surtout la T4 maternelle (complément).'],
         ['2e trimestre : les œstrogènes augmentent la TBG (environ ×2), qui transporte 75 % des hormones (p. 8) : la T4 totale monte.',
           'Ce n\'est pas une hyperthyroïdie : on interprète la T4 libre, non liée à la TBG (p. 8), avec des normes adaptées (complément).',
           'Femme traitée par lévothyroxine : besoins augmentés, dose à adapter sur la TSH (complément).',
@@ -982,7 +984,7 @@
           txt = 0.3;
           effT.querySelectorAll('tspan')[0].textContent = stim ? (k > 0.05 ? 'synthèse et sécrétion ↑' : 'stimulation par la TSH seule') : 'TSH empêchée de se fixer';
           effT.querySelectorAll('tspan')[1].textContent = stim ? (k > 0.05 ? 'croissance → goitre diffus' : '') : 'AMPc ↓ → hypothyroïdie';
-          exT.textContent = k > 0.05 ? 'Exophtalmie : le contenu de l\'orbite augmente (p. 31)' : 'Orbite normale : TRAb du modèle négatifs';
+          exT.textContent = k > 0.05 ? 'Orbitopathie (moitié des cas, p. 31) : le contenu de l\'orbite augmente' : 'Orbite normale : TRAb du modèle négatifs';
           lvT.textContent = 'TRAb : ' + (demo ? 'élevés (démonstration)' : fmt(P.trab * 4, 1) + ' UI/L (modèle)');
         }
       });

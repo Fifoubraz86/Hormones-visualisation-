@@ -23,12 +23,36 @@
       samples: [{ x: 0.06, label: 'T0' }, { x: 0.55, label: '30 min' }, { x: 1, label: '60 min' }],
       apply(p, x) { if (x > 0.08) p.syn = 6; },
       measure: (sim) => sim.lab('cort'),
-      interpret(v, sim) {
+      interpret(v, sim, st) {
         // Seules les valeurs prélevées aux temps du protocole comptent (T0, 30 et 60 min).
         const peak = Math.max(...v);
-        if (peak >= 500) return { tone: 'good', text: `Cortisol maximal sur les prélèvements : ${n0(peak)} nmol/L (≥ 500 nmol/L, 18 µg/dL) : réponse normale. Une insuffisance surrénale est éliminée (sauf insuffisance corticotrope récente, avant l'atrophie surrénalienne).` };
+        // Bloc en 21-hydroxylase : le test sert surtout à doser la 17-OHP stimulée (polycopié p. 82).
+        const b21 = sim.p && sim.p.cyp21 < 0.9;
+        const ohp = b21 ? ` 17-OHP après stimulation : ${sim.lab('ohp').toFixed(1).replace('.', ',')} × N : élévation en faveur d'un bloc en 21-hydroxylase (polycopié p. 82).` : '';
+        // Insuffisance corticotrope récente : surrénales pas encore atrophiées, réponse faussement normale (polycopié p. 61).
+        const recent = (st && st.base && st.base.recent) || (v[0] < 275 && sim.lab('acth') < 20);
+        if (peak >= 500 && recent) return { tone: 'warn', text: `Cortisol maximal sur les prélèvements : ${n0(peak)} nmol/L (≥ 500 nmol/L) : réponse faussement rassurante. Cortisol de base bas (${n0(v[0])} nmol/L) avec une ACTH basse : une insuffisance corticotrope récente est possible, les surrénales ne sont pas encore atrophiées et répondent encore à l'ACTH exogène (polycopié p. 61). Le test au Synacthène ne l'exclut pas : hypoglycémie insulinique, qui explore tout l'axe, ou nouveau test à distance (complément).` };
+        if (peak >= 500) return { tone: b21 ? 'warn' : 'good', text: `Cortisol maximal sur les prélèvements : ${n0(peak)} nmol/L (≥ 500 nmol/L, 18 µg/dL) : réponse normale. Une insuffisance surrénale est éliminée (sauf insuffisance corticotrope récente, avant l'atrophie surrénalienne).` + ohp };
         const acth = sim.lab('acth') > 52; // ACTH endogène (le Synacthène n'est pas dosé comme ACTH)
-        return { tone: 'bad', text: `Cortisol maximal sur les prélèvements : ${n0(peak)} nmol/L (< 500) : réponse insuffisante. ` + (acth ? 'Avec une ACTH élevée : insuffisance surrénale périphérique.' : 'Avec une ACTH basse ou normale : insuffisance corticotrope ancienne, avec atrophie surrénalienne.') };
+        return { tone: 'bad', text: `Cortisol maximal sur les prélèvements : ${n0(peak)} nmol/L (< 500) : réponse insuffisante. ` + (acth ? (b21 ? 'Avec une ACTH élevée : insuffisance surrénale périphérique, ici par bloc en 21-hydroxylase.' : 'Avec une ACTH élevée : insuffisance surrénale périphérique.') : 'Avec une ACTH basse ou normale : insuffisance corticotrope ancienne, avec atrophie surrénalienne.') + ohp };
+      }
+    },
+    {
+      id: 'synacthene-17ohp', name: 'Synacthène : 17-OHP', poly: true,
+      what: 'Recherche un bloc en 21-hydroxylase non classique devant une hyperandrogénie : la 17-OHP s\'élève-t-elle anormalement sous ACTH (polycopié p. 82) ?',
+      proto: '250 µg de tétracosactide (ACTH 1-24) IV ou IM ; 17-OHP à T0 et à 60 min. Valeurs relatives (× N) ; en pratique, une 17-OHP stimulée > 10 ng/mL (≈ 30 nmol/L) est en faveur du bloc (complément, Endocrine Society 2018).',
+      unit: '× N', label: '17-OHP', thr: 5, thrDir: 'below', thrLabel: 'seuil pédagogique 5 × N (valeur relative)',
+      span: 60, xUnit: 'min', duration: 14,
+      samples: [{ x: 0.06, label: 'T0' }, { x: 1, label: '60 min' }],
+      apply(p, x) { if (x > 0.08) p.syn = 6; },
+      measure: (sim) => sim.lab('ohp'),
+      interpret(v, sim) {
+        const f = (x) => x.toFixed(1).replace('.', ',');
+        const base = v[0], peak = Math.max(...v);
+        if (peak < 0.67) return { tone: 'warn', text: `17-OHP basse et non stimulable (${f(peak)} × N) : la corticosurrénale ne répond pas (insuffisance surrénale ou atrophie) ; le test n'apporte rien pour un bloc enzymatique.` };
+        if (peak < 5) return { tone: 'good', text: `17-OHP : ${f(base)} × N à T0, ${f(peak)} × N après stimulation : réponse normale, un bloc en 21-hydroxylase non classique est peu probable.` };
+        if (base > 20 && sim.lab('cort') < 275) return { tone: 'bad', text: `17-OHP déjà très élevée à T0 (${f(base)} × N), cortisol bas : bloc en 21-hydroxylase classique ; le test n'est pas nécessaire (dépistage néonatal à J3, polycopié p. 81).` };
+        return { tone: 'bad', text: `17-OHP : ${f(base)} × N à T0, ${f(peak)} × N après stimulation : élévation anormale, en faveur d'un bloc en 21-hydroxylase non classique (polycopié p. 82). Confirmation par l'étude du gène CYP21A2 (complément).` };
       }
     },
     {
@@ -93,11 +117,16 @@
       span: 120, xUnit: 'min', duration: 15,
       samples: [{ x: 0.04, label: 'T0' }, { x: 0.25, label: '30' }, { x: 0.5, label: '60' }, { x: 0.75, label: '90' }, { x: 1, label: '120' }],
       apply(p, x) { if (x > 0.05) p.load = clamp(Math.min((x - 0.05) * 8, 1) * (1 - 0.4 * Math.max(0, x - 0.6) / 0.4), 0, 1); },
-      measure: (sim) => sim.lab('gh'),
-      interpret(v, sim) {
-        const nadir = Math.min(...v.slice(1));
+      measure: (sim) => {
+        const st = HV.Tests.state();
+        if (st && !st.trace.length) st.igf0 = sim.lab('igf'); // IGF-1 avant la charge
+        return sim.lab('gh');
+      },
+      interpret(v, sim, st) {
+        const nadir = Math.min(...v.slice(1)), igf0 = st && st.igf0 != null ? st.igf0 : sim.lab('igf');
+        if (nadir >= 0.4 && igf0 <= 300) return { tone: 'warn', text: `Nadir de GH à ${n2(nadir)} ng/mL (≥ 0,4) : absence de freination, mais IGF-1 normale (${n0(igf0)} µg/L) : résultat discordant, à contrôler. Le diagnostic d'acromégalie repose d'abord sur l'IGF-1 élevée (polycopié p. 55).` };
         if (nadir < 0.4) return { tone: 'good', text: `Nadir de GH à ${n2(nadir)} ng/mL : freination normale. Pas d'acromégalie.` };
-        return { tone: 'bad', text: `Nadir de GH à ${n2(nadir)} ng/mL (≥ 0,4) : absence de freination. Avec une IGF-1 élevée (${n0(sim.lab('igf'))} µg/L), le diagnostic d'acromégalie est confirmé : IRM hypophysaire.` };
+        return { tone: 'bad', text: `Nadir de GH à ${n2(nadir)} ng/mL (≥ 0,4) : absence de freination. Avec une IGF-1 élevée (${n0(igf0)} µg/L), le diagnostic d'acromégalie est confirmé : IRM hypophysaire.` };
       }
     }
   ];
@@ -120,7 +149,7 @@
   T.raa = [{
     id: 'saline', name: 'Test de charge sodée', poly: true,
     what: 'Confirme l\'autonomie de l\'aldostérone : l\'expansion volémique la freine-t-elle ?',
-    proto: 'Perfusion de 2 L de sérum salé isotonique en 4 h, patient allongé ; aldostérone avant et après. Les seuils sont des compléments (variables selon les centres).',
+    proto: 'Principe : expansion volémique par charge sodée (polycopié p. 77). Perfusion de 2 L de sérum salé isotonique en 4 h, en position couchée ou assise ; aldostérone avant et après. Protocole et seuils : complément (Endocrine Society 2016), variables selon les centres.',
     unit: 'pmol/L', label: 'Aldostérone', thr: 140, thrDir: 'below', thrLabel: 'freinage normal < 140 pmol/L (5 ng/dL)',
     span: 4, xUnit: 'h', duration: 14,
     samples: [{ x: 0.04, label: '0 h' }, { x: 0.5, label: '2 h' }, { x: 1, label: '4 h' }],
@@ -145,6 +174,8 @@
       measure: (sim) => sim.lab('g'),
       interpret(v) {
         const g0 = v[0], g2 = v[v.length - 1], f = (x) => x.toFixed(2).replace('.', ',');
+        // Glycémie à jeun basse : l'HGPO n'est pas l'examen adapté (normale à jeun 0,80–1,10 g/L ; hypoglycémie < 0,50 g/L hors diabète, polycopié partie 2 p. 32 et 66).
+        if (g0 < 0.7) return { tone: 'bad', text: `À jeun : ${f(g0)} g/L : glycémie basse (hypoglycémie si < 0,50 g/L hors diabète). À 2 h : ${f(g2)} g/L. L'HGPO standard n'est pas l'examen adapté : rechercher une hypoglycémie organique (triade de Whipple, épreuve de jeûne) ; l'HGPO prolongée sur 5 heures montre la chute tardive de la glycémie après le pic.` };
         // On classe d'abord sur la glycémie à jeun, puis à 2 h ; on retient la catégorie la plus haute (polycopié, tableau 8).
         const c0 = g0 >= 1.26 ? 3 : g0 >= 1.1 ? 1 : 0;
         const c2 = g2 >= 2 ? 3 : g2 >= 1.4 ? 2 : 0;
@@ -160,6 +191,23 @@
       }
     },
     {
+      id: 'hgpo5', name: 'HGPO prolongée sur 5 heures', poly: true,
+      what: 'Recherche une hypoglycémie post-stimulative : la glycémie descend-elle sous 0,50 g/L dans les heures qui suivent la charge (polycopié, partie 2 p. 70) ?',
+      proto: '75 g de glucose per os à jeun ; glycémie toutes les heures pendant 5 heures (polycopié, partie 2 p. 70 ; rythme des prélèvements : complément).',
+      unit: 'g/L', label: 'Glycémie', thr: 0.5, thrDir: 'above', thrLabel: 'hypoglycémie < 0,50 g/L',
+      span: 300, xUnit: 'min', duration: 26,
+      samples: [{ x: 0.02, label: 'T0' }, { x: 0.2, label: '60' }, { x: 0.4, label: '120' }, { x: 0.6, label: '180' }, { x: 0.8, label: '240' }, { x: 1, label: '300' }],
+      apply(p, x) { p.fast = 1; const u = (x - 0.03) / 0.14; p.ogtt = u > 0 ? u * Math.exp(1 - u) : 0; /* absorption digestive */ },
+      measure: (sim) => sim.lab('g'),
+      interpret(v, sim) {
+        const f = (x) => x.toFixed(2).replace('.', ','), g0 = v[0];
+        const late = v.slice(2), m = Math.min(...late), at = [120, 180, 240, 300][late.indexOf(m)];
+        if (sim.p && sim.p.exo > 0.05) return { tone: 'warn', text: 'Examen non indiqué chez le diabétique traité par insuline : l\'hypoglycémie est iatrogène (polycopié, partie 2 p. 70).' };
+        if (m < 0.5) return { tone: 'bad', text: `Hypoglycémie tardive à ${f(m)} g/L (${at} min) après la charge` + (g0 < 0.7 ? `, avec une glycémie déjà basse à jeun (${f(g0)} g/L) : la sécrétion d'insuline, autonome, se prolonge après le pic glycémique. Évoque un hyperinsulinisme organique (insulinome) : épreuve de jeûne avec insuline et peptide C (complément).` : ' : hypoglycémie post-stimulative ; à confronter aux symptômes (triade de Whipple, polycopié partie 2 p. 72).') };
+        return { tone: 'good', text: `Glycémie minimale ${f(m)} g/L entre 2 et 5 heures : pas de glycémie inférieure à 0,50 g/L (polycopié, partie 2 p. 70).` };
+      }
+    },
+    {
       id: 'jeune', name: 'Épreuve de jeûne de 72 h', poly: false,
       what: 'Recherche une hypoglycémie organique : pendant le jeûne, l\'insuline doit s\'effondrer et la glycémie rester ≥ 0,50 g/L.',
       proto: 'Jeûne surveillé en hospitalisation ; glycémie répétée, insuline et peptide C (complément) au moment d\'une hypoglycémie (triade de Whipple, citée dans le polycopié). Non indiquée chez un diabétique traité.',
@@ -171,6 +219,7 @@
       interpret(v, sim) {
         const min = Math.min(...v), ins = sim.lab('ins'), f = (x) => x.toFixed(2).replace('.', ',');
         const iTxt = ins.toFixed(1).replace('.', ',') + ' µUI/mL';
+        if (sim.p && sim.p.exo > 0.05) return { tone: 'warn', text: 'Épreuve non indiquée chez le diabétique traité par insuline : l\'hypoglycémie est iatrogène (polycopié, partie 2 p. 70).' };
         if (min >= 0.5) return { tone: 'good', text: `Glycémie minimale ${f(min)} g/L, sans hypoglycémie ; insuline ${ins < 3 ? 'freinée' : 'adaptée à la glycémie'} en fin de jeûne (${iTxt}). Pas d'hypoglycémie organique.` };
         if (ins >= 3) return { tone: 'bad', text: `Hypoglycémie à ${f(min)} g/L avec une insuline non freinée (${iTxt}, ≥ 3 µUI/mL ; complément) : hyperinsulinisme. Peptide C élevé : hyperinsulinisme endogène (insulinome, ou prise de sulfamides hypoglycémiants, à rechercher dans le plasma) ; peptide C bas : insuline exogène.` };
         return { tone: 'warn', text: `Hypoglycémie à ${f(min)} g/L avec une insuline freinée : cause non insulinique à rechercher.` };
@@ -185,25 +234,31 @@
       unit: 'L/24 h', label: 'Débit urinaire', thr: 3, thrDir: 'below', thrLabel: 'débit urinaire habituel < 3 L/24 h',
       span: 4, xUnit: 'h', duration: 16,
       samples: [{ x: 0.03, label: '0 h' }, { x: 0.25, label: '1 h' }, { x: 0.5, label: '2 h' }, { x: 0.75, label: '3 h' }, { x: 1, label: '4 h' }],
-      apply(p, x) { p.drink = x > 0.04 && x < 0.16 ? 1.6 : 0; },
+      // Temps du protocole : 4 h en 16 s ; 3 L/h pendant 0,48 h ≈ 1,5 L.
+      apply(p, x) { p.hps = 4 / 16; p.drink = x > 0.04 && x < 0.16 ? 10 : 0; },
       measure: (sim) => sim.lab('diur'),
       interpret(v, sim, st) {
         const peak = Math.max(...v), na = sim.lab('na');
-        return { tone: 'good', text: `L'eau bue abaisse l'osmolalité : l'ADH s'effondre, les urines deviennent abondantes (jusqu'à ${n2(peak)} L/24 h en débit) et diluées, puis tout revient à la normale en quelques heures (natrémie ${n0(na)} mmol/L). C'est le rétrocontrôle négatif de l'osmostat. Si le rein ne pouvait pas éliminer l'eau (SIADH), la même charge ferait chuter la natrémie.` };
+        if (st.base.siadh > 0.02 || st.base.drug > 0.02) return { tone: 'bad', text: `L'ADH reste élevée : le rein ne peut pas éliminer l'eau bue, les urines restent concentrées et la natrémie chute à ${n0(na)} mmol/L. C'est pourquoi le SIADH se traite par restriction hydrique.` };
+        if (peak < 3) return { tone: 'warn', text: `Chez ce patient déshydraté, l'eau bue corrige d'abord le déficit : l'ADH reste stimulée et les urines restent rares (${n2(peak)} L/24 h au plus). Natrémie ${n0(na)} mmol/L.` };
+        if (st.base.poto > 0.02 && st.base.hypo >= 0.5 && st.base.kidney >= 0.5) return { tone: 'warn', text: `Ce patient boit déjà beaucoup : sa diurèse est proche du maximum (${n2(peak)} L/24 h en débit) et la charge supplémentaire fait baisser la natrémie à ${n0(na)} mmol/L. Dans la polydipsie primaire, des apports qui dépassent le pouvoir d'excrétion du rein exposent à l'hyponatrémie (complément).` };
+        if (st.base.hypo < 0.5 || st.base.kidney < 0.5) return { tone: 'warn', text: `Les urines sont déjà abondantes et diluées en permanence (diabète insipide) : la charge en eau ne modifie guère la diurèse, déjà maximale (${n2(peak)} L/24 h en débit). Natrémie ${n0(na)} mmol/L.` };
+        return { tone: 'good', text: `L'eau bue abaisse l'osmolalité : l'ADH s'effondre, les urines deviennent abondantes (jusqu'à ${n2(peak)} L/24 h en débit) et diluées, puis l'excès d'eau est éliminé en quelques heures (natrémie ${n0(na)} mmol/L). C'est le rétrocontrôle négatif de l'osmostat. Si le rein ne pouvait pas éliminer l'eau (SIADH), la même charge ferait chuter la natrémie.` };
       }
     },
     {
       id: 'desert', name: 'Marche dans le désert (6 h)', poly: false,
       what: 'Situation de la vie courante : sueur abondante sans pouvoir boire.',
       proto: 'Six heures de marche au soleil sans eau ; natrémie, osmolalité urinaire et diurèse (illustration physiologique, complément).',
-      unit: 'mosmol/kg', label: 'Osmolalité urinaire', thr: 600, thrDir: 'above', thrLabel: 'urines concentrées > 600 mosmol/kg',
+      unit: 'mosmol/kg', label: 'Osmolalité urinaire', thr: 600, thrDir: 'above', thrLabel: 'urines concentrées > 600 mosmol/kg (complément)',
       span: 6, xUnit: 'h', duration: 16,
       samples: [{ x: 0.03, label: '0 h' }, { x: 0.33, label: '2 h' }, { x: 0.67, label: '4 h' }, { x: 1, label: '6 h' }],
-      apply(p, x) { if (x > 0.04) p.sweat = Math.min(1, (x - 0.04) * 3); },
+      apply(p, x) { p.hps = 6 / 16; if (x > 0.04) p.sweat = Math.min(1, (x - 0.04) * 3); }, // 6 h en 16 s
       measure: (sim) => sim.lab('uosm'),
       interpret(v, sim) {
         const u = v[v.length - 1], na = sim.lab('na'), d = sim.lab('diur');
         if (u < 300) return { tone: 'bad', text: `Malgré la déshydratation (natrémie ${n0(na)} mmol/L), les urines restent diluées (${n0(u)} mosmol/kg) : le rein ne peut pas économiser l'eau. Chez un patient atteint de diabète insipide, une telle situation est dangereuse (déshydratation hypernatrémique) s'il ne peut pas boire.` };
+        if (u < 600) return { tone: 'warn', text: `La sueur fait monter l'osmolalité (natrémie ${n0(na)} mmol/L) mais les urines se concentrent mal (${n0(u)} mosmol/kg, ${n2(d)} L/24 h) : pouvoir de concentration réduit, par un défaut partiel d'ADH ou par le lavage médullaire d'une polyurie chronique (complément). Seule la boisson peut corriger le déficit en eau.` };
         return { tone: 'warn', text: `La sueur fait monter l'osmolalité (natrémie ${n0(na)} mmol/L) : l'ADH s'élève, les urines deviennent rares (${n2(d)} L/24 h) et très concentrées (${n0(u)} mosmol/kg). Le rein limite les pertes, mais seule la boisson (soif) peut corriger le déficit en eau.` };
       }
     }
@@ -219,32 +274,110 @@
       apply(p, x) {
         const siadh = p.siadh > 0.02 || p.drug > 0.02;
         // SIADH : restriction partielle (500 à 800 mL/j) et correction lente ; jamais de desmopressine.
-        if (x > 0.05) p.restrict = siadh ? 0.2 : 1;
+        // Temps du protocole : 10 h en 20 s. La polydipsie primaire (p.poto) garde son lavage médullaire.
+        p.hps = 10 / 20;
+        // SIADH : apports limités à ≈ 700 mL/j (500 à 800 mL/j, complément), soit environ 28 % des apports habituels.
+        if (x > 0.05) { p.restrict = siadh ? 0.72 : 1; if (!siadh) { p.drink = 0; p.sweat = 0; } }
         if (x > 0.8 && !siadh) p.ddavp = 1;
       },
       measure: (sim) => {
         const st = HV.Tests.state();
-        if (st && !st.trace.length) st.na0 = sim.lab('na'); // natrémie de départ
+        if (st && !st.trace.length) { st.na0 = sim.lab('na'); st.W0 = sim.s.W; } // natrémie et bilan d'eau de départ
+        if (st) st.naMax = Math.max(st.naMax || 0, sim.lab('na')); // natrémie la plus haute de l'épreuve
         return sim.lab('uosm');
       },
-      track: (sim) => sim.lab('diur') / 24, // litres par heure
       interpret(v, sim, st) {
         const u8 = v[4], ud = v[5], na = sim.lab('na');
-        const loss = (st.acc / 70) * 100;
-        const extra = ` Natrémie finale ${n0(na)} mmol/L ; perte de poids ≈ ${loss.toFixed(1).replace('.', ',')} %.` + (loss > 3 || na > 148 ? ' En pratique, l\'épreuve est interrompue avant ce stade (perte de poids > 3 à 5 % ou natrémie qui dépasse la normale ; complément).' : '');
+        // Perte de poids = eau libre perdue (bilan du modèle) rapportée au poids du patient.
+        const kg = sim.p.poids || 70, loss = Math.max(0, ((st.W0 != null ? st.W0 : 0) - sim.s.W) / kg * 100);
+        const naMax = Math.max(st.naMax || 0, na);
+        const extra = ` Natrémie maximale ${n0(naMax)} mmol/L ; perte de poids ≈ ${loss.toFixed(1).replace('.', ',')} %.` + (loss > 3 || naMax > 148 ? ' En pratique, l\'épreuve est interrompue avant ce stade (perte de poids > 3 à 5 % ou natrémie qui dépasse la normale ; complément).' : '');
         if (st.base.siadh > 0.02 || st.base.drug > 0.02) {
           const na0 = st.na0 != null ? st.na0 : na, d = na - na0;
-          return { tone: 'warn', text: `Restriction hydrique partielle (500 à 800 mL/j ; complément) : les urines restent inappropriément concentrées et la natrémie remonte lentement, de ${n0(na0)} à ${n0(na)} mmol/L (+${d.toFixed(1).replace('.', ',')} mmol/L) : argument pour un SIADH (épreuve diagnostique et thérapeutique). Pas de desmopressine dans un SIADH. Mise en garde : corriger de 8 à 10 mmol/L par 24 h au plus (risque de myélinolyse osmotique ; complément).` };
+          return { tone: 'warn', text: `Restriction hydrique partielle (500 à 800 mL/j ; complément) : les urines restent inappropriément concentrées et la natrémie remonte lentement, de ${n0(na0)} à ${n0(na)} mmol/L (+${d.toFixed(1).replace('.', ',')} mmol/L) : argument pour un SIADH (épreuve diagnostique et thérapeutique ; voir la restriction sur 3 jours, plus parlante). Pas de desmopressine dans un SIADH. Mise en garde : corriger de 8 à 10 mmol/L par 24 h au plus (risque de myélinolyse osmotique ; complément).` };
         }
         if (u8 >= 600) {
           return { tone: 'good', text: `Osmolalité urinaire à ${n0(u8)} mosmol/kg à 8 h : concentration normale, pas de diabète insipide.` + extra };
         }
-        if (ud > u8 * 1.5 && ud > 400) return { tone: 'bad', text: `Urines non concentrées (${n0(u8)} mosmol/kg) puis concentration après desmopressine (${n0(ud)}) : diabète insipide central.` + extra };
-        return { tone: 'bad', text: `Urines non concentrées (${n0(u8)} mosmol/kg) et pas de réponse à la desmopressine (${n0(ud)}) : diabète insipide néphrogénique.` + extra };
+        // Réponse à la desmopressine (complément, Miller 1970) : hausse > 50 % central ; 10 à 50 % partielle ; < 10 % aucune.
+        const na0 = st.na0 != null ? st.na0 : na, r = (ud - u8) / Math.max(u8, 1), rTxt = `${r >= 0 ? '+' : ''}${Math.round(r * 100)} %`;
+        const crit = ' Critère : hausse de l\'osmolalité urinaire après desmopressine > 50 % : origine centrale ; 10 à 50 % : réponse partielle ; < 10 % : pas de réponse (complément).';
+        const cop = ' La copeptine aide à trancher (complément).';
+        if (r > 0.5) return { tone: 'bad', text: `Urines ${u8 < 300 ? 'non concentrées' : 'insuffisamment concentrées'} (${n0(u8)} mosmol/kg) puis concentration après desmopressine (${n0(ud)}, ${rTxt}) : diabète insipide central${u8 < 300 ? '' : ' partiel'}. Le lavage médullaire de la polyurie limite la réponse, qui n'atteint pas celle du sujet sain (complément).` + crit + extra };
+        if (r > 0.1 || u8 >= 300) {
+          if (na0 < 139) return { tone: 'warn', text: `Concentration partielle (${n0(u8)} mosmol/kg à 8 h) et réponse partielle à la desmopressine (${n0(ud)}, ${rTxt}), avec une natrémie de départ basse-normale (${n0(na0)} mmol/L) : en faveur d'une polydipsie primaire (complément) ; les formes partielles de diabète insipide donnent un profil proche.` + cop + crit + extra };
+          return { tone: 'bad', text: `Concentration partielle (${n0(u8)} mosmol/kg à 8 h) et réponse partielle à la desmopressine (${n0(ud)}, ${rTxt}), avec une natrémie de départ normale haute (${n0(na0)} mmol/L) : diabète insipide partiel probable (complément) ; à distinguer d'une polydipsie primaire.` + cop + crit + extra };
+        }
+        return { tone: 'bad', text: `Urines non concentrées (${n0(u8)} mosmol/kg) et pas de réponse à la desmopressine (${n0(ud)}, ${rTxt}) : diabète insipide néphrogénique.` + crit + extra };
+      }
+    },
+    {
+      id: 'restriction-siadh', name: 'Restriction hydrique du SIADH (3 jours)', poly: true,
+      what: 'Dans un SIADH, la restriction hydrique est à la fois diagnostique et thérapeutique (polycopié p. 64) : la natrémie remonte-t-elle quand on limite les apports ?',
+      proto: 'Apports limités à 500 à 800 mL/j (ici ≈ 700 mL/j, complément) pendant 3 jours ; natrémie, osmolalités et diurèse chaque jour ; pas de desmopressine. Correction de 8 à 10 mmol/L par 24 h au plus (complément).',
+      unit: 'mmol/L', label: 'Natrémie', thr: 135, thrDir: 'above', thrLabel: 'natrémie normale ≥ 135 mmol/L',
+      span: 72, xUnit: 'h', duration: 20,
+      samples: [{ x: 0.03, label: 'J0' }, { x: 0.34, label: 'J1' }, { x: 0.67, label: 'J2' }, { x: 1, label: 'J3' }],
+      apply(p, x) {
+        p.hps = 72 / 20; // 3 jours en 20 s
+        if (x > 0.03) { p.restrict = 0.72; p.drink = 0; }
+      },
+      measure: (sim) => sim.lab('na'),
+      interpret(v, sim, st) {
+        const siadh = st.base.siadh > 0.02 || st.base.drug > 0.02;
+        const d = v[v.length - 1] - v[0], perDay = d / 3;
+        const f = (x) => x.toFixed(1).replace('.', ',');
+        if (!siadh) return { tone: 'warn', text: `Sans SIADH, la restriction modérée change peu la natrémie (${n0(v[0])} → ${n0(v[v.length - 1])} mmol/L) : ce test ne s'adresse qu'à une hyponatrémie avec urines inappropriément concentrées.` };
+        return { tone: d > 2 ? 'good' : 'warn', text: `Natrémie ${n0(v[0])} → ${n0(v[1])} → ${n0(v[2])} → ${n0(v[3])} mmol/L en 3 jours (+${f(d)} mmol/L, ≈ +${f(perDay)} par 24 h) sous restriction à ≈ 700 mL/j : la remontée confirme a posteriori le SIADH et en est le traitement (polycopié p. 64). Les urines restent concentrées (${n0(sim.lab('uosm'))} mosmol/kg). Rechercher et traiter la cause (tumeur, médicament). Vitesse de correction ≤ 8 à 10 mmol/L par 24 h (myélinolyse osmotique ; complément).` };
       }
     }
   ].concat(T.adh_situations);
   delete T.adh_situations;
+  /* Axe gonadotrope masculin : tests hors polycopié (complément), textes nuancés comme dans docs/tests-dynamiques.md. */
+  const f1g = (v) => v.toFixed(1).replace('.', ',');
+  T.gonadoM = [
+    {
+      id: 'gnrh', name: 'Test à la GnRH', poly: false,
+      what: 'Les cellules gonadotropes répondent-elles à une injection de GnRH ? Utile surtout chez l\'enfant (puberté précoce centrale) ; chez l\'adulte, il ne précise pas le niveau d\'un déficit gonadotrope.',
+      proto: 'Gonadoréline (GnRH) 100 µg IV ; LH et FSH à T0, 30, 60 et 90 min (complément, non détaillé dans le polycopié ; protocoles et seuils variables selon les centres).',
+      unit: 'UI/L', label: 'LH', thrFn: (st) => (st.values.length ? st.values[0] * 3 : null), thrDir: 'above', thrLabel: 'réponse indicative : LH × 3 à 5 au pic (complément)',
+      span: 90, xUnit: 'min', duration: 14,
+      samples: [{ x: 0.04, label: 'T0' }, { x: 0.34, label: '30' }, { x: 0.67, label: '60' }, { x: 1, label: '90' }],
+      apply(p, x) { if (x > 0.06) p.gnrh = 8 * (x < 0.36 ? 1 : Math.exp(-(x - 0.36) / 0.12)); }, // bolus IV : pic de LH vers 30 min, retour à la base en 60 à 90 min
+      measure: (sim) => {
+        const st = HV.Tests.state();
+        if (st && !st.trace.length) st.fsh0 = sim.lab('fsh');
+        if (st) st.fshMax = Math.max(st.fshMax || 0, sim.lab('fsh'));
+        return sim.lab('lh');
+      },
+      interpret(v, sim, st) {
+        const lh0 = v[0], peak = Math.max(...v.slice(1)), r = peak / Math.max(lh0, 0.05);
+        const fsh = st && st.fsh0 != null ? ` ; FSH de ${f1g(st.fsh0)} à ${f1g(st.fshMax)} UI/L` : '';
+        const head = `LH de ${f1g(lh0)} à ${f1g(peak)} UI/L au pic (× ${f1g(r)})${fsh}. `;
+        if (st.base.exoT > 0.05) return { tone: 'warn', text: head + 'Axe freiné par des androgènes exogènes : le test n\'est pas interprétable. Arrêter les androgènes puis réévaluer l\'axe (complément).' };
+        if (lh0 > 9) return { tone: 'warn', text: head + 'LH déjà élevée à l\'état basal : hypogonadisme primaire (testiculaire). Le test n\'apporte rien : le dosage de base de la testostérone, de la LH et de la FSH suffit (polycopié, partie 2, p. 10).' };
+        if (r >= 3) return { tone: 'good', text: head + 'Réponse franche : les cellules gonadotropes sont fonctionnelles. Une réponse normale n\'élimine pas un déficit d\'origine hypothalamique (complément).' };
+        return { tone: 'bad', text: head + 'Réponse faible : déficit gonadotrope, sans en préciser le niveau. Après une longue privation en GnRH, une hypophyse intacte peut répondre peu ; le test distingue mal le retard pubertaire simple du déficit congénital (complément).' };
+      }
+    },
+    {
+      id: 'hcg', name: 'Test à l\'hCG', poly: false,
+      what: 'Les cellules de Leydig répondent-elles à une stimulation de type LH ? Utile surtout chez l\'enfant (cryptorchidie, anomalie de la différenciation sexuelle) ; chez l\'adulte, testostérone et LH de base suffisent le plus souvent.',
+      proto: 'hCG en IM (agit sur le récepteur de la LH) ; testostérone avant puis à J3 (ou J5 selon le protocole) (complément, non détaillé dans le polycopié ; doses et seuils variables selon l\'âge et les centres).',
+      unit: 'nmol/L', label: 'Testostérone', thrFn: (st) => (st.values.length ? st.values[0] * 2 : null), thrDir: 'above', thrLabel: 'hausse indicative : testostérone × 2 (complément)',
+      span: 72, xUnit: 'h', duration: 14,
+      samples: [{ x: 0.04, label: '0 h' }, { x: 0.34, label: '24 h' }, { x: 0.67, label: '48 h' }, { x: 1, label: '72 h' }],
+      apply(p, x) { if (x > 0.06) p.hcg = 3; }, // demi-vie longue : stimulation soutenue sur 72 h
+      measure: (sim) => sim.lab('tt'),
+      interpret(v, sim, st) {
+        const t0 = v[0], t3 = v[v.length - 1], r = t3 / Math.max(t0, 0.1);
+        const head = `Testostérone de ${f1g(t0)} à ${f1g(t3)} nmol/L (× ${f1g(r)}). `;
+        if (st.base.exoT > 0.05) return { tone: 'warn', text: head + 'Sous testostérone exogène, le dosage mêle hormone injectée et production testiculaire : test non interprétable (complément).' };
+        if (r >= 2) return { tone: 'good', text: head + 'Hausse franche : cellules de Leydig fonctionnelles.' + (st.base.hypo < 0.5 ? ' Avec des gonadotrophines basses, l\'atteinte est située en amont (hypothalamo-hypophysaire).' : '') + ' (Complément.)' };
+        return { tone: 'bad', text: head + 'Hausse faible : réserve des cellules de Leydig diminuée, en faveur d\'une atteinte testiculaire (complément).' + (st.base.hypo < 0.5 ? ' Après une longue privation en LH, la réponse peut aussi être retardée : une stimulation prolongée est parfois nécessaire (complément).' : '') };
+      }
+    }
+  ];
   HV.TESTS = T;
 
   /* ---------------- Moteur ---------------- */

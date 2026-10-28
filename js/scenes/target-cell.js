@@ -5,7 +5,7 @@
   const S = HV.model.s, P = HV.model.p;
   const cap = (v, m) => Math.min(m, Math.max(0, v));
 
-  HV.scene({
+  const def = HV.scene({
     id: 'cell',
     parent: 'thyro',
     x: 1300,
@@ -15,10 +15,10 @@
     level: 'Cellule',
     lead: 'La T3 se lie à son récepteur nucléaire (TRα ou TRβ), associé à RXR sur les éléments de réponse (TRE) de l\'ADN, et module la transcription de nombreux gènes.',
     points: [
-      'Les transporteurs MCT8, MCT10 et OATP1C1 font entrer T4 et T3. Une mutation de MCT8 cause le syndrome d\'Allan-Herndon-Dudley.',
-      'D1 et D2 activent (T4 → T3). D3 inactive (T4 → T3 reverse, T3 → T2).',
-      'Sans T3, le récepteur recrute des corépresseurs. La T3 les remplace par des coactivateurs.',
-      'Effets : thermogenèse, métabolisme basal, fréquence cardiaque, développement cérébral, remodelage osseux.'
+      'Les transporteurs MCT8, MCT10 et OATP1C1 font entrer T4 et T3. Une mutation de MCT8 cause le syndrome d\'Allan-Herndon-Dudley (complément).',
+      'D1 et D2 activent (T4 → T3). D3 inactive (T4 → T3 reverse, T3 → T2) (complément).',
+      'Sans T3, le récepteur recrute des corépresseurs. La T3 les remplace par des coactivateurs (complément).',
+      'Effets : thermogenèse, métabolisme basal, fréquence cardiaque, développement cérébral, remodelage osseux (polycopié p. 9-10).'
     ],
     build(g, a) {
       a.frame('Cellule cible · action de la T3', 'Entrée → activation / inactivation → récepteur nucléaire → transcription');
@@ -92,6 +92,15 @@
           occT.textContent = 'Occupation des TR : ' + Math.round(o * 100) + ' %';
         }
       });
+      HV.spotlight(def, a, [
+        { t: 'Entrer dans la cellule', d: 'T4 et T3 entrent par les transporteurs MCT8, MCT10 et OATP1C1. Une mutation de MCT8 cause le syndrome d\'Allan-Herndon-Dudley (complément).', spot: [[260, 320, 120, 330]] },
+        { t: 'Activer : D2', d: 'La désiodase D2 (comme D1) retire un iode à la T4 et forme la T3, la forme active (complément).', spot: [[560, 350, 80]] },
+        { t: 'Inactiver : D3', d: 'La D3 transforme la T4 en T3 reverse, inactive, et la T3 en T2 (complément). Chaque tissu règle ainsi la quantité de T3 qu\'il reçoit.', spot: [[560, 790, 80]] },
+        { t: 'Le récepteur nucléaire', d: 'La T3 se lie à son récepteur nucléaire (TRα ou TRβ), associé à RXR sur les éléments de réponse (TRE) de l\'ADN.', spot: [[980, 610, 130]] },
+        { t: 'Interrupteur : corépresseur ou coactivateur', d: 'Sans T3, le récepteur recrute des corépresseurs (CoR) ; la T3 les remplace par des coactivateurs (CoA) et la transcription démarre (complément). L\'occupation affichée suit la T3 du modèle.', spot: [[928, 516, 80], [980, 760, 140]] },
+        { t: 'Des gènes aux effets', d: 'Les ARN messagers sont traduits par les ribosomes : Na⁺/K⁺-ATPase, UCP, α-MHC et SERCA2, récepteur des LDL… Effets : thermogenèse, métabolisme basal, fréquence cardiaque, développement cérébral, remodelage osseux (polycopié p. 9-10).', spot: [[1280, 240, 270, 640]] },
+        { t: 'En résumé', d: 'Entrée par les transporteurs → T4 activée en T3 (D2) ou inactivée (D3) → T3 sur TR-RXR → coactivateurs → transcription → effets métaboliques, cardiaques, cérébraux et osseux.', spot: [[60, 150, 1490, 800]] }
+      ]);
     }
   });
 })();

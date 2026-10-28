@@ -6,6 +6,8 @@
   const S = M.s, P = M.p;
   const cap = (v, m) => Math.min(m, Math.max(0, v));
 
+  HV.INFO['les-tsho'] = { t: 'Adénome thyréotrope', k: 'Sécrétion autonome de TSH · polycopié p. 24, 30, 59', d: 'Cause rare d\'hyperthyroïdie centrale : l\'adénome sécrète de la TSH que le rétrocontrôle ne freine pas. Signes d\'hyperthyroïdie souvent plus modérés à sécrétion égale ; T4L élevée avec une TSH inadaptée, normale ou élevée (p. 59). IRM hypophysaire. Diagnostic différentiel : résistance aux hormones thyroïdiennes (complément).' };
+
   HV.scene({
     id: 'thyro',
     parent: 'atlas',
@@ -83,10 +85,11 @@
         on(vasc, P.trab > 0.05);
         on(lymph, P.thy < 0.6);
         on(gmn, P.iodine < 0.5);
-        on(pitMass, P.pit < 0.5);
+        on(pitMass, P.pit < 0.5 || P.tsho > 0.05);
+        pitMass.setAttribute('data-info', P.tsho > 0.05 && !(P.pit < 0.5) ? 'les-tsho' : 'les-pitmass');
         // Parenchyme « éteint » quand la TSH est effondrée (adénome toxique, surdosage en LT4)
         lobes.classList.toggle('quiet', S.tsh < 0.15 && P.trab < 0.05);
-        lesLbl.textContent = P.auto > 0.02 ? 'nodule autonome, reste du parenchyme éteint' : P.trab > 0.05 ? 'goitre diffus hypervasculaire' : P.thy < 0.6 ? (P.atro > 0.5 ? 'thyroïde atrophique' : 'goitre de Hashimoto, infiltrat lymphocytaire') : P.iodine < 0.5 ? 'goitre multinodulaire' : '';
+        lesLbl.textContent = P.auto > 0.02 ? 'nodule autonome, reste du parenchyme éteint' : P.trab > 0.05 ? 'goitre diffus hypervasculaire' : P.thy < 0.6 ? (P.atro > 0.5 ? 'thyroïde atrophique' : S.goitre > 1.15 ? 'goitre de Hashimoto, infiltrat lymphocytaire' : 'Hashimoto, infiltrat lymphocytaire') : P.iodine < 0.5 ? 'goitre multinodulaire' : '';
       });
 
       /* --- Scintigraphie à l'iode 123 (vignette) --- */
@@ -101,7 +104,8 @@
       a.dyn(() => {
         // Indiquée seulement devant une TSH basse : inutile devant une hypothyroïdie ou un goitre à TSH non basse.
         const ind = HV.model.lab('tsh') < 0.4;
-        sc.setAttribute('opacity', ind ? 1 : 0.4);
+        // Basedow à TRAb positifs : scintigraphie non nécessaire (seconde intention, polycopié p. 30).
+        sc.setAttribute('opacity', ind && !(P.trab > 0.05) ? 1 : 0.4);
         const fig = !ind ? '' : P.auto > 0.02 ? '9A' : P.trab > 0.05 ? '9B' : '';
         if (fig !== shown) {
           shown = fig;
@@ -112,7 +116,7 @@
           if (!fig) sc.removeAttribute('data-figs');
         }
         miss.setAttribute('visibility', ind && !fig ? 'visible' : 'hidden');
-        scTxt.textContent = !ind ? 'non indiquée : TSH non basse' : P.auto > 0.02 ? 'nodule chaud (fig. 9A du polycopié)' : P.trab > 0.05 ? 'fixation diffuse (fig. 9B du polycopié)' : 'TSH basse : autre cause';
+        scTxt.textContent = !ind ? 'non indiquée : TSH non basse' : P.auto > 0.02 ? 'nodule chaud (fig. 9A du polycopié)' : P.trab > 0.05 ? 'diffuse (9B) : inutile si TRAb +' : P.levo > 0.02 ? 'hypofixation (LT4 ; complément)' : 'TSH basse : autre cause';
       });
 
       /* --- Circulation --- */
@@ -225,13 +229,13 @@
 
       /* --- Pas à pas --- */
       HV.spotlight(HV.scenes.thyro, a, [
-        { t: 'L\'hypothalamus sécrète la TRH', d: 'Les neurones du noyau paraventriculaire fabriquent la TRH, un tripeptide, et la libèrent dans les capillaires de l\'éminence médiane. Zoomez sur l\'hypothalamus pour voir le neurone à TRH.', spot: [[700, 252, 92]] },
+        { t: 'L\'hypothalamus sécrète la TRH', d: 'Les neurones du noyau paraventriculaire fabriquent la TRH, un tripeptide (complément), et la libèrent dans les capillaires de l\'éminence médiane. Zoomez sur l\'hypothalamus pour voir le neurone à TRH.', spot: [[700, 252, 92]] },
         { t: 'Le système porte conduit la TRH à l\'antéhypophyse', d: 'Les veines portes de la tige pituitaire amènent la TRH aux cellules thyréotropes, qui sécrètent la TSH. La somatostatine freine la TSH.', spot: [[690, 352, 112]] },
         { t: 'La TSH stimule la thyroïde', d: 'La TSH gagne la circulation générale et se fixe sur son récepteur à la surface des thyréocytes : captation de l\'iode, synthèse et sécrétion des hormones, croissance de la glande.', spot: [[742, 520, 86], [700, 650, 122]] },
         { t: 'La thyroïde fabrique surtout de la T4', d: 'L\'iode alimentaire est capté puis incorporé à la thyroglobuline : la glande sécrète surtout de la T4 (forme de réserve) et un peu de T3. Zoomez sur le follicule pour suivre la synthèse.', spot: [[700, 650, 130], [455, 785, 72]] },
         { t: 'Le transport dans le sang', d: 'T4 et T3 circulent liées à des protéines (TBG surtout) ; seule la fraction libre, infime, est active et dosée (T4L, T3L).', spot: [[520, 812, 1052, 100]] },
         { t: 'Dans les tissus, la T4 devient T3', d: 'Les désiodases convertissent la T4 en T3, forme active : 75 % de la T3 vient de cette conversion. La T3 agit sur le cœur, le cerveau, l\'os, le muscle, le métabolisme de base.', spot: [[1030, 400, 540, 350]] },
-        { t: 'Rétrocontrôle négatif', d: 'T4 et T3 freinent la TSH (surtout) et la TRH. La relation est log-linéaire : une petite baisse de T4L fait monter fortement la TSH, d\'où l\'intérêt de la TSH en première intention.', spot: [[760, 240, 240, 610], [700, 252, 60], [790, 428, 46]] },
+        { t: 'Rétrocontrôle négatif', d: 'T4 et T3 freinent la TSH (surtout) et la TRH. La relation est log-linéaire (complément) : une petite baisse de T4L fait monter fortement la TSH, d\'où le diagnostic sur la seule TSH (polycopié p. 22, 28).', spot: [[760, 240, 240, 610], [700, 252, 60], [790, 428, 46]] },
         { t: 'Ce qui vient de l\'extérieur', d: 'L\'apport iodé, les anticorps anti-récepteur de la TSH (Basedow) et la lévothyroxine entrent dans la boucle. Essayez les scénarios du panneau pour voir l\'axe se rééquilibrer.', spot: [[465, 540, 72], [455, 785, 72], [600, 948, 80]] }
       ]);
     }

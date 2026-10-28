@@ -1,0 +1,61 @@
+/* Module pancréas (pancreas.js) et ses loupes (zoom-pancreas.js) */
+.pz-liver { fill: color-mix(in srgb, var(--o-liver) 55%, var(--scene-1)); stroke: var(--o-liver); stroke-width: 3; }
+.pz-gb { fill: color-mix(in srgb, var(--o-gall) 60%, var(--scene-1)); stroke: var(--o-gall); stroke-width: 3; }
+.pz-stone { fill: #c9a24a; stroke: #6d5420; stroke-width: 2; }
+.pz-stomach { fill: color-mix(in srgb, var(--o-stomach) 55%, var(--scene-1)); stroke: var(--o-stomach); stroke-width: 3; }
+.pz-eso { fill: none; stroke: var(--o-stomach); stroke-width: 18; stroke-linecap: round; }
+.pz-gut { fill: none; stroke: color-mix(in srgb, var(--p-rose) 45%, var(--scene-1)); stroke-width: 46; stroke-linecap: round; stroke-linejoin: round; }
+.pz-gut-l { fill: none; stroke: color-mix(in srgb, var(--p-rose) 12%, var(--scene-1)); stroke-width: 24; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+.pz-panc { fill: color-mix(in srgb, var(--o-pancreas) 75%, var(--scene-1)); stroke: color-mix(in srgb, var(--o-pancreas) 70%, #000); stroke-width: 3; }
+.pz-islet { fill: color-mix(in srgb, var(--p-blue2) 35%, var(--scene-1)); stroke: var(--p-blue2); stroke-width: 2.5; cursor: zoom-in; }
+.pz-duct { fill: none; stroke: color-mix(in srgb, var(--o-pancreas) 50%, #000); stroke-width: 6; stroke-linecap: round; opacity: 0.55; }
+.pz-bile { fill: none; stroke: var(--o-gall); stroke-width: 7; stroke-linecap: round; opacity: 0.7; }
+.pz-amp { fill: var(--scene-1); stroke: var(--o-gall); stroke-width: 3; }
+.pz-portal { fill: none; stroke: var(--o-vein); stroke-width: 10; stroke-linecap: round; opacity: 0.35; }
+.pz-calc { fill: #f3efe2; stroke: #7a6f55; stroke-width: 1.5; }
+.pz-ulcer { fill: var(--bad); opacity: 0.8; }
+.pz-pert { fill: var(--p-amber); stroke: rgba(0, 0, 0, 0.3); stroke-width: 1.5; }
+.pz-org-t { font: 600 21px var(--font-display); fill: var(--fg); }
+.pz-org-s { font: italic 500 16px var(--font-body); fill: var(--muted); }
+.pz-cell { fill: color-mix(in srgb, var(--c) 30%, var(--scene-1)); stroke: var(--c); stroke-width: 3; }
+.pz-cell-t { font: 600 15px var(--font-body); fill: var(--fg); paint-order: stroke; stroke: var(--scene-1); stroke-width: 4px; }
+.pz-tum { transition: opacity 0.5s; cursor: zoom-in; }
+.pz-tum-c { fill: color-mix(in srgb, var(--bad) 35%, var(--scene-1)); stroke: var(--bad); stroke-width: 3.5; }
+.pz-pill { fill: color-mix(in srgb, var(--accent) 12%, var(--scene-1)); stroke: var(--accent); stroke-width: 2; cursor: zoom-in; }
+.pz-pill-t { font: 600 14px var(--font-body); fill: var(--fg); pointer-events: none; }
+.pz-note { font: 600 19px var(--font-body); fill: var(--fg); }
+.pz-note-b { font: 15px var(--font-body); fill: var(--muted); }
+
+/* Loupes */
+.pz-box { fill: color-mix(in srgb, var(--c, var(--line-2)) 9%, var(--scene-1)); stroke: color-mix(in srgb, var(--c, var(--line-2)) 70%, transparent); stroke-width: 2; }
+.pz-box.hot { stroke: var(--bad); stroke-width: 4; }
+.pz-h { font: 600 20px var(--font-display); fill: var(--fg); }
+.pz-t { font: 600 17px var(--font-body); fill: var(--fg); }
+.pz-s { font: 15px var(--font-body); fill: var(--muted); }
+.pz-v { font: 600 16px var(--font-data); fill: var(--fg); }
+.pz-v.hi { fill: var(--bad); }
+.pz-v.lo { fill: var(--p-blue); }
+.pz-li { font: 15.5px var(--font-body); fill: var(--fg); }
+.pz-tumcell { fill: color-mix(in srgb, var(--bad) 18%, var(--scene-1)); stroke: var(--bad); stroke-width: 4; }
+.pz-tumcell-n { fill: color-mix(in srgb, var(--bad) 45%, var(--scene-1)); }
+.pz-btn { cursor: pointer; }
+.pz-btn rect { fill: color-mix(in srgb, var(--accent) 16%, var(--scene-1)); stroke: var(--accent); stroke-width: 2.5; }
+.pz-btn:hover rect { fill: color-mix(in srgb, var(--accent) 30%, var(--scene-1)); }
+.pz-btn.on rect { fill: color-mix(in srgb, var(--bad) 22%, var(--scene-1)); stroke: var(--bad); }
+.pz-btn-t { font: 600 16px var(--font-body); fill: var(--fg); pointer-events: none; }
+.pz-mark { fill: var(--bad); stroke: var(--scene-1); stroke-width: 3; }
+.pz-mark-halo { fill: none; stroke: var(--bad); stroke-width: 2; opacity: 0.5; }
+.pz-sym { transition: opacity 0.4s; }
+.pz-tab-h { font: 600 15px var(--font-body); fill: var(--fg); }
+.pz-tab { font: 15px var(--font-body); fill: var(--fg); }
+.pz-tab-l { stroke: var(--line-2); stroke-width: 1.5; }
+.pz-acin { fill: color-mix(in srgb, var(--o-pancreas) 30%, var(--scene-1)); stroke: color-mix(in srgb, var(--o-pancreas) 75%, #000); stroke-width: 3; }
+.pz-zym { fill: color-mix(in srgb, var(--p-amber) 70%, var(--scene-1)); stroke: rgba(0, 0, 0, 0.3); stroke-width: 1; }
+.pz-lyso { fill: color-mix(in srgb, var(--p-violet) 50%, var(--scene-1)); stroke: rgba(0, 0, 0, 0.3); stroke-width: 1; }
+.pz-nuc { fill: color-mix(in srgb, var(--p-violet) 25%, var(--scene-1)); stroke: var(--p-violet); stroke-width: 2; }
+.pz-lumen { fill: color-mix(in srgb, var(--p-sky) 12%, var(--scene-1)); stroke: var(--p-sky); stroke-width: 2; stroke-dasharray: 6 5; }
+.pz-chan { fill: var(--c); stroke: rgba(0, 0, 0, 0.3); stroke-width: 1.5; }
+.pz-arr { fill: none; stroke: var(--muted); stroke-width: 2.5; }
+.pz-arr.bad { stroke: var(--bad); stroke-width: 3.5; }
+.pz-step { transition: opacity 0.4s; }
+.pz-under { fill-opacity: 0; stroke-opacity: 0; }

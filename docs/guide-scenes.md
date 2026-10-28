@@ -55,7 +55,7 @@ Pour une molécule absente, dessinez une pastille de texte, ou un petit glyphe d
 - **Exactitude médicale avant tout.** Ce qui figure dans le polycopié (`scratchpad/poly/p1-pages.txt`, `p2-pages.txt`) peut être cité tel quel. Tout le reste est marqué « (complément) » dans le texte ou la fiche.
 - **Une idée par scène.** Le schéma doit se lire sans le panneau : étiquettes courtes sur le dessin, explications au survol (`data-info` → `HV.INFO`).
 - **Animation sobre.** Les flux de particules montrent un sens et un débit. Utilisez `a.dyn` pour les valeurs qui changent (curseurs, scénarios).
-- **Pas à pas.** Ajoutez un `HV.spotlight` (4 à 8 étapes) quand la scène raconte une séquence.
+- **Pas à pas.** Ajoutez un `HV.spotlight` (4 à 10 étapes) à chaque scène : il ajoute la pastille « Comprendre pas à pas » sur le cadre. Expliquez le pourquoi à chaque étape, avec la page ou « (complément) ». Une étape peut imposer un état de démonstration par `go: () => { … }` (repas, jeûne, insuline basse) ; remettez le modèle dans `def.stepEnd = () => { … }`. Terminez par une étape « En résumé ».
 - **Lisibilité.** Le texte fait au moins 15 px dans le repère 1600 × 1000 ; rien ne déborde du cadre ni ne se chevauche.
 
 ## Vérifier

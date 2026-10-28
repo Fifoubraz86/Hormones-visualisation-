@@ -57,7 +57,7 @@
     'zh-scn': { t: 'Noyaux suprachiasmatiques', k: 'Horloge circadienne (complément)', d: 'Juste au-dessus du chiasma, ils reçoivent l\'information lumineuse de la rétine et donnent le rythme jour – nuit à de nombreuses sécrétions (cortisol, mélatonine…).' },
     'zh-me': { t: 'Éminence médiane', k: 'Interface entre neurones et système porte (complément)', d: 'Les terminaisons des neurones hypophysiotropes y libèrent leurs facteurs dans le plexus capillaire primaire du système porte hypothalamo-hypophysaire, qui les conduit à l\'antéhypophyse (polycopié p. 47).' },
     'zh-stalk': { t: 'Tige pituitaire', k: 'Système porte et axones magnocellulaires', d: 'Elle contient les vaisseaux portes (facteurs hypothalamiques vers l\'antéhypophyse) et les axones des noyaux supraoptiques et paraventriculaires (ADH, ocytocine vers la posthypophyse). Sa section entraîne des déficits somatotrope, gonadotrope, thyréotrope et corticotrope et une hyperprolactinémie de déconnexion (polycopié p. 47).' },
-    'zh-portal': { t: 'Système porte hypothalamo-hypophysaire', k: 'Polycopié p. 47', d: 'Il véhicule les facteurs hypothalamiques stimulants (CRH, TRH, GHRH, GnRH) et la dopamine, inhibitrice de la prolactine, jusqu\'à l\'antéhypophyse.' },
+    'zh-portal': { t: 'Système porte hypothalamo-hypophysaire', k: 'Polycopié p. 47', d: 'Il véhicule les facteurs hypothalamiques stimulants (CRH, TRH, GHRH, GnRH) et la dopamine, inhibitrice de la prolactine, jusqu\'à l\'antéhypophyse ; la somatostatine, inhibitrice de la GH, emprunte la même voie (p. 49).' },
     'zh-magno': { t: 'Axones magnocellulaires', k: 'Voie de l\'ADH et de l\'ocytocine', d: 'L\'ADH transite le long des axones de la tige pituitaire et est stockée dans la posthypophyse, d\'où elle est libérée dans la circulation sanguine (polycopié p. 50).' },
     'zh-tract': { t: 'Chiasma et tractus optiques', k: 'Voies visuelles', d: 'Le chiasma est situé au-dessus de la selle turcique : une tumeur à extension supra-sellaire le comprime (hémianopsie bitemporale, polycopié p. 51).' },
     'zh-composite': { t: 'Schéma composite', k: 'Complément', d: 'Les noyaux ne sont pas tous dans le même plan frontal : supraoptiques et suprachiasmatiques sont plus antérieurs (niveau du chiasma), le noyau arqué et l\'éminence médiane plus postérieurs (niveau tubérien). Ils sont regroupés ici pour la lecture.' }
@@ -72,7 +72,7 @@
     lead: 'Autour du 3e ventricule, des groupes de neurones spécialisés produisent les hormones hypothalamiques. Les neurones parvocellulaires libèrent leurs facteurs dans l\'éminence médiane, d\'où le système porte les conduit à l\'antéhypophyse ; les neurones magnocellulaires des noyaux supraoptiques et paraventriculaires envoient l\'ADH et l\'ocytocine par leurs axones jusqu\'à la posthypophyse.',
     points: [
       'ADH et ocytocine : synthèse dans les noyaux supraoptiques et paraventriculaires, transport axonal dans la tige, stockage et libération posthypophysaires (polycopié p. 47 et 50).',
-      'Les facteurs hypothalamiques gagnent l\'antéhypophyse par le système porte ; seule la prolactine est sous influence inhibitrice, celle de la dopamine (polycopié p. 47).',
+      'Les facteurs hypothalamiques gagnent l\'antéhypophyse par le système porte ; tous sont stimulants sauf la dopamine (qui freine la prolactine, seule hormone soumise à ce tonus inhibiteur) et la somatostatine (qui freine la GH et la TSH) (polycopié p. 47 et 49).',
       'Localisation des noyaux : paraventriculaire (CRH, TRH), arqué (GHRH, dopamine, kisspeptine, POMC / NPY), périventriculaire (somatostatine), suprachiasmatique (horloge) (complément).',
       'La section de la tige donne un déficit GH, LH/FSH, TSH, ACTH et une hyperprolactinémie de déconnexion (polycopié p. 47).',
       'Schéma composite : plusieurs plans frontaux réunis (complément).'
@@ -232,7 +232,7 @@
         { t: 'Une coupe frontale', d: 'Le 3e ventricule occupe la ligne médiane ; les noyaux hypothalamiques sont disposés symétriquement de part et d\'autre. Son plancher se prolonge par l\'éminence médiane et la tige pituitaire. Le schéma réunit plusieurs plans de coupe (complément).', spot: [[260, 165, 690, 520]] },
         { t: 'ADH et ocytocine : la voie magnocellulaire', d: 'Les neurones des noyaux supraoptiques et paraventriculaires synthétisent l\'ADH et l\'ocytocine. Ces hormones transitent le long des axones de la tige pituitaire et sont stockées dans la posthypophyse, d\'où elles sont libérées dans le sang (polycopié p. 47 et 50).', spot: [[345, 600, 90], [855, 600, 90], [505, 300, 80], [695, 300, 80], [560, 690, 100, 280]] },
         { t: 'Les facteurs hypophysiotropes', d: 'D\'autres neurones (parvocellulaires) libèrent leurs facteurs dans l\'éminence médiane : CRH et TRH (paraventriculaire), somatostatine (périventriculaire), GHRH et dopamine (arqué) (localisations : complément).', spot: [[600, 420, 150], [600, 620, 110]] },
-        { t: 'Le système porte', d: 'Le plexus capillaire de l\'éminence médiane se draine dans les vaisseaux portes de la tige, qui conduisent ces facteurs à l\'antéhypophyse. Tous sont stimulants, sauf la dopamine qui freine la prolactine (polycopié p. 47).', spot: [[540, 650, 120, 330]] },
+        { t: 'Le système porte', d: 'Le plexus capillaire de l\'éminence médiane se draine dans les vaisseaux portes de la tige, qui conduisent ces facteurs à l\'antéhypophyse. Tous sont stimulants, sauf la dopamine, qui freine la prolactine, et la somatostatine, qui freine la GH (polycopié p. 47 et 49).', spot: [[540, 650, 120, 330]] },
         { t: 'Le noyau arqué', d: 'Ses neurones à kisspeptine font partie des signaux qui commandent les neurones à GnRH (polycopié, partie 2 p. 3) ; ses neurones à POMC et à NPY interviennent dans la régulation de l\'appétit (complément).', spot: [[560, 590, 70], [720, 520, 110]] },
         { t: 'L\'horloge suprachiasmatique', d: 'Plus en avant, juste au-dessus du chiasma, les noyaux suprachiasmatiques reçoivent la lumière via la rétine et rythment les sécrétions sur 24 heures (complément).', spot: [[IX, 160, 470, 305]] },
         { t: 'Que se passe-t-il si la tige est sectionnée ?', d: 'Les facteurs ne gagnent plus l\'antéhypophyse : déficits somatotrope, gonadotrope, thyréotrope et corticotrope. À l\'inverse, la prolactine n\'est plus freinée par la dopamine : hyperprolactinémie de déconnexion (polycopié p. 47).', spot: [[540, 660, 120, 310]] }
@@ -432,7 +432,7 @@
   ];
   TYPES.forEach((t) => { HV.INFO['zh-' + t.k] = { t: 'Cellules ' + t.name.toLowerCase(), k: t.horm + ' · ' + t.pct + ' des cellules (complément)', d: t.d }; });
   Object.assign(HV.INFO, {
-    'zh-mosaic': { t: 'Antéhypophyse (adénohypophyse)', k: '6 hormones principales (polycopié p. 47)', d: 'GH, prolactine, LH et FSH, TSH et ACTH. Toutes sont sous influence stimulante de facteurs hypothalamiques véhiculés par le système porte, sauf la prolactine, freinée par la dopamine. Répartition : somatotropes et lactotropes surtout latérales, corticotropes et thyréotropes plutôt médianes (complément).' },
+    'zh-mosaic': { t: 'Antéhypophyse (adénohypophyse)', k: '6 hormones principales (polycopié p. 47)', d: 'GH, prolactine, LH et FSH, TSH et ACTH. Toutes sont sous influence stimulante de facteurs hypothalamiques véhiculés par le système porte, sauf la prolactine, freinée par la dopamine (polycopié p. 47) ; la somatostatine freine en outre la GH (p. 49). Répartition : somatotropes et lactotropes surtout latérales, corticotropes et thyréotropes plutôt médianes (complément).' },
     'zh-capil': { t: 'Capillaires sinusoïdes', k: 'Système porte → circulation générale (complément)', d: 'Le sang porte apporte les facteurs hypothalamiques au contact des cellules ; les hormones sécrétées par exocytose (polycopié p. 47) gagnent la circulation générale.' },
     'zh-prop': { t: 'Proportions des types cellulaires', k: 'Complément (manuels d\'histologie et d\'endocrinologie)', d: 'Somatotropes ≈ 50 %, lactotropes et corticotropes 15 à 20 % chacun, gonadotropes ≈ 10 %, thyréotropes ≈ 5 %. Ordres de grandeur : ils varient selon les sources, le sexe et l\'état physiologique (grossesse).' }
   });
@@ -445,7 +445,7 @@
     level: 'Tissu',
     lead: 'L\'antéhypophyse sécrète six hormones principales (GH, prolactine, LH, FSH, TSH, ACTH) produites par cinq types de cellules. Chaque type obéit à son facteur hypothalamique et commande sa glande cible ; seule la prolactine est d\'abord freinée, par la dopamine.',
     points: [
-      'Six hormones antéhypophysaires principales ; toutes sous contrôle stimulant hypothalamique, sauf la prolactine, freinée par la dopamine (polycopié p. 47).',
+      'Six hormones antéhypophysaires principales ; toutes sous contrôle stimulant hypothalamique, sauf la prolactine, freinée par la dopamine (polycopié p. 47) ; la somatostatine freine en outre la GH (p. 49).',
       'Somatotropes ≈ 50 %, lactotropes 15–20 %, corticotropes 15–20 %, gonadotropes ≈ 10 %, thyréotropes ≈ 5 % (complément).',
       'Facteurs et cibles des cinq axes : polycopié p. 48–49.',
       'Survolez une ligne ou une cellule pour isoler un type.'
@@ -547,7 +547,7 @@
   ];
   Object.assign(HV.INFO, {
     'zh-order': { t: 'Ordre classique de perte', k: 'GH → LH/FSH → TSH → ACTH (complément)', d: 'Devant une compression progressive, les axes somatotrope puis gonadotrope sont classiquement touchés les premiers, l\'axe corticotrope le dernier. Cet ordre est une tendance, pas une règle ; le schéma est qualitatif et ne représente pas des seuils de taille. Diagnostic biologique : hormones périphériques basses avec hormones hypophysaires anormalement normales, plus rarement basses (polycopié p. 60).' },
-    'zh-prl': { t: 'Prolactine de déconnexion', k: '< 200 ng/mL (polycopié p. 52)', d: 'En cas de tumeur supracentimétrique non lactotrope avec prolactine modérément élevée (< 200 ng/mL), évoquer une hyperprolactinémie de déconnexion : la compression de la tige lève le tonus inhibiteur dopaminergique. Au-delà de 200 ng/mL, évoquer un macroadénome à prolactine.' },
+    'zh-prl': { t: 'Prolactine de déconnexion', k: '< 200 ng/mL (polycopié p. 52 et 56)', d: 'En cas de tumeur supracentimétrique non lactotrope avec prolactine modérément élevée (< 200 ng/mL), évoquer une hyperprolactinémie de déconnexion : la compression de la tige lève le tonus inhibiteur dopaminergique. Au-delà de 200 ng/mL, évoquer un macroadénome à prolactine.' },
     'zh-adh': { t: 'Posthypophyse (ADH)', k: 'Pas de diabète insipide (polycopié p. 64–65)', d: 'Un adénome hypophysaire n\'est jamais associé à un diabète insipide, sauf en cas d\'apoplexie ou après une chirurgie hypophysaire. Masse hypothalamo-hypophysaire + diabète insipide : évoquer hypophysite, craniopharyngiome, gliome du chiasma, méningiome, pathologie infiltrative, métastase…' },
     'zh-size': { t: 'Diamètre de l\'adénome', k: 'Micro < 10 mm · macro ≥ 10 mm · géant > 40 mm (polycopié p. 65–66)', d: 'Faites glisser le curseur, ou laissez l\'animation tourner. Le dessin n\'est pas à l\'échelle.' },
     'zh-ad-apo': HV.INFO['zh-apo'],
@@ -563,7 +563,7 @@
     lead: 'Un macroadénome non sécrétant qui grossit comprime l\'hypophyse saine et la tige. Les fonctions antéhypophysaires se perdent classiquement dans l\'ordre GH, puis LH/FSH, puis TSH, puis ACTH (complément). La prolactine, elle, monte modérément par déconnexion (< 200 ng/mL), et il n\'y a pas de diabète insipide, sauf apoplexie ou chirurgie.',
     points: [
       'Ordre classique de perte : GH → LH/FSH → TSH → ACTH (complément) ; l\'insuffisance corticotrope, la plus dangereuse, est souvent la dernière.',
-      'Hyperprolactinémie de déconnexion : tumeur supracentimétrique et prolactine < 200 ng/mL (polycopié p. 52).',
+      'Hyperprolactinémie de déconnexion : tumeur supracentimétrique et prolactine < 200 ng/mL (polycopié p. 52 et 56).',
       'Insuffisance lactotrope : rare, seulement en cas de destruction complète de l\'adénohypophyse (polycopié p. 63).',
       'Pas de diabète insipide avec un adénome, sauf apoplexie ou chirurgie hypophysaire (polycopié p. 64–65).',
       'Schéma qualitatif : les jauges ne représentent pas des seuils de taille mesurés.'
@@ -751,7 +751,7 @@
         { t: '… puis LH/FSH', d: 'L\'axe gonadotrope suit (complément) : troubles des règles, baisse de la libido.', spot: [SPG(1)], act: go(25) },
         { t: '… puis la TSH', d: 'L\'insuffisance thyréotrope vient ensuite (complément).', spot: [SPG(2)], act: go(31) },
         { t: '… et l\'ACTH en dernier', d: 'L\'axe corticotrope est classiquement le plus résistant (complément) ; son déficit est le plus dangereux (insuffisance surrénale secondaire).', spot: [SPG(3)], act: go(42) },
-        { t: 'La prolactine monte', d: 'La compression de la tige lève le tonus dopaminergique : hyperprolactinémie de déconnexion, modérée (< 200 ng/mL) (polycopié p. 52).', spot: [[480, 330, 220, 260], SPG(4)], act: go(30) },
+        { t: 'La prolactine monte', d: 'La compression de la tige lève le tonus dopaminergique : hyperprolactinémie de déconnexion, modérée (< 200 ng/mL) (polycopié p. 52 et 56).', spot: [[480, 330, 220, 260], SPG(4)], act: go(30) },
         { t: 'Pas de diabète insipide…', d: 'Un adénome hypophysaire n\'est jamais associé à un diabète insipide, sauf en cas d\'apoplexie ou après chirurgie hypophysaire (polycopié p. 64–65). Essayez les boutons « Apoplexie » et « Chirurgie ».', spot: [SPG(5), [RX - 10, 160, 540, 56]], act: go(30, { apo: true }) }
       ]);
       stepActions(ad, ad.steps, () => { playing = true; apo = false; chir = false; updBtns(); });

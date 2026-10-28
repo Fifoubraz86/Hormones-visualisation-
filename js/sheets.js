@@ -70,6 +70,7 @@
     if (I.d) h('p', 'sheet-lead', I.d, body);
     h('h3', null, 'Propriétés biochimiques', body);
     rows(body, S.rows);
+    h('p', 'sheet-src', 'Structure, masse, demi-vie, récepteur et normes : PubChem, PDB et références usuelles (complément), sauf mention du polycopié avec sa page.', body);
     if (I.live) h('p', 'sheet-live', I.live(), body);
     if (I.src) h('p', 'sheet-src', I.src, body);
     if (S.eta && HV.LT4_ETA) etaTables(body, HV.LT4_ETA);
@@ -101,19 +102,29 @@
   }
 
   /* Chapitre en cours : l'axe (ou la scène racine) dont dépend la scène affichée. */
+  const CORTICO_KW = 'cortisol|\\bACTH\\b|\\bCRH\\b|glucocortic|corticosurr|androgènes surr|\\bCBG\\b|Cushing|stéroïdogenèse|\\bStAR\\b|fasciculée';
   const CHAPTER_KW = {
-    thyro: /thyro|T3|T4|TSH|TRH|iode|désiodase|TBG|goitre/i,
-    cortico: /cortisol|ACTH|CRH|glucocortic|corticosurr|androgènes surr|CBG|Cushing/i,
-    somato: /\bGH\b|IGF|croissance|somato/i,
-    lacto: /prolactine|lactation|galactorrh|dopamine/i,
-    adh: /ADH|vasopressine|ocytocine|osmol|natrémie|\beau\b|V2|aquaporine/i,
-    medullo: /catécholamine|adrénaline|noradrénaline|médullo|phéochromocytome/i,
-    gonadoF: /œstrog|estradiol|progestérone|LH|FSH|GnRH|ovaire|endomètre|cycle|SHBG|ocytocine|leptine/i,
-    gonadoM: /testostérone|androgène|LH|FSH|GnRH|testicul|spermato|SHBG|aromatisation/i,
-    phospho: /calci|PTH|vitamine D|phosph|FGF23|ostéo/i,
-    raa: /rénine|angiotens|aldostérone|potassium|sodium|Na\b|K\b/i,
-    glyc: /glucose|glycog|insuline|glucagon|GLUT|SGLT|cétogenèse|néoglucogenèse|lipolyse|glyc/i,
+    thyro: /thyr|\bT3\b|\bT4\b|\bTSH\b|\bTRH\b|iode|désiodase|\bTBG\b|goitre/i,
+    cortico: new RegExp(CORTICO_KW, 'i'),
+    surrenale: new RegExp(CORTICO_KW + '|aldostérone|androgène|17-OHP|cortex|glomérulée|réticulée', 'i'),
+    somato: /\bGH\b|IGF|croissance|somato|acromégal/i,
+    lacto: /prolactin|lactation|lactotrope|galactorrh|dopamin|déconnexion/i,
+    adh: /\bADH\b|vasopressine|ocytocine|osmol|natrémie|\beau\b|\bV2\b|aquaporine|posthypophyse/i,
+    medullo: /catécholamine|adrénaline|noradrénaline|médull|chromaffine|phéochromocytome/i,
+    gonadoF: /œstrog|estradiol|progestérone|\bLH\b|\bFSH\b|GnRH|ovaire|endomètre|cycle|SHBG|ocytocine|leptine|ménopause/i,
+    gonadoM: /testostérone|androgène|\bLH\b|\bFSH\b|GnRH|testicul|spermato|SHBG|aromatisation|gynécomastie/i,
+    phospho: /calci|\bPTH\b|vitamine D|phosph|FGF23|ostéo/i,
+    raa: /rénine|angiotens|aldostérone|potassium|sodium|\bNa⁺|\bK⁺/i,
+    glyc: /glucose|glycog|insulin|glucagon|GLUT\d|SGLT|cétogenèse|néoglucogenèse|lipolyse|glyc|incrétine|GLP-1|\bGIP\b|\bDT[12]\b|îlot/i,
+    pancreas: /pancréa|exocrine|acini|îlot|insulin|glucagon|somatostatine|gastrine|sécrétine|CCK|VIP|duodén|TNE|neuroendocrine|stéatorrhée|lipase|trypsine|vésicule|chol[ée]doque/i,
     lipid: /LDL|VLDL|HDL|cholest|lipid|lipoprot|PCSK9|chylomicron|triglyc/i
+  };
+  // Organe principal du chapitre : sa fiche s'affiche en entier, sans repli.
+  const HP = ['pituitary', 'hypothalamus'];
+  const MAIN_ORGANS = {
+    thyro: ['thyroid'].concat(HP), cortico: ['adrenal'].concat(HP), surrenale: ['adrenal'], somato: HP, lacto: ['breast'].concat(HP),
+    adh: ['kidney'].concat(HP), medullo: ['adrenal'], gonadoF: ['ovary', 'uterus'].concat(HP), gonadoM: ['testis'].concat(HP),
+    phospho: ['parathyroid'], raa: ['kidney', 'adrenal'], glyc: ['pancreas'], pancreas: ['pancreas'], lipid: ['liver']
   };
   HV.currentChapter = function () {
     let sc = HV.app && HV.app.current;
@@ -123,8 +134,10 @@
 
   function organSheet(body, key) {
     const S = HV.ORGAN_SHEETS[key];
-    // Seul ce qui concerne le chapitre en cours est affiché d'emblée ; le reste est replié dans « Autres rôles ».
-    const ch = HV.currentChapter(), kw = ch && CHAPTER_KW[ch];
+    // Fiche de l'organe principal du chapitre : tout s'affiche. Sinon, seul ce qui concerne le chapitre en cours
+    // est affiché d'emblée ; le reste est replié dans « Autres éléments ».
+    const ch = HV.currentChapter();
+    const kw = ch && (MAIN_ORGANS[ch] || []).indexOf(key) < 0 ? CHAPTER_KW[ch] : null;
     const hit = (r) => !kw || kw.test(r[0] + ' ' + r[1]);
     const top = h('div', 'sheet-top', null, body);
     figure(top, (svg) => {
@@ -140,7 +153,7 @@
     rows(body, mine.length ? mine : S.rows);
     if (mine.length && other.length) {
       const det = h('details', 'sheet-more', null, body);
-      h('summary', null, 'Autres rôles (' + other.length + ')', det);
+      h('summary', null, 'Autres éléments (' + other.length + ')', det);
       rows(det, other);
     }
     // Imagerie : seules de vraies images sont montrées (figures du polycopié ci-dessous). Les examens sans image

@@ -330,3 +330,54 @@ Réponses de l'auteur au quiz « Arbitrages de l'atlas endocrinien ». « Oui »
 | M4 Demi-vie de l'angiotensine II | Oui | < 1 min |
 | O1 Adénome géant | Sans importance | — |
 | O2 Tronc thyro-cervical | Oui | Terminologie harmonisée |
+
+## Deuxième audit complet (octobre 2026)
+
+Six relecteurs (thyroïde ; surrénales et stéroïdogenèse ; hypophyse et ADH ; gonades ; calcium, glucose, lipides ; molécules et notions transversales), puis application des corrections sûres et contrôles automatiques (tous les scénarios, pas à pas, chevauchements, formules brutes recalculées). Rapports détaillés, avec la liste des corrections appliquées : `docs/audit-2/`.
+
+| Domaine | Erreurs médicales | Imprécisions | Forme |
+| --- | --- | --- | --- |
+| Thyroïde | 1 | 15 | 4 |
+| Surrénales | 1 | 18 | 6 |
+| Hypophyse, ADH | 4 | 12 | 7 |
+| Gonades | 2 | 16 | 4 |
+| Calcium, glucose, lipides | 4 | 22 | 6 |
+| Molécules, transversal | 1 | 11 | 6 |
+| **Total** | **13** | **94** | **33** |
+
+Toutes les erreurs médicales sont corrigées. Les points à trancher (30) sont soumis à l'auteur par le quiz « Arbitrages du 2e audit ».
+
+### Décisions sur les points à trancher du 2e audit (quiz du 25 octobre 2026)
+
+| Point | Décision | Changement demandé |
+| --- | --- | --- |
+| T1 TSH ≥ 10 et T4L normale | Oui | « Hypothyroïdie infraclinique sévère (ETA 2013, complément) » |
+| T2 Origine des cellules C | Sans importance | — |
+| T3 Adénome thyréotrope | Oui | Scénario ajouté ; évoquer aussi la résistance aux hormones thyroïdiennes (note de l'auteur) |
+| T4 P3 médiastinale (40 %) | Oui | Nuance « fréquence variable selon les séries » |
+| T5 Froid et TRH | Sans importance | — |
+| S1 Insuffisance corticotrope récente | Oui | Scénario avec Synacthène faussement normal |
+| S2 ACTH dans l'HCS classique | Oui | ACTH > 150 pg/mL, harmonisée entre les deux scènes |
+| S3 Test « Synacthène : 17-OHP » | Oui | Test dynamique dédié |
+| S4 Voie lyase de la 17-OHP | Sans importance | — |
+| A1 Polydipsie primaire | Oui | Scénario (complément) et interprétation de l'épreuve |
+| A2 Réponse à la desmopressine | Oui | Critère affiché, formes partielles, réponse plafonnée |
+| A3 Prolactine de grossesse | Oui | ≈ 150–200 ng/mL en fin de grossesse |
+| A4 Débit du DI néphrogénique | Non | — |
+| A5 Désert dans le SIADH | Oui | Natrémie calculée à partir du bilan d'eau et du poids du patient (note de l'auteur) |
+| G1 Testostérone du SOPK | Oui | ≈ 1,8 × N |
+| G2 Testostérone après la ménopause | Oui | ≈ 0,6–0,7 × N |
+| G3 Tests gonadiques | Oui | Tests à la GnRH et à l'hCG animés |
+| G4 Relais lutéo-placentaire | Non | — |
+| G5 Prolactine légèrement élevée | Oui | Alerte « contrôler, éliminer une macroprolactinémie » |
+| G6 Seuil de FSH à J3 | Oui | 10 UI/L |
+| C1 Hypercalcémie tumorale | Oui | Calcémie ≈ 3 mmol/L |
+| C2 Hypercalcémie hypocalciurique familiale | Oui | Fraction d'excrétion du calcium (rapport de clairance < 0,01 ; recommandations SFE, note de l'auteur) |
+| C3 HF et objectif de LDL-c | Non | — |
+| C4 Critères complets de l'épreuve de jeûne | Non | — |
+| C5 Insuline après les repas | Non | — |
+| C6 Insulinome à l'HGPO | Oui | Hypoglycémie réactionnelle tardive |
+| M1 Coquille 5 µg/dL | Oui | Écart avec le polycopié signalé |
+| M2 Seuil du DN4 | Oui | « ≥ 4/10 (complément) » |
+| M3 Fiche des inhibines | Oui | « Inhibines A et B » |
+| M4 Pastilles mammaires | Oui | Libellé « Seins » et fiche au survol |

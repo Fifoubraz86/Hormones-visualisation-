@@ -28,7 +28,8 @@
     glycemia: (T) => 0.85 + HV.rhythm.meals.reduce((a, m) => a + 0.55 * G(((T.h - m + 24) % 24), 0.9, 0.7), 0),
     e2: (T) => 0.25 + 1.2 * G(T.d, 12.5, 2.6) + 0.55 * G(T.d, 21, 3.5),
     lh: (T) => 0.35 + 2.4 * G(T.d, 14, 0.7),
-    fsh: (T) => 0.45 + 0.55 * G(T.d, 2.5, 3) + 0.9 * G(T.d, 14, 0.8),
+    // FSH de début de phase folliculaire ≈ 8 UI/L chez la femme normale : sous le seuil indicatif de 10 UI/L à J3 (complément).
+    fsh: (T) => 0.45 + 0.35 * G(T.d, 2.5, 3) + 0.9 * G(T.d, 14, 0.8),
     prog: (T) => 0.08 + 1.4 * G(T.d, 21, 3.4),
     // Rétrocontrôle de l'estradiol : positif en milieu de cycle (pic de LH), négatif le reste du temps.
     e2Positive: (T) => T.d >= 12 && T.d < 14.6
@@ -90,8 +91,29 @@
       def.content.appendChild(ring);
       for (let k = 0; k < i; k++) steps[k].spot.forEach((sp) => shape(sp, '#7a7a7a', holes));
       steps[i].spot.forEach((sp) => { shape(sp, 'black', holes); shape(sp, 'none', ring, 'spot-ring'); });
+      if (steps[i].go) steps[i].go();
     };
     def.stepIndex = () => cur;
+    HV.stepChip(def, a);
+  };
+
+  /* Pastille « Comprendre pas à pas » posée sur le bord inférieur du cadre, à droite (à gauche si def.chipLeft) : le clic
+     entre dans la scène et lance le parcours (js/app.js, attribut data-steps). Masquée pendant le parcours.
+     Étapes des scènes dessinées : `go()` facultatif, appelé à l'entrée de l'étape (animation de démonstration) ;
+     `def.stepEnd()` facultatif, appelé à la sortie du parcours (retour au modèle). */
+  HV.stepChip = function (def, a) {
+    const n = def.steps.length, label = `▶ Comprendre pas à pas (${n} étapes)`, w = Math.round(label.length * 10.4 + 44);
+    const chip = a.el('g', { class: 'step-chip', 'data-steps': def.id, transform: `translate(${def.chipLeft ? 50 : HV.W - 50 - w} ${HV.H - 24})` });
+    a.el('rect', { x: 0, y: 0, width: w, height: 48, rx: 24 }, chip);
+    a.text(w / 2, 31, label, 'step-chip-t', { anchor: 'middle' }, chip);
+    Promise.resolve().then(() => chip.parentNode && chip.parentNode.appendChild(chip)); // au-dessus du dessin de la scène
+    const stepTo = def.stepTo;
+    def.stepTo = function (i) {
+      const was = def.stepIndex();
+      stepTo(i);
+      chip.setAttribute('visibility', i < 0 ? 'visible' : 'hidden');
+      if (i < 0 && was >= 0 && def.stepEnd) def.stepEnd();
+    };
   };
 
   /* Loupes : scènes de zoom posées hors du cadre de leur scène parente (à droite des cartes de gauche,
@@ -118,13 +140,14 @@
       level: ax.level || 'Axe',
       lead: ax.lead,
       points: ax.points,
-      source: ax.source || 'Source : Polycopié de sémiologie endocrinienne, CEEDMM, 1re édition 2023.',
+      source: ax.source || 'Source : Polycopié de sémiologie endocrinienne, CEEDMM, 2e édition (2023).',
       legend: legendMols,
       build(g, a) {
         a.frame(ax.name, ax.sub);
         if (ax.steps) {
           def.steps = ax.steps;
           makeSteps(def, reg);
+          HV.stepChip(def, a);
         }
         /* ---- Coupe cerveau – hypothalamus – hypophyse (axes hypophysaires) ---- */
         const hh = ax.hh || null;
@@ -375,7 +398,7 @@
         /* ---- Horloge et niveaux ---- */
         let clockHand = null, clockTxt = null, cycleMark = null, cycleTxt = null;
         if (ax.clock === 'day') {
-          const cg = a.el('g', { class: 'clock', transform: `translate(${ax.clockX || 790} 92)`, 'data-info': ax.id + '.clock' });
+          const cg = a.el('g', { class: 'clock', transform: `translate(${ax.clockX || Math.max(790, 60 + ax.name.length * 28 + 90)} 92)`, 'data-info': ax.id + '.clock' });
           HV.INFO[ax.id + '.clock'] = { t: 'Horloge simulée', k: '24 h en 48 s', d: ax.clockInfo || 'Le temps de la scène défile pour montrer les variations rythmiques de sécrétion.', live: () => String(Math.floor(T.h)).padStart(2, '0') + ' h' };
           a.el('circle', { r: 44, class: 'clock-face' }, cg);
           for (let i = 0; i < 24; i += 3) {
@@ -390,10 +413,10 @@
           const cg = a.el('g', { class: 'cycle', transform: 'translate(600 172)', 'data-info': ax.id + '.clock' });
           HV.INFO[ax.id + '.clock'] = { t: 'Cycle ovarien simulé', k: '28 jours', d: 'J1 : règles. J1–J14 : phase folliculaire. J14 : ovulation déclenchée par le pic de LH. J14–J28 : phase lutéale (corps jaune).', live: () => 'Jour ' + Math.floor(T.d) };
           a.el('rect', { x: 0, y: 0, width: 420, height: 16, rx: 8, class: 'cycle-foll' }, cg);
-          a.el('rect', { x: 210, y: 0, width: 210, height: 16, rx: 8, class: 'cycle-lut' }, cg);
+          a.el('rect', { x: 195, y: 0, width: 225, height: 16, rx: 8, class: 'cycle-lut' }, cg);
           a.el('rect', { x: 0, y: 0, width: 75, height: 16, rx: 8, class: 'cycle-mens' }, cg);
           a.text(0, 40, 'J1 règles', 'note', null, cg);
-          a.text(210, 40, 'J14 ovulation', 'note', { anchor: 'middle' }, cg);
+          a.text(195, 40, 'J14 ovulation', 'note', { anchor: 'middle' }, cg);
           a.text(420, 40, 'J28', 'note', { anchor: 'end' }, cg);
           cycleMark = a.el('path', { d: 'M 0,-4 L -8,-16 L 8,-16 Z', class: 'cycle-mark' }, cg);
           cycleTxt = a.text(440, 15, '', 'clock-t', null, cg);

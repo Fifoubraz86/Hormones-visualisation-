@@ -40,8 +40,8 @@
       ['Transport', 'Liée à plus de 99,9 % : TBG ≈ 70–75 %, TBPA ≈ 10–15 %, albumine ≈ 10–20 % (complément ; le polycopié simplifie en 75 / 25 %) ; fraction libre ≈ 0,03 %'],
       ['Demi-vie', '≈ 7 jours'],
       ['Récepteur', 'Prohormone : faible affinité pour TR, convertie en T3 par D1 et D2'],
-      ['Dosage', 'T4 libre 12–22 pmol/L'],
-      ['Pharmacologie', 'Lévothyroxine, 1 à 1,5 µg/kg/j (item 243)']
+      ['Dosage', 'T4 libre 12–22 pmol/L (complément ; selon la trousse)'],
+      ['Pharmacologie', 'Lévothyroxine, ≈ 1,6 µg/kg/j en substitution complète']
     ], links: [pc(5819)] },
     levo: { cls: 'Médicament · T4 de synthèse', glyph: 't4', eta: true, rows: [
       ['Molécule', 'Lévothyroxine sodique (sel pentahydraté), identique à la T4 endogène'],
@@ -59,7 +59,7 @@
       ['Demi-vie', '≈ 1 jour'],
       ['Récepteur', 'Récepteurs nucléaires TRα1, TRβ1, TRβ2 : hétérodimère avec RXR sur les TRE ; affinité ≈ 10 fois supérieure à celle de la T4'],
       ['Effets', 'Thermogenèse, métabolisme basal, chronotropie et inotropie, développement cérébral, remodelage osseux'],
-      ['Dosage', 'T3 libre 3,1–6,8 pmol/L'],
+      ['Dosage', 'T3 libre 3,1–6,8 pmol/L (complément ; selon la trousse)'],
       ['Pharmacologie', 'Liothyronine']
     ], links: [pc(5920)] },
     rt3: { cls: 'Iodothyronine inactive', rows: [
@@ -76,7 +76,7 @@
       ['Sortie apicale', 'Pendrine, ANO1'],
       ['Organification', 'Oxydation par la TPO avec l\'H₂O₂ de DUOX2'],
       ['Recyclage', 'DEHAL1 libère l\'iode de MIT et DIT'],
-      ['Pathologie', 'Carence : goitre ; excès : effet Wolff-Chaikoff, hyperthyroïdie induite']
+      ['Pathologie', 'Carence : goitre (polycopié p. 10) ; excès : effet Wolff-Chaikoff (blocage transitoire de l\'organification ; complément), hypothyroïdie par surcharge iodée (p. 19) ou hyperthyroïdie induite par l\'iode (produits de contraste iodés, amiodarone, p. 27)']
     ], links: [pc(30165)] },
     tg: { cls: 'Glycoprotéine dimérique (support de l\'hormonosynthèse)', rows: [
       ['Structure', 'Homodimère ; chaque monomère ≈ 2 750 acides aminés (2 551 résolus en cryo-microscopie, PDB 6SCJ), ≈ 305 kDa de chaîne polypeptidique ; nombreux glycanes'],
@@ -123,7 +123,7 @@
       ['Demi-vie', '≈ 60 à 90 min'],
       ['Récepteur', 'Récepteur nucléaire des glucocorticoïdes (GR) ; aussi le récepteur minéralocorticoïde, protégé dans le rein par la 11β-HSD2'],
       ['Rythme', 'Pic en début de matinée, nadir le soir'],
-      ['Dosage', 'Cortisol à 8 h (habituellement 10–20 µg/dL, 275–550 nmol/L ; < 5 µg/dL, ≈ 138 nmol/L : évocateur d\'insuffisance surrénale ; > 18 µg/dL, ≈ 500 nmol/L : l\'exclut) ; cortisol libre urinaire ; cortisol salivaire à minuit'],
+      ['Dosage', 'Cortisol à 8 h (habituellement 10–20 µg/dL, 275–550 nmol/L ; < 5 µg/dL, ≈ 138 nmol/L : évocateur d\'insuffisance surrénale ; > 18 µg/dL, ≈ 500 nmol/L : l\'exclut ; p. 88, où le polycopié indique 80 nmol/L pour 5 µg/dL, coquille) ; cortisol libre urinaire ; cortisol salivaire à minuit'],
       ['Pharmacologie', 'Hydrocortisone ; corticoïdes de synthèse (prednisone, dexaméthasone)']
     ], links: [pc(5754)] },
     aldo: { cls: 'Minéralocorticoïde (stéroïde en C21)', rows: [
@@ -142,7 +142,7 @@
       ['Transport', 'SHBG (≈ 45 %), albumine ; ≈ 2 % libre'],
       ['Métabolisme', '5α-réductase → DHT (plus puissante) ; aromatase → estradiol'],
       ['Récepteur', 'Récepteur nucléaire des androgènes (AR)'],
-      ['Dosage', 'Testostérone totale le matin (≈ 10–30 nmol/L chez l\'homme jeune)']
+      ['Dosage', 'Testostérone totale (p. 62), le matin (≈ 10–30 nmol/L chez l\'homme jeune ; complément, selon la technique)']
     ], links: [pc(6013)] },
     e2: { cls: 'Œstrogène (stéroïde en C18)', rows: [
       ['Formule, masse', 'C₁₈H₂₄O₂ · 272,4 g/mol'],
@@ -224,7 +224,7 @@
       ['Demi-vie', '≈ 20 à 30 min'],
       ['Récepteur', 'PRLR, cytokine de classe I, JAK2/STAT5'],
       ['Effets', 'Lactation ; en excès, inhibe la GnRH'],
-      ['Dosage', '< 25 ng/mL ; > 200 ng/mL évoque un macroadénome à prolactine']
+      ['Dosage', 'Au repos (p. 55) ; < 25 ng/mL (complément) ; > 200 ng/mL évoque un macroadénome à prolactine (p. 56)']
     ], links: [pdb('1RW5')] },
     adh: { cls: 'Nonapeptide', rows: [
       ['Formule, masse', 'C₄₆H₆₅N₁₅O₁₂S₂ · 1 084,2 g/mol (arginine-vasopressine)'],
@@ -260,7 +260,7 @@
       ['Effets', 'Sertoli : spermatogenèse, inhibine B ; granulosa : croissance folliculaire, aromatase'],
       ['Régulation', 'Freinée sélectivement par l\'inhibine B']
     ], links: [pdb('4AY9')] },
-    inhib: { cls: 'Glycoprotéine dimérique (famille TGF-β)', rows: [['Structure', 'Sous-unité α + sous-unité βA (inhibine A) ou βB (inhibine B), reliées par un pont disulfure'], ['Synthèse', 'Sertoli (homme), granulosa (femme)'], ['Effets', 'Freine la FSH au niveau hypophysaire'], ['Dosage', 'Inhibine B : marqueur de la spermatogenèse et de la réserve ovarienne']], links: [] },
+    inhib: { cls: 'Glycoprotéine dimérique (famille TGF-β)', rows: [['Structure', 'Sous-unité α + sous-unité βA (inhibine A) ou βB (inhibine B), reliées par un pont disulfure'], ['Synthèse', 'Inhibine B : Sertoli (homme), cellules folliculaires (femme) (partie 2, p. 4) ; inhibine A : follicule dominant et corps jaune (complément)'], ['Effets', 'Freinent la FSH au niveau hypophysaire (inhibine B : partie 2, p. 4)'], ['Dosage', 'Inhibine B : marqueur de la spermatogenèse (complément) ; la réserve ovarienne s\'évalue plutôt par l\'AMH et le compte des follicules antraux (complément)']], links: [] },
 
     /* ---------------- Phosphocalcique ---------------- */
     pth: { cls: 'Peptide', rows: [
@@ -269,7 +269,7 @@
       ['Demi-vie', '2 à 4 min'],
       ['Récepteur', 'PTH1R (os, rein), Gs et Gq'],
       ['Régulation', 'Freinée par le calcium via le CaSR, par le calcitriol ; stimulée par le phosphate'],
-      ['Dosage', '≈ 15–65 pg/mL, à interpréter avec la calcémie'],
+      ['Dosage', '≈ 15–65 pg/mL (complément ; selon la trousse), à interpréter avec la calcémie'],
       ['Pharmacologie', 'Tériparatide ; calcimimétiques (cinacalcet)']
     ], links: [pdb('1ET1')] },
     ca: { cls: 'Cation divalent', rows: [
@@ -308,15 +308,15 @@
     glucagon: { cls: 'Peptide', rows: [['Structure', '29 acides aminés, hélice (PDB 1GCN)'], ['Masse', '3,5 kDa'], ['Synthèse', 'Cellules α ; proglucagon (qui donne le GLP-1 dans l\'intestin)'], ['Demi-vie', '≈ 5 min'], ['Récepteur', 'GCGR, Gs (foie)'], ['Effets', 'Glycogénolyse, néoglucogenèse, cétogenèse'], ['Pharmacologie', 'Glucagon en urgence pour l\'hypoglycémie sévère']], links: [pdb('1GCN')] },
     glucose: { cls: 'Ose (hexose)', rows: [['Formule, masse', 'C₆H₁₂O₆ · 180,2 g/mol'], ['Forme', 'Pyranose (cycle à 6 dont 1 oxygène), majoritairement β'], ['Valeurs', 'À jeun 0,80–1,10 g/L ; diabète ≥ 1,26 g/L ; hypoglycémie < 0,50 g/L (< 0,70 chez le diabétique)'], ['Conversion', '1 g/L ≈ 5,5 mmol/L'], ['Transporteurs', 'GLUT1-4 (GLUT4 insulinodépendant), SGLT1-2']], links: [pc(5793)] },
     ffa: { cls: 'Acide gras', rows: [['Exemple', 'Acide palmitique C₁₆H₃₂O₂ · 256,4 g/mol'], ['Origine', 'Lipolyse du tissu adipeux (freinée par l\'insuline)'], ['Devenir', 'β-oxydation, cétogenèse hépatique']], links: [pc(985)] },
-    ketone: { cls: 'Corps cétonique', rows: [['Exemple', 'Acétoacétate (acide acétoacétique C₄H₆O₃ · 102,1 g/mol) ; β-hydroxybutyrate'], ['Origine', 'Foie, à partir de l\'acétyl-CoA'], ['Valeurs', 'Cétonémie < 0,6 mmol/L ; acidocétose au-delà de 3 mmol/L (complément)']], links: [pc(96)] },
+    ketone: { cls: 'Corps cétonique', rows: [['Exemple', 'Acétoacétate (acide acétoacétique C₄H₆O₃ · 102,1 g/mol) ; β-hydroxybutyrate'], ['Origine', 'Foie, à partir de l\'acétyl-CoA'], ['Valeurs', 'Cétonémie < 0,6 mmol/L (complément) ; acidocétose : cétonémie > 3 mmol/L, pH < 7,30 ou bicarbonates < 15 mmol/L (polycopié, partie 2 p. 38)']], links: [pc(96)] },
 
     /* ---------------- Lipides ---------------- */
     chol: { cls: 'Stérol', rows: [['Formule, masse', 'C₂₇H₄₆O · 386,7 g/mol ; XLogP 8,7'], ['Rôle', 'Membranes ; précurseur des stéroïdes, de la vitamine D et des acides biliaires'], ['Synthèse', 'Voie de l\'HMG-CoA réductase (cible des statines)']], links: [pc(5997)] },
     chylo: { cls: 'Lipoprotéine', rows: [['Taille', '75 à 1 200 nm'], ['Composition', '85–90 % de triglycérides alimentaires ; apoB48'], ['Origine', 'Entérocyte → lymphe'], ['Devenir', 'Lipoprotéine lipase → remnants captés par le foie']], links: [] },
     vldl: { cls: 'Lipoprotéine', rows: [['Composition', 'Riches en triglycérides endogènes ; apoB100'], ['Origine', 'Foie'], ['Devenir', 'VLDL → IDL → LDL']], links: [] },
     ldl: { cls: 'Lipoprotéine', rows: [['Taille', '≈ 22 nm'], ['Composition', 'Cœur d\'esters de cholestérol ; une apoB100'], ['Rôle', 'Transporteur majoritaire du cholestérol'], ['Captation', 'Récepteur des LDL (70 % hépatiques)'], ['Dosage', 'LDL-c calculé (Friedewald) ou mesuré']], links: [] },
-    hdl: { cls: 'Lipoprotéine', rows: [['Taille', '≈ 8 à 12 nm'], ['Composition', 'ApoA-I'], ['Rôle', 'Retour du cholestérol vers le foie ; anti-athérogènes'], ['Dosage', 'HDL-c > 0,40 g/L']], links: [] },
-    pcsk9: { cls: 'Protéase (proprotéine convertase)', rows: [['Structure', 'Prodomaine + domaine catalytique + domaine C-terminal (PDB 2P4E)'], ['Rôle', 'Fixe le récepteur des LDL et l\'oriente vers le lysosome'], ['Génétique', 'Mutations gain de fonction : hypercholestérolémie familiale ; perte de fonction : LDL bas'], ['Pharmacologie', 'Anticorps anti-PCSK9 (évolocumab, alirocumab), inclisiran']], links: [pdb('2P4E')] },
+    hdl: { cls: 'Lipoprotéine', rows: [['Taille', '≈ 8 à 12 nm'], ['Composition', 'ApoA-I'], ['Rôle', 'Retour du cholestérol vers le foie ; anti-athérogènes'], ['Dosage', 'HDL-c ≤ 0,40 g/L (1,0 mmol/L) : facteur de risque cardiovasculaire (partie 2, p. 26)']], links: [] },
+    pcsk9: { cls: 'Protéase (proprotéine convertase)', rows: [['Structure', 'Prodomaine + domaine catalytique + domaine C-terminal (PDB 2P4E)'], ['Rôle', 'Fixe le récepteur des LDL et l\'oriente vers le lysosome'], ['Génétique', 'Mutations gain de fonction : hypercholestérolémie familiale ; perte de fonction : LDL bas'], ['Pharmacologie', 'Anticorps anti-PCSK9 (évolocumab, alirocumab) ; ARN interférent (inclisiran)']], links: [pdb('2P4E')] },
     ldlr: { cls: 'Récepteur membranaire', rows: [['Structure', 'Domaine de liaison (7 répétitions LA), domaine homologue de l\'EGF, β-propeller (PDB 1N7D)'], ['Ligands', 'ApoB100 (LDL), apoE'], ['Cycle', 'Endocytose, libération du LDL à pH acide, recyclage ou dégradation (PCSK9)'], ['Régulation', 'SREBP-2 : augmente quand le cholestérol cellulaire baisse (statines)']], links: [pdb('1N7D')] },
     mrna: { cls: 'Acide nucléique', rows: [['Rôle', 'Transcrit des gènes cibles de la T3 (Na⁺/K⁺-ATPase, UCP1, α-MHC, SERCA2, récepteur des LDL…)']], links: [] }
   };

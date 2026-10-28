@@ -45,6 +45,30 @@ Le dessin garde les couleurs et dégradés Servier ; le fond blanc de la diaposi
 | endo-thyroid-small, endo-goiter-small | petites thyroïdes normale et goitreuse | réserve |
 | endo-neck-cancer, endo-thyroid-cancer | cancer thyroïdien | réserve (NEM 2, nodule) |
 
+## Déjà extrait : kit Diabetes → `assets/organs/servier/diab-*`
+
+| Fichier | Contenu (diapositive) | Utilisé |
+| --- | --- | --- |
+| diab-eye, diab-fundus | œil en coupe, fond d'œil (7) | loupe « Complications », planche du pas à pas |
+| diab-kidney-normal, diab-kidney-nephro | rein normal, néphropathie (8) | silhouette et planche des complications |
+| diab-neuro-periph, diab-neuro-auto | neuropathies périphérique et végétative (13) | planche des complications |
+| diab-monofilament | test au monofilament (11) | planche des complications |
+| diab-sole-ulcer, diab-foot | plante du pied avec ulcère (9), pied (10) | planche des complications |
+| diab-islet | îlot entre les acini (3) | réserve |
+
+## Déjà extrait : kits Arteries → `assets/organs/servier/art-*`, `ath-*`
+
+| Fichier | Contenu (kit, diapositive) | Utilisé |
+| --- | --- | --- |
+| art-tree | arbre artériel du corps entier, cœur et reins, tête de profil (Arteries-physiology, 3) | loupe « Complications du diabète » |
+| ath-cut-0, -30, -65, -90 | coupes d'artère : obstruction 0, 30, 65, 90 % (atherothrombosis part 1, 5) | loupe « Athérosclérose » |
+| ath-remod-pos | remodelage positif (part 1, 7) | loupe « Athérosclérose » |
+| ath-thrombosis, ath-thromb-2 | athérothrombose, de l'athérome au thrombus (part 1, 14 et 11) | loupe « Athérosclérose » (ath-thromb-2 en réserve) |
+
+D'autres dessins ont été extraits dans le dossier de travail sans être copiés (arbre artériel sans organes, aorte, paroi et tuniques artérielles, coupes longitudinales des stades, plaques, position du thrombus) : relancer `tools/pptx2svg.py` sur les diapositives citées pour les récupérer.
+
+Autres images utilisées dans les loupes de la glycémie : `dig-stomach`, `dig-duodenum`, `dig-small-intestine` (incrétines, appétit), `veins-body-skin` (silhouette des complications).
+
 Non copiés (trop lourds, > 300 Ko après svgo) : la zonation corticosurrénalienne en histologie
 (diapositive 8, six groupes) et sa version vascularisée (diapositive 7). À extraire en PNG si besoin.
 

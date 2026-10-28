@@ -1,12 +1,14 @@
 # Atlas endocrinien
 
+Conception et réalisation : Philippe Thuillier.
+
 Visualisation zoomable et animée des axes endocriniens humains, dans l'esprit d'une présentation Prezi : on dézoome pour voir l'ensemble des axes, on rezoome jusqu'à la cellule pour voir les hormones circuler.
 
 L'**axe thyréotrope** est détaillé jusqu'à la cellule (hypothalamus, hypophyse, follicule, transport plasmatique, cellule cible). Les autres axes et boucles de régulation sont tirés du *Polycopié de sémiologie endocrinienne* du CEEDMM (2023) et représentés en schémas animés : corticotrope, somatotrope, lactotrope, gonadotrope féminin (cycle de 28 jours, rétrocontrôle de l'estradiol qui devient positif en milieu de cycle) et masculin, posthypophyse (ADH), médullosurrénale, métabolisme phosphocalcique, système rénine-angiotensine-aldostérone, régulation de la glycémie et métabolisme des lipoprotéines. Le détail des boucles extraites est dans [`docs/axes-polycopie.md`](docs/axes-polycopie.md).
 
 Chaque axe dispose d'un modèle physiologique simplifié, d'un bilan biologique simulé et de scénarios cliniques tirés de la sémiologie du polycopié : Cushing (hypophysaire, surrénalien, ectopique), insuffisances surrénale et corticotrope, corticothérapie, acromégalie, déficit somatotrope, prolactinomes et déconnexion, diabète insipide, SIADH, phéochromocytome, ménopause, hypogonadismes, hyperparathyroïdie primaire et secondaire, hypoparathyroïdie, hyperaldostéronismes primaire et secondaire, DT1, DT2, insulinome, hypercholestérolémie familiale et ses traitements…
 
-Les organes sont dessinés de façon anatomique, les molécules d'après leur structure (iodothyronines, stéroïdes à quatre cycles, peptides, glycoprotéines, catécholamines, lipoprotéines…). Une légende contextuelle et des fiches au survol (ou au toucher) donnent les informations de chaque élément.
+Les principaux organes (pancréas, foie, rein, estomac, intestin, cerveau, cœur, poumons, muscle) sont des illustrations de *Servier Medical Art* (CC BY 3.0, via [Bioicons](https://bioicons.com)) ; la thyroïde avec le larynx et la trachée, les parathyroïdes, la surrénale, le testicule, l'utérus, l'ovaire, le sein, le néphron et le cerveau en coupe sagittale viennent des kits SMART de Servier (CC BY 4.0), extraits en SVG par `tools/pptx2svg.py` ; l'icône de l'hypophyse est un dessin original dans le même esprit (`tools/organs_svg.py`) ; voir `assets/organs/CREDITS.md`. Les illustrations réutilisables pour d'autres atlas sont inventoriées dans `docs/inventaire-illustrations.md` (Bioicons) et `docs/inventaire-servier.md` (kits Servier) ; les organes sont dessinés de façon anatomique, les molécules d'après leur structure (iodothyronines, stéroïdes à quatre cycles, peptides, glycoprotéines, catécholamines, lipoprotéines…). Une légende contextuelle et des fiches au survol (ou au toucher) donnent les informations de chaque élément.
 
 ## Lancer
 
@@ -39,7 +41,7 @@ Le modèle (`js/simu/model.js`) calcule l'état du patient jour par jour : stock
 | Molette / pincement | zoom libre |
 | Glisser | déplacement |
 | Échap, Retour arrière ou « Dézoomer » | remonter d'un niveau |
-| ← / → | parcours guidé en 18 étapes (atlas → axe thyréotrope → hypothalamus → hypophyse → follicule → transport → cellule cible → axes corticotrope, somatotrope, gonadotropes féminin et masculin, lactotrope, ADH, médullosurrénale, phosphocalcique, SRAA, glycémie, lipides) |
+| ← / → | parcours guidé en 20 étapes (atlas → axe thyréotrope → hypothalamus → hypophyse → follicule → transport → cellule cible → axes corticotrope, somatotrope, gonadotropes féminin et masculin, lactotrope, ADH, médullosurrénale, phosphocalcique, SRAA, glycémie, îlot, pancréas, lipides) |
 | Espace | pause / lecture |
 
 Chaque scène a une ancre (`#thyro`, `#foll`, `#cell`…) pour y accéder directement.
@@ -72,6 +74,20 @@ Les 71 figures du polycopié du CEEDMM (2e édition 2023, parties 1 et 2) sont d
 ## Îlot de Langerhans
 
 L'îlot est un zoom de la régulation glycémique. On y voit l'architecture de l'îlot (cellules β, α, δ, PP, ε, capillaires, acini exocrines) et la cellule β : GLUT2, glucokinase, ATP, canal K-ATP, potentiel de membrane, canal calcique, granules, incrétines. Tout est animé par le modèle glycémique (scénarios DT1, DT2, insulinome, HGPO) et dispose d'un pas à pas en 8 étapes.
+
+## Pancréas exocrine, endocrine et tumeurs neuroendocrines
+
+Module satellite posé sous la silhouette, à côté de la physiologie surrénalienne (`#pancreas`). Il réunit l'estomac, le duodénum, le pancréas et les voies biliaires : gastrine et acide, sécrétine et bicarbonates, CCK, enzymes et vésicule, îlots et veine porte, somatostatine, VIP. Un modèle commun anime la scène, ses bilans simulés (gastrine, pH gastrique, glycémie, insuline, peptide C, glucagon, VIP, somatostatine, kaliémie, bicarbonates, selles, graisses fécales, élastase, chromogranine A) et deux tests dynamiques (test à la sécrétine, épreuve de jeûne). Treize scénarios : sujet sain à jeun et après un repas, IPP (piège de la gastrine et de la chromogranine A), gastrinome avec et sans IPP, insulinome, glucagonome avec et sans analogue, VIPome avec et sans analogue, somatostatinome, insuffisance pancréatique exocrine avec et sans extraits.
+
+Neuf loupes, chacune avec son pas à pas :
+
+- **Pancréas exocrine** : cellule acineuse (CCK-A, M3, IP3/Ca²⁺, granules de zymogène), cellule canalaire (sécrétine, AMPc, CFTR, échangeur Cl⁻/HCO₃⁻, aquaporines), activation en cascade par l'entérokinase, protections contre l'autodigestion.
+- **Pancréatites** : trois mécanismes d'activation intrapancréatique, pancréatite aiguë et chronique, seuil de 80 % de perte de fonction pour la stéatorrhée, élastase fécale.
+- **Hormones digestives** : douze hormones, leur cellule, leur siège, leur stimulus et leurs actions sur le tube digestif.
+- **Classification des TNE** : OMS (G1, G2, G3, CNE, MiNEN), 80 % de formes non fonctionnelles, tableau des TNE fonctionnelles, bilan, chromogranine A, prédispositions (NEM 1, VHL, NF1), traitements.
+- **Un modèle par TNE fonctionnelle** (gastrinome, insulinome, glucagonome, VIPome, somatostatinome) : siège, carte d'identité, cellule tumorale qui envoie son hormone vers ses cibles (valeurs en direct), diagnostic, traitement, bilan et boutons de scénario.
+
+Sources : SNFGE, *Les fondamentaux de la pathologie digestive*, chapitre 7 (2014) ; CEEDMM / SFE, item 308 (2022) ; TNCD, chapitre 11 (07/09/2026). Les compléments sont listés dans `docs/a-verifier.md`. Le module est relié depuis l'atlas (point du pancréas), l'axe glycémique, l'îlot de Langerhans (acini, insulinome), la loupe NEM et la fiche du pancréas.
 
 ## Les scènes de l'axe thyréotrope
 
@@ -120,10 +136,12 @@ js/sheets-organs.js fiches anatomiques des organes et figures du polycopié
 js/imaging.js       planches d'imagerie schématiques (normales et pathologiques)
 js/protein-traces.js tracés protéiques extraits de la PDB (généré)
 js/protein-glyphs.js glyphes protéiques à partir des tracés
-js/scenes/*.js      atlas et scènes détaillées de l'axe thyréotrope
+js/scenes/*.js      atlas, scènes détaillées et loupes (pancreas.js, zoom-pancreas.js : module pancréas et TNE)
 js/app.js           caméra, navigation, panneau, boucle d'animation
 js/video-export.js  éditeur vidéo : rendu image par image, encodage MP4
 ```
+
+Pour une nouvelle session : [`docs/MEMOIRE-ATLAS.md`](docs/MEMOIRE-ATLAS.md) (architecture, recette d'un axe ou d'un module, vérifications).
 
 Documentation : [`docs/axes-polycopie.md`](docs/axes-polycopie.md) (boucles extraites du polycopié), [`docs/tests-dynamiques.md`](docs/tests-dynamiques.md) (tests dynamiques), [`docs/audit.md`](docs/audit.md) (audit médical).
 

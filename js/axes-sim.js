@@ -67,7 +67,7 @@
   /* ===================== Axe corticotrope ===================== */
   SIMS.cortico = {
     title: 'Bilan corticotrope simulé',
-    defaults: { hypo: 1, pit: 1, adr: 1, autoPit: 0, autoAdr: 0, ecto: 0, exo: 0, syn: 0, dxm: 0, ith: 0, cyp21: 1 },
+    defaults: { hypo: 1, pit: 1, adr: 1, autoPit: 0, autoAdr: 0, ecto: 0, exo: 0, syn: 0, dxm: 0, ith: 0, cyp21: 1, recent: 0 },
     init: { crh: 1, acth: 1, cort: 1, reg: 1, troph: 1, ohp: 1, andro: 1 },
     tau: { troph: 6 },
     targets(p, s) {
@@ -79,7 +79,10 @@
       // Trophicité du cortex : s'atrophie lentement sans ACTH (insuffisance corticotrope, corticothérapie).
       // Elle évolue sur des jours : elle reste figée pendant un test dynamique (60 min à 48 h).
       const testing = p.syn > 0 || p.dxm > 0 || p.ith > 0;
-      const troph = testing ? s.troph : clamp(pw(Math.max(acth, 0.01), 0.8), 0.15, 1.6);
+      // Privation prolongée d'ACTH : atrophie suffisante pour que le Synacthène ne donne plus de réponse normale
+      // (polycopié p. 61 et 85).
+      // Insuffisance corticotrope récente (recent = 1) : le cortex n'a pas encore eu le temps de s'atrophier.
+      const troph = testing ? s.troph : p.recent ? 1 : clamp(pw(Math.max(acth, 0.01), 1.3), 0.08, 1.6);
       // Réponse surrénalienne saturable ; le Synacthène (ACTH 1-24) s'ajoute à l'ACTH endogène.
       const drive = Math.max(acth, 0) + p.syn;
       // Bloc en 21-hydroxylase (HCS, figure 26) : le cortisol baisse, l'ACTH monte et la 17-OHP accumulée
@@ -119,11 +122,12 @@
       { id: 'eu', name: 'Axe normal', note: 'Cortisol élevé le matin, bas le soir.', p: {} },
       { id: 'cushing', name: 'Maladie de Cushing', note: 'Adénome corticotrope : ACTH normale ou élevée, cortisol élevé, rythme aboli.', p: { autoPit: 2.3 } },
       { id: 'adeno', name: 'Adénome surrénalien cortisolique', note: 'Cushing ACTH-indépendant : ACTH effondrée, cortisol élevé non freinable.', p: { autoAdr: 1.6 } },
-      { id: 'ecto', name: 'Sécrétion ectopique d\'ACTH', note: 'Tumeur (bronches, pancréas…) : ACTH et cortisol très élevés.', p: { ecto: 5 } },
+      { id: 'ecto', name: 'Sécrétion ectopique d\'ACTH', note: 'Tumeur (bronches, pancréas…) : ACTH et cortisol très élevés.', p: { ecto: 7 } },
       { id: 'addison', name: 'Insuffisance surrénale périphérique', note: 'Cortisol bas, ACTH très élevée (mélanodermie par excès de POMC/α-MSH).', p: { adr: 0.06 } },
       { id: 'corticotrope', name: 'Insuffisance corticotrope', note: 'Atteinte hypophysaire : cortisol bas avec ACTH basse ou normale.', p: { pit: 0.03 } },
+      { id: 'corticorec', name: 'Insuffisance corticotrope récente', note: 'Atteinte hypophysaire récente (chirurgie, apoplexie…) : le cortex n\'est pas encore atrophié. Le test au Synacthène peut être faussement normal ; l\'hypoglycémie insulinique, qui explore tout l\'axe, est alors anormale (polycopié p. 61 et 85).', p: { pit: 0.03, recent: 1 } },
       { id: 'hcs', name: 'Bloc en 21-hydroxylase, forme classique', note: 'HCS (CYP21A2, 95 % des cas) : cortisol bas, ACTH élevée, 17-OHP très élevée, androgènes surrénaliens en excès ; perte de sel possible (aldostérone non simulée ici). Dépistage néonatal à J3 (17-OHP).', p: { cyp21: 0.03 } },
-      { id: 'hcsnc', name: 'Bloc en 21-hydroxylase, forme non classique', note: 'L\'ACTH compense : cortisol conservé, 17-OHP et androgènes modérément élevés ; 17-OHP de base ou après test au Synacthène.', p: { cyp21: 0.4 } },
+      { id: 'hcsnc', name: 'Bloc en 21-hydroxylase, forme non classique', note: 'Cortisol conservé avec une ACTH normale ou discrètement augmentée ; 17-OHP et androgènes modérément élevés ; 17-OHP de base ou après test au Synacthène (polycopié p. 82).', p: { cyp21: 0.4 } },
       { id: 'cortico', name: 'Corticothérapie prolongée', note: 'Les corticoïdes freinent l\'axe : ACTH et cortisol endogène bas, risque d\'insuffisance surrénale à l\'arrêt (complément).', p: { exo: 1.6 } }
     ],
     interpret(s, p, L) {
@@ -131,7 +135,7 @@
       // Hyperplasie congénitale des surrénales (polycopié p. 80–82, figure 26).
       if (oh > 3 && p.cyp21 < 0.9) {
         if (c < 275) return { tone: 'bad', label: 'Bloc en 21-hydroxylase, forme classique', text: 'Cortisol bas, ACTH élevée, 17-OHP très élevée et androgènes surrénaliens en excès : hyperplasie congénitale des surrénales. Fille : virilisation des organes génitaux externes ; perte de sel (hyponatrémie, hyperkaliémie, déshydratation) si l\'aldostérone est aussi touchée. Dépistage néonatal : 17-OHP à J3.' };
-        return { tone: 'warn', label: 'Bloc en 21-hydroxylase, forme non classique', text: 'Cortisol maintenu au prix d\'une ACTH élevée ; 17-OHP et androgènes surrénaliens augmentés : pubarche précoce, âge osseux avancé, hyperandrogénie de l\'adolescente (acné, hirsutisme, troubles des règles). Diagnostic : 17-OHP de base ou après test au Synacthène.' };
+        return { tone: 'warn', label: 'Bloc en 21-hydroxylase, forme non classique', text: 'Cortisol conservé, ACTH normale ou discrètement augmentée ; 17-OHP et androgènes surrénaliens augmentés : pubarche précoce, âge osseux avancé, hyperandrogénie de l\'adolescente (acné, hirsutisme, troubles des règles). Diagnostic : 17-OHP de base ou après test au Synacthène.' };
       }
       // Cortisol à 8 h (polycopié) : < 5 µg/dL (≈ 138 nmol/L) très évocateur d'insuffisance surrénale,
       // > 18 µg/dL (500 nmol/L) l'exclut ; entre les deux, zone grise : test au Synacthène.
@@ -162,7 +166,7 @@
         { node: 'pit', kind: 'mass', dy: -6, tone: 'grey', show: (p) => p.pit < 0.5, label: 'lésion hypophysaire', ly: 50, title: 'Lésion hypothalamo-hypophysaire', text: 'Insuffisance corticotrope : adénome, chirurgie, radiothérapie, apoplexie, hypophysite…' },
         { node: 'adr', kind: 'nodule', tone: 'yellow', dx: -34, dy: -30, show: (p) => p.autoAdr > 0.02, ly: -26, label: 'adénome cortisolique', title: 'Adénome surrénalien cortisolique', text: 'Tumeur de la zone fasciculée. L\'ACTH effondrée entraîne l\'atrophie de la surrénale controlatérale et du cortex sain.' },
         { node: 'adr', kind: 'infiltrate', dy: -10, show: (p) => p.adr < 0.5, label: 'destruction surrénalienne', title: 'Insuffisance surrénale périphérique', text: 'Destruction des deux surrénales : auto-immune dans 80 à 90 % des cas, la tuberculose étant la cause historique ; plus rarement hémorragie surrénalienne bilatérale ou métastases.' },
-        { node: 'adr', kind: 'label', show: (p, s) => s.acth < 0.3, label: 'cortex atrophique', ly: -96, title: 'Atrophie corticosurrénalienne', text: 'Sans ACTH, la zone fasciculée s\'atrophie : risque d\'insuffisance surrénale à l\'arrêt d\'une corticothérapie ou après exérèse d\'un adénome.' },
+        { node: 'adr', kind: 'label', show: (p, s) => s.acth < 0.3 && !p.recent, label: 'cortex atrophique', ly: -96, title: 'Atrophie corticosurrénalienne', text: 'Sans ACTH, la zone fasciculée s\'atrophie : risque d\'insuffisance surrénale à l\'arrêt d\'une corticothérapie ou après exérèse d\'un adénome.' },
         { node: 'adr', kind: 'label', show: (p) => p.cyp21 < 0.7, label: 'bloc en 21-hydroxylase', ly: -96, title: 'Hyperplasie congénitale des surrénales', text: 'Déficit en 21-hydroxylase (CYP21A2, chromosome 6p21.3), autosomique récessif : 95 % des HCS. Voir la figure 26 et la loupe « Stéroïdogenèse ».' },
         { node: 'adr', kind: 'label', show: (p, s) => s.acth > 2.5 && p.cyp21 >= 0.7, label: 'hyperplasie bilatérale', ly: -70, title: 'Hyperplasie surrénalienne', text: 'L\'excès chronique d\'ACTH induit une hyperplasie et une hypertrophie des surrénales.' }
       ],
@@ -242,7 +246,7 @@
       extraLinks: [{ from: 'load', to: 'pit', kind: 'inhib', mol: 'glucose', v: 'loadRate', label: '' }, { from: 'ins', to: 'hypo', kind: 'stim', color: 'p-blue2', label: '' }],
       rates: { loadRate: (s, p) => 2 * p.load },
       lesions: [
-        { node: 'pit', kind: 'mass', tone: 'sky', dy: -4, show: (p) => p.autoPit > 0.02, size: (p) => clamp(0.6 + 0.12 * p.autoPit, 0.6, 1.3), label: 'adénome somatotrope', ly: 52, title: 'Adénome somatotrope', text: 'Souvent un macroadénome au diagnostic (extension vers le sinus caverneux ou le chiasma).' },
+        { node: 'pit', kind: 'mass', tone: 'sky', dy: -4, show: (p) => p.autoPit > 0.02, size: (p) => clamp(0.6 + 0.12 * p.autoPit, 0.6, 1.3), label: 'adénome somatotrope', ly: 52, title: 'Adénome somatotrope', text: 'Souvent un macroadénome au diagnostic (complément), pouvant s\'étendre vers le sinus caverneux ou le chiasma.' },
         { node: 'pit', kind: 'mass', tone: 'grey', dy: -4, show: (p) => p.pit < 0.5, label: 'lésion hypophysaire', ly: 52, title: 'Insuffisance somatotrope', text: 'Atteinte hypophysaire (tumeur, chirurgie, radiothérapie). Le test de référence est l\'hypoglycémie insulinique.' },
         { node: 'liver', kind: 'label', show: (p) => p.liver < 0.6, label: 'production d\'IGF-1 diminuée', ly: -72, title: 'Résistance à la GH', text: 'Dénutrition ou insuffisance hépatique : l\'IGF-1 baisse malgré une GH élevée (complément).' }
       ],
@@ -257,7 +261,7 @@
     init: { prl: 1, inh: 1 },
     targets(p, s) {
       const inh = clamp(p.dopa * p.stalk * (1 - 0.85 * p.drug), 0, 1.5);
-      const prl = (1 + 5 * p.preg) * (1 + 5 * Math.max(0, 1 - inh)) + p.autoPit;
+      const prl = (1 + 13 * p.preg) * (1 + 5 * Math.max(0, 1 - inh)) + p.autoPit; // fin de grossesse ≈ 150–200 ng/mL (complément)
       return { prl, inh };
     },
     labs: [
@@ -277,12 +281,12 @@
       { id: 'macro', name: 'Macroadénome à prolactine', note: 'Prolactine > 200 ng/mL.', p: { autoPit: 25 } },
       { id: 'decon', name: 'Hyperprolactinémie de déconnexion', note: 'Tumeur comprimant la tige : levée du tonus dopaminergique, prolactine < 200 ng/mL.', p: { stalk: 0.2 } },
       { id: 'nl', name: 'Neuroleptique', note: 'Cause iatrogène à écarter avant tout bilan.', p: { drug: 1 } },
-      { id: 'preg', name: 'Grossesse', note: 'Élévation physiologique sous l\'effet des œstrogènes.', p: { preg: 1 } }
+      { id: 'preg', name: 'Grossesse (fin de grossesse)', note: 'Élévation physiologique sous l\'effet des œstrogènes (polycopié p. 49) : prolactine ≈ 150–200 ng/mL en fin de grossesse (complément).', p: { preg: 1 } }
     ],
     interpret(s, p, L) {
       const v = L('prl');
       if (v > 200) return { tone: 'bad', label: 'Prolactine > 200 ng/mL', text: 'Évoque un macroadénome à prolactine.' };
-      if (v > 25) return { tone: 'warn', label: 'Hyperprolactinémie', text: 'Écarter grossesse, médicaments et macroprolactinémie ; < 200 ng/mL avec tumeur volumineuse : déconnexion. La LH est freinée (pulsatilité de la GnRH inhibée).' };
+      if (v > 25) return { tone: 'warn', label: 'Hyperprolactinémie', text: 'Écarter les causes physiologiques (grossesse, allaitement), iatrogènes (psychotropes, toxiques), pathologiques (hypothyroïdie profonde, insuffisance rénale terminale) et analytiques (interférence, macroprolactinémie). Avec une IRM compatible : < 100 ng/mL évoque plutôt un microadénome ; < 200 ng/mL avec une tumeur supracentimétrique : déconnexion (polycopié p. 56). La LH est freinée (pulsatilité de la GnRH inhibée).' };
       return { tone: 'good', label: 'Prolactine normale', text: 'Tonus dopaminergique conservé.' };
     },
     hooks: {
@@ -299,32 +303,49 @@
   };
 
   /* ===================== Posthypophyse ===================== */
-  // Bilan d'eau W (litres d'eau libre en excès ; négatif = déficit) : les boissons l'augmentent, la sueur
-  // le diminue ; le rein élimine l'excès d'autant plus vite que l'ADH est basse, la soif corrige le déficit.
-  // En hyponatrémie, le pouvoir de concentration maximal baisse (lavage médullaire) : SIADH ≈ 500–600 mosmol/kg.
-  const uosmOf = (eff, na) => clamp((50 + 700 * pw(eff, 1.5)) * clamp(1 - 0.05 * Math.max(0, 135 - (na || 140)), 0.4, 1), 40, 1200);
+  // Bilan d'eau libre W (litres en excès ; négatif = déficit), intégré en litres par heure (complément) :
+  // entrées = boissons habituelles (≈ 2,5 L/24 h) + soif (si Na > 140) + excès de boissons + eau métabolique ;
+  // sorties = urines (charge osmolaire ≈ 900 mosmol/24 h ÷ osmolalité urinaire) + pertes insensibles + sueur.
+  // Natrémie = 140 × eau totale / (eau totale + W), eau totale ≈ 0,6 × poids (complément).
+  // p.hps : heures simulées par seconde (12 dans le panneau ; les tests imposent le temps de leur protocole).
+  // Pouvoir de concentration maximal : abaissé par l'hyponatrémie et par le lavage médullaire d'une polyurie
+  // chronique (diabète insipide, polydipsie primaire ; s.med), d'où une réponse plafonnée à la desmopressine.
+  const ADH_SOL = 900;
+  const uosmOf = (s) => {
+    const g = pw(clamp(s.eff, 0, 1.5) / 1.5, 2.7);
+    const hypoF = clamp(1 - 0.035 * Math.max(0, 135 - (s.na || 140)), 0.35, 1);
+    return clamp(80 + (1200 * (s.med || 1) * hypoF - 80) * g, 60, 1200);
+  };
+  const diurOf = (s) => clamp(ADH_SOL / uosmOf(s), 0.4, 14); // L/24 h
   SIMS.adh = {
     title: 'Bilan hydrique simulé',
-    defaults: { hypo: 1, kidney: 1, siadh: 0, drug: 0, restrict: 0, ddavp: 0, drink: 0, sweat: 0 },
-    init: { na: 140, adh: 1, eff: 1, W: 0 },
-    tau: { na: 1.5, W: 1, adh: 0.5, eff: 0.5 },
+    defaults: { hypo: 1, kidney: 1, siadh: 0, drug: 0, restrict: 0, ddavp: 0, drink: 0, poto: 0, sweat: 0, poids: 70, hps: 12 },
+    init: { na: 140, adh: 1, adhP: 1, eff: 1, W: 0, med: 1 },
+    tau: { na: 0.3, W: 1, adh: 0.5, adhP: 0.5, eff: 0.5, med: 0.5 },
     targets(p, s) {
-      const adh = p.hypo * clamp(ex((s.na - 140) / (s.na < 140 ? 1.2 : 3)) * (1 + 1.2 * p.sweat), 0, 12) + p.siadh + 3 * p.drug; // osmolalité (effondrée sous la consigne), volémie ; SIADH paranéoplasique (ADH ectopique) ou médicamenteux (libération hypothalamique stimulée)
+      // ADH hypothalamo-hypophysaire : réglée par l'osmolalité (effondrée sous la consigne) et la volémie ; un médicament inducteur de SIADH stimule sa libération.
+      // ADH ectopique d'une tumeur : autonome, elle s'ajoute dans le sang mais ne passe pas par la posthypophyse ; l'hypo-osmolalité qu'elle provoque éteint la sécrétion hypophysaire.
+      const adhP = p.hypo * clamp(ex((s.na - 140) / (s.na < 140 ? 1.2 : 2)) * (1 + 1.2 * p.sweat), 0, 12) + 3 * p.drug;
+      const adh = adhP + p.siadh; // ADH plasmatique totale
       const a2 = adh + 5 * p.ddavp; // desmopressine : agoniste V2
       const eff = clamp((p.kidney * a2) / (a2 + 0.5) * 1.5 * (1 + 0.15 * p.drug), 0, 1.5); // certains médicaments potentialisent aussi l'effet rénal (complément)
-      // Excès d'eau éliminé quand l'ADH s'effondre ; déficit corrigé par la soif si le patient peut boire.
+      // Lavage médullaire d'une polyurie chronique (complément) : concentration maximale réduite de moitié au plus.
+      const med = 1 - 0.5 * clamp(Math.max(p.poto, 1 - p.hypo, 1 - p.kidney), 0, 1);
+      const tbw = 0.6 * p.poids; // eau totale (complément)
+      // Entrées et sorties d'eau libre (L/h). La restriction et la marche sans eau suppriment les boissons.
       const canDrink = Math.max(0, 1 - p.restrict - p.sweat);
-      const dW = 2.4 * p.drink - 0.45 * p.sweat - (s.W > 0 ? s.W * 0.8 * clamp(1.15 - eff, 0.03, 1.15) : 0) + (s.W < 0 ? -s.W * 0.8 * canDrink : 0);
-      const W = clamp(s.W + dW, -4, 6);
-      // Rétention d'eau libre → baisse de la natrémie ; perte d'eau compensée par la soif, sauf en restriction hydrique.
-      const na = 140 + 3 * p.restrict + (eff >= 1 ? -40 * (eff - 1) * canDrink : (7 + 10 * p.restrict) * (1 - eff)) - 2.6 * s.W;
-      return { adh, eff, na, W };
+      const intake = canDrink * (0.105 + 0.3 * p.drink + 0.3 * p.poto + clamp(0.15 * (s.na - 140), 0, 1.5)) + 0.013;
+      const out = diurOf(s) / 24 + 0.033 + 0.5 * p.sweat;
+      const W = clamp(s.W + (intake - out) * p.hps, -0.12 * tbw, 0.2 * tbw);
+      // ΔNa ≈ Na × Δeau / eau totale : tant que le patient boit, la natrémie du diabète insipide reste à peine augmentée (polycopié p. 64).
+      const na = 140 * tbw / (tbw + s.W);
+      return { adh, adhP, eff, na, W, med };
     },
     labs: [
       { key: 'na', name: 'Natrémie', unit: 'mmol/L', k: 1, lo: 135, hi: 145, min: 110, max: 160, dec: 0 },
-      { key: 'posm', name: 'Osmolalité plasmatique', unit: 'mosmol/kg', range: '285–295 mosmol/kg', lo: 280, hi: 295, min: 240, max: 330, dec: 0, fn: (s) => 2 * s.na + 10 },
-      { key: 'uosm', name: 'Osmolalité urinaire', unit: 'mosmol/kg', range: '100–1200 selon l\'apport', lo: 100, hi: 1200, min: 0, max: 1300, dec: 0, fn: (s) => uosmOf(s.eff, s.na) },
-      { key: 'diur', name: 'Diurèse', unit: 'L/24 h', range: '< 3 L/24 h', lo: 0.5, hi: 3, min: 0, max: 14, dec: 1, fn: (s) => clamp(900 / uosmOf(s.eff, s.na), 0.4, 14) }
+      { key: 'posm', name: 'Osmolalité plasmatique', unit: 'mosmol/kg', range: '285–295 mosmol/kg (complément)', lo: 285, hi: 295, min: 240, max: 330, dec: 0, fn: (s) => 2 * s.na + 10 },
+      { key: 'uosm', name: 'Osmolalité urinaire', unit: 'mosmol/kg', range: '100–1200 selon l\'apport', lo: 100, hi: 1200, min: 0, max: 1300, dec: 0, fn: (s) => uosmOf(s) },
+      { key: 'diur', name: 'Diurèse', unit: 'L/24 h', range: '< 3 L/24 h', lo: 0.5, hi: 3, min: 0, max: 14, dec: 1, fn: (s) => diurOf(s) }
     ],
     params: [
       { key: 'hypo', label: 'Sécrétion d\'ADH', min: 0.01, max: 1.5, step: 0.01, fmt: pct },
@@ -332,31 +353,38 @@
       { key: 'siadh', label: 'ADH ectopique (tumeur)', min: 0, max: 6, step: 0.1, fmt: x100 },
       { key: 'drug', label: 'Médicament inducteur de SIADH', min: 0, max: 2, step: 0.05, fmt: x100 },
       { key: 'drink', label: 'Boissons en excès', min: 0, max: 1, step: 0.05, fmt: pct },
-      { key: 'sweat', label: 'Pertes sudorales sans boire', min: 0, max: 1, step: 0.05, fmt: pct }
+      { key: 'poto', label: 'Polydipsie primaire (chronique)', min: 0, max: 1, step: 0.05, fmt: pct },
+      { key: 'sweat', label: 'Pertes sudorales sans boire', min: 0, max: 1, step: 0.05, fmt: pct },
+      { key: 'poids', label: 'Poids (kg)', min: 40, max: 120, step: 1, fmt: (v) => Math.round(v) + ' kg' }
     ],
     scenarios: [
       { id: 'eu', name: 'Équilibre hydrique normal', note: 'Natrémie stable, urines concentrées selon les besoins.', p: {} },
-      { id: 'deshy', name: 'Déshydratation : marche dans le désert', note: 'Plusieurs heures de sueur sans boire : l\'osmolalité monte, l\'ADH et la soif s\'élèvent, les urines deviennent rares et très concentrées.', p: { sweat: 1 } },
+      { id: 'deshy', name: 'Déshydratation : marche dans le désert', note: 'Plusieurs heures de sueur sans boire : l\'osmolalité monte, l\'ADH et la soif s\'élèvent, les urines deviennent rares et très concentrées.', p: { sweat: 0.72 } },
       { id: 'hyper', name: 'Hyperhydratation : 1,5 L d\'eau bus', note: 'Apport d\'eau abondant : l\'osmolalité baisse, l\'ADH s\'effondre, le rein élimine l\'excès par des urines abondantes et diluées.', p: { drink: 1 } },
-      { id: 'dic', name: 'Diabète insipide central', note: 'Défaut d\'ADH : polyurie > 3 L, urines diluées < 200 mosmol/kg, natrémie un peu haute.', p: { hypo: 0.01 } },
+      { id: 'dic', name: 'Diabète insipide central', note: 'Défaut d\'ADH : polyurie > 3 L/24 h, polydipsie, urines diluées < 200 mosmol/kg ; natrémie conservée tant que le patient boit, un peu augmentée si les sorties dépassent les apports (polycopié p. 64).', p: { hypo: 0.01 } },
+      { id: 'dicp', name: 'Diabète insipide central partiel (complément)', note: 'Sécrétion d\'ADH réduite sans être abolie : polyurie moins marquée, natrémie normale haute ; sous restriction, les urines se concentrent partiellement, puis la desmopressine les concentre encore, sans atteindre le niveau du sujet sain (complément).', p: { hypo: 0.15 } },
+      { id: 'poto', name: 'Polydipsie primaire (complément)', note: 'Apports d\'eau excessifs et chroniques (potomanie) : l\'ADH est freinée, polyurie hypotonique avec une natrémie basse-normale. Le lavage médullaire limite la concentration sous restriction ; réponse partielle à la desmopressine (complément).', p: { poto: 1 } },
       { id: 'din', name: 'Diabète insipide néphrogénique', note: 'Résistance rénale à l\'ADH (complément) : même tableau, ADH élevée.', p: { kidney: 0.05 } },
-      { id: 'siadh', name: 'SIADH paranéoplasique', note: 'Une tumeur sécrète de l\'ADH de façon autonome (syndrome paranéoplasique) : rétention d\'eau sans œdème, hyponatrémie en règle très basse (< 120 mmol/L), urines inappropriément concentrées.', p: { siadh: 5 } },
+      { id: 'siadh', name: 'SIADH paranéoplasique', note: 'Une tumeur sécrète de l\'ADH de façon autonome (syndrome paranéoplasique) : rétention d\'eau sans œdème, hyponatrémie en règle très basse (< 120 mmol/L), urines inappropriément concentrées. L\'hypo-osmolalité éteint la sécrétion hypothalamo-hypophysaire : l\'ADH plasmatique vient uniquement de la tumeur.', p: { siadh: 5 } },
       { id: 'siadhm', name: 'SIADH médicamenteux', note: 'De nombreux médicaments (polycopié p. 64) : ils stimulent surtout la libération hypothalamique d\'ADH ou potentialisent son effet rénal (complément). Même tableau ; l\'éviction du médicament confirme rétrospectivement le diagnostic.', p: { drug: 1.6 } }
     ],
     interpret(s, p, L) {
       const na = L('na'), u = L('uosm'), d = L('diur');
-      if (na < 135 && u > 100) return { tone: 'bad', label: 'Hyponatrémie, urines concentrées', text: 'Profil de SIADH (osmolalité urinaire > 100 mosmol/kg, complément ; natriurèse conservée) en l\'absence d\'insuffisance cardiaque, rénale ou hépatique : restriction hydrique.' };
+      if (na < 135 && u > 100) return { tone: 'bad', label: 'Hyponatrémie, urines concentrées', text: 'Profil de SIADH (osmolalité urinaire > 100 mosmol/kg, complément ; natriurèse conservée) en l\'absence d\'insuffisance cardiaque, rénale ou hépatique (polycopié p. 63), d\'insuffisance corticotrope (p. 60-61) et d\'hypothyroïdie (complément) : restriction hydrique.' };
       if (L('posm') > 295 && u > 600) return { tone: 'warn', label: 'Déshydratation, ADH stimulée', text: 'Hypernatrémie avec urines rares et concentrées : le rein économise l\'eau au maximum ; seule la boisson corrige le déficit.' };
+      if (p.poto > 0.02 && d > 3 && u < 300) return { tone: 'warn', label: 'Polyurie hypotonique, natrémie basse-normale', text: 'Apports d\'eau excessifs et chroniques : évoquer une polydipsie primaire (complément). L\'épreuve de restriction montre une concentration partielle des urines ; la copeptine aide à la distinguer d\'un diabète insipide partiel (complément).' };
       if (d > 2.5 && u < 300 && na < 141) return { tone: 'warn', label: 'Diurèse aqueuse', text: 'Urines abondantes et diluées avec une natrémie normale basse : réponse adaptée à un apport d\'eau (à distinguer d\'une potomanie si elle est permanente).' };
       if (d > 3 && u < 200) return { tone: 'bad', label: 'Polyurie hypotonique', text: 'Diabète insipide : confirmer par une épreuve de restriction hydrique, après IRM.' };
       return { tone: 'good', label: 'Équilibre hydrique normal', text: 'Natrémie normale, diurèse normale.' };
     },
     hooks: {
-      links: { 'hypo>post>adh': 'adh', 'post>kidney>adh': 'adh', 'post>vessel>adh': 'adh', 'kidney>osm>water': 'eff', 'kidney>urine>water': 'urineRate', 'thirst>osm>water': 'thirstRate' },
-      rates: { siadhRate: (s, p) => p.siadh / 2, ddavpRate: (s, p) => 2 * p.ddavp, urineRate: (s) => 900 / uosmOf(s.eff, s.na) / 1.5, thirstRate: (s, p) => Math.max(0, 1 - p.restrict - p.sweat) * clamp(0.6 + (s.na - 140) / 2, 0.15, 3) + 3 * p.drink },
+      links: { 'hypo>post>adh': 'adhP', 'post>kidney>adh': 'adhP', 'post>vessel>adh': 'adhP', 'kidney>osm>water': 'eff', 'kidney>urine>water': 'urineRate', 'thirst>osm>water': 'thirstRate' },
+      rates: { siadhRate: (s, p) => p.siadh / 2, ddavpRate: (s, p) => 2 * p.ddavp, urineRate: (s) => ADH_SOL / uosmOf(s) / 1.5, thirstRate: (s, p) => Math.max(0, 1 - p.restrict - p.sweat) * (clamp(0.6 + (s.na - 140) / 2, 0.15, 3) + 3 * clamp(p.drink, 0, 1) + 2 * p.poto) },
       liveNode: {
+        hypo: (s) => (s.adhP < 0.05 ? 'ADH hypophysaire éteinte (freinée par l\'hypo-osmolalité)' : 'ADH hypophysaire × ' + f1(s.adhP)),
+        post: (s) => (s.adhP < 0.05 ? 'aucune libération d\'ADH' : 'libération d\'ADH × ' + f1(s.adhP)),
         osm: (s) => Math.round(2 * s.na + 10) + ' mosmol/kg · Na ' + Math.round(s.na),
-        urine: (s) => f1(clamp(900 / uosmOf(s.eff, s.na), 0.4, 14)) + ' L/24 h · ' + Math.round(uosmOf(s.eff, s.na)) + ' mosmol/kg'
+        urine: (s) => f1(diurOf(s)) + ' L/24 h · ' + Math.round(uosmOf(s)) + ' mosmol/kg'
       },
       lesions: [
         { node: 'post', kind: 'mass', tone: 'grey', dx: -40, dy: -110, size: () => 0.75, show: (p) => p.hypo < 0.5, label: 'lésion de la tige', lx: 120, ly: 0, title: 'Lésion hypothalamo-tigellaire', text: 'Le polycopié cite : hypophysite, craniopharyngiome, gliome du chiasma, méningiome, pathologie infiltrative, métastase. Un adénome hypophysaire n\'en donne pas, sauf apoplexie ou chirurgie.' },
@@ -365,13 +393,13 @@
       extraNodes: [
         { id: 'restr', x: 700, y: 570, label: 'Restriction hydrique', w: 250, color: 'p-sky', show: (p) => p.restrict > 0.02, info: 'Arrêt des boissons en milieu hospitalier : l\'osmolalité monte et l\'ADH doit concentrer les urines.' },
         { id: 'ddavp', x: 1090, y: 560, label: 'Desmopressine', w: 220, color: 'p-sky', show: (p) => p.ddavp > 0.02, info: 'Agoniste V2 : concentre les urines si le rein répond (diabète insipide central), pas dans le diabète insipide néphrogénique.' },
-        { id: 'ectoadh', x: 960, y: 588, label: 'Tumeur : ADH ectopique', w: 290, color: 'bad', show: (p) => p.siadh > 0.02, info: 'SIADH paranéoplasique : la tumeur sécrète elle-même l\'ADH, sans passer par l\'hypothalamus ni la posthypophyse.' },
+        { id: 'ectoadh', x: 960, y: 588, label: 'Tumeur : ADH ectopique', w: 290, color: 'bad', show: (p) => p.siadh > 0.02, info: 'SIADH paranéoplasique : la tumeur sécrète elle-même l\'ADH, sans passer par l\'hypothalamus ni la posthypophyse. L\'hypo-osmolalité freine l\'ADH hypophysaire, qui devient quasi nulle.' },
         { id: 'drugadh', x: 960, y: 588, label: 'Médicament', w: 210, color: 'bad', show: (p) => p.drug > 0.02, info: 'De nombreux médicaments peuvent entraîner un SIADH (polycopié p. 64). Mécanismes (complément) : stimulation de la libération hypothalamique d\'ADH, potentialisation de son effet sur le rein.' },
         { id: 'sun', x: 1000, y: 140, label: 'Chaleur, sueur, pas d\'eau', w: 300, color: 'p-amber', show: (p) => p.sweat > 0.02, info: 'Marche prolongée au soleil sans boire : perte d\'eau par la sueur et la respiration, que la soif ne peut compenser.' },
-        { id: 'glass', x: 1000, y: 140, label: 'Boissons', w: 170, color: 'p-sky', show: (p) => p.drink > 0.02, info: 'Apport rapide d\'eau libre (par exemple 1,5 L en 30 minutes).' }
+        { id: 'glass', x: 1000, y: 140, label: 'Boissons', w: 170, color: 'p-sky', show: (p) => p.drink > 0.02 || p.poto > 0.02, info: 'Apport rapide d\'eau libre (par exemple 1,5 L en 30 minutes), ou apports excessifs et chroniques de la polydipsie primaire (complément).' }
       ],
       extraLinks: [{ from: 'ectoadh', to: 'kidney', kind: 'stim', mol: 'adh', v: 'siadhRate', label: '' }, { from: 'drugadh', to: 'hypo', kind: 'stim', color: 'bad', label: 'libération ↑' }, { from: 'drugadh', to: 'kidney', kind: 'stim', color: 'bad', label: 'potentialisation' }, { from: 'restr', to: 'osm', kind: 'stim', color: 'p-sky', label: '' }, { from: 'ddavp', to: 'kidney', kind: 'stim', mol: 'adh', v: 'ddavpRate', label: '' }, { from: 'sun', to: 'osm', kind: 'stim', color: 'p-amber', label: 'perte d\'eau' }, { from: 'glass', to: 'osm', kind: 'inhib', mol: 'water', v: 'thirstRate', label: '' }],
-      levels: [{ label: 'ADH', mol: 'adh', v: 'adh', max: 6 }, { label: 'Ocytocine', mol: 'oxy', fn: () => 0.6, max: 2 }]
+      levels: [{ label: 'ADH plasmatique', mol: 'adh', v: 'adh', max: 6 }, { label: 'ADH hypophysaire', mol: 'adh', v: 'adhP', max: 6 }, { label: 'Ocytocine', mol: 'oxy', fn: () => 0.6, max: 2 }]
     }
   };
 
@@ -404,17 +432,18 @@
     scenarios: [
       { id: 'eu', name: 'Repos', note: 'Faible sécrétion basale.', p: {} },
       { id: 'stress', name: 'Stress aigu', note: 'Réaction de combat ou de fuite : FC et PA ↑, glycémie ↑ ; métanéphrines au plus discrètement augmentées.', p: { sym: 3 } },
-      { id: 'pheoA', name: 'Phéochromocytome à adrénaline', note: 'Triade de Ménard (céphalées, sueurs, palpitations), HTA généralement permanente avec parfois des crises paroxystiques ; profil adrénergique (complément) : tachycardie, hyperglycémie, métanéphrine très élevée.', p: { pheoA: 2.6 } },
+      { id: 'pheoA', name: 'Phéochromocytome à adrénaline', note: 'Triade de Ménard (céphalées, sueurs, palpitations), HTA généralement permanente avec parfois des crises paroxystiques ; profil adrénergique pur (complément) : tachycardie, hyperglycémie, métanéphrine très élevée, normétanéphrine normale (la tumeur ne fabrique pas de noradrénaline sécrétée).', p: { pheoA: 2.6 } },
       { id: 'pheoN', name: 'Phéochromocytome à noradrénaline', note: 'Profil noradrénergique : HTA plus permanente, moins de tachycardie ; normétanéphrine très élevée. Profil aussi des paragangliomes (complément).', p: { pheoN: 2.6 } },
+      { id: 'pheoM', name: 'Phéochromocytome mixte (adrénaline et noradrénaline)', note: 'Les deux catécholamines sont sécrétées (complément) : métanéphrine et normétanéphrine toutes deux élevées ; tachycardie, HTA et hyperglycémie intermédiaires entre les deux profils purs.', p: { pheoA: 1.8, pheoN: 1.8 } },
       { id: 'pheoD', name: 'Tumeur à dopamine', note: 'Rare, surtout paragangliome (souvent SDHB, risque de malignité) : peu ou pas d\'HTA ; 3-méthoxytyramine élevée (complément).', p: { pheoD: 2.6 } }
     ],
     interpret(s, p, L) {
       const mn = L('mn'), nmn = L('nmn'), mt = L('mt'), top = Math.max(mn, nmn, mt);
       if (top >= 3) {
-        const kind = mt === top ? 'dopaminergique (3-méthoxytyramine) : penser à un paragangliome, rechercher une mutation SDHB' : mn === top ? 'adrénergique (métanéphrine) : origine surrénalienne quasi certaine' : 'noradrénergique (normétanéphrine) : surrénale ou paragangliome';
-        return { tone: 'bad', label: 'Métanéphrines ≥ 3 × LSN', text: `Évoquer un phéochromocytome ou un paragangliome : HTA généralement permanente, parfois paroxystique ; céphalées, sueurs, palpitations. Profil ${kind} (seuil de 3 × LSN indicatif ; complément). Imagerie ensuite (scanner, IRM, imagerie fonctionnelle ; complément).` };
+        const kind = mn >= 3 && nmn >= 3 ? 'mixte (métanéphrine et normétanéphrine toutes deux élevées) : surrénale le plus souvent' : mt === top ? 'dopaminergique (3-méthoxytyramine) : penser à un paragangliome, rechercher une mutation SDHB' : mn === top ? 'adrénergique (métanéphrine) : origine surrénalienne quasi certaine' : 'noradrénergique (normétanéphrine) : surrénale ou paragangliome';
+        return { tone: 'bad', label: 'Métanéphrines ≥ 3 × LSN', text: `Évoquer un phéochromocytome ou un paragangliome : HTA généralement permanente, parfois paroxystique ; céphalées, sueurs, palpitations. Profil ${kind} (complément ; seuil de 3 × LSN indicatif). Imagerie ensuite : scanner ou IRM, puis imagerie fonctionnelle (polycopié p. 79).` };
       }
-      if (top > 1) return { tone: 'warn', label: 'Élévation modérée des métanéphrines', text: 'Élévation discrète (< 3 × LSN) : faux positif fréquent (stress, médicaments, prélèvement non couché). Contrôler au repos avant de conclure.' };
+      if (top > 1) return { tone: 'warn', label: 'Élévation modérée des métanéphrines', text: 'Élévation discrète (< 3 × LSN) : faux positifs (stress, affection aiguë grave, médicaments, alimentation ; polycopié p. 79 ; prélèvement en position assise : complément). Contrôler au repos avant de conclure.' };
       if (L('fc') > 100) return { tone: 'warn', label: 'Activation adrénergique', text: 'Tachycardie et HTA réactionnelles au stress, sans excès de métanéphrines.' };
       return { tone: 'good', label: 'Normal', text: 'Pas d\'excès de catécholamines.' };
     },
@@ -453,7 +482,7 @@
       { key: 'lh', name: 'LH', unit: 'UI/L', range: '2–12 UI/L hors pic ovulatoire, pic jusqu\'à 70–80 (complément)', k: 14, lo: 2, hi: 12, min: 0, max: 80, dec: 1 },
       { key: 'e2', name: 'Estradiol', unit: 'pg/mL', range: '25–400 pg/mL selon la phase (complément)', k: 140, lo: 25, hi: 400, min: 0, max: 400, dec: 0 },
       { key: 'prog', name: 'Progestérone', unit: 'ng/mL', range: '> 5 ng/mL en phase lutéale (complément)', k: 10, lo: 0, hi: 25, min: 0, max: 20, dec: 1 },
-      { key: 'testo', name: 'Testostérone totale', unit: '× N', range: 'valeur relative (complément : normes selon la technique)', lo: 0, hi: 1.5, min: 0, max: 6, dec: 1, fn: (s, p) => (0.3 + 0.7 * Math.min(1, p.ovary)) * (1 + 1.6 * p.sopk) },
+      { key: 'testo', name: 'Testostérone totale', unit: '× N', range: 'valeur relative (complément : normes selon la technique)', lo: 0, hi: 1.5, min: 0, max: 6, dec: 1, fn: (s, p) => (0.65 + 0.35 * Math.min(1, p.ovary)) * (1 + 0.8 * p.sopk) }, // ménopause ≈ 0,65 × N : le stroma ovarien continue de produire des androgènes (complément) ; SOPK ≈ 1,8 × N, élévation modérée
       { key: 'prl', name: 'Prolactine', unit: 'ng/mL', range: '< 25 ng/mL (complément)', lo: 3, hi: 25, min: 1, max: 1000, log: true, dec: 0, fn: (s, p) => 12 * (1 + 4 * p.prl) }
     ],
     params: [
@@ -472,10 +501,12 @@
     interpret(s, p, L, T) {
       const f = L('fsh'), e = L('e2'), prl = L('prl');
       // SOPK : 2 critères de Rotterdam sur 3, après exclusion des autres diagnostics (polycopié, partie 2, p. 15).
-      if (p.sopk >= 0.5 && prl <= 25 && p.ovary > 0.3) return { tone: 'bad', label: 'Anovulation avec hyperandrogénie : SOPK ?', text: 'Critères de Rotterdam (2 sur 3) : troubles du cycle (spanioménorrhée, aménorrhée, infertilité) ; hyperandrogénie clinique ou biologique ; ovaires > 10 mL avec au moins 20 follicules antraux de 2 à 9 mm par ovaire à l\'échographie (« pré-antraux » dans le polycopié ; critères actualisés, complément). Diagnostic d\'exclusion : éliminer un bloc en 21-hydroxylase non classique (17-OHP), un syndrome de Cushing, une tumeur virilisante, une hyperprolactinémie. Rechercher l\'insulinorésistance (obésité, acanthosis nigricans).' };
+      if (p.sopk >= 0.5 && prl <= 25 && p.ovary > 0.3) return { tone: 'bad', label: 'Anovulation avec hyperandrogénie : SOPK ?', text: 'Critères de Rotterdam (2 sur 3) : troubles du cycle (spanioménorrhée, aménorrhée, infertilité) ; hyperandrogénie clinique ou biologique ; ovaires ≥ 10 mL ou au moins 20 follicules antraux de 2 à 9 mm dans un ovaire à l\'échographie (polycopié, partie 2, p. 15 : volume > 10 mL « avec » plus de 20 follicules « pré-antraux » ; critères actualisés, complément ; l\'AMH peut remplacer l\'échographie chez l\'adulte, Teede 2023). Diagnostic d\'exclusion : éliminer un bloc en 21-hydroxylase non classique (17-OHP), un syndrome de Cushing, une tumeur virilisante, une hyperprolactinémie. Rechercher l\'insulinorésistance (obésité, acanthosis nigricans).' };
       // « Ovulatoire » seulement si le cycle simulé comporte un pic de LH et une phase lutéale (progestérone > 5 ng/mL vers J21).
       if (s.cyc > 0.5) {
-        if (T && T.d < 6 && f > 12) return { tone: 'warn', label: 'Cycle ovulatoire, FSH élevée', text: 'Pic de LH et phase lutéale conservés, mais FSH élevée en début de phase folliculaire : baisse de la réserve ovarienne (seuil indicatif ; complément).' };
+        if (T && T.d < 6 && f > 10) return { tone: 'warn', label: 'Cycle ovulatoire, FSH élevée', text: 'Pic de LH et phase lutéale conservés, mais FSH > 10 UI/L en début de phase folliculaire (dosage à J3) : baisse de la réserve ovarienne (seuil indicatif ; complément).' };
+        // Prolactine à peine élevée avec un cycle conservé : contrôler avant de conclure (polycopié, partie 1, p. 56).
+        if (prl > 25) return { tone: 'warn', label: 'Cycle ovulatoire, prolactine un peu élevée', text: 'Cycle conservé avec une prolactine légèrement élevée : contrôler le dosage, éliminer une macroprolactinémie et les causes connues (grossesse, médicaments, hypothyroïdie profonde, insuffisance rénale ; polycopié, partie 1, p. 56).' };
         return { tone: 'good', label: 'Cycle ovulatoire', text: 'Pic de LH à mi-cycle puis progestérone > 5 ng/mL en phase lutéale : rétrocontrôles négatif puis positif de l\'estradiol conservés.' };
       }
       // Pas de pic de LH ni de phase lutéale : anovulation.
@@ -491,8 +522,8 @@
       scale: { ovary: (p) => 0.7 + 0.3 * Math.min(1, p.ovary), uterus: (p, s) => 0.8 + 0.2 * Math.min(1, s.e2) },
       lesions: [
         { node: 'ovary', kind: 'label', show: (p) => p.ovary < 0.3, label: 'ovaire sans follicules', ly: -84, title: 'Épuisement folliculaire', text: 'Ménopause ou insuffisance ovarienne précoce (avant 40 ans) : plus de follicules, donc plus d\'estradiol ni d\'inhibine.' },
-        { node: 'hypo', kind: 'label', show: (p) => p.hypo < 0.5, label: 'GnRH freinée', ly: -76, title: 'Aménorrhée hypothalamique', text: 'Baisse de la pulsatilité de la GnRH : insuffisance gonadotrope fonctionnelle. Causes (complément) : anorexie mentale, activité physique intense, stress (baisse de la leptine).' },
-        { node: 'ovary', kind: 'label', show: (p) => p.sopk >= 0.5, label: 'ovaires multifolliculaires', ly: -96, title: 'Aspect échographique du SOPK', text: 'Ovaires augmentés de volume (> 10 mL) avec au moins 20 follicules par ovaire (critère de Rotterdam). Le polycopié (partie 2, p. 15) écrit « pré-antraux » ; les critères actualisés (Teede 2018, 2023) parlent de follicules antraux de 2 à 9 mm (complément). La thèque produit les androgènes sous LH.' },
+        { node: 'hypo', kind: 'label', show: (p) => p.hypo < 0.5, label: 'GnRH freinée', ly: -76, title: 'Aménorrhée hypothalamique', text: 'Baisse de la pulsatilité de la GnRH : insuffisance gonadotrope fonctionnelle. Causes (complément) : anorexie mentale et activité physique intense (déficit énergétique, baisse de la leptine), stress.' },
+        { node: 'ovary', kind: 'label', show: (p) => p.sopk >= 0.5, label: 'ovaires multifolliculaires', ly: -96, title: 'Aspect échographique du SOPK', text: 'Ovaires augmentés de volume (≥ 10 mL) ou au moins 20 follicules par ovaire (critère de Rotterdam actualisé). Le polycopié (partie 2, p. 15) écrit « > 10 mL avec plus de 20 follicules pré-antraux » ; les critères actualisés (Teede 2018, 2023) retiennent l\'un ou l\'autre, avec des follicules antraux de 2 à 9 mm (complément). La thèque produit les androgènes sous LH.' },
         { node: 'pit', kind: 'nodule', tone: 'magenta', dx: 30, dy: -26, show: (p) => p.prl > 0.3, label: 'prolactinome', title: 'Adénome à prolactine', text: 'La prolactine en excès inhibe la pulsatilité de la GnRH.' }
       ],
       extraNodes: [
@@ -511,14 +542,19 @@
   /* ===================== Axe gonadotrope masculin ===================== */
   SIMS.gonadoM = {
     title: 'Bilan gonadotrope simulé (homme)',
-    defaults: { hypo: 1, leydig: 1, sertoli: 1, exoT: 0 },
+    defaults: { hypo: 1, leydig: 1, sertoli: 1, exoT: 0, gnrh: 0, hcg: 0 },
     init: { lh: 1, fsh: 1, t: 1, inh: 1 },
+    tau: { t: 3 }, // la testostérone suit la LH avec retard : le rétrocontrôle ne masque pas le pic de LH d'un test à la GnRH
     targets(p, s) {
       const fbT = s.t + p.exoT;
-      const lh = clamp(p.hypo * ex(-1.5 * (fbT - 1)), 0, 12);
+      // Tests dynamiques : GnRH injectée (gnrh) et hCG (hcg), nulles hors test. Après une longue privation en GnRH,
+      // les cellules gonadotropes répondent peu à une injection isolée (complément) : réponse pondérée par l'activité habituelle.
+      const prime = pw(Math.min(1, p.hypo), 1.5);
+      // La GnRH injectée agit directement sur l'hypophyse, moins freinée par la testostérone que l'hypothalamus (complément).
+      const lh = clamp(p.hypo * ex(-1.5 * (fbT - 1)) + (p.gnrh || 0) * prime * ex(-0.5 * (fbT - 1)), 0, 12);
       // La levée des rétrocontrôles est plafonnée : sans GnRH, la FSH reste basse (déficit gonadotrope).
-      const fsh = clamp(p.hypo * Math.min(3, ex(-3 * (fbT - 1))) * Math.min(2, ex(-1.2 * (s.inh - 1))), 0, 14);
-      const t = clamp(p.leydig * pw(lh, 0.7), 0, 5); // testostérone endogène (intratesticulaire, dépend de la LH)
+      const fsh = clamp((p.hypo + 0.4 * (p.gnrh || 0) * prime) * Math.min(3, ex(-3 * (fbT - 1))) * Math.min(2, ex(-1.2 * (s.inh - 1))), 0, 14);
+      const t = clamp(p.leydig * pw(lh + (p.hcg || 0), 0.7), 0, 5); // testostérone endogène (intratesticulaire, dépend de la LH, ou de l'hCG pendant le test)
       // L'inhibine B dépend de la FSH et de la testostérone intratesticulaire, pas de la testostérone exogène (complément).
       const inh = clamp(p.sertoli * fsh * pw(Math.min(t, 1.5), 0.3), 0, 3);
       return { lh, fsh, t, inh };
@@ -545,7 +581,7 @@
       const t = L('tt'), lh = L('lh'), fsh = L('fsh'), inh = L('inh');
       if (p.exoT > 0.05) return { tone: 'warn', label: 'Axe freiné par les androgènes', text: 'LH, FSH et inhibine B effondrées malgré une testostérone normale ou haute : la testostérone intratesticulaire chute et la spermatogenèse s\'arrête (complément).' };
       if (t < 10 && (lh > 9 || fsh > 12)) return { tone: 'bad', label: 'Hypogonadisme hypergonadotrope', text: 'Testostérone basse avec gonadotrophines élevées : atteinte testiculaire.' };
-      if (t < 10) return { tone: 'bad', label: 'Hypogonadisme hypogonadotrope', text: 'Testostérone basse avec gonadotrophines basses ou inadaptées : atteinte hypothalamo-hypophysaire.' };
+      if (t < 10) return { tone: 'bad', label: 'Hypogonadisme hypogonadotrope', text: 'Testostérone basse avec gonadotrophines basses ou inadaptées : atteinte hypothalamo-hypophysaire. Doser la prolactine : une hyperprolactinémie freine la GnRH (polycopié, partie 1, p. 62) ; contrôler la testostérone sur un second prélèvement matinal (complément).' };
       if (inh < 80) return { tone: 'warn', label: 'Atteinte tubulaire isolée', text: 'Inhibine B basse avec une testostérone normale (FSH ' + (fsh > 12 ? 'élevée' : 'normale haute') + ') : atteinte de la spermatogenèse (cellules de Sertoli) ; spermogramme.' };
       return { tone: 'good', label: 'Axe gonadotrope normal', text: 'Testostérone et gonadotrophines dans les normes.' };
     },
@@ -556,7 +592,7 @@
       lesions: [
         { node: 'testis', kind: 'label', show: (p) => p.sertoli < 0.5, label: 'petits testicules fermes', ly: -84, title: 'Syndrome de Klinefelter', text: 'Caryotype 47,XXY : atrophie testiculaire (volume < 4 mL), azoospermie ; hyalinisation des tubes séminifères (complément).' },
         { node: 'testis', kind: 'label', show: (p) => p.exoT > 0.05, label: 'atrophie testiculaire', ly: -84, title: 'Atrophie sous androgènes', text: 'Sans LH ni FSH, les testicules s\'atrophient et la spermatogenèse s\'arrête.' },
-        { node: 'hypo', kind: 'label', show: (p) => p.hypo < 0.5, label: 'défaut de GnRH (± anosmie)', ly: -76, title: 'Syndrome de Kallmann', text: 'Défaut de migration des neurones à GnRH, souvent associé à une anosmie (complément).' }
+        { node: 'hypo', kind: 'label', show: (p) => p.hypo < 0.5, label: 'défaut de GnRH (± anosmie)', ly: -76, title: 'Syndrome de Kallmann', text: 'Défaut de migration des neurones à GnRH (et olfactifs) : déficit gonadotrope congénital avec anosmie ou hyposmie ; sans trouble de l\'odorat, on parle de forme normosmique (complément).' }
       ],
       extraNodes: [{ id: 'exo', x: 920, y: 760, label: 'Testostérone exogène', w: 260, color: 'p-blue', show: (p) => p.exoT > 0.02, info: 'Les androgènes exogènes freinent LH et FSH.' }],
       extraLinks: [{ from: 'exo', to: 'pit', kind: 'inhib', mol: 'testo', v: 'exoRate', label: '' }],
@@ -566,6 +602,9 @@
   };
 
   /* ===================== Phosphocalcique ===================== */
+  // Calciurie : charge filtrée (calcémie) moins la réabsorption stimulée par la PTH (ou la PTHrP) ; le CaSR rénal peu sensible
+  // de l'hypercalcémie hypocalciurique familiale fait réabsorber davantage (complément).
+  const caU = (s, p) => clamp((4.5 * ex(3 * (s.ca - 2.4)) * pw(p.casr, 1.2)) / (1 + 0.25 * ln(Math.max(s.pth + 1.5 * p.pthrp, 0.2))), 0.3, 15);
   SIMS.phospho = {
     title: 'Bilan phosphocalcique simulé',
     defaults: { para: 1, autoPara: 0, vitD: 1, pthrp: 0, casr: 1 },
@@ -588,14 +627,17 @@
       // La PTHrP est phosphaturique comme la PTH (complément) : phosphatémie basse dans l'hypercalcémie humorale.
       // Calciurie : charge filtrée (calcémie) moins la réabsorption stimulée par la PTH (ou la PTHrP) ; le CaSR rénal peu sensible
       // de l'hypercalcémie hypocalciurique familiale fait réabsorber davantage (complément).
-      { key: 'cau', name: 'Calciurie', unit: 'mmol/24 h', range: '2,5–7,5 mmol/24 h (complément)', lo: 2.5, hi: 7.5, min: 0, max: 16, dec: 1, fn: (s, p) => clamp((4.5 * ex(3 * (s.ca - 2.4)) * pw(p.casr, 1.2)) / (1 + 0.25 * ln(Math.max(s.pth + 1.5 * p.pthrp, 0.2))), 0.3, 15) },
+      { key: 'cau', name: 'Calciurie', unit: 'mmol/24 h', range: '2,5–7,5 mmol/24 h (complément)', lo: 2.5, hi: 7.5, min: 0, max: 16, dec: 1, fn: (s, p) => caU(s, p) },
+      // Rapport de clairance calcium/créatinine = (CaU × créatininémie) / (calcémie × créatininurie), soit la fraction d'excrétion
+      // du calcium ; créatinine supposée normale dans le modèle (clairance ≈ 150 L/24 h, soit ≈ 100 mL/min ; complément).
+      { key: 'fec', name: 'Rapport de clairance Ca / créatinine', unit: '', range: '< 0,01 : en faveur d\'une HHF (complément ; recommandations SFE ; 5e atelier international sur l\'HPT primaire, 2022) ; créatinine supposée normale', lo: 0.01, hi: 0.05, min: 0, max: 0.06, dec: 3, fn: (s, p) => caU(s, p) / s.ca / 150 },
       { key: 'phos', name: 'Phosphatémie', unit: 'mmol/L', range: '0,8–1,45 mmol/L (complément)', lo: 0.8, hi: 1.45, min: 0.3, max: 2.4, dec: 2, fn: (s, p) => clamp(1.1 - 0.3 * ln(Math.max(s.pth + 1.5 * p.pthrp, 0.05)) + 0.12 * (s.d - 1), 0.4, 2.3) }
     ],
     params: [
       { key: 'autoPara', label: 'Adénome parathyroïdien', min: 0, max: 6, step: 0.1, fmt: x100 },
       { key: 'para', label: 'Tissu parathyroïdien fonctionnel', min: 0.03, max: 1.5, step: 0.01, fmt: pct },
       { key: 'vitD', label: 'Statut en vitamine D', min: 0.05, max: 1.5, step: 0.01, fmt: pct },
-      { key: 'pthrp', label: 'PTHrP tumorale', min: 0, max: 4, step: 0.1, fmt: x100 },
+      { key: 'pthrp', label: 'PTHrP tumorale', min: 0, max: 20, step: 0.1, fmt: x100 },
       { key: 'casr', label: 'Sensibilité du CaSR', min: 0.2, max: 1.2, step: 0.01, fmt: pct }
     ],
     scenarios: [
@@ -603,12 +645,13 @@
       { id: 'hpt', name: 'Hyperparathyroïdie primaire', note: 'Adénome : hypercalcémie avec PTH élevée ou inadaptée, phosphatémie basse ou normale basse.', p: { autoPara: 2.5 } },
       { id: 'hypo', name: 'Hypoparathyroïdie (post-chirurgicale)', note: 'Hypocalcémie avec PTH basse ou inadaptée, phosphatémie haute.', p: { para: 0.05 } },
       { id: 'vitd', name: 'Carence en vitamine D', note: 'Hyperparathyroïdie secondaire (complément) : calcémie basse ou normale, PTH élevée.', p: { vitD: 0.1 } },
-      { id: 'pthrp', name: 'Hypercalcémie tumorale', note: 'PTHrP (complément) : elle agit comme la PTH sur l\'os et sur le rein (réabsorption du calcium, fuite de phosphate) ; hypercalcémie avec PTH effondrée, phosphatémie basse.', p: { pthrp: 4 } },
-      { id: 'hhf', name: 'Hypercalcémie hypocalciurique familiale', note: 'Complément (absente du polycopié) : CaSR peu sensible (mutation inactivatrice) ; hypercalcémie modérée, PTH normale ou un peu élevée, calciurie basse. Bénigne : à distinguer de l\'hyperparathyroïdie primaire, car elle ne s\'opère pas.', p: { casr: 0.3 } }
+      { id: 'pthrp', name: 'Hypercalcémie tumorale', note: 'PTHrP (complément) : elle agit comme la PTH sur l\'os et sur le rein (réabsorption du calcium, fuite de phosphate) ; hypercalcémie franche (≈ 3 mmol/L) avec PTH effondrée, phosphatémie basse.', p: { pthrp: 16 } },
+      { id: 'hhf', name: 'Hypercalcémie hypocalciurique familiale', note: 'Complément (absente du polycopié) : CaSR peu sensible (mutation inactivatrice) ; hypercalcémie modérée, PTH normale ou un peu élevée, calciurie basse avec un rapport de clairance calcium/créatinine < 0,01. Bénigne : à distinguer de l\'hyperparathyroïdie primaire, car elle ne s\'opère pas.', p: { casr: 0.3 } }
     ],
     interpret(s, p, L) {
       const ca = L('ca'), pth = L('pth');
-      if (ca > 2.6 && L('cau') < 2.5) return { tone: 'warn', label: 'Hypercalcémie avec calciurie basse', text: 'PTH normale ou peu élevée et calciurie basse : évoquer une hypercalcémie hypocalciurique familiale (complément), bénigne, qui ne s\'opère pas.' };
+      // HHF : on se fonde sur le rapport de clairance Ca/créatinine (fraction d'excrétion du calcium), pas sur la calciurie des 24 h seule.
+      if (ca > 2.6 && L('fec') < 0.01) return { tone: 'warn', label: 'Hypercalcémie avec fraction d\'excrétion du calcium basse', text: 'PTH normale ou peu élevée et rapport de clairance calcium/créatinine < 0,01 : évoquer une hypercalcémie hypocalciurique familiale (complément ; recommandations recommandations SFE ; 5e atelier international sur l\'HPT primaire, 2022), bénigne, qui ne s\'opère pas. Une carence en vitamine D abaisse aussi ce rapport : la corriger avant de conclure ; confirmation par l\'étude génétique du CaSR (complément).' };
       // Face à une hypercalcémie, une PTH « normale » (20–65 pg/mL) est déjà inadaptée (polycopié p. 42) ; seule une PTH freinée oriente ailleurs.
       if (ca > 2.6 && pth >= 20) return { tone: 'bad', label: 'Hypercalcémie PTH-dépendante', text: 'PTH élevée, ou normale donc inadaptée face à l\'hypercalcémie : hyperparathyroïdie primaire. Calciurie élevée : la charge filtrée de calcium dépasse les capacités de réabsorption (polycopié p. 40–41).' };
       if (ca > 2.6) return { tone: 'bad', label: 'Hypercalcémie non parathyroïdienne', text: 'PTH freinée (< 20 pg/mL, seuil indicatif ; complément) : rechercher une cause tumorale (PTHrP, métastases osseuses) ou une intoxication en vitamine D (complément).' };
@@ -639,7 +682,7 @@
     init: { renin: 1, aldo: 1, k: 4.2, vol: 1 },
     tau: { k: 2, vol: 2 },
     targets(p, s) {
-      const renin = clamp((1 + 3 * p.sten) * ex(-8 * (s.vol - 1) - 2.2 * p.salt), 0.02, 20); // la charge sodée freine la rénine (macula densa, volémie)
+      const renin = clamp((1 + 3 * p.sten) * ex(-10 * (s.vol - 1) - 2.2 * p.salt), 0.02, 20); // la charge sodée freine la rénine (macula densa, volémie)
       const aldo = clamp(p.adr * pw(renin, 0.8) * ex(1.2 * (s.k - 4.2)), 0, 20) + p.conn;
       const vol = 1 + 0.1 * ln(Math.max(aldo, 0.05)) + 0.04 * p.salt; // charge sodée : expansion volémique
       const k = clamp(4.2 - 0.55 * ln(Math.max(aldo, 0.05)), 2.2, 7);
@@ -648,7 +691,7 @@
     labs: [
       { key: 'renin', name: 'Rénine active', unit: 'mUI/L', range: '5–40 mUI/L (complément ; variable selon le laboratoire et la position)', k: 15, lo: 5, hi: 40, min: 0.2, max: 400, log: true, dec: 1 },
       { key: 'aldo', name: 'Aldostérone', unit: 'pmol/L', range: '100–550 pmol/L (complément ; variable selon le laboratoire et la position)', k: 300, lo: 100, hi: 550, min: 10, max: 4000, log: true, dec: 0 },
-      { key: 'k', name: 'Kaliémie', unit: 'mmol/L', k: 1, lo: 3.5, hi: 5, min: 2, max: 7, dec: 1 },
+      { key: 'k', name: 'Kaliémie', unit: 'mmol/L', range: '3,5–5,0 mmol/L', k: 1, lo: 3.5, hi: 5, min: 2, max: 7, dec: 1 },
       { key: 'na', name: 'Natrémie', unit: 'mmol/L', range: '135–145 mmol/L', lo: 135, hi: 145, min: 120, max: 150, dec: 0, fn: (s) => clamp(140 + 3 * ln(Math.max(s.aldo, 0.05)), 122, 148) },
       { key: 'pas', name: 'PA systolique', unit: 'mmHg', range: '100–140 mmHg (indicatif, complément)', lo: 100, hi: 140, min: 70, max: 220, dec: 0, fn: (s, p) => clamp(120 + 250 * (s.vol - 1) + 18 * p.sten, 75, 210) }
     ],
@@ -693,11 +736,14 @@
   SIMS.glyc = {
     title: 'Bilan glucidique simulé',
     defaults: { beta: 1, sens: 1, tumor: 0, exo: 0, glucResp: 1, fast: 0, ogtt: 0, long: 0 },
-    init: { g: 0.9, ins: 1, insE: 1, glu: 1, ket: 0.1 },
-    tau: { g: 0.8, ins: 0.4, insE: 0.4, glu: 0.5, ket: 2 },
+    init: { g: 0.9, ins: 1, insE: 1, glu: 1, ket: 0.1, tl: 0 },
+    tau: { g: 0.8, ins: 0.4, insE: 0.4, glu: 0.5, ket: 2, tl: 12 },
     targets(p, s, T) {
       const food = meal(T) * (1 - p.fast) + 4 * p.ogtt; // repas, jeûne, charge orale de 75 g
-      const insE = p.beta * clamp((s.g - 0.65) * 4, 0, 8) + p.tumor; // insuline pancréatique (îlots, insulinome)
+      // Insulinome : sécrétion autonome, amplifiée avec retard par une charge en glucose et prolongée après elle,
+      // d'où une hypoglycémie réactionnelle tardive (complément).
+      const tl = clamp(s.g - 0.6, 0, 3);
+      const insE = p.beta * clamp((s.g - 0.65) * 4, 0, 8) + p.tumor * (1 + 8 * s.tl); // insuline pancréatique (îlots, insulinome)
       const ins = insE + p.exo * (0.6 + 0.6 * meal(T)); // + insuline injectée
       const eff = ins * p.sens;
       const glu = p.glucResp * clamp(1 + 4 * Math.max(0, 0.85 - s.g) - 0.3 * Math.min(eff, 2), 0.1, 6);
@@ -706,7 +752,7 @@
       const prod = ((0.55 + 0.45 * glu) * (1 + 5 * Math.max(0, 0.3 - eff)) * (1 - 0.45 * p.long)) / (1 + 0.8 * eff);
       const g = clamp(0.12 + 0.35 * food / (0.4 + 0.6 * Math.min(eff, 3)) + 1.25 * prod, 0.25, 6);
       const ket = clamp(0.05 + 10 * Math.max(0, 0.25 - eff), 0, 8);
-      return { ins, insE, glu, g, ket };
+      return { ins, insE, glu, g, ket, tl };
     },
     labs: [
       { key: 'g', name: 'Glycémie', unit: 'g/L', range: 'à jeun 0,80–1,10 g/L ; 0,70–1,40 sur la journée (complément)', k: 1, lo: 0.7, hi: 1.4, min: 0.2, max: 4, dec: 2 },
@@ -716,7 +762,7 @@
     params: [
       { key: 'beta', label: 'Masse de cellules β', min: 0, max: 1.5, step: 0.01, fmt: pct },
       { key: 'sens', label: 'Sensibilité à l\'insuline', min: 0.1, max: 1.5, step: 0.01, fmt: pct },
-      { key: 'tumor', label: 'Insulinome', min: 0, max: 4, step: 0.1, fmt: x100 },
+      { key: 'tumor', label: 'Insulinome', min: 0, max: 6, step: 0.1, fmt: x100 },
       { key: 'exo', label: 'Insuline injectée', min: 0, max: 3, step: 0.05, fmt: x100 },
       { key: 'glucResp', label: 'Réponse du glucagon', min: 0, max: 1.2, step: 0.01, fmt: pct }
     ],
@@ -725,13 +771,14 @@
       { id: 'dt1', name: 'Diabète de type 1', note: 'Destruction auto-immune des cellules β : carence totale en insuline, cétose.', p: { beta: 0.02 } },
       { id: 'dt1t', name: 'DT1 traité, surdosage en insuline', note: 'Insuline exogène sans baisse possible et réponse du glucagon perdue : hypoglycémies.', p: { beta: 0.02, exo: 2.4, glucResp: 0.15 } },
       { id: 'dt2', name: 'Diabète de type 2', note: 'Insulinorésistance et défaut de sécrétion d\'insuline : glycémie à jeun ≥ 1,26 g/L.', p: { sens: 0.2, beta: 0.35 } },
-      { id: 'insulinome', name: 'Insulinome', note: 'Sécrétion autonome d\'insuline : hypoglycémies de jeûne avec insuline inappropriée.', p: { tumor: 4.5 } }
+      { id: 'insulinome', name: 'Insulinome', note: 'Sécrétion autonome d\'insuline : hypoglycémies de jeûne avec insuline inappropriée.', p: { tumor: 5.5 } }
     ],
     interpret(s, p, L) {
       const g = L('g'), k = L('ket'), i = L('ins');
+      // Chez le diabétique sous insuline, la classification en niveaux s'applique d'abord (polycopié, partie 2 p. 66-68).
+      if (g < 0.7 && p.exo > 0) return { tone: 'bad', label: 'Hypoglycémie du diabétique, niveau ' + (g < 0.54 ? 2 : 1), text: g < 0.54 ? 'Glycémie < 0,54 g/L sous insuline : hypoglycémie de niveau 2.' : 'Glycémie entre 0,54 et 0,70 g/L sous insuline : hypoglycémie de niveau 1.' };
       if (g < 0.5) return { tone: 'bad', label: 'Hypoglycémie', text: i > 3 ? 'Glycémie < 0,50 g/L avec insuline non freinée : hyperinsulinisme (insulinome, insuline exogène).' : 'Glycémie basse : resucrage immédiat.' };
       if (g < 0.7 && p.exo === 0 && i > 3) return { tone: 'warn', label: 'Glycémie basse, insuline inappropriée', text: 'Hors diabète, l\'hypoglycémie se définit par une glycémie < 0,50 g/L (triade de Whipple) ; une insuline non freinée devant une glycémie basse fait évoquer un insulinome (épreuve de jeûne).' };
-      if (g < 0.7 && p.exo > 0) return { tone: 'bad', label: 'Hypoglycémie du diabétique, niveau ' + (g < 0.54 ? 2 : 1), text: g < 0.54 ? 'Glycémie < 0,54 g/L sous insuline : hypoglycémie de niveau 2.' : 'Glycémie entre 0,54 et 0,70 g/L sous insuline : hypoglycémie de niveau 1.' };
       if (k > 0.6 && g > 2) return { tone: 'bad', label: 'Hyperglycémie avec cétose', text: 'Carence en insuline : la lipolyse et la cétogenèse s\'emballent (risque d\'acidocétose).' };
       if (g >= 1.26) return { tone: 'warn', label: 'Hyperglycémie', text: 'Glycémie élevée : diabète si ≥ 1,26 g/L à jeun à deux reprises ou ≥ 2,00 g/L avec symptômes. Entre 1,10 et 1,25 g/L à jeun : hyperglycémie modérée à jeun.' };
       return { tone: 'good', label: 'Glycémie normale', text: 'Équilibre insuline / glucagon conservé.' };
@@ -749,7 +796,7 @@
       rates: { ogttRate: (s, p) => 3 * p.ogtt, exoRate: (s, p) => p.exo * 0.8 },
       scale: { fat: (p) => (p.sens < 0.6 ? 1.3 : 1) },
       lesions: [
-        { node: 'islet', kind: 'infiltrate', dx: 6, dy: -24, show: (p) => p.beta < 0.5, label: 'insulite auto-immune', ly: -40, title: 'Diabète de type 1', text: 'Destruction auto-immune des cellules β (infiltrat lymphocytaire des îlots).' },
+        { node: 'islet', kind: 'infiltrate', dx: 6, dy: -24, show: (p) => p.beta < 0.1, label: 'insulite auto-immune', ly: -40, title: 'Diabète de type 1', text: 'Destruction auto-immune des cellules β (infiltrat lymphocytaire des îlots).' },
         { node: 'islet', kind: 'nodule', tone: 'blue', dx: -36, dy: 10, show: (p) => p.tumor > 0.02, label: 'insulinome', title: 'Insulinome', text: 'Tumeur endocrine pancréatique sécrétant l\'insuline de façon autonome.' },
         { node: 'fat', kind: 'label', show: (p) => p.sens < 0.6, label: 'adiposité viscérale', ly: -84, title: 'Insulinorésistance', text: 'Diabète de type 2 : insulinorésistance (foie, muscle, tissu adipeux) et défaut de sécrétion.' }
       ],
@@ -767,7 +814,10 @@
     tau: { ldl: 2.5 },
     targets(p, s) {
       // Récepteurs fonctionnels : mutation du récepteur (ldlr), de l'apoB (apob : LDL mal reconnues) ou gain de fonction de PCSK9 (pcsk9g).
-      const rec = p.ldlr * p.apob * (1 + 0.9 * p.statin) * (1 + 1.4 * p.pcsk9i) / (1 + p.pcsk9g * (1 - 0.8 * p.pcsk9i));
+      // Statine et anti-PCSK9 agissent en augmentant les récepteurs : leur effet s'atténue quand il reste peu de récepteurs
+      // (hypercholestérolémie familiale homozygote ; complément, essai TESLA).
+      const resid = Math.min(1, p.ldlr / 0.5);
+      const rec = p.ldlr * p.apob * (1 + 0.9 * p.statin * resid) * (1 + 1.4 * p.pcsk9i * resid) / (1 + p.pcsk9g * (1 - 0.8 * p.pcsk9i));
       return { rec, ldl: clamp(1 / Math.max(rec, 0.05), 0.15, 12) };
     },
     labs: [
@@ -785,8 +835,8 @@
     ],
     scenarios: [
       { id: 'eu', name: 'Profil normal', note: 'LDL captées par leurs récepteurs.', p: {} },
-      { id: 'hfhe', name: 'Hypercholestérolémie familiale hétérozygote', note: 'Moitié des récepteurs des LDL : LDL-c doublé (complément), xanthomes tendineux, arc cornéen précoce.', p: { ldlr: 0.5 } },
-      { id: 'hfho', name: 'Hypercholestérolémie familiale homozygote', note: 'Récepteurs quasi absents : LDL-c très élevé dès l\'enfance.', p: { ldlr: 0.15 } },
+      { id: 'hfhe', name: 'Hypercholestérolémie familiale hétérozygote', note: 'Moitié des récepteurs des LDL (complément) : LDL-c doublé, xanthomes tendineux, arc cornéen précoce.', p: { ldlr: 0.5 } },
+      { id: 'hfho', name: 'Hypercholestérolémie familiale homozygote', note: 'Récepteurs quasi absents : LDL-c très élevé dès l\'enfance (complément).', p: { ldlr: 0.15 } },
       { id: 'apob', name: 'HF par mutation de l\'apoB (complément)', note: 'Récepteurs normaux mais LDL mal reconnues (apoB100 mutée) : LDL-c élevé (complément ; le polycopié ne détaille pas les gènes).', p: { apob: 0.5 } },
       { id: 'pcsk9g', name: 'HF par gain de fonction de PCSK9 (complément)', note: 'PCSK9 trop active : récepteurs dégradés en excès, peu de LDL internalisées (complément ; le polycopié ne détaille pas les gènes).', p: { pcsk9g: 1 } },
       { id: 'statin', name: 'HF hétérozygote sous statine', note: 'La statine (complément) freine l\'HMG-CoA réductase : plus de récepteurs des LDL. Risque d\'emblée élevé : objectif LDL-c < 0,70 g/L.', p: { ldlr: 0.5, statin: 1 } },

@@ -20,7 +20,7 @@
   // Molécules de l'axe thyréotrope proposées en fiches dans toutes ses scènes
   ['thyro', 'hypo', 'pit', 'foll', 'transp', 'cell'].forEach((id) => { HV.scenes[id].legend = new Set(['trh', 'tsh', 't4', 't3', 'rt3', 'iod', 'tg', 'trab', 'tbg', 'ttr', 'alb']); });
   const scenes = HV.sceneList;
-  const TOUR = ['atlas', 'thyro', 'hypo', 'pit', 'foll', 'transp', 'cell', 'cortico', 'somato', 'gonadoF', 'gonadoM', 'lacto', 'adh', 'medullo', 'phospho', 'raa', 'glyc', 'islet', 'lipid'];
+  const TOUR = ['atlas', 'thyro', 'hypo', 'pit', 'foll', 'transp', 'cell', 'cortico', 'somato', 'gonadoF', 'gonadoM', 'lacto', 'adh', 'medullo', 'phospho', 'raa', 'glyc', 'islet', 'pancreas', 'lipid'];
 
   /* ---------- Caméra ---------- */
   const cam = { cx: 800, cy: 500, w: 1700 };
@@ -94,11 +94,13 @@
     }
     if (best !== current) setCurrent(best);
   }
-  function isActive(sc) {
+  function inView(sc) {
     const r = HV.rectOf(sc);
     const h = (cam.w * vh) / vw;
-    if (r.w / cam.w < 0.05) return false;
     return r.x < cam.cx + cam.w / 2 && r.x + r.w > cam.cx - cam.w / 2 && r.y < cam.cy + h / 2 && r.y + r.h > cam.cy - h / 2;
+  }
+  function isActive(sc) {
+    return HV.rectOf(sc).w / cam.w >= 0.05 && inView(sc);
   }
 
   /* ---------- Interaction : glisser, molette, pincement, clic ---------- */
@@ -145,6 +147,9 @@
         const inf = drag.target && drag.target.closest && drag.target.closest('[data-info]');
         // Un élément de la scène courante affiche sa fiche ; ailleurs, le clic fait entrer dans la scène.
         // Dans la scène courante, un clic ouvre la fiche (molécule, organe) ; Maj + clic l'ouvre aussi sur un élément zoomable.
+        const chip = drag.target && drag.target.closest && drag.target.closest('[data-steps]');
+        const chipSc = chip && HV.scenes[chip.getAttribute('data-steps')];
+        if (chipSc) { if (chipSc !== current) flyTo(chipSc); stepShow(chipSc, 0); drag = null; return; }
         const sheet = HV.resolveSheet(drag.target);
         const fg = drag.target && drag.target.closest && drag.target.closest('[data-figs]');
         if (fg && sc === current) HV.openFigure(HV.polyFigsRef ? fg.getAttribute('data-figs').split(',').map(HV.polyFig).filter(Boolean) : [], 0);
@@ -215,16 +220,22 @@
 
   /* ---------- Panneau : scène courante ---------- */
   /* ---------- Mode pas à pas ---------- */
-  let stepSc = null;
+  let stepSc = null, legOpen = null;
   const stepping = () => !!(stepSc && stepSc.stepIndex() >= 0);
   function stepShow(sc, i) {
     const box = $('stepBox');
     if (stepSc && stepSc !== sc) stepSc.stepTo(-1);
+    // La légende (en haut à droite) se replie pendant le parcours pour ne pas masquer les projecteurs.
+    const leg = $('legend');
+    if (i >= 0 && box.hidden) { legOpen = leg.open; leg.open = false; } else if (i < 0 && !box.hidden && legOpen != null) { leg.open = legOpen; legOpen = null; }
     stepSc = sc;
     sc.stepTo(i);
     box.hidden = i < 0;
     if (i < 0) return;
     const S = sc.steps[i];
+    // Projecteur dans la moitié basse de la scène : l'encadré passe en haut pour ne pas le cacher.
+    const cy = S.spot ? S.spot.map((sp) => (sp.length === 3 ? sp[1] : sp[1] + sp[3] / 2)) : [];
+    box.classList.toggle('at-top', cy.length > 0 && cy.reduce((x, y) => x + y, 0) / cy.length > 560);
     $('stepCount').textContent = `Étape ${i + 1} / ${sc.steps.length}`;
     $('stepTitle').textContent = S.t;
     $('stepText').textContent = S.d;
@@ -471,14 +482,20 @@
   /* ---------- Animation ---------- */
   let playing = !reduced;
   let speed = 1;
-  function togglePlay() {
-    playing = !playing;
+  // Deux boutons pilotent l'animation : celui du panneau et celui de la barre de navigation.
+  function showPlay() {
     $('btnPlay').setAttribute('aria-pressed', String(playing));
     $('btnPlay').textContent = playing ? 'Pause' : 'Lecture';
+    $('btnPause').setAttribute('aria-pressed', String(playing));
+    $('btnPause').textContent = playing ? '❚❚ Pause' : '▶ Lecture';
+  }
+  function togglePlay() {
+    playing = !playing;
+    showPlay();
   }
   $('btnPlay').addEventListener('click', togglePlay);
-  $('btnPlay').setAttribute('aria-pressed', String(playing));
-  $('btnPlay').textContent = playing ? 'Pause' : 'Lecture';
+  $('btnPause').addEventListener('click', togglePlay);
+  showPlay();
   document.querySelectorAll('[data-speed]').forEach((b) => {
     b.addEventListener('click', () => {
       speed = parseFloat(b.dataset.speed);
@@ -511,9 +528,21 @@
         sc.content.style.opacity = op;
         sc.content.style.visibility = op === 0 ? 'hidden' : '';
       }
-      if (op === 0 || !isActive(sc)) continue;
-      for (const f of sc.flows) f.step(sdt);
+      // Allègement du rendu : une scène hors champ (ou réduite à un point) sort de l'arbre de rendu ;
+      // vue de loin, ses particules sont masquées et ne sont plus animées.
+      const frac = HV.rectOf(sc).w / cam.w;
+      const on = op > 0 && frac > 0.012 && inView(sc);
+      if (on !== sc._on) { sc._on = on; sc.content.style.display = on ? '' : 'none'; }
+      const fl = on && frac > 0.2;
+      if (fl !== sc._fl) { sc._fl = fl; for (const f of sc.flows) f.layer.style.display = fl ? '' : 'none'; }
+      if (!on || !isActive(sc)) continue;
+      if (fl) for (const f of sc.flows) f.step(sdt);
       for (const fn of sc.dyn) fn(sdt);
+    }
+    // Grands titres de la vue d'ensemble : visibles de loin, effacés dès qu'on zoome sur une carte.
+    if (HV.atlasTitles) {
+      const o = clamp((cam.w / HV.W - 0.45) / 0.3, 0, 1);
+      if (o !== HV.atlasTitles._o) { HV.atlasTitles._o = o; HV.atlasTitles.style.opacity = o; HV.atlasTitles.style.display = o ? '' : 'none'; }
     }
     labTimer -= dt;
     if (labTimer <= 0) {
