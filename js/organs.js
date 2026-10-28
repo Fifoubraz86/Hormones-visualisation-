@@ -14,6 +14,14 @@
     return p;
   }
   const line = (g, d, cls) => el('path', { d, class: cls || 'org-detail' }, g);
+  // Illustration vectorielle (Servier Medical Art, CC BY 3.0, via Bioicons ; voir assets/organs/CREDITS.md),
+  // inscrite dans la boîte (x, y, w, h) du repère de l'organe ; `rot` la fait pivoter autour du centre.
+  function art(g, name, x, y, w, h, rot) {
+    const im = el('image', { href: 'assets/organs/' + name + '.svg', x, y, width: w, height: h, preserveAspectRatio: 'xMidYMid meet', class: 'org-art' }, g);
+    if (rot) im.setAttribute('transform', `rotate(${rot} ${x + w / 2} ${y + h / 2})`);
+    return im;
+  }
+  HV.organArt = art;
   const mirror = (d) => d.replace(/(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/g, (m, x, y) => -parseFloat(x) + ',' + y);
 
   const O = {};
@@ -112,26 +120,17 @@
 
   /* Cerveau, vue latérale */
   O.brainLateral = function (g) {
-    solid(g, 'M -44,6 C -48,-18 -30,-38 -4,-40 C 22,-42 44,-28 46,-6 C 48,6 42,14 32,14 C 28,22 18,24 10,20 C 0,26 -16,26 -22,18 C -34,20 -44,16 -44,6 Z', 'o-brain');
-    solid(g, 'M 18,16 C 24,10 40,12 42,22 C 42,32 26,36 18,30 C 14,26 14,20 18,16 Z', 'o-cerebellum');
-    solid(g, 'M 8,20 L 12,44 L 20,44 L 18,22 Z', 'o-brainstem');
-    line(g, 'M -30,8 C -14,0 4,2 18,-6 M 4,-38 C -2,-24 8,-14 2,-2 M -30,-24 C -20,-18 -24,-8 -14,-6 M 20,-30 C 28,-22 22,-12 32,-8 M -36,-6 C -28,-10 -26,-2 -20,-4', 'o-gyrus');
+    art(g, 'brain', -48, -46, 96, 94);
   };
 
   /* Cœur anatomique (vue antérieure) */
   O.heart = function (g) {
-    solid(g, 'M -2,-22 C -4,-36 4,-46 16,-46 C 30,-46 34,-36 32,-28 L 25,-28 C 25,-35 20,-39 15,-39 C 9,-39 7,-32 7,-22 Z', 'o-aorta');
-    line(g, 'M 10,-44 L 8,-54 M 16,-46 L 16,-56 M 22,-45 L 25,-55', 'o-vessel-l');
-    el('rect', { x: -22, y: -44, width: 10, height: 26, rx: 4, class: 'org o-vein' }, g);
-    solid(g, 'M -30,-10 C -34,10 -18,32 6,42 C 14,46 22,40 28,30 C 38,14 40,-4 32,-16 C 24,-26 6,-26 -4,-20 C -14,-24 -26,-20 -30,-10 Z', 'o-heart');
-    solid(g, 'M 6,-20 C 8,-32 18,-34 24,-26 L 18,-14 C 14,-18 10,-18 6,-20 Z', 'o-pulm');
-    line(g, 'M -6,-14 C 0,2 6,20 4,38 M 6,-16 C 18,-6 26,8 26,26', 'o-coronary');
+    art(g, 'heart', -38, -58, 76, 104);
   };
 
   /* Foie (vue antérieure) avec vésicule biliaire */
   O.liver = function (g) {
-    solid(g, 'M -50,-6 C -48,-26 -18,-34 10,-30 C 30,-28 48,-22 52,-14 C 54,-8 42,-4 28,2 C 12,10 -6,22 -22,26 C -38,30 -50,18 -50,-6 Z', 'o-liver');
-    line(g, 'M 2,-30 C 0,-18 -2,-6 -6,8', 'o-detail-strong');
+    art(g, 'liver', -54, -36, 108, 72);
     solid(g, 'M -16,16 C -14,30 -2,32 0,24 C 0,18 -8,13 -16,16 Z', 'o-gall');
   };
 
@@ -143,9 +142,7 @@
 
   /* Muscle squelettique fusiforme avec tendons */
   O.muscle = function (g) {
-    line(g, 'M -52,0 L -34,0 M 34,0 L 52,0', 'o-tendon');
-    solid(g, 'M -36,0 C -26,-20 26,-20 36,0 C 26,20 -26,20 -36,0 Z', 'o-muscle');
-    line(g, 'M -28,-6 C -10,-12 10,-12 28,-6 M -30,0 L 30,0 M -28,6 C -10,12 10,12 28,6', 'o-fiber');
+    art(g, 'muscle', -16, -54, 32, 108, 90);
   };
 
   /* Tissu adipeux : adipocytes uniloculaires, noyau refoulé en périphérie */
@@ -204,9 +201,7 @@
     solid(g, 'M 10,-12 C 22,-22 38,-16 38,0 C 38,16 22,24 12,18 C 16,8 16,-4 10,-12 Z', 'o-pit-post');
   };
   O.kidney = function (g) {
-    solid(g, 'M -6,-40 C 18,-46 34,-22 34,0 C 34,26 16,46 -6,40 C -22,36 -14,16 -6,8 C -14,0 -14,-8 -6,-12 C -16,-20 -24,-34 -6,-40 Z', 'o-kidney');
-    line(g, 'M -8,-10 C 4,-14 12,-4 14,0 C 12,6 4,14 -8,10', 'o-detail-strong');
-    line(g, 'M -10,2 C -22,4 -30,10 -34,22', 'o-ureter');
+    art(g, 'kidney', -30, -46, 60, 92);
   };
   O.adrenalKidney = function (g) {
     const k = el('g', { transform: 'translate(0 16) scale(0.78)' }, g);
@@ -240,9 +235,7 @@
     el('circle', { cx: 20, cy: 20, r: 4, class: 'org o-nipple' }, g);
   };
   O.intestine = function (g) {
-    solid(g, 'M -40,-30 C -40,-40 40,-40 40,-30 L 40,30 C 40,40 -40,40 -40,30 Z', 'o-colon');
-    solid(g, 'M -28,-18 C -10,-30 10,-6 28,-18 C 34,-6 18,4 28,16 C 10,26 -10,4 -28,16 C -34,4 -18,-6 -28,-18 Z', 'o-small');
-    line(g, 'M -20,-12 C -6,-20 8,-2 22,-12 M -22,10 C -6,0 8,18 22,8', 'o-detail');
+    art(g, 'intestine', -42, -40, 84, 80);
   };
   O.parathyroidBack = function (g) {
     const r = 'M -6,-2 C -8,-24 -18,-40 -30,-40 C -44,-40 -50,-16 -50,4 C -50,28 -42,42 -28,42 C -16,42 -8,30 -6,20 Z';
@@ -255,19 +248,14 @@
     });
   };
   O.islet = function (g) {
-    solid(g, 'M -46,8 C -46,-6 -26,-10 -10,-6 C 10,-2 30,-14 44,-8 C 52,-2 42,10 26,12 C 8,14 -14,22 -32,20 C -42,19 -46,14 -46,8 Z', 'o-pancreas');
+    art(g, 'pancreas', -52, -12, 104, 44);
     el('circle', { cx: 6, cy: -24, r: 20, class: 'o-islet' }, g);
     line(g, 'M -2,-6 L -2,-6', 'o-detail');
     [[0, -30, 'b'], [10, -30, 'b'], [4, -20, 'b'], [14, -20, 'a'], [-4, -20, 'a'], [8, -38, 'a'], [-6, -30, 'b'], [16, -28, 'd']].forEach(([x, y, k]) => el('circle', { cx: x, cy: y, r: 3.6, class: 'o-islet-' + k }, g));
     line(g, 'M 6,-4 L 2,4', 'o-detail-strong');
   };
   O.lungs = function (g) {
-    const lung = 'M -8,-40 C -26,-40 -40,-10 -42,22 C -44,40 -30,46 -14,40 C -4,36 -2,20 -4,0 C -4,-20 0,-40 -8,-40 Z';
-    const a = el('g', { transform: 'translate(-6 0)' }, g);
-    solid(a, lung, 'o-lung solid');
-    const b = el('g', { transform: 'translate(6 0)' }, g);
-    solid(b, mirror(lung), 'o-lung solid');
-    line(g, 'M 0,-46 L 0,-24 M 0,-24 C -4,-18 -8,-14 -12,-10 M 0,-24 C 4,-18 8,-14 12,-10', 'o-bronch');
+    art(g, 'lungs', -52, -50, 104, 98);
   };
   O.vessel = function (g) {
     el('path', { d: 'M -46,0 C -20,-10 20,10 46,0', class: 'o-vessel-wall' }, g);

@@ -58,3 +58,4 @@
 .pz-arr { fill: none; stroke: var(--muted); stroke-width: 2.5; }
 .pz-arr.bad { stroke: var(--bad); stroke-width: 3.5; }
 .pz-step { transition: opacity 0.4s; }
+.pz-under { fill-opacity: 0; stroke-opacity: 0; }

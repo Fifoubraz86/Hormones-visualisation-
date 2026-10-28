@@ -275,9 +275,18 @@
 
       /* ---- Anatomie ---- */
       const an = a.el('g', { class: 'pz-anat' });
+      // Illustration Servier (Bioicons) posée sur le tracé, qui reste en dessous comme zone de survol.
+      const dress = (el, name, pad) => {
+        const bb = el.getBBox(), k = pad || 0;
+        const im = HV.organArt(el.parentNode, name, bb.x - k, bb.y - k, bb.width + 2 * k, bb.height + 2 * k);
+        el.parentNode.insertBefore(im, el.nextSibling);
+        im.style.pointerEvents = 'none';
+        el.classList.add('pz-under');
+      };
       // Foie et vésicule
       const liver = a.el('g', { 'data-info': 'pz-liver' }, an);
       a.path('M 80,240 C 90,180 200,160 320,170 C 420,178 500,190 520,220 C 530,250 470,280 420,300 C 360,330 300,370 230,390 C 160,410 90,380 80,320 Z', 'pz-liver', liver);
+      dress(liver.firstChild, 'liver', 14);
       a.text(150, 260, 'Foie', 'pz-org-t', null, liver);
       const gbG = a.el('g', { 'data-info': 'pz-gb' }, an);
       a.el('ellipse', { cx: 300, cy: 420, rx: 34, ry: 56, transform: 'rotate(-25 300 420)', class: 'pz-gb' }, gbG);
@@ -287,7 +296,7 @@
       // Estomac
       const stom = a.el('g', { 'data-info': 'pz-stom' }, an);
       a.path('M 800,170 C 830,160 900,170 930,215 C 965,270 960,360 905,420 C 850,478 740,495 660,485 C 620,480 595,470 585,455 L 590,425 C 640,440 700,438 760,410 C 810,385 820,330 812,280 C 806,240 790,210 785,180 Z', 'pz-stomach', stom);
-      a.path('M 790,150 L 805,175', 'pz-eso', stom);
+      dress(stom.firstChild, 'stomach', 10);
       a.text(880, 205, 'Estomac', 'pz-org-t', { anchor: 'middle' }, stom);
       // Duodénum, jéjunum, iléon
       const duoD = 'M 588,445 C 540,442 480,440 452,470 C 432,495 430,560 432,640 C 434,700 440,740 480,752 C 560,770 690,770 760,745 C 790,732 800,700 795,670';
@@ -302,7 +311,7 @@
       a.text(1100, 885, 'Intestin grêle', 'pz-org-t', { anchor: 'end' }, gutG);
       // Pancréas
       const pg = a.el('g', { 'data-info': 'pz-panc' }, an);
-      a.path('M 478,575 C 480,540 525,532 565,548 C 650,568 780,532 900,512 C 985,498 1055,470 1092,488 C 1112,500 1098,530 1062,542 C 985,566 905,580 805,596 C 705,612 630,616 608,642 C 592,690 566,718 528,714 C 490,710 474,680 476,640 Z', 'pz-panc', pg);
+      dress(a.path('M 478,575 C 480,540 525,532 565,548 C 650,568 780,532 900,512 C 985,498 1055,470 1092,488 C 1112,500 1098,530 1062,542 C 985,566 905,580 805,596 C 705,612 630,616 608,642 C 592,690 566,718 528,714 C 490,710 474,680 476,640 Z', 'pz-panc', pg), 'pancreas', 18);
       const acG = a.el('g', { 'data-info': 'pz-acini' }, an);
       [[520, 600], [560, 655], [530, 680], [650, 590], [700, 578], [940, 530], [1000, 512]].forEach(([x, y]) => {
         a.el('circle', { cx: x, cy: y, r: 13, class: 'acinus' }, acG);

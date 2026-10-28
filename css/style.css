@@ -873,3 +873,6 @@ line.m-db { stroke: var(--mc); stroke-width: 0.9; }
 
 .warn-author { font-size: 14px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
 .warn-author strong { color: var(--fg); }
+
+/* Illustrations d'organes (Servier Medical Art via Bioicons) */
+.org-art { image-rendering: auto; }
