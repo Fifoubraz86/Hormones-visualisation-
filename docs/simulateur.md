@@ -204,3 +204,7 @@ Chaque remarque affichée cite sa source ; le détail est dans `js/simu/rules.js
 ## Limites du modèle
 
 Cinétiques et valeurs illustratives, normes indicatives (T4L 12–22 pmol/L, T3L 3,1–6,8 pmol/L, TRAb < 1,8 UI/L selon la trousse). Pas de variabilité interindividuelle au-delà des paramètres de chaque cas ; bruit analytique de ± 4 %. La rechute après arrêt est modélisée (paramètre `relapse`) et utilisée en mode thérapeutique (évolution défavorable des TRAb). Le modèle ne simule pas l'orbitopathie ; l'angor et les effets des ATS sont des événements déclenchés par des seuils et des tirages (voir plus haut), pas une physiologie fine.
+
+## Microangiopathie (DT2)
+
+`js/simu/dt2-micro.js` : carte « Microangiopathie : risque selon l'HbA1c » du dossier. Risque relatif ×1,59 par point d'HbA1c (UKPDS 35 : − 37 % de complications microvasculaires par point de baisse, sans seuil), exposition cumulée depuis le début du suivi en années-équivalent à 6 %, comparée à une HbA1c de 7 % ; mémoire glycémique (UKPDS 80). Pas de probabilité absolue : le taux d'incidence par niveau d'HbA1c (texte intégral d'UKPDS 35) n'a pas pu être vérifié. Au-delà de 10 %, extrapolation signalée. Repères dans `js/simu/dt2-ref.js` (classe « Complications »).

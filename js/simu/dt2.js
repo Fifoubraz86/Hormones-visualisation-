@@ -774,7 +774,7 @@
     main.textContent = '';
     main.className = 'sv-main sv-game sv-sandbox';
     const left = h('aside', { class: 'sv-dossier' }, [patientCard(), G.dead ? deathCard() : rxCard()]);
-    const right = h('section', { class: 'sv-consult' }, (G.story ? [storyCard()] : []).concat(TRAIN() ? [journeyCard(), physioEntry(), latestCard(), chartCard(), historyCard(), refCard()] : [journeyCard(), physioEntry(), latestCard(), sfdCard(), chartCard(), marginCard(), historyCard(), treeCard(), guideCard(), factorsCard(), refCard(), effectsCard(), revealCard()]));
+    const right = h('section', { class: 'sv-consult' }, (G.story ? [storyCard()] : []).concat(TRAIN() ? [journeyCard(), physioEntry(), latestCard(), chartCard(), microCard(), historyCard(), refCard()] : [journeyCard(), physioEntry(), latestCard(), sfdCard(), chartCard(), microCard(), marginCard(), historyCard(), treeCard(), guideCard(), factorsCard(), refCard(), effectsCard(), revealCard()]));
     main.append(left, right);
     const box = right.querySelector('.sv-chartbox');
     if (box) requestAnimationFrame(() => chart(box));
@@ -978,6 +978,9 @@
   }
 
   // Marge de progression hygiéno-diététique : situation actuelle, repères, et ce que donnerait le respect des objectifs.
+  // Microangiopathie : risque relatif selon l'HbA1c et exposition cumulée (js/simu/dt2-micro.js).
+  function microCard() { return S.dt2micro ? S.dt2micro.card({ h, pt: G.pt, cfg: G.cfg }) : null; }
+
   function marginCard() {
     const pt = G.pt, c = G.cfg, p = pt.par;
     const W = pt.st.W, bmi = W / Math.pow(c.height / 100, 2);

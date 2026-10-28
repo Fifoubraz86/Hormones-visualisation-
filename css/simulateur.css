@@ -755,3 +755,14 @@ body.ph-noscroll { overflow: hidden; }
 .org-ic .o-cell-n { fill: color-mix(in srgb, var(--tsh) 55%, var(--panel)); stroke: var(--tsh); stroke-width: 1.5; }
 .org-credit { margin: 6px 2px 0; }
 .org-credit a { color: var(--muted); }
+
+/* Microangiopathie : risque relatif et exposition cumulée (dt2-micro.js) */
+.mi-chart { display: block; width: 100%; max-width: 560px; height: auto; margin: 6px 0; }
+.mi-axis { stroke: var(--line-2); stroke-width: 1.5; }
+.mi-t { font: 12px var(--font-data); fill: var(--muted); }
+.mi-line { fill: none; stroke-width: 3; stroke-linejoin: round; }
+.mi-line.mi-pt { stroke: var(--bad); }
+.mi-line.mi-goal { stroke: var(--good); stroke-dasharray: 6 5; }
+.mi-leg { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.mi-sw { display: inline-block; width: 22px; height: 0; border-top: 3px solid var(--bad); }
+.mi-sw.mi-goal { border-top: 3px dashed var(--good); }
