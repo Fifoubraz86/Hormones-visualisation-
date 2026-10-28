@@ -1,0 +1,15 @@
+/* Notion transversale : pharmacocinétique (zoom-pk.js, calculs js/pk.js) */
+.zpk-plasma { fill: color-mix(in srgb, var(--p-red) 6%, var(--scene-1)); stroke: var(--p-red2); stroke-width: 3; }
+.zpk-plasma-fill { fill: var(--p-amber); stroke: none; pointer-events: none; }
+.zpk-btn { cursor: pointer; }
+.zpk-btn rect { fill: var(--panel-2); stroke: var(--line-2); stroke-width: 2; }
+.zpk-btn.on rect { fill: color-mix(in srgb, var(--accent) 18%, var(--panel)); stroke: var(--accent); }
+.zpk-btn-t { font: 600 16px var(--font-body); fill: var(--fg); pointer-events: none; }
+.zpk-axis { fill: none; stroke: var(--line-2); stroke-width: 2; }
+.zpk-avg { fill: none; stroke: var(--good); stroke-width: 2.5; stroke-dasharray: 8 6; }
+.zpk-ss { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 4 5; }
+.zpk-curve { fill: none; stroke: var(--p-amber); stroke-width: 4; stroke-linejoin: round; }
+.zpk-tick { fill: var(--p-blue2); }
+.zpk-head { stroke: var(--accent); stroke-width: 1.5; opacity: 0.6; }
+.zpk-dot { fill: var(--accent); stroke: var(--scene-1); stroke-width: 3; }
+.zpk-avg-t { fill: var(--good); }

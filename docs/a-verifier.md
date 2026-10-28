@@ -146,3 +146,9 @@ Marqué « (complément) » et à confirmer :
 1. **Causalité des LDL** : effet dépendant du niveau de LDL-c et de la durée d'exposition. À confirmer : Ference et al., *Eur Heart J* 2017;38:2459-72 (consensus EAS).
 2. **Étapes de la plaque** : dysfonction endothéliale (molécules d'adhésion, VCAM-1), rétention des LDL par les protéoglycanes et oxydation, monocytes → macrophages (récepteurs « éboueurs » non freinés par le cholestérol) → cellules spumeuses, strie lipidique dès l'adolescence, noyau lipidique nécrotique, chape fibreuse par les cellules musculaires lisses, remodelage positif (Glagov), plaque vulnérable (chape fine, gros noyau, inflammation), rupture ou érosion → thrombus. À confirmer : manuel de physiopathologie ; Libby et al., *Nat Rev Dis Primers* 2019 (athérosclérose).
 3. **Modèle de croissance de la plaque** : purement illustratif (progression proportionnelle à l'excès de LDL-c au-dessus de 0,5 g/L et à la durée, accélérée par tabac, HTA, diabète) ; aucune valeur chiffrée n'est affirmée.
+
+## Pharmacocinétique (notion transversale)
+
+1. **Principes** : demi-vie = 0,693 / ke ; 90 % de l'équilibre en 3,3 demi-vies, 97 % en 5 ; dose de charge = dose d'entretien × facteur d'accumulation. À confirmer : manuel de pharmacologie (Collège national de pharmacologie médicale).
+2. **Hydrocortisone** : demi-vie ≈ 1,5 h, d'où 2 à 3 prises par jour ; pic environ 1 h après la prise. Source : revue, *Expert Opin Drug Metab Toxicol* 2008;4:749 (variabilité individuelle : 1,1 à 6,1 h par voie IV). Doses relatives 2 : 1 : 1 illustratives.
+3. **Lévothyroxine** : demi-vie ≈ 7 jours (déjà en complément dans la loupe « Transport plasmatique ») ; constante d'absorption illustrative.

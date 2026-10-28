@@ -25,6 +25,7 @@ Aucune dépendance, aucune compilation : HTML, CSS et JavaScript « vanilla » s
 2. **Garder le socle** (réutilisable tel quel) :
    - `js/engine.js` (scènes, caméra, flux de particules), `js/app.js` (navigation, panneau, pas à pas, tests, pause, vitesse), `js/axis-builder.js` (constructeur déclaratif des axes), `js/sheets.js` (fiches), `js/video-export.js` (export MP4), `js/warning.js`, `css/style.css` (thème clair/sombre), `css/video-export.css` ;
    - `tools/bundle.py` (page unique pour la publication), `tools/verif/` (harnais de vérification), `tools/enregistrer-video.js`.
+   - `js/pk.js` (pharmacocinétique générique, sans dessin : un et deux compartiments, prises répétées, dose de charge, demi-vie, délai d'équilibre ; utilisable dans la page et dans Node, donc par le simulateur).
 3. **Remplacer le contenu** (spécifique à la spécialité) :
    - `js/axes-data.js` (axes déclaratifs : nœuds, liens, textes), `js/axes-sim.js` (modèles, labs, scénarios, interprétations), `js/axes-steps.js` (pas à pas), `js/tests.js` (tests dynamiques) ;
    - `js/molecules.js`, `js/molecules-axes.js`, `js/protein-glyphs.js` (glyphes), `js/organs.js` (organes), `js/info.js` (info-bulles), `js/sheets-molecules.js`, `js/sheets-organs.js` (fiches), `js/poly-figs.js` + `assets/poly/` (figures du référentiel) ;
@@ -306,4 +307,5 @@ scénario avec `sim.setScenario(id); sim.settle(); sim.lab(key)` et chaque test 
 | Autres axes | `axes-data.js`, `axes-sim.js`, loupes `zoom-*.js` | polycopié CEEDMM |
 | Physiologie surrénalienne | `surrenale.js` | polycopié, partie 1, p. 61-89, figure 26 |
 | Pancréas exocrine, endocrine et TNE | `pancreas.js`, `zoom-pancreas.js`, `css/pancreas.css` | SNFGE chap. 7 (2014) ; SFE item 308 (2022) ; TNCD chap. 11 (2026) |
+| Pharmacocinétique (notion transversale) | `js/pk.js` (socle), `zoom-pk.js`, `css/zoom-pk.css` | principes en complément ; hydrocortisone : Expert Opin Drug Metab Toxicol 2008 |
 | Athérosclérose (loupe de l'axe des lipoprotéines) | `zoom-athero.js`, `css/zoom-athero.css` | polycopié partie 2 (p. 41) ; mécanismes en complément (consensus EAS 2017) ; Servier Arteries |

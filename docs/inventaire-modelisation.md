@@ -163,7 +163,7 @@ Colonne « Modèle » : *compartiments* (réservoirs qui se remplissent et se vi
 
 | Élément | Atlas | Modèle | Ressources |
 | --- | --- | --- | --- |
-| Pharmacocinétique (absorption, distribution, demi-vie, état d'équilibre) | partiel (lévothyroxine, insulines dans le simulateur) | compartiments | kit Servier Scientific-graphs ; Pulse (PK/PD) |
+| Pharmacocinétique (absorption, distribution, demi-vie, état d'équilibre) | fait (`js/pk.js` dans le socle, notion « Pharmacocinétique ») | compartiments | kit Servier Scientific-graphs ; Pulse (PK/PD) |
 | Récepteurs : membranaires (RCPG, tyrosine kinase), nucléaires, canaux | partiel (loupes cellulaires) | cinétique (occupation, Hill) | kit Servier Receptors-channels ; Reactome |
 | Transport membranaire (diffusion, transporteurs, pompes, osmose) | partiel | compartiments | kits Servier Cell-membrane, Receptors-channels |
 | Rétrocontrôle négatif et positif, homéostasie | fait (principe de l'atlas) | rétrocontrôle | OpenStax ch. 1 |
@@ -173,8 +173,8 @@ Colonne « Modèle » : *compartiments* (réservoirs qui se remplissent et se vi
 ## 3. Priorités suggérées
 
 1. **Athérosclérose** (loupe partagée entre l'axe lipides et un futur module cardio) : endothélium, LDL oxydées, macrophages et cellules spumeuses, plaque, rupture, thrombus ; kits Servier Arteries-atherothrombosis et Blood-immunology déjà dans le Drive.
-2. **Microangiopathie diabétique** en modèle : glycation (HbA1c), voies délétères, et courbe de risque selon la durée et l'HbA1c, branchée sur le simulateur DT2 (les complications deviendraient une conséquence de l'équilibre simulé).
-3. **Pharmacocinétique** générique (un à deux compartiments) dans le socle : déjà nécessaire pour la lévothyroxine, l'hydrocortisone, les insulines, et réutilisable par tous les modules.
+2. **Microangiopathie diabétique** en modèle (fait dans le simulateur DT2 : `js/simu/dt2-micro.js`, risque relatif UKPDS 35 et exposition cumulée) : glycation (HbA1c), voies délétères, et courbe de risque selon la durée et l'HbA1c, branchée sur le simulateur DT2 (les complications deviendraient une conséquence de l'équilibre simulé).
+3. **Pharmacocinétique** générique (fait : `js/pk.js`, notion transversale) (un à deux compartiments) dans le socle : déjà nécessaire pour la lévothyroxine, l'hydrocortisone, les insulines, et réutilisable par tous les modules.
 4. **Circulation et boucle pression-volume** (base du module cardio) : modèle de Windkessel et d'élastance, inspiré de Pulse.
 5. **Néphron complet** (base du module néphro, et complète ADH, aldostérone, iSGLT2).
 6. **Hémostase** (cascade de la coagulation, anticoagulants).
