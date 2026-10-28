@@ -140,3 +140,9 @@ Marqué « (complément) » et à confirmer :
 - **Normes** : gastrinémie < 100 pg/mL, pH gastrique à jeun 1,5–3,5, glucagon 50–150 pg/mL, VIP < 100 pg/mL, somatostatine < 25 pg/mL, insuline 2–25 mU/L, peptide C 0,8–3 ng/mL, bicarbonates 22–29 mmol/L, volume des selles < 0,3 L/24 h. Les seuils pathologiques (gastrine > 3 N, glucagon et VIP > 2 N, glycémie < 0,45 g/L, insuline ≥ 3 mU/L, proinsuline ≥ 5 pmol/L, sécrétine ≥ 120 pg/mL) viennent du TNCD p. 6. Valeurs selon le laboratoire.
 - **Test à la sécrétine** : dose et temps de prélèvement (2, 5, 10, 15 min) ; seul le seuil de 120 pg/mL est tiré du TNCD.
 - **Modèle** : grandeurs normalisées et temps accéléré ; l'effet des analogues de la somatostatine (stéatorrhée, lithiase) et la pente de la stéatorrhée autour de 80 % de perte de fonction sont illustratifs.
+
+## Lipoprotéines (loupe athérosclérose)
+
+1. **Causalité des LDL** : effet dépendant du niveau de LDL-c et de la durée d'exposition. À confirmer : Ference et al., *Eur Heart J* 2017;38:2459-72 (consensus EAS).
+2. **Étapes de la plaque** : dysfonction endothéliale (molécules d'adhésion, VCAM-1), rétention des LDL par les protéoglycanes et oxydation, monocytes → macrophages (récepteurs « éboueurs » non freinés par le cholestérol) → cellules spumeuses, strie lipidique dès l'adolescence, noyau lipidique nécrotique, chape fibreuse par les cellules musculaires lisses, remodelage positif (Glagov), plaque vulnérable (chape fine, gros noyau, inflammation), rupture ou érosion → thrombus. À confirmer : manuel de physiopathologie ; Libby et al., *Nat Rev Dis Primers* 2019 (athérosclérose).
+3. **Modèle de croissance de la plaque** : purement illustratif (progression proportionnelle à l'excès de LDL-c au-dessus de 0,5 g/L et à la durée, accélérée par tabac, HTA, diabète) ; aucune valeur chiffrée n'est affirmée.

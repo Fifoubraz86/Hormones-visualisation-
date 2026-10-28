@@ -429,7 +429,7 @@
       { id: 'gut', x: 200, y: 280, organ: 'intestine', label: 'Intestin', sub: 'chylomicrons (apoB48)', color: 'p-amber' },
       { id: 'plasma', x: 620, y: 280, organ: 'vessel', s: 1.3, label: 'Plasma', sub: ['lipoprotéine lipase', 'VLDL → IDL → LDL'], color: 'p-amber', info: 'La lipoprotéine lipase hydrolyse les triglycérides des chylomicrons et des VLDL ; les VLDL deviennent IDL puis LDL (lipase hépatique).' },
       { id: 'tissue', x: 1060, y: 190, organ: 'muscle', s: 0.85, label: 'Muscle, tissu adipeux', sub: 'acides gras', color: 'p-amber' },
-      { id: 'artery', x: 1060, y: 410, organ: 'vessel', s: 0.9, label: 'Paroi artérielle', sub: 'dépôt de LDL : athérome', color: 'bad', info: 'Les LDL en excès pénètrent dans l\'intima et s\'y oxydent : début de la plaque d\'athérome.' },
+      { id: 'artery', zoom: 'athero', x: 1060, y: 410, organ: 'vessel', s: 0.9, label: 'Paroi artérielle', sub: 'dépôt de LDL : athérome', color: 'bad', info: 'Les LDL en excès pénètrent dans l\'intima et s\'y oxydent : début de la plaque d\'athérome.' },
       { id: 'liver', x: 640, y: 830, organ: 'liver', s: 1.2, label: 'Foie', sub: 'sécrète VLDL, HDL naissantes', color: 'p-gold' },
       { id: 'ldlr', x: 860, y: 625, label: 'Récepteur des LDL', w: 250, color: 'p-teal', info: 'Le récepteur reconnaît l\'apoB100 des LDL. Après internalisation, il est recyclé vers la membrane ou dégradé dans le lysosome (polycopié, partie 2, p. 19–20).' },
       { id: 'hmg', x: 1080, y: 900, label: 'HMG-CoA réductase', w: 250, sub: 'synthèse du cholestérol', color: 'p-gold', info: 'Enzyme limitante de la synthèse du cholestérol dans l\'hépatocyte, freinée par le cholestérol issu des LDL internalisées ; cible des statines.' },

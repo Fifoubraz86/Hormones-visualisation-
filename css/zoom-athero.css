@@ -1,0 +1,26 @@
+/* Loupe athérosclérose (zoom-athero.js) */
+.zat-lumen { fill: color-mix(in srgb, var(--p-red) 12%, var(--scene-1)); stroke: none; }
+.zat-intima { fill: color-mix(in srgb, var(--p-rose) 22%, var(--scene-1)); stroke: none; }
+.zat-media { fill: color-mix(in srgb, var(--p-red2) 20%, var(--scene-1)); }
+.zat-adv { fill: color-mix(in srgb, var(--p-amber) 14%, var(--scene-1)); }
+.zat-smc-cell { fill: color-mix(in srgb, var(--p-red2) 40%, var(--scene-1)); stroke: var(--p-red2); stroke-width: 1.2; }
+.zat-iel { fill: none; stroke: var(--p-gold); stroke-width: 3; }
+.zat-endo { fill: none; stroke: var(--p-red2); stroke-width: 6; stroke-linejoin: round; }
+.zat-core { fill: color-mix(in srgb, var(--p-gold) 70%, #fff); stroke: var(--p-amber); stroke-width: 2; }
+.zat-cap { fill: none; stroke: color-mix(in srgb, var(--p-rose) 70%, #fff); stroke-width: 12; stroke-linecap: round; opacity: 0.9; }
+.zat-foam circle:first-child { fill: color-mix(in srgb, var(--p-violet) 25%, var(--scene-1)); stroke: var(--p-violet); stroke-width: 2; }
+.zat-drop { fill: color-mix(in srgb, var(--p-gold) 80%, #fff); stroke: var(--p-amber); stroke-width: 0.8; }
+.zat-g.mono circle { fill: color-mix(in srgb, var(--p-violet) 35%, #fff); stroke: var(--p-violet); stroke-width: 1.5; }
+.zat-g-n { fill: var(--p-violet); }
+.zat-g.plt ellipse, .zat-thr-plt ellipse { fill: #d9b8e8; stroke: #8a5aa8; stroke-width: 1; }
+.zat-g.ox circle:first-child { fill: #c9a24a; stroke: #7a5a18; stroke-width: 1.2; }
+.zat-g.ox circle + circle { fill: #7a5a18; }
+.zat-thr-clot { fill: #9c2a3a; stroke: #6d1a28; stroke-width: 2; opacity: 0.92; }
+.zat-crack { fill: none; stroke: #4a1018; stroke-width: 4; stroke-linecap: round; }
+.zat-fibrin { stroke: #f2d6da; stroke-width: 1.6; opacity: 0.8; }
+.zat-stage-bg { fill: transparent; stroke: transparent; stroke-width: 3; }
+.zat-stage.on .zat-stage-bg { fill: color-mix(in srgb, var(--accent) 12%, var(--panel)); stroke: var(--accent); }
+.zat-tog { cursor: pointer; }
+.zat-tog rect { fill: var(--panel-2); stroke: var(--line-2); stroke-width: 2; }
+.zat-tog.on rect { fill: color-mix(in srgb, var(--bad) 22%, var(--panel)); stroke: var(--bad); }
+.zat-tog-t { font: 600 17px var(--font-body); fill: var(--fg); pointer-events: none; }

@@ -306,3 +306,4 @@ scénario avec `sim.setScenario(id); sim.settle(); sim.lab(key)` et chaque test 
 | Autres axes | `axes-data.js`, `axes-sim.js`, loupes `zoom-*.js` | polycopié CEEDMM |
 | Physiologie surrénalienne | `surrenale.js` | polycopié, partie 1, p. 61-89, figure 26 |
 | Pancréas exocrine, endocrine et TNE | `pancreas.js`, `zoom-pancreas.js`, `css/pancreas.css` | SNFGE chap. 7 (2014) ; SFE item 308 (2022) ; TNCD chap. 11 (2026) |
+| Athérosclérose (loupe de l'axe des lipoprotéines) | `zoom-athero.js`, `css/zoom-athero.css` | polycopié partie 2 (p. 41) ; mécanismes en complément (consensus EAS 2017) ; Servier Arteries |
