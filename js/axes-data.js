@@ -75,7 +75,7 @@
 
   /* ===================== Axe corticotrope ===================== */
   AX.push({
-    id: 'cortico', card: { side: 'L', row: 1 }, color: 'p-gold', target: [761, 452],
+    id: 'cortico', card: { side: 'L', row: 1 }, color: 'p-gold', target: [762, 424],
     name: 'Axe corticotrope', sub: 'Hypothalamus · antéhypophyse · corticosurrénale', clock: 'day',
     hh: { x: 280, y: 341, s: 1.8, flip: true, inset: { cx: 300, cy: 480, r: 235 } },
     clockInfo: 'Le cortisol est le plus élevé en début de matinée et le plus bas le soir, du fait du rythme circadien de l\'ACTH.',
@@ -114,7 +114,7 @@
 
   /* ===================== Axe somatotrope ===================== */
   AX.push({
-    id: 'somato', card: { side: 'L', row: 2 }, color: 'p-sky', target: [790, 198],
+    id: 'somato', card: { side: 'L', row: 2 }, color: 'p-sky', target: [792, 168],
     name: 'Axe somatotrope', sub: 'Hypothalamus · antéhypophyse · foie', clock: 'day', startHour: 20,
     hh: { x: 280, y: 341, s: 1.8, flip: true, inset: { cx: 300, cy: 480, r: 235 } },
     clockInfo: 'La GH est sécrétée de façon pulsatile, particulièrement la nuit.',
@@ -145,7 +145,7 @@
 
   /* ===================== Axe lactotrope ===================== */
   AX.push({
-    id: 'lacto', card: { side: 'L', row: 3 }, color: 'p-magenta', target: [764, 352],
+    id: 'lacto', card: { side: 'L', row: 3 }, color: 'p-magenta', target: [756, 340],
     name: 'Axe lactotrope', sub: 'Hypothalamus · antéhypophyse · glande mammaire',
     hh: { x: 280, y: 341, s: 1.8, flip: true, inset: { cx: 300, cy: 480, r: 235 } },
     lead: 'La prolactine est la seule hormone antéhypophysaire freinée en permanence : la dopamine hypothalamique exerce un tonus inhibiteur. TRH et œstrogènes la stimulent. Il n\'y a pas de boucle de rétrocontrôle hormonal comme dans les quatre autres axes.',
@@ -168,7 +168,7 @@
 
   /* ===================== Posthypophyse : ADH et ocytocine ===================== */
   AX.push({
-    id: 'adh', card: { side: 'L', row: 4 }, color: 'p-sky', target: [760, 474],
+    id: 'adh', card: { side: 'L', row: 4 }, color: 'p-sky', target: [762, 452],
     name: 'Posthypophyse · ADH et ocytocine', sub: 'Hypothalamus · posthypophyse · rein · utérus, sein',
     hh: { x: 250, y: 330, s: 1.0, portal: false },
     levels: { x: 1350, y: 740, w: 190 },
@@ -211,7 +211,7 @@
 
   /* ===================== Médullosurrénale ===================== */
   AX.push({
-    id: 'medullo', card: { side: 'L', row: 5 }, color: 'p-red', target: [765, 456],
+    id: 'medullo', card: { side: 'L', row: 5 }, color: 'p-red', target: [766, 428],
     name: 'Médullosurrénale', sub: 'Système sympathique · cellules chromaffines · catécholamines',
     lead: 'Les nerfs splanchniques du système sympathique stimulent les cellules chromaffines, qui libèrent l\'adrénaline (80 à 95 %) et la noradrénaline (10 à 20 %) stockées dans leurs granules. Les glucocorticoïdes du cortex stimulent leur synthèse. Dans la cellule (et dans la tumeur), la COMT transforme en continu les catécholamines en métanéphrines : c\'est ce que l\'on dose.',
     points: ['Réaction de combat ou de fuite : fréquence cardiaque ↑, pression artérielle ↑, vasoconstriction.', 'Les catécholamines participent à la contre-régulation de l\'hypoglycémie ; leurs signes adrénergiques alertent le patient (polycopié, partie 2, p. 67).', 'Les glucocorticoïdes augmentent la tyrosine hydroxylase et la PNMT (polycopié p. 74) : seule la médullosurrénale, baignée de cortisol, fabrique beaucoup d\'adrénaline (complément).', 'Profil sécrétoire (complément) : adrénergique pur (métanéphrine ↑ seule, paroxysmes, tachycardie, hyperglycémie), mixte (métanéphrine et normétanéphrine ↑), noradrénergique (normétanéphrine ↑, HTA plus permanente ; paragangliomes extra-surrénaliens), dopaminergique (3-méthoxytyramine ↑, souvent peu d\'HTA ; paragangliomes, gène SDHB).'],
@@ -242,7 +242,7 @@
   /* ===================== Axe gonadotrope féminin ===================== */
   const e2Kind = (T) => (R.e2Positive(T) ? 'stim' : 'inhib');
   AX.push({
-    id: 'gonadoF', card: { side: 'R', row: 0 }, color: 'p-rose', target: [832, 592],
+    id: 'gonadoF', card: { side: 'R', row: 0 }, color: 'p-rose', target: [830, 522],
     name: 'Axe gonadotrope féminin', sub: 'GnRH pulsatile · LH, FSH · ovaire · cycle de 28 jours', clock: 'cycle',
     hh: { x: 280, y: 341, s: 1.8, flip: true, inset: { cx: 300, cy: 480, r: 235 } },
     lead: 'La GnRH pulsatile commande la LH et la FSH. La LH stimule la thèque interne (androgènes), la FSH la granulosa, qui les aromatise en estradiol. Le rétrocontrôle de l\'estradiol est négatif, sauf en milieu de cycle où il devient positif et déclenche le pic de LH et l\'ovulation.',
@@ -276,7 +276,7 @@
 
   /* ===================== Axe gonadotrope masculin ===================== */
   AX.push({
-    id: 'gonadoM', card: { side: 'R', row: 1 }, color: 'p-blue', target: [806, 638],
+    id: 'gonadoM', card: { side: 'R', row: 1 }, color: 'p-blue', target: [806, 576],
     name: 'Axe gonadotrope masculin', sub: 'GnRH pulsatile · LH, FSH · testicule', clock: 'day',
     hh: { x: 280, y: 341, s: 1.8, flip: true, inset: { cx: 300, cy: 480, r: 235 } },
     clockInfo: 'Pulses de GnRH environ toutes les 90 minutes (complément), suivis de pulses de LH.',
@@ -314,7 +314,7 @@
   const calc = (T) => 2.4 + 0.12 * Math.sin((2 * Math.PI * T.h) / 6);
   const pthLvl = (T) => HV.clamp(1 + (2.4 - calc(T)) * 6, 0.2, 2);
   AX.push({
-    id: 'phospho', card: { side: 'R', row: 2 }, color: 'p-green', target: [814, 258],
+    id: 'phospho', card: { side: 'R', row: 2 }, color: 'p-green', target: [814, 232],
     name: 'Métabolisme phosphocalcique', sub: 'Calcium · CaSR · PTH · calcitriol', clock: 'day',
     clockInfo: 'La calcémie oscille légèrement : quand elle baisse, le CaSR est moins activé et la PTH augmente.',
     lead: 'Le calcium ionisé active le récepteur sensible au calcium (CaSR) des parathyroïdes : quand la calcémie baisse, le CaSR est moins activé et la PTH est sécrétée. La PTH fait réabsorber le calcium par le rein, le libère de l\'os et stimule la production de calcitriol, qui augmente l\'absorption intestinale.',
@@ -342,7 +342,7 @@
 
   /* ===================== Système rénine-angiotensine-aldostérone ===================== */
   AX.push({
-    id: 'raa', card: { side: 'R', row: 3 }, color: 'p-teal', target: [840, 474],
+    id: 'raa', card: { side: 'R', row: 3 }, color: 'p-teal', target: [838, 452],
     name: 'Rénine-angiotensine-aldostérone', sub: 'Appareil juxtaglomérulaire · angiotensine II · zone glomérulée',
     lead: 'L\'appareil juxtaglomérulaire libère la rénine, qui déclenche une cascade aboutissant à l\'angiotensine II. Celle-ci stimule l\'aldostérone de la zone glomérulée. L\'aldostérone fait réabsorber le sodium et excréter le potassium et les ions H⁺ au tube distal et au canal collecteur. La kaliémie stimule aussi l\'aldostérone.',
     points: ['Aldostérone : rôle important dans la régulation de la pression artérielle par la rétention sodée.', 'Toutes les hormones corticostéroïdes dérivent du cholestérol ; son transport mitochondrial par StAR est l\'étape limitante.', 'L\'hypovolémie, la baisse de la pression artérielle ou de la perfusion rénale stimulent la rénine ; l\'expansion volémique la met au repos.'],
@@ -381,7 +381,7 @@
   const glu = (T) => HV.clamp((1.15 - gly(T)) * 3 + (T.h < 6 || T.h > 23 ? 0.4 : 0), 0.08, 2);
   const meal = (T) => HV.clamp(R.meals.reduce((a, m) => a + Math.exp(-Math.pow(((T.h - m + 24) % 24 - 0.5) / 0.5, 2)), 0) * 2, 0, 2);
   AX.push({
-    id: 'glyc', card: { side: 'R', row: 4 }, color: 'p-lime', target: [812, 484],
+    id: 'glyc', card: { side: 'R', row: 4 }, color: 'p-lime', target: [808, 441],
     name: 'Régulation de la glycémie', sub: 'Îlots de Langerhans · foie · muscle · tissu adipeux · rein', clock: 'day', startHour: 6,
     clockInfo: 'Repas à 7 h 30, 12 h 30 et 19 h 30. L\'insuline prédomine en journée, le glucagon la nuit.',
     clockLabel: (T) => n2(gly(T)) + ' g/L',
@@ -421,7 +421,7 @@
 
   /* ===================== Lipoprotéines ===================== */
   AX.push({
-    id: 'lipid', card: { side: 'R', row: 5 }, color: 'p-orange', target: [774, 436],
+    id: 'lipid', card: { side: 'R', row: 5 }, color: 'p-orange', target: [772, 404],
     name: 'Métabolisme des lipoprotéines', sub: 'Chylomicrons · VLDL · IDL · LDL · HDL · récepteur des LDL',
     lead: 'Le foie est au centre du métabolisme des LDL : l\'hépatocyte sécrète les VLDL, porte 70 % des récepteurs des LDL et sécrète la PCSK9, qui agit surtout sur ses propres récepteurs (complément). Dans le plasma, la lipoprotéine lipase transforme les VLDL en IDL puis en LDL. Le cholestérol internalisé freine l\'HMG-CoA réductase. Les HDL ramènent au foie le cholestérol des tissus.',
     points: ['70 % des récepteurs des LDL sont hépatiques, 30 % sur les autres cellules.', 'PCSK9, sécrétée par l\'hépatocyte, se fixe au récepteur des LDL et l\'oriente vers le lysosome au lieu du recyclage : moins de récepteurs, LDL plasmatique ↑.', 'Les statines freinent l\'HMG-CoA réductase : la cellule exprime plus de récepteurs (SREBP-2) et capte plus de LDL. Les anti-PCSK9 empêchent la dégradation des récepteurs (complément).', 'Objectif de LDL-c selon le risque cardiovasculaire : < 0,55, < 0,70, < 1,00 ou < 1,90 g/L ; l\'hypercholestérolémie familiale est d\'emblée à risque élevé.', 'Un LDL-c élevé se dépose dans la paroi artérielle (athérome) ; les HDL sont anti-athérogènes.'],

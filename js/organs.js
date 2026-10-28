@@ -68,11 +68,15 @@
     g.appendChild(brainArt);
     const hypo = solid(g, 'M -40,0 C -40,-14 -16,-22 6,-20 C 30,-18 44,-8 42,4 C 40,16 14,20 -6,18 C -26,16 -40,12 -40,0 Z', 'o-hypo');
     el('ellipse', { cx: -54, cy: 16, rx: 16, ry: 7, class: 'org o-chiasm art-hit', 'data-info': 'chiasm' }, g);
-    solid(g, 'M -6,16 C -10,50 4,80 8,118 L 22,118 C 18,80 14,48 12,16 Z', 'o-stalk', { 'data-info': 'stalk' });
+    solid(g, 'M -6,16 C -10,50 4,80 8,118 L 22,118 C 18,80 14,48 12,16 Z', 'o-stalk pit-stalk', { 'data-info': 'stalk' });
     el('path', { d: 'M -64,146 C -66,214 80,214 80,146', class: 'o-sella' }, g);
     el('path', { d: 'M -70,146 C -74,138 -60,132 -56,140 M 74,140 C 78,130 92,136 86,146', class: 'o-sella thin' }, g);
-    const ant = solid(g, 'M -54,152 C -54,124 -14,118 8,130 C 20,140 18,178 -4,188 C -28,196 -54,180 -54,152 Z', 'o-pit-ant');
-    const post = solid(g, 'M 10,134 C 26,120 58,126 60,150 C 62,174 36,186 20,176 C 26,162 24,146 10,134 Z', 'o-pit-post', { 'data-info': 'pit-post' });
+    // Hypophyse : dessin Servier (tige et deux lobes, antérieur à gauche) ; les lobes propres, posés
+    // par-dessus en teinte légère, gardent le code couleur antéhypophyse (bleu) / posthypophyse (gris).
+    art(g, 'servier/endo-pituitary-gland', -100, 72, 207, 127);
+    const ant = solid(g, 'M -54,152 C -54,124 -14,118 8,130 C 20,140 18,178 -4,188 C -28,196 -54,180 -54,152 Z', 'o-pit-ant pit-tint');
+    const post = solid(g, 'M 10,134 C 26,120 58,126 60,150 C 62,174 36,186 20,176 C 26,162 24,146 10,134 Z', 'o-pit-post pit-tint', { 'data-info': 'pit-post' });
+    [ant, post].forEach((p) => p.nextSibling && p.nextSibling.classList.add('art-hit'));
     return { hypo, ant, post };
   };
 
@@ -161,19 +165,20 @@
       draw(gg);
       return gg;
     };
-    L('brain', 0, -384, 0.95, O.brainLateral);
-    L('lungs', 0, -172, 1, (gg) => art(gg, 'lungs', -50, -46, 100, 94));
-    L('heart', 10, -170, 0.75, O.heart);
-    L('thyroid', 0, -284, 0.85, O.thyroidSmall);
-    L('liver', -26, -112, 0.95, O.liver);
-    L('stomach', 34, -114, 1, (gg) => art(gg, 'stomach', -18, -20, 36, 38));
+    // Positions dans le repère de la silhouette Servier (sommet du crâne -446, pieds 434).
+    L('brain', 0, -404, 0.62, O.brainLateral);
+    L('lungs', 0, -212, 1, (gg) => art(gg, 'lungs', -62, -58, 124, 116));
+    L('heart', 12, -200, 0.62, O.heart);
+    L('thyroid', 0, -312, 0.7, O.thyroidSmall);
+    L('liver', -28, -150, 0.8, O.liver);
+    L('stomach', 38, -146, 1, (gg) => art(gg, 'stomach', -18, -20, 36, 38));
     // Reins et surrénales (dessin Servier, retourné pour le côté droit du sujet)
     [-1, 1].forEach((k) => {
-      L('kidney', k * 40, -80, 1, (gg) => art(el('g', { transform: `scale(${-k} 1)` }, gg), 'servier/endo-kidney-adrenal', -12, -22, 24, 40), k < 0 ? 'kidney' : 'adrenal');
+      L('kidney', k * 38, -104, 1, (gg) => art(el('g', { transform: `scale(${-k} 1)` }, gg), 'servier/endo-kidney-adrenal', -12, -24, 24, 42), k < 0 ? 'kidney' : 'adrenal');
     });
-    L('pancreas', 10, -64, 1, (gg) => art(gg, 'pancreas', -28, -10, 56, 22));
-    L('uterus', 0, 48, 1, (gg) => art(gg, 'servier/endo-uterus', -36, -22, 72, 54), 'ovary');
-    L('testis', 0, 92, 1, (gg) => [-1, 1].forEach((k) => art(el('g', { transform: `scale(${k} 1)` }, gg), 'servier/endo-testis', -2, -14, 12, 28)));
+    L('pancreas', 8, -108, 1, (gg) => art(gg, 'pancreas', -26, -9, 52, 20));
+    L('uterus', 0, -24, 1, (gg) => art(gg, 'servier/endo-uterus', -34, -20, 68, 50), 'ovary');
+    L('testis', 0, 30, 1, (gg) => [-1, 1].forEach((k) => art(el('g', { transform: `scale(${k} 1)` }, gg), 'servier/endo-testis', -2, -14, 12, 28)));
   };
 
 
@@ -183,7 +188,9 @@
     el('ellipse', { cx: -2, cy: 14, rx: 9, ry: 5, class: 'org o-hypo' }, g);
   };
   O.pituitaryIcon = function (g) {
-    art(g, 'pituitary', -42, -48, 84, 80);
+    art(g, 'servier/endo-pituitary', -40, -48, 80, 86);
+    el('ellipse', { cx: -8, cy: 20, rx: 15, ry: 13, class: 'o-pit-ant pit-tint' }, g);
+    el('ellipse', { cx: 13, cy: 22, rx: 9, ry: 10, class: 'o-pit-post pit-tint' }, g);
   };
   O.kidney = function (g) {
     art(g, 'kidney', -30, -46, 60, 92);

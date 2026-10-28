@@ -93,9 +93,18 @@ Non copiés (trop lourds, > 300 Ko après svgo) : la zonation corticosurrénalie
 | [Dietetics](servier/SMART-Dietetics.jpg), [Risk-Factors](servier/SMART-Risk-Factors.jpg) | aliments ; tabac, obésité, rachitisme, mode de vie | iode, calcium, obésité |
 | [Drugs](servier/SMART-Drugs.jpg), [Medical-equipment](servier/SMART-Medical-equipment.jpg), [Medical-acts](servier/SMART-Medical-acts.jpg), [Chemistry](servier/SMART-Chemistry.jpg), [Emergency-equipment](servier/SMART-Emergency-equipment.jpg), [Bone-fractures](servier/SMART-Bone-fractures.jpg) | formes galéniques, matériel, gestes, verrerie, fractures | traitements, ostéoporose |
 
+## Kits découpés (part 1, part 2)
+
+| Kit | Contenu | Intérêt pour l'atlas |
+| --- | --- | --- |
+| [Veins part 1](servier/SMART-Veins-part-1.jpg) | 3-4 circulation veineuse (corps entier) · 5-8 réseaux profond, superficiel, tête et cou · 9-16 veines, tuniques, capillaires | **utilisé** : silhouette de la page générale (diapositive 3, peau seule, `veins-body-skin.svg`) |
+| [Digestive-system part 1](servier/SMART-Digestive-system-part-1.jpg) | 3-5 appareil digestif complet et éclaté · 7-12 bouche, dents · 13-16 estomac, paroi gastrique, péristaltisme · 17-19 foie, lobule, sécrétion biliaire · 20 pancréas | module pancréas (estomac, cellules pariétales, foie) |
+| [Digestive-system part 2](servier/SMART-Digestive-system-part-2.jpg) | 1-2 pancréas · 3 rate · 4-7 intestin grêle, villosités · 8-10 côlon, rectum · 11-19 ulcère, RGO, cirrhose, Crohn, polypes, cancer colique, lithiase | gastrinome (ulcères), VIPome (diarrhée), incrétines |
+| [Arteries-atherothrombosis part 1](servier/SMART-Arteries-atherothrombosis-part-1.jpg), [part 2](servier/SMART-Arteries-atherothrombosis-part-2.jpg) | athérome, remodelage, athérothrombose, dissection, angioplastie, stent | axe lipides ; **atlas cardio** |
+
 ## Kits trop lourds pour le connecteur Drive
 
 Le téléchargement par le connecteur Google Drive échoue au-delà d'environ 7 Mo : **Digestive-system**,
 **People**, **Veins**, **Bones**, **Dermatology**, **Animals**, **Arteries-atherothrombosis**, **Infectiology**
-n'ont pas pu être récupérés. Pour les traiter, les déposer dans le dépôt (par exemple dans un dossier
+n'ont pas pu être récupérés tels quels ; Digestive-system, Veins et Arteries-atherothrombosis ont été découpés en deux parties (ci-dessus). Restent : People, Bones, Dermatology, Animals, Infectiology et Veins part 2 (14 Mo). Pour les traiter, les déposer dans le dépôt (par exemple dans un dossier
 `servier-kits/`, éventuellement compressés en .zip) ou les découper en plusieurs fichiers.

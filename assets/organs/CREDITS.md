@@ -23,15 +23,15 @@ dossier `static/icons/cc-by-3.0/Human_physiology/Servier/`), licence **CC BY 3.0
 
 ## Kits SMART (CC BY 4.0) : dossier `servier/`
 
-Dessins des kits PowerPoint *SMART* (Endocrinology, Nervous system, Urinary system, Reproduction) de Servier Medical Art, licence **CC BY 4.0**
+Dessins des kits PowerPoint *SMART* (Endocrinology, Nervous system, Urinary system, Reproduction, Veins) de Servier Medical Art, licence **CC BY 4.0**
 (https://creativecommons.org/licenses/by/4.0/). Modifications : chaque dessin est isolé de sa diapositive,
 converti en SVG (`tools/pptx2svg.py`), le fond blanc retiré et le fichier allégé avec svgo ; formes et
-couleurs inchangées ; `endo-larynx-trachea.svg` est le dessin « cancer thyroïdien » (Endocrinology, diapositive 14) dont la thyroïde et la tumeur ont été retirées. Liste et diapositives d'origine : `docs/inventaire-servier.md`.
+couleurs inchangées ; `veins-body-skin.svg` est la silhouette de « Venous circulation » (Veins, diapositive 3) sans les veines ni les organes ; `endo-pituitary-gland.svg` est `endo-pituitary.svg` recadré sur la tige et les lobes ; `endo-larynx-trachea.svg` est le dessin « cancer thyroïdien » (Endocrinology, diapositive 14) dont la thyroïde et la tumeur ont été retirées. Liste et diapositives d'origine : `docs/inventaire-servier.md`.
 
 ## Dessins originaux de l'atlas
 
 Générés par `tools/organs_svg.py` dans le même esprit (dégradé, ombre interne, texture) : `pituitary.svg`
-(icône à antéhypophyse et posthypophyse distinctes) et `ovary.svg` (plus utilisé : remplacé par l'ovaire du kit Reproduction). Le script sait
+(plus utilisé : remplacé par l'hypophyse Servier teintée) et `ovary.svg` (plus utilisé : remplacé par l'ovaire du kit Reproduction). Le script sait
 aussi produire thyroïde, parathyroïdes, surrénale, testicule, utérus et sein, remplacés par les dessins Servier.
 Pour les modifier : éditer le script puis `python3 tools/organs_svg.py <dossier>`.
 
