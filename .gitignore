@@ -1,3 +1,4 @@
 .claude/worktrees/
 exports/
 docs/tools/captures/
+__pycache__/
