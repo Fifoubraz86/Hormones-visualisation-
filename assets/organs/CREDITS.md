@@ -23,10 +23,10 @@ dossier `static/icons/cc-by-3.0/Human_physiology/Servier/`), licence **CC BY 3.0
 
 ## Kits SMART (CC BY 4.0) : dossier `servier/`
 
-Dessins des kits PowerPoint *SMART* (Endocrinology, Nervous system, Urinary system, Reproduction, Veins) de Servier Medical Art, licence **CC BY 4.0**
+Dessins des kits PowerPoint *SMART* (Endocrinology, Nervous system, Urinary system, Reproduction, Veins, Digestive system) de Servier Medical Art, licence **CC BY 4.0**
 (https://creativecommons.org/licenses/by/4.0/). Modifications : chaque dessin est isolé de sa diapositive,
 converti en SVG (`tools/pptx2svg.py`), le fond blanc retiré et le fichier allégé avec svgo ; formes et
-couleurs inchangées ; `veins-body-skin.svg` est la silhouette de « Venous circulation » (Veins, diapositive 3) sans les veines ni les organes ; `endo-pituitary-gland.svg` est `endo-pituitary.svg` recadré sur la tige et les lobes ; `endo-larynx-trachea.svg` est le dessin « cancer thyroïdien » (Endocrinology, diapositive 14) dont la thyroïde et la tumeur ont été retirées. Liste et diapositives d'origine : `docs/inventaire-servier.md`.
+couleurs inchangées ; les fichiers `dig-pancreas-duct`, `dig-duodenum` et `dig-spleen` sont les SVG intégrés tels quels au kit Digestive system (part 2, diapositive 2), le premier recadré ; `dig-gallstones` réunit la vésicule et deux groupes de calculs de la diapositive « Biliary lithiasis » ; `veins-body-skin.svg` est la silhouette de « Venous circulation » (Veins, diapositive 3) sans les veines ni les organes ; `endo-pituitary-gland.svg` est `endo-pituitary.svg` recadré sur la tige et les lobes ; `endo-larynx-trachea.svg` est le dessin « cancer thyroïdien » (Endocrinology, diapositive 14) dont la thyroïde et la tumeur ont été retirées. Liste et diapositives d'origine : `docs/inventaire-servier.md`.
 
 ## Dessins originaux de l'atlas
 

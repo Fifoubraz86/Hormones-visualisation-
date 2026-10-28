@@ -98,8 +98,8 @@ Non copiés (trop lourds, > 300 Ko après svgo) : la zonation corticosurrénalie
 | Kit | Contenu | Intérêt pour l'atlas |
 | --- | --- | --- |
 | [Veins part 1](servier/SMART-Veins-part-1.jpg) | 3-4 circulation veineuse (corps entier) · 5-8 réseaux profond, superficiel, tête et cou · 9-16 veines, tuniques, capillaires | **utilisé** : silhouette de la page générale (diapositive 3, peau seule, `veins-body-skin.svg`) |
-| [Digestive-system part 1](servier/SMART-Digestive-system-part-1.jpg) | 3-5 appareil digestif complet et éclaté · 7-12 bouche, dents · 13-16 estomac, paroi gastrique, péristaltisme · 17-19 foie, lobule, sécrétion biliaire · 20 pancréas | module pancréas (estomac, cellules pariétales, foie) |
-| [Digestive-system part 2](servier/SMART-Digestive-system-part-2.jpg) | 1-2 pancréas · 3 rate · 4-7 intestin grêle, villosités · 8-10 côlon, rectum · 11-19 ulcère, RGO, cirrhose, Crohn, polypes, cancer colique, lithiase | gastrinome (ulcères), VIPome (diarrhée), incrétines |
+| [Digestive-system part 1](servier/SMART-Digestive-system-part-1.jpg) | 3-5 appareil digestif complet et éclaté · 7-12 bouche, dents · 13-16 estomac, paroi gastrique, péristaltisme · 17-19 foie, lobule, sécrétion biliaire · 20 pancréas | **utilisé** : module pancréas (foie, estomac, cellules pariétales, paroi gastrique) |
+| [Digestive-system part 2](servier/SMART-Digestive-system-part-2.jpg) | 1-2 pancréas · 3 rate · 4-7 intestin grêle, villosités · 8-10 côlon, rectum · 11-19 ulcère, RGO, cirrhose, Crohn, polypes, cancer colique, lithiase | **utilisé** : pancréas avec canal de Wirsung (SVG intégré, diapositive 2), vésicule et lithiase, intestin grêle, villosités, ulcère gastrique (loupes des TNE) |
 | [Arteries-atherothrombosis part 1](servier/SMART-Arteries-atherothrombosis-part-1.jpg), [part 2](servier/SMART-Arteries-atherothrombosis-part-2.jpg) | athérome, remodelage, athérothrombose, dissection, angioplastie, stent | axe lipides ; **atlas cardio** |
 
 ## Kits trop lourds pour le connecteur Drive

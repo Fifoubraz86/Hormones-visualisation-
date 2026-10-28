@@ -22,6 +22,14 @@
     return im;
   }
   HV.organArt = art;
+  // Pose un dessin sur l'emprise d'un tracé existant (élément déjà dans le document), qui reste dessous comme zone de survol.
+  HV.dressArt = function (shape, name, pad) {
+    const bb = shape.getBBox(), k = pad || 0;
+    const im = art(shape.parentNode, name, bb.x - k, bb.y - k, bb.width + 2 * k, bb.height + 2 * k);
+    shape.parentNode.insertBefore(im, shape.nextSibling);
+    shape.classList.add('pz-under');
+    return im;
+  };
   const mirror = (d) => d.replace(/(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/g, (m, x, y) => -parseFloat(x) + ',' + y);
 
   const O = {};
