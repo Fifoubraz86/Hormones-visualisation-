@@ -67,7 +67,7 @@
     g.querySelectorAll('.o-brain, .o-gyrus, .o-callosum, .o-cerebellum, .o-brainstem, .org-shine').forEach((p) => p.classList.add('art-hit'));
     g.appendChild(brainArt);
     const hypo = solid(g, 'M -40,0 C -40,-14 -16,-22 6,-20 C 30,-18 44,-8 42,4 C 40,16 14,20 -6,18 C -26,16 -40,12 -40,0 Z', 'o-hypo');
-    el('ellipse', { cx: -54, cy: 16, rx: 16, ry: 7, class: 'org o-chiasm', 'data-info': 'chiasm' }, g);
+    el('ellipse', { cx: -54, cy: 16, rx: 16, ry: 7, class: 'org o-chiasm art-hit', 'data-info': 'chiasm' }, g);
     solid(g, 'M -6,16 C -10,50 4,80 8,118 L 22,118 C 18,80 14,48 12,16 Z', 'o-stalk', { 'data-info': 'stalk' });
     el('path', { d: 'M -64,146 C -66,214 80,214 80,146', class: 'o-sella' }, g);
     el('path', { d: 'M -70,146 C -74,138 -60,132 -56,140 M 74,140 C 78,130 92,136 86,146', class: 'o-sella thin' }, g);
@@ -99,7 +99,7 @@
       el('path', { d: 'M -2,26 C -6,60 -12,100 -20,138', class: 'hh-vein' }, po);
       el('path', { d: 'M 4,26 C 2,60 -4,100 -12,136', class: 'hh-vein' }, po);
       el('path', { d: 'M -40,146 C -34,138 -26,150 -18,142 C -10,150 -4,140 2,150 M -42,162 C -34,154 -26,166 -18,158 C -10,166 -4,156 4,166', class: 'hh-plexus2' }, po);
-      el('ellipse', { cx: -54, cy: 16, rx: 16, ry: 7, class: 'org o-chiasm', 'data-info': 'chiasm' }, g);
+      el('ellipse', { cx: -54, cy: 16, rx: 16, ry: 7, class: 'org o-chiasm art-hit', 'data-info': 'chiasm' }, g);
     }
     return parts;
   };
@@ -113,6 +113,9 @@
     el('circle', { cx: -70, cy: -64, r: 20, class: 'neph-glom' }, g);
     el('path', { d: 'M -52,-56 C -30,-50 -40,-30 -20,-24 C 0,-18 -20,0 -8,20 L -8,100 C -8,116 14,116 14,100 L 14,20 C 14,-10 30,-20 44,-40 C 54,-56 62,-70 70,-70', class: 'neph-tube' }, g);
     el('path', { d: 'M 70,-100 L 70,112', class: 'neph-cd', 'data-info': 'cd' }, g);
+    // Dessin Servier par-dessus ; les tracés ci-dessus restent comme zones de survol.
+    g.querySelectorAll('path, circle').forEach((p) => p.classList.add('art-hit'));
+    art(g, 'servier/uri-nephron', -100, -124, 200, 260);
   };
 
   /* Cerveau, vue latérale */
@@ -159,30 +162,18 @@
       return gg;
     };
     L('brain', 0, -384, 0.95, O.brainLateral);
-    const lung = 'M -8,-40 C -26,-40 -40,-10 -42,22 C -44,40 -30,46 -14,40 C -4,36 -2,20 -4,0 C -4,-20 0,-40 -8,-40 Z';
-    L('lungs', -40, -180, 1, (gg) => solid(gg, lung, 'o-lung'));
-    L('lungs', 40, -180, 1, (gg) => solid(gg, mirror(lung), 'o-lung'));
+    L('lungs', 0, -172, 1, (gg) => art(gg, 'lungs', -50, -46, 100, 94));
     L('heart', 10, -170, 0.75, O.heart);
     L('thyroid', 0, -284, 0.85, O.thyroidSmall);
     L('liver', -26, -112, 0.95, O.liver);
-    L('stomach', 34, -112, 1, (gg) => solid(gg, 'M -10,-14 C 0,-20 14,-14 14,-2 C 14,12 2,18 -10,16 C -4,8 -4,0 -10,-14 Z', 'o-stomach'));
-    const kidney = 'M -6,-14 C 4,-16 10,-6 10,2 C 10,12 4,18 -4,16 C -10,14 -6,6 -2,2 C -6,-2 -12,-10 -6,-14 Z';
-    const adr = 'M -8,4 C -8,-4 -2,-10 4,-8 C 8,-6 8,2 6,4 Z';
+    L('stomach', 34, -114, 1, (gg) => art(gg, 'stomach', -18, -20, 36, 38));
+    // Reins et surrénales (dessin Servier, retourné pour le côté droit du sujet)
     [-1, 1].forEach((k) => {
-      L('kidney', k * 40, -74, 1, (gg) => solid(gg, k < 0 ? mirror(kidney) : kidney, 'o-kidney'));
-      L('adrenal', k * 39, -96, 1, (gg) => solid(gg, k < 0 ? mirror(adr) : adr, 'o-adrenal'));
+      L('kidney', k * 40, -80, 1, (gg) => art(el('g', { transform: `scale(${-k} 1)` }, gg), 'servier/endo-kidney-adrenal', -12, -22, 24, 40), k < 0 ? 'kidney' : 'adrenal');
     });
-    L('pancreas', 10, -64, 1, (gg) => solid(gg, 'M -22,2 C -22,-6 -10,-6 0,-4 C 12,-2 22,-6 26,-2 C 28,2 20,6 8,6 C -4,6 -14,10 -22,2 Z', 'o-pancreas'));
-    L('uterus', 0, 50, 1, (gg) => {
-      solid(gg, 'M -9,-12 C -9,-18 9,-18 9,-12 C 9,0 4,10 0,14 C -4,10 -9,0 -9,-12 Z', 'o-gonad');
-      line(gg, 'M -9,-12 C -18,-16 -26,-12 -30,-8 M 9,-12 C 18,-16 26,-12 30,-8', 'o-tube');
-      el('ellipse', { cx: -32, cy: -6, rx: 6, ry: 4, class: 'org o-gonad', 'data-info': 'ovary' }, gg);
-      el('ellipse', { cx: 32, cy: -6, rx: 6, ry: 4, class: 'org o-gonad', 'data-info': 'ovary' }, gg);
-    }, 'ovary');
-    L('testis', 0, 90, 1, (gg) => { // juste sous le pubis
-      el('ellipse', { cx: -7, cy: 0, rx: 6, ry: 8, class: 'org o-gonad' }, gg);
-      el('ellipse', { cx: 7, cy: 0, rx: 6, ry: 8, class: 'org o-gonad' }, gg);
-    });
+    L('pancreas', 10, -64, 1, (gg) => art(gg, 'pancreas', -28, -10, 56, 22));
+    L('uterus', 0, 48, 1, (gg) => art(gg, 'servier/endo-uterus', -36, -22, 72, 54), 'ovary');
+    L('testis', 0, 92, 1, (gg) => [-1, 1].forEach((k) => art(el('g', { transform: `scale(${k} 1)` }, gg), 'servier/endo-testis', -2, -14, 12, 28)));
   };
 
 
@@ -204,7 +195,7 @@
     art(g, 'servier/endo-testis', -24, -46, 48, 92);
   };
   O.ovary = function (g) {
-    art(g, 'ovary', -36, -28, 72, 56);
+    art(g, 'servier/repro-ovary-cycle', -50, -30, 100, 58);
   };
   O.uterus = function (g) {
     art(g, 'servier/endo-uterus', -56, -40, 112, 82);

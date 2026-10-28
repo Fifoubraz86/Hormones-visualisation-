@@ -69,18 +69,33 @@ Non copiés (trop lourds, > 300 Ko après svgo) : la zonation corticosurrénalie
 | [General-items](servier/SMART-General-items.jpg) | bulles, flèches, doigts, balances, cadenas, robinet, feux, horloges | pictogrammes (rythme circadien, balance hormonale) |
 | [World-maps](servier/SMART-World-maps.jpg) | monde, Europe, France, Île-de-France, continents | épidémiologie (carence iodée) |
 
-## Kits absents du dossier
+## Kits ajoutés ensuite (25 de plus, 41 en tout)
 
-Servier publie d'autres kits qui ne sont pas dans le dossier Drive ; ils seraient nécessaires pour :
+| Kit | Diapositives utiles | Intérêt pour l'atlas |
+| --- | --- | --- |
+| [Nervous-system](servier/SMART-Nervous-system.jpg) | 5-9 coupes sagittales (hypothalamus, hypophyse) · 12 noyau suprachiasmatique et zoom hypothalamo-hypophysaire · 17 polygone de Willis · 31-32 sympathique, parasympathique | **utilisé** : coupe sagittale des axes hypophysaires ; rythmes circadiens, médullosurrénale |
+| [Urinary-system](servier/SMART-Urinary-system.jpg) | 4-6 rein, coupe, vascularisation · 7-9 néphron · 10 corpuscule rénal · 11 artériole afférente · 17 HTA rénovasculaire | **utilisé** : néphron (axe ADH) ; RAA (appareil juxtaglomérulaire), phosphocalcique |
+| [Reproduction](servier/SMART-Reproduction.jpg) | 3 appareils génitaux · 4 utérus · 5 ovaire et ovocyte · 6-7 cycle ovarien · 8 cycle utérin · 9 testicule · 10 spermatogenèse | **utilisé** : ovaire ; folliculogenèse, endomètre, tube séminifère |
+| [Diabetes](servier/SMART-Diabetes.jpg) | 3 pancréas, îlot · 4-5 glycémie capillaire · 7 rétinopathie · 8 néphropathie · 9-12 pied diabétique · 13 neuropathies | axe glycémie, complications du diabète |
+| [Bone-structure](servier/SMART-Bone-structure.jpg) | 3 ostéon · 5-9 ostéoclastes, ostéoblastes, ostéocytes · 14-16 cycle du remodelage · 19-20 hydroxyapatite · 21 ostéoporose | phosphocalcique (remodelage osseux, PTH) |
+| [Heart-physiology](servier/SMART-Heart-physiology.jpg) | 3-8 cœur · 9 coronaires · 11 conduction · 12 cycle cardiaque · 17 cardiomyocytes · 21 ECG | **atlas cardio** ; hormones thyroïdiennes, peptides natriurétiques |
+| [Heart-pathophysiology](servier/SMART-Heart-pathophysiology.jpg) | insuffisance cardiaque, valvulopathies, endocardite, infarctus, remodelage, hypertrophie | **atlas cardio** |
+| [Arteries-physiology](servier/SMART-Arteries-physiology.jpg) | circulation artérielle, aorte, tuniques, endothélium, vasoconstriction, capillaires, pression artérielle | RAA, catécholamines ; atlas cardio |
+| [Arteries-pathophysiology](servier/SMART-Arteries-pathophysiology.jpg) | hypertrophie artérielle, anévrismes, œdème, pression artérielle, pouls | HTA endocrine ; atlas cardio |
+| [Receptors-channels](servier/SMART-Receptors-channels.jpg) | 3-5 récepteurs · 6-14 canaux · 15-17 transporteurs, pompe Na/K · 18 récepteur sensible au calcium · 19 ions | loupes cellulaires (CaSR, canaux K-ATP, NIS) |
+| [Cell-membrane](servier/SMART-Cell-membrane.jpg) | cellules vides, vacuoles, membrane, endocytose, exocytose | loupes cellulaires (sécrétion) |
+| [Intracellular-components](servier/SMART-Intracellular-components.jpg) | Golgi, RE, mitochondries, noyau, protéines, cellule animale | stéroïdogenèse (mitochondrie, RE), synthèse des peptides |
+| [Nucleic-acids](servier/SMART-Nucleic-acids.jpg) | ADN, ARN, transcription, traduction | récepteurs nucléaires (T3, stéroïdes) |
+| [Neural-cells](servier/SMART-Neural-cells.jpg) | neurones, glie, synapses, jonction neuromusculaire | neurones hypothalamiques, médullosurrénale |
+| [Muscles](servier/SMART-Muscles.jpg) | musculature, sarcomère, contraction | cibles (GH, cortisol, hormones thyroïdiennes) |
+| [Embryology](servier/SMART-Embryology.jpg) | grossesse, embryon, fœtus, circulation fœtale, croissance osseuse | thyroïde et grossesse, GH (cartilage de croissance) |
+| [Paraclinical-exams](servier/SMART-Paraclinical-exams.jpg) | ECG, échographie, radiographie, densitométrie, scanner, IRM, scintigraphie | imagerie (scintigraphie, densitométrie) |
+| [Dietetics](servier/SMART-Dietetics.jpg), [Risk-Factors](servier/SMART-Risk-Factors.jpg) | aliments ; tabac, obésité, rachitisme, mode de vie | iode, calcium, obésité |
+| [Drugs](servier/SMART-Drugs.jpg), [Medical-equipment](servier/SMART-Medical-equipment.jpg), [Medical-acts](servier/SMART-Medical-acts.jpg), [Chemistry](servier/SMART-Chemistry.jpg), [Emergency-equipment](servier/SMART-Emergency-equipment.jpg), [Bone-fractures](servier/SMART-Bone-fractures.jpg) | formes galéniques, matériel, gestes, verrerie, fractures | traitements, ostéoporose |
 
-| Kit Servier (nom sur smart.servier.com) | Pour |
-| --- | --- |
-| Cardiovascular system (cœur, valves, coronaires, ECG, artères, athérome) | **atlas cardio** ; axe RAA (cœur, vaisseaux), phéochromocytome, peptides natriurétiques |
-| Digestive system (estomac, intestin, foie, voies biliaires, pancréas exocrine) | module pancréas (tube digestif détaillé), axe glycémie (foie, incrétines) |
-| Nervous system (encéphale, hypothalamus, moelle, nerfs) | hypothalamus, voies neuro-endocrines |
-| Urinary system (rein, néphron, vessie) | axe ADH, RAA, phosphocalcique (néphron) |
-| Reproductive system / Pregnancy (organes génitaux, ovaire, folliculogenèse, grossesse) | axes gonadotropes, ovaire (encore dessiné à la main), grossesse |
-| Musculoskeletal system (os, remodelage, muscle) | phosphocalcique (os), GH |
-| Skin, Cellular biology (récepteurs, membrane, organites) | loupes cellulaires, mécanismes hormonaux |
+## Kits trop lourds pour le connecteur Drive
 
-Les déposer dans le même dossier Drive suffit : `servier_index.py` puis `pptx2svg.py` les traitent de la même façon.
+Le téléchargement par le connecteur Google Drive échoue au-delà d'environ 7 Mo : **Digestive-system**,
+**People**, **Veins**, **Bones**, **Dermatology**, **Animals**, **Arteries-atherothrombosis**, **Infectiology**
+n'ont pas pu être récupérés. Pour les traiter, les déposer dans le dépôt (par exemple dans un dossier
+`servier-kits/`, éventuellement compressés en .zip) ou les découper en plusieurs fichiers.
