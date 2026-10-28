@@ -55,6 +55,5 @@
 .zgl-mark { fill: var(--accent); stroke: var(--scene-1); stroke-width: 4; }
 /* Planches Servier du pas à pas (complications) et silhouette */
 .zgl-card rect { fill: var(--panel); stroke: var(--line-2); stroke-width: 2; }
-.zgl-bodyg .org-art { filter: drop-shadow(0 0 1px rgba(120, 80, 70, 0.7)) drop-shadow(0 2px 6px rgba(60, 40, 40, 0.15)); }
-.zgl-bodyg ~ g .zgl-art, g[data-info="zgl-c-carot"] .zgl-art, g[data-info="zgl-c-aomi"] .zgl-art { stroke-width: 3.5; opacity: 0.85; }
 g[data-info="zgl-c-nerve"] .zgl-nerve { stroke-width: 2.5; }
+.zgl-hit { fill: transparent; stroke: transparent; stroke-width: 16; }

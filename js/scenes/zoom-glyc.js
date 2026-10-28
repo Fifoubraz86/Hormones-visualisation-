@@ -687,36 +687,28 @@
       a.frame('Complications du diabète', 'Microangiopathie · macroangiopathie · pied diabétique');
       cp.sim = HV.scenes.glyc.sim;
       const BX = 557;
-      // Silhouette Servier (Veins, diapositive 3) ; repères mesurés sur le dessin : tête (557, 270),
-      // cœur (580, 440), reins (528 et 588, 520), bifurcation aortique (557, 585), pieds (520 et 595, 935).
-      const body = a.el('g', { class: 'zgl-bodyg body-skin' });
-      HV.organArt(body, 'servier/veins-body-skin', 423, 232, 274, 715);
-      // Yeux
-      const eye = a.el('g', { 'data-info': 'zgl-c-retina' });
-      a.el('circle', { cx: BX - 11, cy: 268, r: 6, class: 'zgl-eye' }, eye);
-      a.el('circle', { cx: BX + 11, cy: 268, r: 6, class: 'zgl-eye' }, eye);
-      // Carotides
-      const car = a.el('g', { 'data-info': 'zgl-c-carot' });
-      a.path(`M ${BX - 8},372 L ${BX - 10},318 M ${BX + 8},372 L ${BX + 10},318`, 'zgl-art', car);
-      // Artères : aorte, iliaques, axes des membres inférieurs
-      const leg = a.el('g', { 'data-info': 'zgl-c-aomi' });
-      a.path(`M ${BX},380 L ${BX},585 M ${BX},585 L ${BX - 26},640 L ${BX - 33},780 L ${BX - 38},915 M ${BX},585 L ${BX + 26},640 L ${BX + 33},780 L ${BX + 38},915`, 'zgl-art', leg);
-      // Nerfs des membres inférieurs
-      const nerve = a.el('g', { 'data-info': 'zgl-c-nerve' });
-      a.path(`M ${BX - 14},600 L ${BX - 44},700 L ${BX - 47},800 L ${BX - 45},912 M ${BX + 14},600 L ${BX + 44},700 L ${BX + 47},800 L ${BX + 46},912`, 'zgl-nerve', nerve);
-      // Cœur (Servier)
-      const heart = a.el('g', { 'data-info': 'zgl-c-coro', transform: `translate(${BX + 22} 438) scale(0.6)` });
-      HV.organs.heart(heart);
-      // Reins (kit Diabetes) : normaux, ou néphropathie quand l'hyperglycémie dure
+      // Arbre artériel Servier (Arteries-physiology, diapositive 3) : cœur, aorte, carotides, reins et artères
+      // des membres dessinés ; tête de profil. Repères mesurés sur le dessin : œil (590, 293), cœur (565, 438),
+      // reins (527 et 592, 505), axes artériels des jambes (532 et 588, 800), pieds (528 et 594, 928).
+      const body = a.el('g', { class: 'zgl-bodyg' });
+      HV.organArt(body, 'servier/art-tree', 415, 232, 285, 715);
+      // Zones de survol (transparentes) posées sur le dessin
+      const zone = (info, el) => { const z = a.el('g', { 'data-info': info }); el(z); return z; };
+      zone('zgl-c-retina', (z) => a.el('circle', { cx: 590, cy: 293, r: 6, class: 'zgl-eye' }, z));
+      zone('zgl-c-carot', (z) => a.path('M 548,372 L 548,320 M 560,372 L 562,320', 'zgl-hit', z));
+      zone('zgl-c-coro', (z) => a.el('circle', { cx: 565, cy: 438, r: 38, class: 'zgl-hit' }, z));
+      zone('zgl-c-aomi', (z) => a.path('M 545,600 L 532,800 L 532,910 M 575,600 L 588,800 L 590,910', 'zgl-hit', z));
+      // Nerfs des membres inférieurs (en pointillés, à côté des axes artériels)
+      zone('zgl-c-nerve', (z) => a.path('M 518,640 L 514,760 L 518,900 M 606,640 L 610,760 L 606,900', 'zgl-nerve', z));
+      // Reins : ceux du dessin ; la néphropathie (kit Diabetes) les recouvre pendant la démonstration
       const kid = a.el('g', { 'data-info': 'zgl-c-kidney' });
+      a.el('ellipse', { cx: 527, cy: 505, rx: 18, ry: 26, class: 'zgl-hit' }, kid);
+      a.el('ellipse', { cx: 592, cy: 505, rx: 18, ry: 26, class: 'zgl-hit' }, kid);
       const kidN = a.el('g', null, kid), kidD = a.el('g', { opacity: 0 }, kid);
-      [[-1, BX - 30], [1, BX + 30]].forEach(([k, x]) => {
-        HV.organArt(a.el('g', { transform: `translate(${x} 520) scale(${-k} 1)` }, kidN), 'servier/diab-kidney-normal', -16, -27, 32, 54);
-        HV.organArt(a.el('g', { transform: `translate(${x} 520) scale(${-k} 1)` }, kidD), 'servier/diab-kidney-nephro', -16, -27, 32, 54);
-      });
+      [[1, 527], [-1, 592]].forEach(([k, x]) => HV.organArt(a.el('g', { transform: `translate(${x} 505) scale(${k} 1)` }, kidD), 'servier/diab-kidney-nephro', -18, -27, 36, 54));
       // Pied : mal perforant plantaire
       const foot = a.el('g', { 'data-info': 'zgl-c-foot' });
-      a.el('circle', { cx: BX + 40, cy: 932, r: 8, class: 'zgl-ulcer' }, foot);
+      a.el('circle', { cx: 600, cy: 930, r: 7, class: 'zgl-ulcer' }, foot);
       // Encadrés : microangiopathie à gauche, macroangiopathie à droite
       const box = (x, y, w, h, color, title, lines, info, figs, dot) => {
         const gB = a.el('g', { 'data-info': info });
@@ -729,16 +721,16 @@
       };
       a.text(60, 196, 'Microangiopathie', 'lbl-h', { attrs: { 'data-info': 'zgl-c-micro' } });
       a.text(60, 220, 'spécifique du diabète · dépistage annuel', 'note', { attrs: { 'data-info': 'zgl-c-micro' } });
-      const ret = box(60, 240, 340, 150, 'p-violet', 'Rétinopathie', ['Occlusion capillaire → ischémie', '→ RD proliférante ; hyper-', 'perméabilité → œdème maculaire.'], 'zgl-c-retina', ['47'], `M 400,300 L ${BX - 18},270`);
-      const nep = box(60, 410, 340, 175, 'p-violet', 'Néphropathie', ['Hyperfiltration, puis albuminurie', '↑ et DFG ↓. Première cause', 'd\'insuffisance rénale terminale', '(avec l\'HTA).'], 'zgl-c-kidney', ['48'], `M 400,500 L ${BX - 46},515`);
-      const neu = box(60, 605, 340, 175, 'p-violet', 'Neuropathie', ['Polyneuropathie distale, symé-', 'trique, « en chaussettes » ;', 'mononeuropathies ; neuropathie', 'végétative.'], 'zgl-c-nerve', ['49', '50'], `M 400,700 L ${BX - 46},720`);
+      const ret = box(60, 240, 340, 150, 'p-violet', 'Rétinopathie', ['Occlusion capillaire → ischémie', '→ RD proliférante ; hyper-', 'perméabilité → œdème maculaire.'], 'zgl-c-retina', ['47'], `M 400,300 L 584,294`);
+      const nep = box(60, 410, 340, 175, 'p-violet', 'Néphropathie', ['Hyperfiltration, puis albuminurie', '↑ et DFG ↓. Première cause', 'd\'insuffisance rénale terminale', '(avec l\'HTA).'], 'zgl-c-kidney', ['48'], `M 400,500 L 509,505`);
+      const neu = box(60, 605, 340, 175, 'p-violet', 'Neuropathie', ['Polyneuropathie distale, symé-', 'trique, « en chaussettes » ;', 'mononeuropathies ; neuropathie', 'végétative.'], 'zgl-c-nerve', ['49', '50'], `M 400,700 L 514,720`);
       a.text(60, 815, ['Neuropathie végétative : hypotension', 'orthostatique, gastroparésie, troubles', 'mictionnels, dysfonction érectile.'], 'note', { lh: 1.3, attrs: { 'data-info': 'zgl-c-auto' } });
       a.text(1080, 196, 'Macroangiopathie', 'lbl-h', { anchor: 'end', attrs: { 'data-info': 'zgl-c-macro' } });
       a.text(1080, 220, 'précoce, diffuse, distale, sévère', 'note', { anchor: 'end', attrs: { 'data-info': 'zgl-c-macro' } });
-      const carB = box(740, 240, 340, 110, 'p-red', 'Carotides, cerveau', ['Atteinte cérébrale artérielle :', 'auscultation vasculaire.'], 'zgl-c-carot', null, `M 740,295 L ${BX + 14},330`);
-      const corB = box(740, 370, 340, 140, 'p-red', 'Coronaires', ['Ischémie souvent silencieuse :', 'déséquilibre inexpliqué, dyspnée', 'd\'effort. ECG de repos annuel.'], 'zgl-c-coro', null, `M 740,430 L ${BX + 42},438`);
-      const aoB = box(740, 530, 340, 140, 'p-red', 'Membres inférieurs (AOMI)', ['Distale (axes jambiers). IPS :', 'artérite < 0,9 ; médiacalcose', '> 1,3.'], 'zgl-c-aomi', ['57'], `M 740,600 L ${BX + 34},700`);
-      const ftB = box(740, 690, 340, 200, 'p-amber', 'Pied diabétique', ['Neuropathie : facteur principal', 'de plaie. Artérite et infection :', 'facteurs majeurs d\'amputation.', 'Mal perforant, pied de Charcot.', 'Grade de risque podologique 0 à 3.'], 'zgl-c-foot', ['51', '52A', '52B', '52C', '52D', '53', '54A', '54B', '54C', '55', '56', '58', '59'], `M 740,850 L ${BX + 48},928`);
+      const carB = box(740, 240, 340, 110, 'p-red', 'Carotides, cerveau', ['Atteinte cérébrale artérielle :', 'auscultation vasculaire.'], 'zgl-c-carot', null, `M 740,295 L 562,340`);
+      const corB = box(740, 370, 340, 140, 'p-red', 'Coronaires', ['Ischémie souvent silencieuse :', 'déséquilibre inexpliqué, dyspnée', 'd\'effort. ECG de repos annuel.'], 'zgl-c-coro', null, `M 740,430 L 603,438`);
+      const aoB = box(740, 530, 340, 140, 'p-red', 'Membres inférieurs (AOMI)', ['Distale (axes jambiers). IPS :', 'artérite < 0,9 ; médiacalcose', '> 1,3.'], 'zgl-c-aomi', ['57'], `M 740,600 L 590,700`);
+      const ftB = box(740, 690, 340, 200, 'p-amber', 'Pied diabétique', ['Neuropathie : facteur principal', 'de plaie. Artérite et infection :', 'facteurs majeurs d\'amputation.', 'Mal perforant, pied de Charcot.', 'Grade de risque podologique 0 à 3.'], 'zgl-c-foot', ['51', '52A', '52B', '52C', '52D', '53', '54A', '54B', '54C', '55', '56', '58', '59'], `M 740,850 L 606,926`);
       // Mécanismes
       const MX = 1110;
       a.el('rect', { x: MX, y: 170, width: 440, height: 770, rx: 22, class: 'side-box' });
@@ -803,11 +795,11 @@
       HV.spotlight(cp, a, [
         { t: 'Le temps et le niveau de la glycémie', d: 'Démonstration : hyperglycémie prolongée (les cadres s\'allument). Les complications chroniques dépendent de la durée et du niveau de l\'hyperglycémie ; elles surviennent après plusieurs années (5 à 10 ans en moyenne) et ne sont pas spécifiques d\'un type de diabète (polycopié, partie 2 p. 40-41).', spot: [[MX, 660, 440, 280]], go: chaud() },
         { t: 'Pourquoi les petits vaisseaux souffrent', d: 'L\'hyperglycémie active des voies délétères : glycation non enzymatique, voie des polyols, protéine kinase C. Elles convergent vers les radicaux libres et la dysfonction de l\'endothélium des capillaires (polycopié, partie 2 p. 43 et 48). Survolez chaque voie.', spot: [[MX, 240, 440, 400]], go: chaud() },
-        { t: 'L\'œil : rétinopathie', d: 'En périphérie, les capillaires se bouchent → ischémie → rétinopathie proliférante ; au centre, ils deviennent hyperperméables → œdème maculaire. Longtemps asymptomatique : d\'où le fond d\'œil annuel (polycopié, partie 2 p. 43-45, figure 47).', spot: [[60, 240, 340, 150], [BX, 268, 45], [MX, 170, 440, 770]], go: chaud('eye') },
-        { t: 'Le rein : néphropathie', d: 'La pression monte dans le glomérule : d\'abord hyperfiltration, puis albuminurie croissante et baisse du DFG. Première cause d\'insuffisance rénale terminale dans les pays occidentaux, au même niveau que l\'HTA. Dépistage annuel : DFG et rapport albuminurie/créatininurie (polycopié, partie 2 p. 46-48, figure 48).', spot: [[60, 410, 340, 175], [BX, 520, 65], [MX, 170, 440, 770]], go: chaud('kidney') },
+        { t: 'L\'œil : rétinopathie', d: 'En périphérie, les capillaires se bouchent → ischémie → rétinopathie proliférante ; au centre, ils deviennent hyperperméables → œdème maculaire. Longtemps asymptomatique : d\'où le fond d\'œil annuel (polycopié, partie 2 p. 43-45, figure 47).', spot: [[60, 240, 340, 150], [590, 293, 32], [MX, 170, 440, 770]], go: chaud('eye') },
+        { t: 'Le rein : néphropathie', d: 'La pression monte dans le glomérule : d\'abord hyperfiltration, puis albuminurie croissante et baisse du DFG. Première cause d\'insuffisance rénale terminale dans les pays occidentaux, au même niveau que l\'HTA. Dépistage annuel : DFG et rapport albuminurie/créatininurie (polycopié, partie 2 p. 46-48, figure 48).', spot: [[60, 410, 340, 175], [560, 505, 62], [MX, 170, 440, 770]], go: chaud('kidney') },
         { t: 'Le nerf : neuropathie', d: 'Polyneuropathie distale, symétrique, longueur-dépendante, « en chaussettes » (80 à 85 % des neuropathies) ; mononeuropathies (10 à 15 %) ; neuropathie végétative (hypotension orthostatique, gastroparésie…). Dépistage : DN4, monofilament (polycopié, partie 2 p. 48-54, figures 49 et 50).', spot: [[60, 605, 340, 310], [BX, 760, 90], [MX, 170, 440, 770]], go: chaud('nerve') },
         { t: 'Les grosses artères : macroangiopathie', d: 'L\'athérome n\'est pas propre au diabète, mais il y est plus précoce, diffus, distal et sévère : coronaires (ischémie souvent silencieuse), carotides et cerveau, membres inférieurs (au-delà de l\'artère poplitée ; IPS < 0,9 = artérite). Examen cardiovasculaire annuel (polycopié, partie 2 p. 41-42 et 62).', spot: [[740, 240, 340, 430]], go: chaud() },
-        { t: 'Le pied : tout se rejoint', d: 'La neuropathie supprime le signal douleur et entraîne troubles morphostatiques et hyperkératose → mal perforant plantaire : c\'est le facteur principal de plaie. L\'artérite et l\'infection sont les facteurs majeurs d\'amputation. Grade de risque podologique 0 à 3, examen des pieds au moins une fois par an (polycopié, partie 2 p. 55-65).', spot: [[740, 690, 340, 200], [BX + 20, 925, 60], [MX, 170, 440, 770]], go: chaud('foot') },
+        { t: 'Le pied : tout se rejoint', d: 'La neuropathie supprime le signal douleur et entraîne troubles morphostatiques et hyperkératose → mal perforant plantaire : c\'est le facteur principal de plaie. L\'artérite et l\'infection sont les facteurs majeurs d\'amputation. Grade de risque podologique 0 à 3, examen des pieds au moins une fois par an (polycopié, partie 2 p. 55-65).', spot: [[740, 690, 340, 200], [562, 922, 60], [MX, 170, 440, 770]], go: chaud('foot') },
         { t: 'En résumé', d: 'Hyperglycémie prolongée → petits vaisseaux (rétine, rein, nerf : microangiopathie, spécifique du diabète) et grosses artères (cœur, cerveau, jambes : macroangiopathie, plus précoce et plus sévère). Dépistage annuel de chacune. Quittez le pas à pas : la glycémie du modèle reprend la main.', spot: [[60, 150, 1490, 800]], go: () => { hot = false; txt = 0; showCard(null); } }
       ]);
     }
