@@ -5,7 +5,7 @@
   const S = HV.model.s, P = HV.model.p;
   const cap = (v, m) => Math.min(m, Math.max(0, v));
 
-  HV.scene({
+  const def = HV.scene({
     id: 'foll',
     parent: 'thyro',
     x: 110,
@@ -118,6 +118,18 @@
         camp.setAttribute('opacity', (0.25 + 0.5 * k).toFixed(2));
         camp.setAttribute('r', (26 + 14 * k).toFixed(1));
       });
+      HV.spotlight(def, a, [
+        { t: '① Le signal : TSH', d: 'La TSH active son récepteur couplé à Gs : l\'AMPc monte (complément). La TSH stimule chaque étape qui suit, ainsi que la croissance de la glande (polycopié p. 7). Dans la maladie de Basedow, les TRAb activent ce même récepteur.', spot: [[322, 760, 90], [340, 620, 60]] },
+        { t: '② Capter l\'iodure', d: 'Au pôle basal, le NIS fait entrer un iodure avec deux ions sodium, grâce au gradient entretenu par la Na⁺/K⁺-ATPase. Le perchlorate inhibe le NIS (complément).', spot: [[491, 790, 80], [1099, 794, 60]] },
+        { t: '③ Vers la colloïde', d: 'L\'iodure traverse la cellule et sort au pôle apical par la pendrine et ANO1 (complément).', spot: [[542, 334, 70]] },
+        { t: '④ La thyroglobuline', d: 'La thyroglobuline est synthétisée dans le réticulum, maturée dans le Golgi puis déversée dans la colloïde : c\'est le support sur lequel les hormones seront fabriquées.', spot: [[720, 560, 160]] },
+        { t: '⑤ L\'organification', d: 'Au pôle apical, la thyroperoxydase (TPO), avec l\'H₂O₂ produit par DUOX2, fixe l\'iode sur les tyrosines de la thyroglobuline : MIT et DIT. Les antithyroïdiens de synthèse (carbimazole, PTU) inhibent la TPO (complément).', spot: [[895, 360, 90]] },
+        { t: '⑥ Le couplage', d: 'Dans la colloïde, les tyrosines iodées s\'assemblent : DIT + DIT → T4 ; MIT + DIT → T3. Les hormones restent stockées dans la thyroglobuline.', spot: [[230, 150, 700, 190]] },
+        { t: '⑦ ⑧ Reprise et protéolyse', d: 'La cellule reprend la colloïde par endocytose ; dans le lysosome, la thyroglobuline est dégradée et libère T4 et T3.', spot: [[1100, 380, 50], [1110, 570, 80]] },
+        { t: '⑨ ⑩ Sécrétion et recyclage', d: 'T4 et T3 sortent vers le capillaire par MCT8 ; la DEHAL1 récupère l\'iode des MIT et DIT libérés, qui est réutilisé (complément).', spot: [[1230, 794, 60], [930, 600, 60], [1320, 840, 260, 90]] },
+        { t: 'Quand la chaîne se dérègle', d: 'Maladie de Basedow : les TRAb stimulent le récepteur de la TSH. Thyroïdite de Hashimoto : la glande est détruite (anti-TPO). Carence iodée : la thyroïde augmente de volume (goitre) et privilégie la T3, moins coûteuse en iode (complément). Essayez ces scénarios dans le panneau.', spot: [[230, 150, 1330, 650]] },
+        { t: 'En résumé', d: 'TSH → iodure capté (NIS) → thyroglobuline iodée par la TPO → couplage en T4 et T3 → reprise et protéolyse → sécrétion. Chaque étape est une cible : perchlorate (NIS), antithyroïdiens de synthèse (TPO), TRAb (récepteur de la TSH).', spot: [[60, 150, 1490, 800]] }
+      ]);
     }
   });
 })();

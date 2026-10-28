@@ -214,7 +214,10 @@
       a.text(RX + 60, 214, 'récepteur de l\'insuline', 'lbl-s strong', { attrs: { 'data-info': 'zgl-ir' } });
       a.text(RX + 60, 240, '2 α (liaison) + 2 β (tyrosine kinase)', 'note', { attrs: { 'data-info': 'zgl-ir' } });
       a.text(RX + 100, 400, 'autophosphorylation', 'note', { attrs: { 'data-info': 'zgl-autop' } });
-      a.flow(`M 110,170 C 200,170 ${RX - 60},180 ${RX},208`, { mol: 'insulin', rate: () => 1.2 * S().ins, pace: () => HV.paceOf(S().ins), size: 1.3, speed: 70, track: false, max: 14 });
+      // Démonstration du pas à pas : insuline et sensibilité imposées (ov), sinon le modèle de l'axe.
+      let ov = null;
+      const insNow = () => (ov ? ov.ins : S().ins);
+      a.flow(`M 110,170 C 200,170 ${RX - 60},180 ${RX},208`, { mol: 'insulin', rate: () => 1.2 * insNow(), pace: () => HV.paceOf(insNow()), size: 1.3, speed: 70, track: false, max: 14 });
       a.text(96, 206, 'insuline', 'note strong');
       // Voie métabolique
       const irs = pill(a, RX, 490, 'IRS-1/2', 'p-gold', { info: 'zgl-irs', w: 140 });
@@ -240,7 +243,7 @@
       arrowTrack(a, 'M 175,600 L 175,650', 'p-violet', 'zgl-mapk');
       pill(a, 175, 670, 'Ras → MAPK', 'p-violet', { info: 'zgl-mapk', w: 150 });
       arrowTrack(a, 'M 190,690 L 215,770', 'p-violet', 'zgl-mapk');
-      a.flow(mapD1, { mol: 'dot', style: 'fill: var(--p-violet)', rate: () => 1.6 * clamp(S().ins / 3, 0, 1), size: 1, speed: 45, track: false, max: 6 });
+      a.flow(mapD1, { mol: 'dot', style: 'fill: var(--p-violet)', rate: () => 1.6 * clamp(insNow() / 3, 0, 1), size: 1, speed: 45, track: false, max: 6 });
       a.el('ellipse', { cx: 230, cy: 830, rx: 150, ry: 60, class: 'bcell-n', 'data-info': 'zgl-nucleus' });
       a.text(230, 820, 'noyau', 'note strong', { anchor: 'middle', attrs: { 'data-info': 'zgl-nucleus' } });
       a.text(230, 845, 'croissance, prolifération', 'note', { anchor: 'middle', attrs: { 'data-info': 'zgl-nucleus' } });
@@ -296,7 +299,7 @@
       let sig = 0.3, txt = 0;
       a.dyn((dt) => {
         keepAlive(dt);
-        const s = S(), p = P();
+        const s = ov ? Object.assign({}, S(), { ins: ov.ins }) : S(), p = ov ? Object.assign({}, P(), { sens: ov.sens, beta: 1, exo: 0 }) : P();
         const occ = clamp(s.ins / 3, 0, 1);
         sig = clamp((s.ins * p.sens) / 1.3, 0, 1);
         const n = Math.round(1 + sig * (NG - 1) * 1.05);
@@ -328,14 +331,18 @@
                 : 'Insuline basse : GLUT4 surtout dans les vésicules';
         }
       });
+      const repos = () => { ov = { ins: 0.4, sens: 1 }; }, repas = () => { ov = { ins: 2.2, sens: 1 }; };
+      ir.stepEnd = () => { ov = null; };
       HV.spotlight(ir, a, [
-        { t: 'L\'insuline se fixe', d: 'L\'insuline se lie aux deux sous-unités α extracellulaires du récepteur (complément).', spot: [[RX, 230, 110]] },
-        { t: 'Autophosphorylation', d: 'Les domaines tyrosine kinase des sous-unités β se phosphorylent mutuellement (complément).', spot: [[RX, 395, 110]] },
-        { t: 'IRS → PI3K → AKT', d: 'Les IRS phosphorylés recrutent la PI3K, qui active AKT : c\'est la voie métabolique de l\'insuline (complément).', spot: [[RX - 90, 460, 190, 240]] },
-        { t: 'GLUT4 monte à la membrane', d: 'AKT déclenche la translocation des vésicules de GLUT4 (complément). Le transport du glucose dans le muscle et le tissu adipeux dépend de l\'insuline (polycopié).', spot: [[660, 300, 450, 470]] },
-        { t: 'Le glucose entre', d: 'Le glucose capté est stocké (glycogène) ou utilisé : en post-prandial, muscle et tissu adipeux captent abondamment le glucose (polycopié).', spot: [[660, 150, 450, 340]] },
-        { t: 'Voie de croissance', d: 'La branche Grb2 – SOS → Ras → MAPK porte les effets de croissance et de prolifération (complément).', spot: [[70, 540, 320, 370]] },
-        { t: 'Insulinorésistance', d: 'Acides gras et inflammation du tissu adipeux viscéral freinent IRS et AKT (complément) : moins de GLUT4 en surface. Le pancréas compense tant qu\'il le peut ; le DT2 associe insulinorésistance et défaut de sécrétion (polycopié).', spot: [[1150, 170, 400, 770], [RX + 92, 500, 50]] }
+        { t: 'À jeun : le glucose entre peu', d: 'Démonstration : insuline basse. Les transporteurs GLUT4 restent stockés dans des vésicules à l\'intérieur de la cellule ; la membrane en porte peu et le glucose entre peu dans le muscle et l\'adipocyte (complément). C\'est l\'insuline qui va ouvrir la porte.', spot: [[660, 300, 450, 470]], go: repos },
+        { t: 'L\'insuline se fixe sur son récepteur', d: 'Après le repas, l\'insuline monte (démonstration). Elle se lie aux deux sous-unités α, à l\'extérieur de la cellule. Le récepteur est présent sur le foie, le muscle et le tissu adipeux (polycopié, partie 2 p. 29 ; structure α2β2 en complément).', spot: [[RX, 230, 110]], go: repas },
+        { t: 'Le récepteur s\'active lui-même', d: 'La fixation rapproche les deux sous-unités β, qui portent une activité tyrosine kinase : chacune phosphoryle sa voisine (les « P »). Le signal a franchi la membrane (complément).', spot: [[RX, 395, 110]], go: repas },
+        { t: 'Le relais : IRS → PI3K → AKT', d: 'Les tyrosines phosphorylées servent de quai d\'amarrage aux IRS, qui recrutent la PI3K ; celle-ci active AKT. C\'est la voie « métabolique » de l\'insuline, celle qui règle le glucose (complément).', spot: [[RX - 90, 460, 190, 240]], go: repas },
+        { t: 'GLUT4 monte à la membrane', d: 'AKT fait fusionner les vésicules avec la membrane : les GLUT4 apparaissent en surface (translocation, complément). Le transport du glucose dans le muscle et le tissu adipeux dépend donc de l\'insuline (polycopié, partie 2 p. 29-30).', spot: [[660, 300, 450, 470]], go: repas },
+        { t: 'Le glucose entre et est mis en réserve', d: 'Le glucose entre par les GLUT4 ouverts, puis il est stocké (glycogène musculaire) ou utilisé (glycolyse) (complément). Après le repas, muscle et tissu adipeux captent ainsi le glucose, ce qui fait redescendre la glycémie.', spot: [[660, 150, 450, 340]], go: repas },
+        { t: 'Une seconde voie : la croissance', d: 'Le même récepteur active une autre branche, Grb2 – SOS → Ras → MAPK, qui agit sur le noyau : croissance et prolifération. Elle reste peu touchée par l\'insulinorésistance (complément).', spot: [[70, 540, 320, 370]], go: repas },
+        { t: 'Insulinorésistance : la porte s\'ouvre mal', d: 'Démonstration : même insuline élevée, sensibilité à 30 %. Les acides gras et l\'inflammation du tissu adipeux viscéral freinent IRS et AKT (complément) : moins de GLUT4 en surface, le glucose entre mal. Le pancréas compense en sécrétant plus, tant qu\'il le peut ; le DT2 associe insulinorésistance et défaut de sécrétion (polycopié, partie 2 p. 33).', spot: [[1150, 170, 400, 770], [RX + 92, 500, 50]], go: () => { ov = { ins: 2.2, sens: 0.3 }; } },
+        { t: 'En résumé', d: 'Insuline → récepteur → IRS → PI3K → AKT → GLUT4 à la membrane → le glucose entre. Si l\'insuline manque (DT1), les GLUT4 restent dans les vésicules ; si la voie est freinée (insulinorésistance), il faut beaucoup plus d\'insuline pour le même effet. Quittez le pas à pas pour revenir au modèle et essayer les scénarios du panneau.', spot: [[60, 150, 1490, 800]], go: () => { ov = null; } }
       ]);
     }
   }, HV.LOUPE.R(0)));
@@ -450,7 +457,7 @@
         a.text(16, 0, ph.name, 'note', null, r);
         return r;
       });
-      let demo = false, demoT = 0;
+      let demo = false, demoT = 0, forced = null; // forced : phase imposée par le pas à pas
       const btn = button(a, PX + 20, 870, 350, '', () => { demo = !demo; demoT = 0; }, 'zgl-demo');
 
       const act = { ins: 1, glu: 1 };
@@ -459,9 +466,10 @@
         keepAlive(dt);
         const s = S(), p = P();
         let ph, keto;
-        if (demo) {
+        const dm = demo || forced != null;
+        if (dm) {
           demoT = (demoT + dt) % 40;
-          const k = Math.floor(demoT / 8);
+          const k = forced != null ? forced : Math.floor(demoT / 8);
           ph = k;
           const tgt = [1, 0.75, 0.1, 0.05, 0.15][k];
           gly += (tgt - gly) * (dt > 0 ? 1 - Math.exp(-dt * 0.8) : 1);
@@ -499,21 +507,24 @@
             setLines(phD, PX + 22, wrap(PHASES[ph].d, 40), 1.32);
             phRows.forEach((r, i) => r.classList.toggle('on', i === ph));
           }
-          bI.set(act.ins / 5, demo ? '' : Math.round(s.ins * 8) + ' µUI/mL');
+          bI.set(act.ins / 5, dm ? '' : Math.round(s.ins * 8) + ' µUI/mL');
           bG.set(act.glu / 3, '');
           bGy.set(gly, Math.round(gly * 100) + ' %');
-          bK.set(demo ? keto : s.ket / 5, demo ? '' : s.ket.toFixed(1).replace('.', ',') + ' mmol/L');
+          bK.set(dm ? keto : s.ket / 5, dm ? '' : s.ket.toFixed(1).replace('.', ',') + ' mmol/L');
           glyT.textContent = gly > 0.6 ? 'réserve pleine' : gly > 0.25 ? 'réserve entamée' : 'réserve épuisée';
-          btn.t.textContent = demo ? '◼ Revenir au modèle' : '▶ Démonstration : du repas au jeûne';
+          btn.t.textContent = forced != null ? 'Démonstration du pas à pas' : demo ? '◼ Revenir au modèle' : '▶ Démonstration : du repas au jeûne';
         }
       });
+      const ph = (k) => () => { forced = k; };
+      lf.stepEnd = () => { forced = null; };
       HV.spotlight(lf, a, [
-        { t: 'Après le repas : stocker', d: 'L\'insuline domine : le glucose entre par GLUT2, est phosphorylé par la glucokinase et stocké en glycogène (glycogénogenèse).', spot: [[GX - 140, 190, 340, 690]] },
-        { t: 'L\'excès devient graisse', d: 'Le glucose en excès est converti en acides gras puis en triglycérides, exportés dans les VLDL (complément).', spot: [[440, 250, 680, 230], [1080, 620, 70]] },
-        { t: 'La nuit : glycogénolyse', d: 'Le glucagon domine : le glycogène est dégradé et la glucose-6-phosphatase libère le glucose dans le sang, surtout dans les premières heures du jeûne (complément).', spot: [[GX - 160, 190, 260, 690]] },
-        { t: 'Jeûne : néoglucogenèse', d: 'Quand le glycogène s\'épuise, le foie fabrique du glucose à partir du lactate, de l\'alanine et du glycérol (complément pour les substrats).', spot: [[500, 520, 280, 360]] },
-        { t: 'Jeûne prolongé : cétogenèse', d: 'Les acides gras du tissu adipeux sont oxydés en acétyl-CoA puis en corps cétoniques : cétose de jeûne, limitée par un peu d\'insuline (polycopié).', spot: [[760, 520, 320, 360]] },
-        { t: 'Carence en insuline', d: 'Lipolyse non freinée, glucagon dominant : la cétogenèse s\'emballe (acidocétose) et la production de glucose n\'est plus freinée. Essayez le scénario « Diabète de type 1 ».', spot: [[760, 520, 320, 360], [PX, 170, 390, 450]] }
+        { t: 'Après le repas : stocker', d: 'Démonstration : phase « après le repas ». L\'insuline domine. Le glucose du sang portal entre par GLUT2, la glucokinase le phosphoryle en glucose-6-phosphate, puis il est stocké en glycogène : la réserve se remplit (glycogénogenèse, polycopié, partie 2 p. 30 ; enzymes en complément).', spot: [[GX - 140, 190, 340, 690]], go: ph(0) },
+        { t: 'L\'excès devient graisse', d: 'Quand le glycogène est plein, le glucose en excès suit la glycolyse jusqu\'à l\'acétyl-CoA, puis devient acides gras et triglycérides (lipogenèse, complément). Le foie les exporte dans les VLDL, lipoprotéines riches en triglycérides (polycopié, partie 2 p. 18).', spot: [[440, 250, 680, 230], [1080, 620, 70]], go: ph(0) },
+        { t: 'La nuit : vider la réserve', d: 'Démonstration : la nuit. L\'insuline baisse, le glucagon domine : le glycogène est dégradé (glycogénolyse) et la glucose-6-phosphatase libère le glucose dans le sang. Le foie est le principal organe capable de produire du glucose, surtout la nuit et au jeûne (polycopié, partie 2 p. 30 ; chronologie en complément).', spot: [[GX - 160, 190, 260, 690]], go: ph(1) },
+        { t: 'Jeûne : fabriquer du glucose', d: 'Démonstration : jeûne. Le glycogène s\'épuise. Le foie fabrique alors du glucose neuf (néoglucogenèse, polycopié, partie 2 p. 30) à partir du lactate, de l\'alanine venue du muscle et du glycérol venu du tissu adipeux (substrats en complément).', spot: [[500, 520, 280, 360]], go: ph(2) },
+        { t: 'Jeûne prolongé : les corps cétoniques', d: 'Démonstration : jeûne prolongé. Les acides gras du tissu adipeux deviennent le carburant principal ; le foie les oxyde en acétyl-CoA (β-oxydation), dont une partie forme des corps cétoniques. La cétose de jeûne reste limitée, car même un peu d\'insuline freine la lipolyse (polycopié, partie 2 p. 31).', spot: [[760, 520, 320, 360]], go: ph(3) },
+        { t: 'Carence en insuline : l\'emballement', d: 'Démonstration : carence en insuline. Plus aucun frein sur la lipolyse : les acides gras affluent et, sous l\'influence du glucagon dominant, la cétogenèse s\'emballe (acidocétose) ; la production de glucose n\'est plus freinée non plus (polycopié, partie 2 p. 31 et 38).', spot: [[760, 520, 320, 360], [PX, 170, 390, 450]], go: ph(4) },
+        { t: 'En résumé', d: 'Insuline : le foie stocke (glycogène, puis graisse). Glucagon : il produit du glucose (glycogénolyse, puis néoglucogenèse). Sans insuline : glucose et corps cétoniques montent ensemble. Quittez le pas à pas pour revenir au modèle : choisissez « Jeûne » ou « Diabète de type 1 » dans le panneau.', spot: [[60, 150, 1490, 800]], go: () => { forced = null; } }
       ]);
     }
   }, HV.LOUPE.R(1)));
@@ -536,6 +547,8 @@
       a.frame('Incrétines', 'Intestin → pancréas · amplification glucose-dépendante de l\'insuline (complément)');
       inc.sim = HV.scenes.glyc.sim;
       ensureDefs(a);
+      let fo = null; // repas imposé par le pas à pas
+      const fd = () => (fo != null ? fo : food());
       // Estomac et intestin
       const st = a.el('g', { 'data-info': 'zgl-inc-stom' });
       a.path('M 120,230 C 100,320 150,400 240,400 C 300,400 330,380 350,360 L 340,320 C 310,340 280,345 250,330 C 200,310 210,240 190,200 Z', 'zgl-stom', st);
@@ -543,7 +556,7 @@
       const gutD = 'M 345,340 C 430,340 470,380 470,440 C 470,520 380,540 300,570 C 200,610 160,680 210,730 C 260,780 380,760 420,800 C 450,830 430,880 380,900';
       a.path(gutD, 'zgl-gut', null, { 'data-info': 'intestine' });
       a.path(gutD, 'zgl-gut-l');
-      a.flow(gutD, { mol: 'glucose', rate: () => 1.5 * food() + 0.1, size: 1, speed: 70, track: false, max: 24 });
+      a.flow(gutD, { mol: 'glucose', rate: () => 1.5 * fd() + 0.1, size: 1, speed: 70, track: false, max: 24 });
       a.text(150, 300, 'repas', 'note');
       const cellK = a.el('g', { 'data-info': 'zgl-kcell', transform: 'translate(512 430)' });
       a.el('rect', { x: -22, y: -30, width: 44, height: 60, rx: 12, class: 'zgl-ecell k' }, cellK);
@@ -560,7 +573,7 @@
             // Vaisseau, DPP-4
       a.vessel('M 690,520 L 1020,520', 64).setAttribute('data-info', 'zgl-dpp4');
       const kD = 'M 534,430 C 620,430 650,500 700,510', lD = 'M 508,780 C 610,780 630,560 700,530';
-      const secr = () => 0.25 + 2.2 * food();
+      const secr = () => 0.25 + 2.2 * fd();
       a.flow(kD + ' L 800,510', { mol: 'zgl-gip', rate: () => secr() * 0.8, size: 1.2, speed: 70, track: false, max: 10, info: 'zgl-gip' });
       a.flow(lD + ' L 800,530', { mol: 'zgl-glp1', rate: () => secr() * 0.8, size: 1.2, speed: 70, track: false, max: 10, info: 'zgl-glp1' });
       a.flow('M 800,510 L 1030,510', { mol: 'zgl-gip', rate: () => secr() * 0.15, size: 1.2, speed: 70, track: false, max: 6, info: 'zgl-gip' });
@@ -633,18 +646,21 @@
         txt -= dt;
         if (txt <= 0) {
           txt = 0.3;
-          const f = food();
+          const f = fd();
           state.textContent = f > 0.3 ? 'Repas en cours : incrétines ↑ · glycémie ' + f2(s.g) + ' g/L' : 'À jeun : sécrétion d\'incrétines basale · glycémie ' + f2(s.g) + ' g/L';
         }
       });
+      const repas = () => { fo = 1; };
+      inc.stepEnd = () => { fo = null; };
       HV.spotlight(inc, a, [
-        { t: 'Le repas arrive dans l\'intestin', d: 'Les nutriments stimulent les cellules entéroendocrines (complément).', spot: [[90, 170, 520, 760]] },
-        { t: 'Cellules K et L', d: 'Les cellules K de l\'intestin proximal sécrètent le GIP ; les cellules L de l\'intestin distal sécrètent le GLP-1 (complément).', spot: [[490, 380, 230, 90], [455, 735, 200, 100]] },
-        { t: 'La DPP-4 les coupe', d: 'En quelques minutes, la DPP-4 inactive la plus grande partie du GLP-1 et du GIP (complément).', spot: [[806, 540, 100]] },
-        { t: 'Insuline ↑, glucagon ↓', d: 'Sur l\'îlot, l\'effet est glucose-dépendant : l\'insuline n\'est amplifiée que si la glycémie est élevée ; le GLP-1 freine le glucagon (complément).', spot: [[1110, 530, 130]] },
-        { t: 'Estomac et cerveau', d: 'Le GLP-1 ralentit la vidange gastrique et favorise la satiété (complément).', spot: [[540, 280, 200], [990, 290, 120]] },
-        { t: 'Effet incrétine', d: 'À glycémie égale, l\'insuline monte plus après du glucose oral qu\'après du glucose IV ; l\'écart est très réduit dans le DT2 (complément).', spot: [[650, 660, 880, 290]] },
-        { t: 'Traitements', d: 'Analogues du GLP-1 résistants à la DPP-4, double agoniste GIP/GLP-1, gliptines (complément).', spot: [[1260, 170, 290, 470]] }
+        { t: 'Le repas arrive dans l\'intestin', d: 'Démonstration : repas en cours. Les nutriments quittent l\'estomac et descendent dans l\'intestin, où des cellules endocrines dispersées dans la muqueuse les détectent (complément).', spot: [[90, 170, 520, 760]], go: repas },
+        { t: 'Cellules K et L : deux incrétines', d: 'Les cellules K de l\'intestin proximal (duodénum, jéjunum) sécrètent le GIP ; les cellules L de l\'intestin distal (iléon, côlon) sécrètent le GLP-1. Le pancréas est ainsi prévenu de l\'arrivée du repas (complément).', spot: [[490, 380, 230, 90], [455, 735, 200, 100]], go: repas },
+        { t: 'La DPP-4 les coupe très vite', d: 'Dans les vaisseaux, l\'enzyme DPP-4 coupe le GLP-1 et le GIP en quelques minutes : seule une petite fraction atteint la circulation générale sous forme active (fragments = inactifs). C\'est la cible des gliptines (complément).', spot: [[806, 540, 100]], go: repas },
+        { t: 'Sur l\'îlot : insuline ↑, glucagon ↓', d: 'Les incrétines amplifient la sécrétion d\'insuline seulement si la glycémie est élevée : d\'où peu d\'hypoglycémies avec ces médicaments en l\'absence d\'insuline ou de sulfamide associés. Le GLP-1 freine aussi le glucagon (complément).', spot: [[1110, 530, 130]], go: repas },
+        { t: 'Estomac et cerveau', d: 'Le GLP-1 ralentit la vidange gastrique (le glucose arrive plus lentement, le pic après le repas s\'atténue) et agit sur l\'hypothalamus et le tronc cérébral : satiété, d\'où la perte de poids sous analogues (complément).', spot: [[540, 280, 200], [990, 290, 120]], go: repas },
+        { t: 'L\'effet incrétine', d: 'À glycémie égale, l\'insuline monte davantage après du glucose pris par la bouche qu\'après du glucose perfusé : la différence est due aux incrétines. Dans le DT2, cet effet est très diminué (comparez les deux graphiques, allure schématique, complément).', spot: [[650, 660, 880, 290]] },
+        { t: 'Les médicaments', d: 'Deux stratégies : des analogues du GLP-1 (ou un double agoniste GIP/GLP-1) qui résistent à la DPP-4, ou des gliptines qui inhibent la DPP-4 et prolongent les incrétines naturelles. Effet glucose-dépendant dans les deux cas (complément).', spot: [[1260, 170, 290, 470]] },
+        { t: 'En résumé', d: 'Repas → cellules K et L → GIP et GLP-1 → (la DPP-4 en inactive la plus grande partie) → plus d\'insuline seulement si la glycémie est haute, moins de glucagon, estomac plus lent, satiété. Quittez le pas à pas pour revenir à l\'horloge des repas du modèle.', spot: [[60, 150, 1490, 800]], go: () => { fo = null; } }
       ]);
     }
   }, HV.LOUPE.R(2)));
@@ -745,7 +761,7 @@
       const gB = bar(a, MX + 22, 855, 396, 'Glycémie du modèle', 'p-lime');
       const gT = a.text(MX + 22, 920, '', 'note');
       const marks = [ret, nep, neu, carB, corB, aoB, ftB];
-      let txt = 0;
+      let txt = 0, hot = false; // hot : hyperglycémie chronique imposée par le pas à pas
       a.dyn((dt) => {
         keepAlive(dt);
         txt -= dt;
@@ -755,17 +771,21 @@
         const hi = clamp((s.g - 1.1) / 1.5, 0, 1);
         gB.set(s.g / 3, f2(s.g) + ' g/L');
         gT.textContent = s.g >= 1.26 ? 'Hyperglycémie : si elle dure, le risque ↑' : 'Glycémie dans les valeurs usuelles';
-        marks.forEach((m) => m.classList.toggle('zgl-hot', hi > 0.05));
+        marks.forEach((m) => m.classList.toggle('zgl-hot', hot || hi > 0.05));
+        if (hot) gT.textContent = 'Démonstration : hyperglycémie prolongée';
         body.setAttribute('opacity', 1);
       });
+      const chaud = () => { hot = true; txt = 0; };
+      cp.stepEnd = () => { hot = false; txt = 0; };
       HV.spotlight(cp, a, [
-        { t: 'Exposition à l\'hyperglycémie', d: 'Les complications chroniques dépendent de la durée et du niveau de l\'hyperglycémie ; elles surviennent après plusieurs années (5 à 10 ans en moyenne) et ne sont pas spécifiques d\'un type de diabète (polycopié p. 40-41).', spot: [[MX, 660, 440, 280]] },
-        { t: 'Mécanismes de la microangiopathie', d: 'Voie des polyols, oxydation des protéines, protéine kinase C, glycation non enzymatique : radicaux libres et dysfonction endothéliale (p. 43).', spot: [[MX, 240, 440, 400]] },
-        { t: 'Rétine', d: 'Occlusion capillaire (périphérie) → ischémie → RD proliférante ; hyperperméabilité (centre) → œdème maculaire. Fond d\'œil annuel (p. 43-45, figure 47).', spot: [[60, 240, 340, 150], [BX, 218, 50]] },
-        { t: 'Rein', d: 'Hyperfiltration initiale, puis albuminurie croissante et baisse du DFG. Dépistage annuel : DFG et rapport albuminurie/créatininurie (p. 46-48, figure 48).', spot: [[60, 410, 340, 175], [BX, 480, 60]] },
-        { t: 'Nerf', d: 'Polyneuropathie distale symétrique (80 à 85 % des neuropathies), mononeuropathies, neuropathie végétative. DN4, monofilament (p. 48-54, figures 49 et 50).', spot: [[60, 605, 340, 310], [BX, 760, 90]] },
-        { t: 'Grosses artères', d: 'Athérome et médiacalcose : coronaires (souvent silencieuses), carotides et cerveau, membres inférieurs (distale). Examen cardiovasculaire annuel, IPS (p. 41-42, 62).', spot: [[740, 240, 340, 430]] },
-        { t: 'Pied diabétique', d: 'Neuropathie (perte du signal douleur, troubles morphostatiques, hyperkératose → mal perforant plantaire), artérite et infection. Grade de risque podologique 0 à 3 (p. 55-65).', spot: [[740, 690, 340, 200], [BX, 930, 120]] }
+        { t: 'Le temps et le niveau de la glycémie', d: 'Démonstration : hyperglycémie prolongée (les cadres s\'allument). Les complications chroniques dépendent de la durée et du niveau de l\'hyperglycémie ; elles surviennent après plusieurs années (5 à 10 ans en moyenne) et ne sont pas spécifiques d\'un type de diabète (polycopié, partie 2 p. 40-41).', spot: [[MX, 660, 440, 280]], go: chaud },
+        { t: 'Pourquoi les petits vaisseaux souffrent', d: 'L\'hyperglycémie active des voies délétères : glycation non enzymatique, voie des polyols, protéine kinase C. Elles convergent vers les radicaux libres et la dysfonction de l\'endothélium des capillaires (polycopié, partie 2 p. 43 et 48). Survolez chaque voie.', spot: [[MX, 240, 440, 400]], go: chaud },
+        { t: 'L\'œil : rétinopathie', d: 'En périphérie, les capillaires se bouchent → ischémie → rétinopathie proliférante ; au centre, ils deviennent hyperperméables → œdème maculaire. Longtemps asymptomatique : d\'où le fond d\'œil annuel (polycopié, partie 2 p. 43-45, figure 47).', spot: [[60, 240, 340, 150], [BX, 218, 50]], go: chaud },
+        { t: 'Le rein : néphropathie', d: 'La pression monte dans le glomérule : d\'abord hyperfiltration, puis albuminurie croissante et baisse du DFG. Première cause d\'insuffisance rénale terminale dans les pays occidentaux, au même niveau que l\'HTA. Dépistage annuel : DFG et rapport albuminurie/créatininurie (polycopié, partie 2 p. 46-48, figure 48).', spot: [[60, 410, 340, 175], [BX, 480, 60]], go: chaud },
+        { t: 'Le nerf : neuropathie', d: 'Polyneuropathie distale, symétrique, longueur-dépendante, « en chaussettes » (80 à 85 % des neuropathies) ; mononeuropathies (10 à 15 %) ; neuropathie végétative (hypotension orthostatique, gastroparésie…). Dépistage : DN4, monofilament (polycopié, partie 2 p. 48-54, figures 49 et 50).', spot: [[60, 605, 340, 310], [BX, 760, 90]], go: chaud },
+        { t: 'Les grosses artères : macroangiopathie', d: 'L\'athérome n\'est pas propre au diabète, mais il y est plus précoce, diffus, distal et sévère : coronaires (ischémie souvent silencieuse), carotides et cerveau, membres inférieurs (au-delà de l\'artère poplitée ; IPS < 0,9 = artérite). Examen cardiovasculaire annuel (polycopié, partie 2 p. 41-42 et 62).', spot: [[740, 240, 340, 430]], go: chaud },
+        { t: 'Le pied : tout se rejoint', d: 'La neuropathie supprime le signal douleur et entraîne troubles morphostatiques et hyperkératose → mal perforant plantaire : c\'est le facteur principal de plaie. L\'artérite et l\'infection sont les facteurs majeurs d\'amputation. Grade de risque podologique 0 à 3, examen des pieds au moins une fois par an (polycopié, partie 2 p. 55-65).', spot: [[740, 690, 340, 200], [BX, 930, 120]], go: chaud },
+        { t: 'En résumé', d: 'Hyperglycémie prolongée → petits vaisseaux (rétine, rein, nerf : microangiopathie, spécifique du diabète) et grosses artères (cœur, cerveau, jambes : macroangiopathie, plus précoce et plus sévère). Dépistage annuel de chacune. Quittez le pas à pas : la glycémie du modèle reprend la main.', spot: [[60, 150, 1490, 800]], go: () => { hot = false; txt = 0; } }
       ]);
     }
   }, HV.LOUPE.R(3)));
@@ -871,7 +891,7 @@
       a.text(84, 916, 'Mutations de la voie leptine – mélanocortines : leptine, récepteur de la leptine, POMC, MC4R (la plus fréquente). Obésité sévère dès l\'enfance, hyperphagie.', 'note', null, mono);
 
       const lev = { lep: 1, ins: 1, ghr: 0.3, pyy: 0.3, npy: 0.5, pomc: 0.5 };
-      let txt = 0;
+      let txt = 0, force = null; // force : signaux imposés par le pas à pas
       a.dyn((dt) => {
         keepAlive(dt);
         const M = sim(), s = M.s, h = M.T.h, p = M.p;
@@ -881,6 +901,7 @@
         lev.pyy = clamp(0.1 + 0.9 * food(), 0, 1.5);
         lev.ins = clamp(s.ins / 3, 0.05, 1.5);
         lev.lep = 1;
+        if (force) Object.assign(lev, force);
         lev.npy = clamp(0.3 + 0.7 * lev.ghr - 0.3 * lev.pyy - 0.2 * lev.ins, 0.05, 1.3);
         lev.pomc = clamp(0.3 + 0.5 * lev.pyy + 0.3 * lev.ins - 0.2 * lev.ghr, 0.05, 1.3);
         hNpy.setAttribute('opacity', (0.1 + 0.6 * lev.npy).toFixed(2));
@@ -890,18 +911,21 @@
         txt -= dt;
         if (txt <= 0) {
           txt = 0.3;
-          clk.textContent = String(Math.floor(h)).padStart(2, '0') + ' h';
+          clk.textContent = force ? 'démonstration' : String(Math.floor(h)).padStart(2, '0') + ' h';
           clk2.textContent = lev.pyy > 0.5 ? 'repas' : lev.ghr > 0.6 ? 'avant un repas' : 'entre les repas';
         }
       });
+      const demoSig = (o) => () => { force = o; txt = 0; };
+      ap.stepEnd = () => { force = null; txt = 0; };
       HV.spotlight(ap, a, [
-        { t: 'Le noyau arqué', d: 'Au contact de la circulation, il perçoit les signaux de faim et de satiété (complément).', spot: [[830, 500, 230]] },
-        { t: 'Deux neurones opposés', d: 'NPY/AgRP stimulent la prise alimentaire ; POMC/CART la freinent (complément).', spot: [[790, 390, 80], [790, 620, 80]] },
-        { t: 'Leptine et insuline', d: 'Signaux des réserves : ils freinent NPY/AgRP et activent POMC (complément).', spot: [[60, 170, 300, 320]] },
-        { t: 'Ghréline', d: 'Sécrétée par l\'estomac, elle monte avant les repas et active NPY/AgRP (complément).', spot: [[60, 510, 300, 140]] },
-        { t: 'PYY et GLP-1', d: 'Sécrétés par l\'intestin après le repas : satiété (complément).', spot: [[60, 680, 340, 150]] },
-        { t: 'MC4R', d: 'L\'α-MSH (issue de la POMC) active MC4R : satiété ; l\'AgRP le bloque : faim (complément).', spot: [[1100, 340, 250, 340]] },
-        { t: 'Obésités monogéniques', d: 'Rares : mutations de la leptine, de son récepteur, de la POMC ou de MC4R (complément).', spot: [[60, 850, 1490, 100]] }
+        { t: 'Le noyau arqué, chef d\'orchestre', d: 'Au contact de l\'éminence médiane, le noyau arqué de l\'hypothalamus perçoit des hormones venues de tout le corps et règle la prise alimentaire et la dépense énergétique (complément).', spot: [[830, 500, 230]], go: demoSig(null) },
+        { t: 'Deux neurones qui s\'opposent', d: 'Les neurones NPY/AgRP stimulent la prise alimentaire (orexigènes) ; les neurones POMC/CART la freinent (anorexigènes). La faim dépend de la balance entre les deux, que montre la jauge « Bilan » (complément).', spot: [[790, 390, 80], [790, 620, 80], [1370, 170, 180, 640]], go: demoSig(null) },
+        { t: 'Les réserves : leptine et insuline', d: 'Démonstration : insuline élevée. La leptine, sécrétée en proportion de la masse grasse, et l\'insuline sont des signaux des réserves : elles freinent NPY/AgRP et activent POMC (complément). Dans l\'obésité commune, la leptine est élevée mais agit moins (résistance à la leptine).', spot: [[60, 170, 300, 320], [790, 500, 150]], go: demoSig({ ins: 1.3, ghr: 0.1, pyy: 0.2 }) },
+        { t: 'Avant le repas : la ghréline', d: 'Démonstration : avant un repas. L\'estomac sécrète la ghréline, seule hormone digestive orexigène : elle monte avant les repas, active NPY/AgRP et la jauge descend vers « faim ». Elle chute après le repas (complément).', spot: [[60, 510, 300, 140], [790, 390, 80], [1370, 170, 180, 640]], go: demoSig({ ghr: 1.4, pyy: 0.05, ins: 0.2 }) },
+        { t: 'Après le repas : PYY et GLP-1', d: 'Démonstration : repas en cours. Les cellules L de l\'intestin sécrètent le PYY et le GLP-1 : le PYY freine NPY/AgRP, le GLP-1 agit sur l\'hypothalamus et le tronc cérébral ; la jauge remonte vers « satiété » (complément).', spot: [[60, 680, 340, 150], [790, 620, 80], [1370, 170, 180, 640]], go: demoSig({ pyy: 1.3, ghr: 0.05, ins: 1.2 }) },
+        { t: 'Le relais : MC4R', d: 'Les deux voies se retrouvent sur le récepteur MC4R du noyau paraventriculaire : l\'α-MSH, issue de la POMC, l\'active → satiété ; l\'AgRP le bloque → faim (complément).', spot: [[1100, 340, 250, 340]], go: demoSig(null) },
+        { t: 'Quand un maillon manque', d: 'Rares obésités monogéniques : une mutation de la leptine, de son récepteur, de la POMC ou de MC4R (la plus fréquente) coupe la voie de la satiété : obésité sévère dès l\'enfance, hyperphagie (complément).', spot: [[60, 850, 1490, 100]], go: demoSig(null) },
+        { t: 'En résumé', d: 'Faim : ghréline → NPY/AgRP (l\'AgRP bloque MC4R). Satiété : leptine, insuline, PYY, GLP-1 → POMC → α-MSH → MC4R. Quittez le pas à pas : la jauge suit de nouveau l\'horloge des repas du modèle.', spot: [[60, 150, 1490, 800]], go: demoSig(null) }
       ]);
     }
   }, HV.LOUPE.R(4)));

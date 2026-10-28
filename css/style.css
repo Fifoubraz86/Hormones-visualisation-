@@ -764,8 +764,10 @@ line.m-db { stroke: var(--mc); stroke-width: 0.9; }
 .step-dots { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
 .step-dots button { width: 10px; height: 10px; border-radius: 50%; border: 1px solid var(--accent); background: transparent; padding: 0; cursor: pointer; }
 .step-dots button[aria-current] { background: var(--accent); }
+.step-box.at-top { bottom: auto; top: 12px; }
 @media (max-width: 860px) {
   .step-box { bottom: 8px; padding: 10px 12px; }
+  .step-box.at-top { bottom: auto; top: 8px; }
   .step-nav > button { padding: 6px 8px; font-size: 12px; }
 }
 /* Lipoprotéines */
@@ -885,3 +887,9 @@ line.m-db { stroke: var(--mc); stroke-width: 0.9; }
 /* Hypophyse Servier : lobes teintés (code couleur) et tige couleur du dessin */
 .pit-tint { fill-opacity: 0.42; stroke-opacity: 0.8; }
 .pit-stalk { fill: #fdd08e; }
+
+/* Pastille « Comprendre pas à pas » sur le bord du cadre des scènes (HV.stepChip) */
+.step-chip { cursor: pointer; }
+.step-chip rect { fill: var(--accent); stroke: var(--panel); stroke-width: 3; }
+.step-chip:hover rect { fill: color-mix(in srgb, var(--accent) 82%, var(--fg)); }
+.step-chip-t { font: 600 19px var(--font-body); fill: var(--accent-ink); pointer-events: none; }

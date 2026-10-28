@@ -4,7 +4,7 @@
   const HV = window.HV;
   const S = HV.model.s;
 
-  HV.scene({
+  const def = HV.scene({
     id: 'hypo',
     parent: 'thyro',
     x: 110,
@@ -71,6 +71,15 @@
         a.text(22, y, k === 'stim' ? '+' : '−', 'mod-' + k, null, mg);
         a.text(48, y, l, 'note', null, mg);
       });
+      HV.spotlight(def, a, [
+        { t: 'Le neurone à TRH', d: 'Dans le noyau paraventriculaire, le gène de la TRH est transcrit ; le pro-TRH est clivé par les convertases PC1/3 et PC2 en TRH, un tripeptide (pGlu-His-Pro-NH₂) (complément).', spot: [[430, 380, 140]] },
+        { t: 'Le long de l\'axone', d: 'La TRH descend dans l\'axone jusqu\'à l\'éminence médiane, à la base de l\'hypothalamus.', spot: [[480, 300, 600, 400]] },
+        { t: 'Le système porte', d: 'Libérée au niveau de l\'éminence médiane, la TRH passe dans le plexus porte primaire, qui la conduit directement à l\'antéhypophyse, sans diluer dans la circulation générale.', spot: [[1030, 656, 60], [1130, 170, 120, 790]] },
+        { t: 'Les tanycytes', d: 'Ces cellules qui bordent le 3ᵉ ventricule captent la T4 et la convertissent en T3 grâce à la désiodase D2 ; elles dégradent aussi la TRH (pyroglutamyl-peptidase II) (complément).', spot: [[130, 700, 1020, 210]] },
+        { t: 'Le rétrocontrôle', d: 'La T3 formée par les tanycytes gagne le neurone et réprime le gène de la TRH via le récepteur TRβ2 : quand les hormones thyroïdiennes montent, la TRH baisse (complément). Le signe « − » s\'intensifie avec le rétrocontrôle du modèle.', spot: [[450, 360, 120], [700, 600, 160]] },
+        { t: 'Les modulateurs', d: 'Le froid et la noradrénaline stimulent la TRH ; le jeûne (baisse de la leptine), les glucocorticoïdes et l\'inflammation (cytokines, maladie aiguë) la freinent (complément).', spot: [[1290, 420, 270, 260]] },
+        { t: 'En résumé', d: 'NPV → TRH → éminence médiane → système porte → antéhypophyse. La T3, produite sur place par les tanycytes, freine le gène de la TRH : c\'est le premier étage du rétrocontrôle de l\'axe thyréotrope.', spot: [[60, 150, 1490, 800]] }
+      ]);
     }
   });
 })();

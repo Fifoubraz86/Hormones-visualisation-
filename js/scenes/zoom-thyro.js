@@ -415,6 +415,7 @@
         c.g.addEventListener('pointerleave', () => hl[key].forEach((e) => e.classList.remove('zt-hl')));
       });
 
+      surg.chipLeft = true; // complications de la thyroïdectomie en bas à droite
       HV.spotlight(surg, a, [
         { t: 'Lobes et isthme', d: 'Deux lobes latéraux réunis par un isthme, parfois surmonté de la pyramide de Lalouette (polycopié p. 6).', spot: [[470, 450, 140]] },
         { t: 'Deux artères par lobe', d: 'L\'artère thyroïdienne supérieure (carotide externe) aborde le pôle supérieur ; l\'inférieure (tronc thyro-cervical de la sous-clavière) passe derrière la carotide et aborde la face postérieure (complément).', spot: [[372, 270, 70], [290, 600, 100]] },

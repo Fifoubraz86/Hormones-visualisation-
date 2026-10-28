@@ -217,15 +217,17 @@
       });
 
       /* --- Pas à pas --- */
+      def.chipLeft = true; // l'état de la cellule β s'écrit en bas à droite
       HV.spotlight(def, a, [
         { t: 'Un îlot dans le pancréas exocrine', d: 'Les îlots ne pèsent qu\'environ 1 % du pancréas. Chaque îlot réunit surtout des cellules β (insuline), des cellules α (glucagon) et des cellules δ (somatostatine), autour de capillaires fenêtrés qui se drainent vers la veine porte.', spot: [[400, 575, 300]] },
-        { t: 'Le glucose entre dans la cellule β', d: 'GLUT2 laisse entrer le glucose proportionnellement à la glycémie. La glucokinase, le « capteur », le phosphoryle à une vitesse qui suit la glycémie.', spot: [[X0 - 100, Y0 + 70, 430, 140]] },
+        { t: 'Le glucose entre dans la cellule β', d: 'GLUT2 laisse entrer le glucose proportionnellement à la glycémie. La glucokinase, le « capteur », le phosphoryle à une vitesse qui suit la glycémie.', spot: [[X0 - 100, Y0 + 70, 430, 140]] },
         { t: 'L\'ATP monte', d: 'Glycolyse et mitochondrie augmentent le rapport ATP/ADP dans le cytoplasme.', spot: [[X0 + 230, Y0 + 320, 130]] },
         { t: 'Les canaux K-ATP se ferment', d: 'L\'ATP ferme les canaux K-ATP : le potassium ne sort plus, la membrane se dépolarise (de −70 vers −40 mV). Les sulfamides ferment ces canaux directement, même si la glycémie est basse : c\'est le mécanisme de leurs hypoglycémies.', spot: [[kx, ky + 10, 120], [X0 + 545, Y0 + 197, 100]] },
         { t: 'Le calcium entre', d: 'La dépolarisation ouvre les canaux calciques voltage-dépendants : le Ca²⁺ entre dans la cellule.', spot: [[cx2 - 40, cy2 + 40, 140]] },
         { t: 'Les granules d\'insuline fusionnent', d: 'Le calcium déclenche l\'exocytose : d\'abord les granules amarrés à la membrane (1re phase), puis les réserves (2e phase). L\'insuline gagne les capillaires puis la veine porte.', spot: [[X0 + 60, Y0 + 440, 440, 360]] },
         { t: 'Les incrétines amplifient', d: 'Après un repas, le GLP-1 et le GIP de l\'intestin augmentent l\'AMPc et amplifient la sécrétion, mais seulement si la glycémie est élevée. Cible des analogues du GLP-1 et des inhibiteurs de la DPP-4.', spot: [[X0 - 60, Y0 + 560, 110]] },
-        { t: 'Les voisines se parlent', d: 'L\'insuline, le zinc et le GABA freinent les cellules α ; la somatostatine des cellules δ freine α et β. Dans le DT1, la perte des cellules β lève ce frein : le glucagon reste inadapté.', spot: [[470, 560, 170], [250, 660, 90]] }
+        { t: 'Les voisines se parlent', d: 'L\'insuline, le zinc et le GABA freinent les cellules α ; la somatostatine des cellules δ freine α et β. Dans le DT1, la perte des cellules β lève ce frein : le glucagon reste inadapté.', spot: [[470, 560, 170], [250, 660, 90]] },
+        { t: 'En résumé', d: 'Glycémie ↑ → glucose dans la cellule β (GLUT2, glucokinase) → ATP ↑ → canaux K-ATP fermés → dépolarisation → entrée de Ca²⁺ → exocytose de l\'insuline, amplifiée par les incrétines. Les cellules α et δ, voisines, sont freinées en retour. Changez de scénario dans le panneau (DT1, DT2, insulinome) pour voir la chaîne se dérégler.', spot: [[60, 150, 1490, 800]] }
       ]);
     }
   });

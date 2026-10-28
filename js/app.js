@@ -147,6 +147,9 @@
         const inf = drag.target && drag.target.closest && drag.target.closest('[data-info]');
         // Un élément de la scène courante affiche sa fiche ; ailleurs, le clic fait entrer dans la scène.
         // Dans la scène courante, un clic ouvre la fiche (molécule, organe) ; Maj + clic l'ouvre aussi sur un élément zoomable.
+        const chip = drag.target && drag.target.closest && drag.target.closest('[data-steps]');
+        const chipSc = chip && HV.scenes[chip.getAttribute('data-steps')];
+        if (chipSc) { if (chipSc !== current) flyTo(chipSc); stepShow(chipSc, 0); drag = null; return; }
         const sheet = HV.resolveSheet(drag.target);
         const fg = drag.target && drag.target.closest && drag.target.closest('[data-figs]');
         if (fg && sc === current) HV.openFigure(HV.polyFigsRef ? fg.getAttribute('data-figs').split(',').map(HV.polyFig).filter(Boolean) : [], 0);
@@ -217,16 +220,22 @@
 
   /* ---------- Panneau : scène courante ---------- */
   /* ---------- Mode pas à pas ---------- */
-  let stepSc = null;
+  let stepSc = null, legOpen = null;
   const stepping = () => !!(stepSc && stepSc.stepIndex() >= 0);
   function stepShow(sc, i) {
     const box = $('stepBox');
     if (stepSc && stepSc !== sc) stepSc.stepTo(-1);
+    // La légende (en haut à droite) se replie pendant le parcours pour ne pas masquer les projecteurs.
+    const leg = $('legend');
+    if (i >= 0 && box.hidden) { legOpen = leg.open; leg.open = false; } else if (i < 0 && !box.hidden && legOpen != null) { leg.open = legOpen; legOpen = null; }
     stepSc = sc;
     sc.stepTo(i);
     box.hidden = i < 0;
     if (i < 0) return;
     const S = sc.steps[i];
+    // Projecteur dans la moitié basse de la scène : l'encadré passe en haut pour ne pas le cacher.
+    const cy = S.spot ? S.spot.map((sp) => (sp.length === 3 ? sp[1] : sp[1] + sp[3] / 2)) : [];
+    box.classList.toggle('at-top', cy.length > 0 && cy.reduce((x, y) => x + y, 0) / cy.length > 560);
     $('stepCount').textContent = `Étape ${i + 1} / ${sc.steps.length}`;
     $('stepTitle').textContent = S.t;
     $('stepText').textContent = S.d;

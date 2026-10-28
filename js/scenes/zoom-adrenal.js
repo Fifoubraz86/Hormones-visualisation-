@@ -622,7 +622,18 @@
       refresh();
       // Scénarios rapides
       const PRE = [['Adénome', { size: 2.5, u: 4, p: 70, d: 30 }], ['Pauvre en lipides', { size: 2.5, u: 25, p: 90, d: 40 }], ['Suspect', { size: 7, u: 38, p: 95, d: 80 }]];
-      PRE.forEach(([l, v], i) => button(a, CX0 + i * 176, 920, 166, 38, l, () => { Object.assign(st, v); sls[0].set(v.size); sls[1].set(v.u); sls[2].set(v.p); sls[3].set(v.d); }, 'za-i-wo'));
+      const preset = (v) => { Object.assign(st, v); sls[0].set(v.size); sls[1].set(v.u); sls[2].set(v.p); sls[3].set(v.d); refresh(); };
+      PRE.forEach(([l, v], i) => button(a, CX0 + i * 176, 920, 166, 38, l, () => preset(v), 'za-i-wo'));
+      HV.spotlight(dI, a, [
+        { t: 'Deux questions', d: 'Une masse surrénalienne de plus de 1 cm découverte par hasard pose deux questions : est-elle sécrétante ? est-elle bénigne ou maligne ? (polycopié, partie 1 p. 82-85)', spot: [[60, 150, 930, 80]] },
+        { t: 'Sécrète-t-elle du cortisol ?', d: 'Freinage minute par 1 mg de dexaméthasone, complété au besoin par le cortisol libre urinaire et salivaire à minuit ; cortisol normal si ≤ 50 nmol/L après 1 mg (seuil en complément).', spot: [[60, 298, 440, 118]] },
+        { t: 'Les autres sécrétions', d: 'Métanéphrines (phéochromocytome) systématiquement ; rapport aldostérone/rénine si HTA (ou hypokaliémie, complément) ; androgènes et œstrogènes selon la clinique.', spot: [[60, 430, 440, 316]] },
+        { t: 'Un antécédent de cancer ?', d: 'Chez un patient qui a eu un cancer, 30 à 50 % des masses surrénaliennes sont malignes, surtout des métastases.', spot: [[60, 772, 440, 96]] },
+        { t: 'Bénin ou malin : la densité', d: 'Démonstration : « Adénome ». Au scanner sans injection, une densité spontanée < 10 UH signe un adénome riche en lipides, bénin (Se 71 %, Sp 98 %) : le wash-out est inutile.', spot: [[540, 298, 450, 216], [1026, 230, 548, 300]], go: () => preset(PRE[0][1]) },
+        { t: 'Sinon : le wash-out', d: 'Démonstration : « Pauvre en lipides ». Si la densité est ≥ 10 UH, on injecte et on mesure le lavage du produit de contraste : WOA > 60 % ou WOR > 40 % évoquent un adénome pauvre en lipides, bénin. Lisez les formules sous le graphique.', spot: [[540, 394, 450, 274], [1026, 520, 548, 400]], go: () => preset(PRE[1][1]) },
+        { t: 'La taille compte', d: 'Démonstration : « Suspect ». Risque de malignité < 2 % sous 4 cm, 6 % entre 4 et 6 cm, 25 % au-delà de 6 cm. Densité élevée, lavage insuffisant et grande taille : avis spécialisé (IRM, TEP-FDG au cas par cas).', spot: [[540, 548, 450, 320], [1026, 760, 548, 150]], go: () => preset(PRE[2][1]) },
+        { t: 'En résumé', d: 'Toute masse > 1 cm : bilan sécrétoire (cortisol, métanéphrines, aldostérone si HTA) et scanner (densité spontanée, puis wash-out, et taille). Jouez avec les curseurs du calculateur pour vous entraîner.', spot: [[60, 150, 1490, 820]] }
+      ]);
     }
   }, HV.LOUPE.L(2)));
 

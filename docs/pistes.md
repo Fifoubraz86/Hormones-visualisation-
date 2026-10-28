@@ -70,7 +70,7 @@ Ceux déjà animés sont listés dans `tests-dynamiques.md`. Il resterait :
 - ★ **Mode « prédisez »** : avant d'animer un scénario, l'élève indique le sens de variation de chaque hormone, puis l'atlas corrige.
 - ★ **Cas cliniques guidés** : motif de consultation → examen → bilan → test dynamique → diagnostic, avec score.
 - QCM par axe, fiches de révision imprimables, mode présentation pour l'enseignant.
-- **Schémas physiologiques du simulateur (à faire, prochaine session)** : la branche `claude/modest-mendel-6xswfa` (simulateur DT2, DT1, lévothyroxine : `simulateur.html`, `js/simu/dt2-physio.js`, `js/simu/lt4-physio.js`) dessine ses propres organes. Les faire passer par le même système que l'atlas, avec les illustrations Servier importées le 28 octobre (`HV.organs` dans `js/organs.js`, fichiers `assets/organs/` et `assets/organs/servier/`, crédits dans `assets/organs/CREDITS.md`), pour un rendu homogène et plus joli. Le simulateur reste une application séparée.
+- **Schémas physiologiques du simulateur (fait le 28 octobre 2026 sur la branche du simulateur, `js/simu/organs-simu.js`)** : la branche `claude/modest-mendel-6xswfa` (simulateur DT2, DT1, lévothyroxine : `simulateur.html`, `js/simu/dt2-physio.js`, `js/simu/lt4-physio.js`) dessine ses propres organes. Les faire passer par le même système que l'atlas, avec les illustrations Servier importées le 28 octobre (`HV.organs` dans `js/organs.js`, fichiers `assets/organs/` et `assets/organs/servier/`, crédits dans `assets/organs/CREDITS.md`), pour un rendu homogène et plus joli. Le simulateur reste une application séparée.
 - **Module animé en direct dans PowerPoint** (idée, à faire plus tard) : héberger l'atlas sur GitHub Pages, ajouter un mode présentation par l'adresse (`#cortico&presentation` : panneau masqué, scène et scénario imposés, boucle), puis l'insérer avec un complément PowerPoint qui affiche une page web dans la diapositive (« Web Viewer »). Nécessite une connexion ; la vidéo MP4 reste la solution hors ligne.
 - ★ **Éditeur vidéo téléchargeable** (demandé) : choisir le module, le scénario, la durée, le cadrage (avec ou sans panneau), le pas à pas, la vitesse des hormones et le thème, puis télécharger un MP4 à insérer dans PowerPoint. Base existante : `tools/enregistrer-video.js`.
 - Version anglaise, accessibilité (lecteur d'écran, contrastes), fonctionnement hors ligne.
@@ -81,3 +81,10 @@ Ceux déjà animés sont listés dans `tests-dynamiques.md`. Il resterait :
 - **Visionneuse 3D** (Mol*, 3Dmol.js) depuis la PDB pour les hormones protéiques et leurs récepteurs (récepteur de la TSH avec les TRAb, récepteur de l'insuline).
 - Bascule entre **unités SI et conventionnelles**, normes selon l'âge, le sexe et la grossesse.
 - Modèles quantitatifs publiés (thyroïde de type SPINA, modèles de l'axe corticotrope) pour des cinétiques plus réalistes.
+
+## 8. Socle commun et modules de spécialité
+
+- Créer une **organisation GitHub** (gratuite) : dépôt `atlas-socle` (moteur, organes Servier, outils de vérification, consignes pour Claude), dépôt `atlas-endocrino` (contenu de l'auteur, simulateur), puis un dépôt par spécialité confié à son auteur (cardiologie, néphrologie…), l'auteur du socle restant propriétaire de l'organisation.
+- Le module charge le socle comme **sous-dossier figé sur une version** (`git submodule`, étiquettes v1.0, v1.1…) ; les améliorations du socle arrivent par pull request.
+- Découpage prévu : § 2 de `docs/MEMOIRE-ATLAS.md`. Les figures et textes du polycopié restent dans le module endocrinologie.
+- À trancher avant de fusionner la branche du simulateur : textes médicaux modifiés différemment dans les deux branches (dose de lévothyroxine, TSH > 10 mUI/L avec T4L normale, notes Basedow, adénome toxique, hypothyroïdie centrale).

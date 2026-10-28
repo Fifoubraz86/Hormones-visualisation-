@@ -66,6 +66,8 @@ Un axe = un objet poussé dans `AX` :
 ### 3.5 Pas à pas (`axes-steps.js`, `HV.spotlight`)
 - Axes déclaratifs : `S.<axe> = [{ t, d, on: ['nœud', 'de>vers', …] }]` (l'étape s'allume, les précédentes pâlissent, la suite s'estompe).
 - Scènes dessinées : `HV.spotlight(def, a, [{ t, d, spot: [[x, y, r] | [x, y, w, h]] }])` (projecteur).
+- Chaque scène qui a un pas à pas porte une **pastille « ▶ Comprendre pas à pas »** sur le bord inférieur de son cadre (`HV.stepChip`, à droite ; `def.chipLeft = true` si un texte occupe ce coin) : un clic entre dans la scène et lance le parcours. Pendant le parcours, la légende se replie et l'encadré passe en haut quand le projecteur est dans la moitié basse.
+- Une étape peut **piloter l'animation** : `go()` est appelé à l'entrée de l'étape (valeurs de démonstration imposées : repas, jeûne, insulinorésistance…) et `def.stepEnd()` à la sortie du parcours (retour au modèle). Exemples : loupes de `zoom-glyc.js`, calculateur de l'incidentalome. Terminer par une étape « En résumé ».
 
 ### 3.6 Tests dynamiques (`tests.js`)
 `HV.TESTS.<axe> = [{ id, name, poly, what, proto, unit, label, thr | thrFn, thrDir, thrLabel, span, xUnit, duration, samples, apply(p, x), measure(sim), track, interpret(values, sim, st) }]`. `apply` modifie les paramètres pendant l'épreuve (x de 0 à 1) ; `st.base` = paramètres du scénario ; garder dans `st` les valeurs de départ (`na0`, `igf0`) ou extrêmes (`naMax`) utiles à l'interprétation. **Les textes doivent dépendre du scénario** (un même texte pour tous est une source d'erreurs).
@@ -127,6 +129,8 @@ Silhouette, glandes cliquables (`gland(x, y, r, couleur, scène, libellé)`), li
 - Il demande l'**iconographie réelle** du référentiel aux bons endroits, et « image manquante » sinon.
 - Il présente en **PowerPoint** : export vidéo MP4 intégré (et un éditeur d'options).
 - Il partage l'atlas avec ses **internes** en lien public : performance et lisibilité de loin comptent.
+- Il veut que **chaque sous-partie** (loupe, scène dessinée) ait son « Comprendre pas à pas » didactique : expliquer le pourquoi, faire réagir l'animation à l'étape, finir par un résumé.
+- **Organisation des sessions** : une session dédiée au **socle commun** (moteur, organes, outils, consignes) ; les modules de spécialité (endocrinologie, et à terme cardiologie, néphrologie… par d'autres auteurs) se travaillent dans leur propre session. Projet : une organisation GitHub avec un dépôt socle et un dépôt par module (voir `docs/pistes.md`).
 
 ---
 

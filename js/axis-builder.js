@@ -91,8 +91,29 @@
       def.content.appendChild(ring);
       for (let k = 0; k < i; k++) steps[k].spot.forEach((sp) => shape(sp, '#7a7a7a', holes));
       steps[i].spot.forEach((sp) => { shape(sp, 'black', holes); shape(sp, 'none', ring, 'spot-ring'); });
+      if (steps[i].go) steps[i].go();
     };
     def.stepIndex = () => cur;
+    HV.stepChip(def, a);
+  };
+
+  /* Pastille « Comprendre pas à pas » posée sur le bord inférieur du cadre, à droite (à gauche si def.chipLeft) : le clic
+     entre dans la scène et lance le parcours (js/app.js, attribut data-steps). Masquée pendant le parcours.
+     Étapes des scènes dessinées : `go()` facultatif, appelé à l'entrée de l'étape (animation de démonstration) ;
+     `def.stepEnd()` facultatif, appelé à la sortie du parcours (retour au modèle). */
+  HV.stepChip = function (def, a) {
+    const n = def.steps.length, label = `▶ Comprendre pas à pas (${n} étapes)`, w = Math.round(label.length * 10.4 + 44);
+    const chip = a.el('g', { class: 'step-chip', 'data-steps': def.id, transform: `translate(${def.chipLeft ? 50 : HV.W - 50 - w} ${HV.H - 24})` });
+    a.el('rect', { x: 0, y: 0, width: w, height: 48, rx: 24 }, chip);
+    a.text(w / 2, 31, label, 'step-chip-t', { anchor: 'middle' }, chip);
+    Promise.resolve().then(() => chip.parentNode && chip.parentNode.appendChild(chip)); // au-dessus du dessin de la scène
+    const stepTo = def.stepTo;
+    def.stepTo = function (i) {
+      const was = def.stepIndex();
+      stepTo(i);
+      chip.setAttribute('visibility', i < 0 ? 'visible' : 'hidden');
+      if (i < 0 && was >= 0 && def.stepEnd) def.stepEnd();
+    };
   };
 
   /* Loupes : scènes de zoom posées hors du cadre de leur scène parente (à droite des cartes de gauche,
@@ -126,6 +147,7 @@
         if (ax.steps) {
           def.steps = ax.steps;
           makeSteps(def, reg);
+          HV.stepChip(def, a);
         }
         /* ---- Coupe cerveau – hypothalamus – hypophyse (axes hypophysaires) ---- */
         const hh = ax.hh || null;

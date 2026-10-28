@@ -4,7 +4,7 @@
   const HV = window.HV;
   const S = HV.model.s;
 
-  HV.scene({
+  const def = HV.scene({
     id: 'transp',
     parent: 'thyro',
     x: 1030,
@@ -93,6 +93,15 @@
       };
       tick(0);
       a.dyn(tick);
+      HV.spotlight(def, a, [
+        { t: 'Presque tout est lié', d: 'Plus de 99 % des hormones thyroïdiennes circulent liées à des protéines (les porteurs chargés de T4 qui dérivent dans le plasma) : c\'est un réservoir.', spot: [[60, 200, 1480, 500]] },
+        { t: 'Les protéines de transport', d: 'TBG ≈ 70–75 %, transthyrétine (TBPA) ≈ 10–15 %, albumine ≈ 10–20 % (complément ; le polycopié simplifie en TBG 75 %, TBPA 25 %).', spot: [[880, 30, 680, 110]] },
+        { t: 'La fraction libre agit', d: 'Seule la fraction libre (environ 0,03 % de la T4 et 0,3 % de la T3, complément) entre dans les cellules et agit : c\'est elle que l\'on dose (T4L, T3L).', spot: [[880, 140, 680, 50], [60, 200, 1480, 500]] },
+        { t: 'L\'entrée dans les cellules', d: 'Les hormones libres traversent la membrane grâce à des transporteurs : MCT8, MCT10, OATP1C1 (complément).', spot: [[60, 760, 1480, 210]] },
+        { t: 'Pourquoi doser la forme libre', d: 'Les œstrogènes et la grossesse augmentent la TBG : la T4 totale monte, mais la T4L reste normale (complément). La forme libre reflète l\'activité hormonale.', spot: [[60, 200, 1480, 500]] },
+        { t: 'Un réservoir lent', d: 'Demi-vie : T4 ≈ 7 jours, T3 ≈ 1 jour (complément). On contrôle donc la TSH 6 à 8 semaines après un changement de dose de lévothyroxine.', spot: [[60, 150, 1490, 800]] },
+        { t: 'En résumé', d: 'Hormones liées (TBG surtout) = réservoir ; hormones libres = forme active, dosée et transportée dans les cellules. Un changement des protéines porteuses modifie les formes totales, pas les formes libres.', spot: [[60, 150, 1490, 800]] }
+      ]);
     }
   });
 })();
