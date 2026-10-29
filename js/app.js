@@ -529,14 +529,16 @@
         sc.content.style.visibility = op === 0 ? 'hidden' : '';
       }
       // Allègement du rendu : une scène hors champ (ou réduite à un point) sort de l'arbre de rendu ;
-      // vue de loin, ses particules sont masquées et ne sont plus animées.
+      // vue de loin (moins de 20 % de l'écran : cartes de la vue d'ensemble, vignettes des loupes),
+      // elle est figée : particules masquées, animations suspendues. Le moindre mouvement obligerait
+      // sinon le navigateur à repeindre toute la scène à chaque image.
       const frac = HV.rectOf(sc).w / cam.w;
       const on = op > 0 && frac > 0.012 && inView(sc);
       if (on !== sc._on) { sc._on = on; sc.content.style.display = on ? '' : 'none'; }
       const fl = on && frac > 0.2;
       if (fl !== sc._fl) { sc._fl = fl; for (const f of sc.flows) f.layer.style.display = fl ? '' : 'none'; }
-      if (!on || !isActive(sc)) continue;
-      if (fl) for (const f of sc.flows) f.step(sdt);
+      if (!fl || !isActive(sc)) continue;
+      for (const f of sc.flows) f.step(sdt);
       for (const fn of sc.dyn) fn(sdt);
     }
     // Grands titres de la vue d'ensemble : visibles de loin, effacés dès qu'on zoome sur une carte.
