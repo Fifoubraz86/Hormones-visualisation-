@@ -140,6 +140,9 @@ button { font: inherit; color: inherit; }
 
 /* ---------- Scène ---------- */
 .stage { grid-area: stage; position: relative; min-height: 0; overflow: hidden; background: var(--bg); }
+/* Le SVG est dans une boîte à part, étirée par la carte graphique pendant les zooms (js/app.js, apply). */
+/* Marge de 25 % de chaque côté (MARGE dans app.js), hors champ, pour dézoomer ou glisser sans redessiner. */
+.stage-view { position: absolute; inset: -25%; transform-origin: 0 0; will-change: transform; }
 #stage { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
 #stage.dragging { cursor: grabbing; }
 .stage-ctrl {

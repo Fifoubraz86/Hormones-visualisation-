@@ -8,13 +8,14 @@
   const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const svg = $('stage');
+  const view = $('stageView'), stage = view.parentNode;
   const defs = HV.buildDefs(svg);
   HV.buildAxisDefs(defs);
   HV.applyTraces(defs);
   HV.applySmallSources();
   const root = HV.el('g', { class: 'world' }, svg);
-  HV.initTips(svg.parentNode);
-  HV.initSheets(svg.parentNode);
+  HV.initTips(stage);
+  HV.initSheets(stage);
 
   HV.mount(root);
   // Molécules de l'axe thyréotrope proposées en fiches dans toutes ses scènes
@@ -23,16 +24,53 @@
   const TOUR = ['atlas', 'thyro', 'hypo', 'pit', 'foll', 'transp', 'cell', 'cortico', 'somato', 'gonadoF', 'gonadoM', 'lacto', 'adh', 'medullo', 'phospho', 'raa', 'glyc', 'islet', 'pancreas', 'lipid'];
 
   /* ---------- Caméra ---------- */
+  /* `cam` est la vue affichée ; `ren` la vue réellement dessinée (viewBox). Pendant un zoom ou un
+     déplacement, on ne redessine pas le SVG à chaque image : on étire l'image déjà rendue par une
+     transformation CSS (faite par la carte graphique). Le SVG déborde de la zone visible d'une marge
+     (MARGE, de chaque côté) pour qu'on puisse dézoomer ou se déplacer un peu sans vide sur les bords.
+     On ne redessine que lorsque l'image devient trop floue (agrandie de plus de 1,8 fois) ou que la
+     marge est épuisée, puis une fois à l'arrêt. Pendant le mouvement, particules et animations sont
+     suspendues. */
+  const MARGE = 0.25;
   const cam = { cx: 800, cy: 500, w: 1700 };
-  let vw = 1, vh = 1;
+  const ren = { cx: 800, cy: 500, w: 1700 };
+  let vw = 1, vh = 1, moving = false, settleTimer = 0;
+  const box = () => stage.getBoundingClientRect();
   function measure() {
-    const r = svg.getBoundingClientRect();
+    const r = box();
     vw = Math.max(1, r.width);
     vh = Math.max(1, r.height);
   }
-  function apply() {
-    const h = (cam.w * vh) / vw;
-    svg.setAttribute('viewBox', `${cam.cx - cam.w / 2} ${cam.cy - h / 2} ${cam.w} ${h}`);
+  function commit() {
+    ren.cx = cam.cx; ren.cy = cam.cy; ren.w = cam.w;
+    const w = cam.w * (1 + 2 * MARGE), h = (w * vh) / vw;
+    svg.setAttribute('viewBox', `${cam.cx - w / 2} ${cam.cy - h / 2} ${w} ${h}`);
+    view.style.transform = '';
+  }
+  // `live` : mouvement en cours (tween, molette, glisser) ; sinon la vue est dessinée tout de suite.
+  function apply(live) {
+    clearTimeout(settleTimer);
+    if (!live || reduced) { moving = false; commit(); return; }
+    moving = true;
+    const k = ren.w / cam.w, ratio = vh / vw;
+    // Coins des vues (monde) : dessinée, marge comprise (R), et affichée (C).
+    const RW = ren.w * (1 + 2 * MARGE), Rx = ren.cx - RW / 2, Ry = ren.cy - (RW * ratio) / 2;
+    const Cx = cam.cx - cam.w / 2, Cy = cam.cy - (cam.w * ratio) / 2;
+    // Débord de la vue affichée hors de l'image dessinée, en fraction de la largeur affichée.
+    const out = Math.max(Rx - Cx, Cx + cam.w - (Rx + RW), Ry - Cy, Cy + cam.w * ratio - (Ry + RW * ratio)) / cam.w;
+    if (k > 1.8 || out > 0) commit();
+    else {
+      const u = vw / cam.w;
+      const tx = (Rx - Cx) * u + MARGE * vw, ty = (Ry - Cy) * u + MARGE * vh;
+      view.style.transform = `translate(${tx.toFixed(2)}px, ${ty.toFixed(2)}px) scale(${k.toFixed(5)})`;
+    }
+    settleTimer = setTimeout(settle, 140);
+  }
+  // Fin du mouvement : image nette, animations relancées.
+  function settle() {
+    if (tween) return;
+    moving = false;
+    commit();
   }
   function fitOf(sc) {
     const r = HV.rectOf(sc);
@@ -59,11 +97,11 @@
     const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     const v = tween.interp(e);
     cam.cx = v[0]; cam.cy = v[1]; cam.w = v[2];
-    apply();
-    if (t === 1) tween = null;
+    apply(true);
+    if (t === 1) { tween = null; settle(); }
   }
   function toWorld(px, py) {
-    const r = svg.getBoundingClientRect();
+    const r = box();
     const h = (cam.w * vh) / vw;
     return [cam.cx - cam.w / 2 + ((px - r.left) / vw) * cam.w, cam.cy - h / 2 + ((py - r.top) / vh) * h];
   }
@@ -75,7 +113,7 @@
     cam.cy = wy + (cam.cy - wy) * k;
     cam.w = nw;
     tween = null;
-    apply();
+    apply(true);
     scheduleDetect();
   }
 
@@ -94,13 +132,15 @@
     }
     if (best !== current) setCurrent(best);
   }
-  function inView(sc) {
+  // Niveau de détail calculé sur la vue dessinée (`ren`) : rien ne change pendant qu'on étire l'image.
+  // `m` : marge dessinée autour de la vue (les scènes de la marge restent affichées, sans être animées).
+  function inView(sc, m) {
     const r = HV.rectOf(sc);
-    const h = (cam.w * vh) / vw;
-    return r.x < cam.cx + cam.w / 2 && r.x + r.w > cam.cx - cam.w / 2 && r.y < cam.cy + h / 2 && r.y + r.h > cam.cy - h / 2;
+    const w = ren.w * (1 + 2 * (m || 0)), h = (w * vh) / vw;
+    return r.x < ren.cx + w / 2 && r.x + r.w > ren.cx - w / 2 && r.y < ren.cy + h / 2 && r.y + r.h > ren.cy - h / 2;
   }
   function isActive(sc) {
-    return HV.rectOf(sc).w / cam.w >= 0.05 && inView(sc);
+    return HV.rectOf(sc).w / ren.w >= 0.05 && inView(sc);
   }
 
   /* ---------- Interaction : glisser, molette, pincement, clic ---------- */
@@ -133,7 +173,7 @@
       tween = null;
       cam.cx -= (dx * cam.w) / vw;
       cam.cy -= (dy * cam.w) / vw;
-      apply();
+      apply(true);
       svg.classList.add('dragging');
     }
   });
@@ -198,7 +238,7 @@
     else if (e.key === ' ' && e.target === document.body) { togglePlay(); e.preventDefault(); }
   });
   function zoomCenter(f) {
-    const r = svg.getBoundingClientRect();
+    const r = box();
     zoomAt(r.left + r.width / 2, r.top + r.height / 2, f);
   }
   function goUp() {
@@ -521,7 +561,7 @@
     HV.Tests.update(sdt);
     for (const sc of scenes) {
       // Le décor d'une scène parente s'efface quand on est loin à l'intérieur d'une de ses scènes enfants.
-      const ratio = (HV.W * sc.world.s) / cam.w;
+      const ratio = (HV.W * sc.world.s) / ren.w;
       const op = Math.round(clamp((4.5 - ratio) / 1.5, 0, 1) * 20) / 20;
       if (op !== sc._op) {
         sc._op = op;
@@ -532,18 +572,18 @@
       // vue de loin (moins de 20 % de l'écran : cartes de la vue d'ensemble, vignettes des loupes),
       // elle est figée : particules masquées, animations suspendues. Le moindre mouvement obligerait
       // sinon le navigateur à repeindre toute la scène à chaque image.
-      const frac = HV.rectOf(sc).w / cam.w;
-      const on = op > 0 && frac > 0.012 && inView(sc);
+      const frac = HV.rectOf(sc).w / ren.w;
+      const on = op > 0 && frac > 0.012 && inView(sc, MARGE);
       if (on !== sc._on) { sc._on = on; sc.content.style.display = on ? '' : 'none'; }
       const fl = on && frac > 0.2;
       if (fl !== sc._fl) { sc._fl = fl; for (const f of sc.flows) f.layer.style.display = fl ? '' : 'none'; }
-      if (!fl || !isActive(sc)) continue;
+      if (!fl || !isActive(sc) || (moving && !run)) continue;
       for (const f of sc.flows) f.step(sdt);
       for (const fn of sc.dyn) fn(sdt);
     }
     // Grands titres de la vue d'ensemble : visibles de loin, effacés dès qu'on zoome sur une carte.
     if (HV.atlasTitles) {
-      const o = clamp((cam.w / HV.W - 0.45) / 0.3, 0, 1);
+      const o = clamp((ren.w / HV.W - 0.45) / 0.3, 0, 1);
       if (o !== HV.atlasTitles._o) { HV.atlasTitles._o = o; HV.atlasTitles.style.opacity = o; HV.atlasTitles.style.display = o ? '' : 'none'; }
     }
     labTimer -= dt;
@@ -574,14 +614,19 @@
   // Une première passe immobile place les éléments dynamiques avant l'animation.
   for (const sc of scenes) for (const fn of sc.dyn) fn(0);
   updateLabs(0.25);
-  window.addEventListener('resize', () => {
+  // Taille de la zone de dessin : fenêtre redimensionnée (on recadre la scène courante) ou simple
+  // changement de hauteur, quand le fil d'Ariane passe sur deux lignes (on garde la vue).
+  const onResize = () => {
+    const w0 = vw;
     measure();
-    if (!tween) {
+    if (vw !== w0 && !tween) {
       const t = fitOf(current);
       cam.cx = t[0]; cam.cy = t[1]; cam.w = t[2];
     }
-    apply();
-  });
+    if (!moving) apply();
+  };
+  if (window.ResizeObserver) new ResizeObserver(onResize).observe(stage);
+  else window.addEventListener('resize', onResize);
   requestAnimationFrame(frame);
   HV.app = {
     flyTo, cam, refreshPanel,

@@ -215,13 +215,13 @@
   }
 
   let timer = 0;
-  input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(render, 90); });
+  input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(() => { timer = 0; render(); }, 90); });
   input.addEventListener('focus', () => { if (input.value.trim()) render(); });
   input.addEventListener('blur', () => setTimeout(close, 120));
   input.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowDown') { if (list.hidden) render(); setActive(active + 1, true); e.preventDefault(); }
     else if (e.key === 'ArrowUp') { setActive(active - 1, true); e.preventDefault(); }
-    else if (e.key === 'Enter') { choose(active >= 0 ? active : 0); e.preventDefault(); }
+    else if (e.key === 'Enter') { if (timer) { clearTimeout(timer); timer = 0; render(); } choose(active >= 0 ? active : 0); e.preventDefault(); }
     else if (e.key === 'Escape') { if (input.value) { input.value = ''; close(); } else input.blur(); e.preventDefault(); e.stopPropagation(); }
   });
   window.addEventListener('keydown', (e) => {
